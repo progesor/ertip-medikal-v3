@@ -1,12 +1,32 @@
 import { buildConfig } from 'payload';
 import { postgresAdapter } from '@payloadcms/db-postgres';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
-import sharp from 'sharp';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Koleksiyon Importları
+import { Users } from '@/collections/Users';
+import { Media } from '@/collections/Media';
+import { Products } from '@/collections/Products';
+import { Categories } from '@/collections/Categories';
+import sharp from "sharp";
+
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
 
 export default buildConfig({
-    editor: lexicalEditor(),
-    collections: [],
-    secret: process.env.PAYLOAD_SECRET || '',
+    admin: {
+        user: Users.slug,
+        importMap: {
+            baseDir: path.resolve(dirname),
+        },
+    },
+    collections: [Users, Media, Products, Categories],
+    editor: lexicalEditor({}),
+    secret: process.env.PAYLOAD_SECRET || 'SECRET_KEY_MISSING',
+    typescript: {
+        outputFile: path.resolve(dirname, 'payload-types.ts'),
+    },
     db: postgresAdapter({
         pool: {
             connectionString: process.env.DATABASE_URI || '',
