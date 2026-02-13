@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ertip_postgres_v3
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ertip_user
+      POSTGRES_PASSWORD: ertip_password
+      POSTGRES_DB: ertip_medikal_v3
+    volumes:
+      - ertip_pg_data:/var/lib/postgresql/data
+
+volumes:
+  ertip_pg_data:
