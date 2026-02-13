@@ -99,9 +99,11 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     'site-settings': SiteSetting;
+    'main-menu': MainMenu;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    'main-menu': MainMenuSelect<false> | MainMenuSelect<true>;
   };
   locale: null;
   user: User;
@@ -717,6 +719,24 @@ export interface SiteSetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "main-menu".
+ */
+export interface MainMenu {
+  id: number;
+  items?:
+    | {
+        label: string;
+        type?: ('reference' | 'custom') | null;
+        reference?: (number | null) | Page;
+        url?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
@@ -731,6 +751,24 @@ export interface SiteSettingsSelect<T extends boolean = true> {
     | T
     | {
         platform?: T;
+        url?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "main-menu_select".
+ */
+export interface MainMenuSelect<T extends boolean = true> {
+  items?:
+    | T
+    | {
+        label?: T;
+        type?: T;
+        reference?: T;
         url?: T;
         id?: T;
       };

@@ -16,6 +16,7 @@ import { Pages } from '@/collections/Pages';
 
 // Global Importları
 import { SiteSettings } from '@/globals/SiteSettings';
+import { MainMenu } from '@/globals/MainMenu';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -30,7 +31,7 @@ export default buildConfig({
     // Yeni koleksiyonları buraya ekledik
     collections: [Users, Media, Products, Categories, Inquiries, News, Pages],
     // Globals dizisini buraya ekledik
-    globals: [SiteSettings],
+    globals: [SiteSettings, MainMenu],
     editor: lexicalEditor({}),
     secret: process.env.PAYLOAD_SECRET || 'SECRET_KEY_MISSING',
     typescript: {

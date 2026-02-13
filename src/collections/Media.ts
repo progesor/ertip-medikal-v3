@@ -1,17 +1,19 @@
 import type { CollectionConfig } from 'payload'
+import path from 'path'
 
 export const Media: CollectionConfig = {
     slug: 'media',
     labels: { singular: 'Medya', plural: 'Medyalar' },
     upload: {
-        staticDir: 'media',
+        // Dosyaları projenin kök dizinindeki 'media' klasörüne kaydeder.
+        // Payload bunları otomatik olarak /api/media/file/resim.jpg adresinden sunar.
+        staticDir: path.resolve(process.cwd(), 'media'),
         imageSizes: [
             { name: 'thumbnail', width: 400, height: 300, position: 'centre' },
             { name: 'card', width: 768, height: 1024, position: 'centre' },
             { name: 'hero', width: 1920, height: 1080, position: 'centre' },
         ],
         adminThumbnail: 'thumbnail',
-        // Hem resimlere hem de PDF belgelerine izin veriyoruz
         mimeTypes: ['image/*', 'application/pdf'],
     },
     fields: [
