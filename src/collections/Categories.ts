@@ -1,33 +1,20 @@
-import type { CollectionConfig } from 'payload';
+import type { CollectionConfig } from 'payload'
 
 export const Categories: CollectionConfig = {
     slug: 'categories',
-    admin: {
-        useAsTitle: 'title',
-    },
+    labels: { singular: 'Kategori', plural: 'Kategoriler' },
+    admin: { useAsTitle: 'title' },
     fields: [
+        { name: 'title', type: 'text', required: true, label: 'Kategori Adı' },
+        { name: 'slug', type: 'text', unique: true, required: true, admin: { position: 'sidebar' } },
         {
-            name: 'title',
-            type: 'text',
-            required: true,
+            name: 'parent',
+            type: 'relationship',
+            relationTo: 'categories',
+            label: 'Üst Kategori (Alt Kategori Yaratmak İçin)',
+            admin: { position: 'sidebar' }
         },
-        {
-            name: 'slug',
-            type: 'text',
-            admin: {
-                position: 'sidebar',
-            },
-            hooks: {
-                beforeValidate: [
-                    ({ value, data }) => {
-                        // Basit slug oluşturucu (Manuel girilmezse)
-                        if (!value && data?.title) {
-                            return data.title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-                        }
-                        return value;
-                    }
-                ]
-            }
-        }
+        { name: 'description', type: 'textarea', label: 'Kategori Kısa Açıklaması' },
+        { name: 'image', type: 'upload', relationTo: 'media', label: 'Kategori Görseli' },
     ],
-};
+}

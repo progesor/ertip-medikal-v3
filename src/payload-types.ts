@@ -71,6 +71,9 @@ export interface Config {
     media: Media;
     products: Product;
     categories: Category;
+    inquiries: Inquiry;
+    news: News;
+    pages: Page;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -82,6 +85,9 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    inquiries: InquiriesSelect<false> | InquiriesSelect<true>;
+    news: NewsSelect<false> | NewsSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -91,8 +97,12 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'site-settings': SiteSetting;
+  };
+  globalsSelect: {
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+  };
   locale: null;
   user: User;
   jobs: {
@@ -124,7 +134,9 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: number;
-  name?: string | null;
+  role: 'admin' | 'editor';
+  firstName?: string | null;
+  lastName?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -150,7 +162,11 @@ export interface User {
  */
 export interface Media {
   id: number;
+  /**
+   * Görseller için SEO metni, PDF'ler için dosya başlığı olarak kullanılır.
+   */
   alt: string;
+  caption?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -179,6 +195,14 @@ export interface Media {
       filesize?: number | null;
       filename?: string | null;
     };
+    hero?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
   };
 }
 /**
@@ -188,6 +212,9 @@ export interface Media {
 export interface Product {
   id: number;
   title: string;
+  sku?: string | null;
+  slug: string;
+  shortDescription?: string | null;
   description?: {
     root: {
       type: string;
@@ -203,16 +230,31 @@ export interface Product {
     };
     [k: string]: unknown;
   } | null;
-  price?: number | null;
-  category: number | Category;
   mainImage: number | Media;
-  specs?:
+  gallery?:
     | {
-        key?: string | null;
-        value?: string | null;
+        image: number | Media;
         id?: string | null;
       }[]
     | null;
+  videoUrl?: string | null;
+  documents?:
+    | {
+        title: string;
+        file: number | Media;
+        id?: string | null;
+      }[]
+    | null;
+  category: (number | Category)[];
+  relatedProducts?: (number | Product)[] | null;
+  specs?:
+    | {
+        key: string;
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  isFeatured?: boolean | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -224,9 +266,104 @@ export interface Product {
 export interface Category {
   id: number;
   title: string;
-  slug?: string | null;
+  slug: string;
+  parent?: (number | null) | Category;
+  description?: string | null;
+  image?: (number | null) | Media;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inquiries".
+ */
+export interface Inquiry {
+  id: number;
+  status?: ('unread' | 'pending' | 'resolved') | null;
+  name: string;
+  email: string;
+  phone?: string | null;
+  message: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news".
+ */
+export interface News {
+  id: number;
+  title: string;
+  publishedDate: string;
+  image: number | Media;
+  excerpt?: string | null;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  title: string;
+  slug: string;
+  layout: (
+    | {
+        heading: string;
+        subheading?: string | null;
+        backgroundImage?: (number | null) | Media;
+        buttons?:
+          | {
+              label: string;
+              link: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'hero';
+      }
+    | {
+        content: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'content';
+      }
+  )[];
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -267,6 +404,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'categories';
         value: number | Category;
+      } | null)
+    | ({
+        relationTo: 'inquiries';
+        value: number | Inquiry;
+      } | null)
+    | ({
+        relationTo: 'news';
+        value: number | News;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: number | Page;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -315,7 +464,9 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
-  name?: T;
+  role?: T;
+  firstName?: T;
+  lastName?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -339,6 +490,7 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  caption?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -373,6 +525,16 @@ export interface MediaSelect<T extends boolean = true> {
               filesize?: T;
               filename?: T;
             };
+        hero?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
       };
 }
 /**
@@ -381,10 +543,27 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface ProductsSelect<T extends boolean = true> {
   title?: T;
+  sku?: T;
+  slug?: T;
+  shortDescription?: T;
   description?: T;
-  price?: T;
-  category?: T;
   mainImage?: T;
+  gallery?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
+  videoUrl?: T;
+  documents?:
+    | T
+    | {
+        title?: T;
+        file?: T;
+        id?: T;
+      };
+  category?: T;
+  relatedProducts?: T;
   specs?:
     | T
     | {
@@ -392,6 +571,7 @@ export interface ProductsSelect<T extends boolean = true> {
         value?: T;
         id?: T;
       };
+  isFeatured?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -403,8 +583,76 @@ export interface ProductsSelect<T extends boolean = true> {
 export interface CategoriesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
+  parent?: T;
+  description?: T;
+  image?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inquiries_select".
+ */
+export interface InquiriesSelect<T extends boolean = true> {
+  status?: T;
+  name?: T;
+  email?: T;
+  phone?: T;
+  message?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news_select".
+ */
+export interface NewsSelect<T extends boolean = true> {
+  title?: T;
+  publishedDate?: T;
+  image?: T;
+  excerpt?: T;
+  content?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  layout?:
+    | T
+    | {
+        hero?:
+          | T
+          | {
+              heading?: T;
+              subheading?: T;
+              backgroundImage?: T;
+              buttons?:
+                | T
+                | {
+                    label?: T;
+                    link?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        content?:
+          | T
+          | {
+              content?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -445,6 +693,50 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: number;
+  contact?: {
+    email?: string | null;
+    phone?: string | null;
+    address?: string | null;
+  };
+  socialMedia?:
+    | {
+        platform?: string | null;
+        url?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  contact?:
+    | T
+    | {
+        email?: T;
+        phone?: T;
+        address?: T;
+      };
+  socialMedia?:
+    | T
+    | {
+        platform?: T;
+        url?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

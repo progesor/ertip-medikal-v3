@@ -1,6 +1,7 @@
 import { buildConfig } from 'payload';
 import { postgresAdapter } from '@payloadcms/db-postgres';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
+import sharp from 'sharp';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -9,7 +10,12 @@ import { Users } from '@/collections/Users';
 import { Media } from '@/collections/Media';
 import { Products } from '@/collections/Products';
 import { Categories } from '@/collections/Categories';
-import sharp from "sharp";
+import { Inquiries } from '@/collections/Inquiries';
+import { News } from '@/collections/News';
+import { Pages } from '@/collections/Pages';
+
+// Global Importları
+import { SiteSettings } from '@/globals/SiteSettings';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -21,7 +27,10 @@ export default buildConfig({
             baseDir: path.resolve(dirname),
         },
     },
-    collections: [Users, Media, Products, Categories],
+    // Yeni koleksiyonları buraya ekledik
+    collections: [Users, Media, Products, Categories, Inquiries, News, Pages],
+    // Globals dizisini buraya ekledik
+    globals: [SiteSettings],
     editor: lexicalEditor({}),
     secret: process.env.PAYLOAD_SECRET || 'SECRET_KEY_MISSING',
     typescript: {
