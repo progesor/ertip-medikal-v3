@@ -434,6 +434,184 @@ export interface Page {
             blockName?: string | null;
             blockType: 'content';
           }
+        | {
+            title?: string | null;
+            subtitle?: string | null;
+            features?:
+              | {
+                  icon?: ('star' | 'shield' | 'cpu' | 'globe' | 'heart' | 'settings') | null;
+                  featureTitle: string;
+                  featureDescription?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'features';
+          }
+        | {
+            title?: string | null;
+            selectionType?: ('latest' | 'manual') | null;
+            selectedProducts?: (number | Product)[] | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'featuredProducts';
+          }
+        | {
+            title?: string | null;
+            questions?:
+              | {
+                  question: string;
+                  answer: string;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'faq';
+          }
+        | {
+            title?: string | null;
+            testimonials?:
+              | {
+                  name: string;
+                  content: string;
+                  avatar?: (number | null) | Media;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'testimonial';
+          }
+        | {
+            stats?:
+              | {
+                  label: string;
+                  value: string;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'stats';
+          }
+        | {
+            title?: string | null;
+            images?:
+              | {
+                  image: number | Media;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'gallery';
+          }
+        | {
+            title?: string | null;
+            logos?:
+              | {
+                  logo: number | Media;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'logoSlider';
+          }
+        | {
+            title?: string | null;
+            address: string;
+            phone?: string | null;
+            email?: string | null;
+            workingHours?: string | null;
+            /**
+             * Google Haritalar -> Paylaş -> Harita Yerleştirme (Embed) kısmındaki src="" içindeki linki buraya yapıştırın.
+             */
+            mapUrl?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'location';
+          }
+        | {
+            title?: string | null;
+            members?:
+              | {
+                  name: string;
+                  role: string;
+                  image?: (number | null) | Media;
+                  linkedin?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'team';
+          }
+        | {
+            title?: string | null;
+            description?: string | null;
+            buttonText?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'newsletter';
+          }
+        | {
+            slides?:
+              | {
+                  image?: (number | null) | Media;
+                  title: string;
+                  subtitle?: string | null;
+                  buttonText?: string | null;
+                  buttonLink?: string | null;
+                  overlayOpacity?: ('0.2' | '0.4' | '0.6') | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'heroSlider';
+          }
+        | {
+            title?: string | null;
+            certificates?:
+              | {
+                  image: number | Media;
+                  name: string;
+                  issuer?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'certificateGrid';
+          }
+        | {
+            title?: string | null;
+            showArrows?: boolean | null;
+            steps?:
+              | {
+                  stepNumber: string;
+                  title: string;
+                  description?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'process';
+          }
+        | {
+            title: string;
+            description?: string | null;
+            buttonText?: string | null;
+            buttonLink?: string | null;
+            theme?: ('primary' | 'dark') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'cta';
+          }
       )[]
     | null;
   /**
@@ -773,6 +951,195 @@ export interface PagesSelect<T extends boolean = true> {
           | T
           | {
               content?: T;
+              id?: T;
+              blockName?: T;
+            };
+        features?:
+          | T
+          | {
+              title?: T;
+              subtitle?: T;
+              features?:
+                | T
+                | {
+                    icon?: T;
+                    featureTitle?: T;
+                    featureDescription?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        featuredProducts?:
+          | T
+          | {
+              title?: T;
+              selectionType?: T;
+              selectedProducts?: T;
+              id?: T;
+              blockName?: T;
+            };
+        faq?:
+          | T
+          | {
+              title?: T;
+              questions?:
+                | T
+                | {
+                    question?: T;
+                    answer?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        testimonial?:
+          | T
+          | {
+              title?: T;
+              testimonials?:
+                | T
+                | {
+                    name?: T;
+                    content?: T;
+                    avatar?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        stats?:
+          | T
+          | {
+              stats?:
+                | T
+                | {
+                    label?: T;
+                    value?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        gallery?:
+          | T
+          | {
+              title?: T;
+              images?:
+                | T
+                | {
+                    image?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        logoSlider?:
+          | T
+          | {
+              title?: T;
+              logos?:
+                | T
+                | {
+                    logo?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        location?:
+          | T
+          | {
+              title?: T;
+              address?: T;
+              phone?: T;
+              email?: T;
+              workingHours?: T;
+              mapUrl?: T;
+              id?: T;
+              blockName?: T;
+            };
+        team?:
+          | T
+          | {
+              title?: T;
+              members?:
+                | T
+                | {
+                    name?: T;
+                    role?: T;
+                    image?: T;
+                    linkedin?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        newsletter?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              buttonText?: T;
+              id?: T;
+              blockName?: T;
+            };
+        heroSlider?:
+          | T
+          | {
+              slides?:
+                | T
+                | {
+                    image?: T;
+                    title?: T;
+                    subtitle?: T;
+                    buttonText?: T;
+                    buttonLink?: T;
+                    overlayOpacity?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        certificateGrid?:
+          | T
+          | {
+              title?: T;
+              certificates?:
+                | T
+                | {
+                    image?: T;
+                    name?: T;
+                    issuer?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        process?:
+          | T
+          | {
+              title?: T;
+              showArrows?: T;
+              steps?:
+                | T
+                | {
+                    stepNumber?: T;
+                    title?: T;
+                    description?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        cta?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              buttonText?: T;
+              buttonLink?: T;
+              theme?: T;
               id?: T;
               blockName?: T;
             };
