@@ -1,28 +1,48 @@
 import type { CollectionConfig } from 'payload'
 import { HeroBlock } from '../blocks/HeroBlock'
 import { ContentBlock } from '../blocks/ContentBlock'
+import { metaFields } from '@/fields/meta'
+import { slugField } from '@/fields/slug'
 
 export const Pages: CollectionConfig = {
     slug: 'pages',
     labels: { singular: 'Sayfa', plural: 'Sayfalar' },
-    admin: { useAsTitle: 'title' },
+    admin: {
+        useAsTitle: 'title',
+        defaultColumns: ['title', 'slug', 'updatedAt'],
+    },
     versions: { drafts: true },
     fields: [
-        { name: 'title', type: 'text', required: true, label: 'Sayfa Başlığı' },
         {
-            name: 'slug',
-            type: 'text',
-            required: true,
-            unique: true,
-            admin: { position: 'sidebar' },
+            type: 'tabs',
+            tabs: [
+                {
+                    label: 'Sayfa İçeriği',
+                    fields: [
+                        {
+                            name: 'title',
+                            type: 'text',
+                            required: true,
+                            label: 'Sayfa Başlığı'
+                        },
+                        {
+                            name: 'layout',
+                            type: 'blocks',
+                            label: 'Sayfa Tasarım Blokları (Page Builder)',
+                            minRows: 1,
+                            blocks: [HeroBlock, ContentBlock],
+                        },
+                    ],
+                },
+                {
+                    label: 'SEO Ayarları',
+                    fields: [
+                        metaFields,
+                    ],
+                },
+            ],
         },
-        {
-            name: 'layout',
-            type: 'blocks',
-            required: true,
-            minRows: 1,
-            blocks: [HeroBlock, ContentBlock], // İleride buraya ImageGalleryBlock, ContactFormBlock vb. eklenecek
-            label: 'Sayfa Yerleşimi (Page Builder)',
-        },
+        // Yan Bar (Sidebar)
+        slugField('title'),
     ],
 }

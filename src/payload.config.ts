@@ -13,6 +13,7 @@ import { Categories } from '@/collections/Categories';
 import { Inquiries } from '@/collections/Inquiries';
 import { News } from '@/collections/News';
 import { Pages } from '@/collections/Pages';
+import { NewsCategories } from '@/collections/NewsCategories';
 
 // Global Importları
 import { SiteSettings } from '@/globals/SiteSettings';
@@ -29,7 +30,7 @@ export default buildConfig({
         },
     },
     // Yeni koleksiyonları buraya ekledik
-    collections: [Users, Media, Products, Categories, Inquiries, News, Pages],
+    collections: [Users, Media, Products, Categories, Inquiries, News, Pages, NewsCategories],
     // Globals dizisini buraya ekledik
     globals: [SiteSettings, MainMenu],
     editor: lexicalEditor({}),

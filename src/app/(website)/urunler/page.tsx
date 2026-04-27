@@ -4,10 +4,18 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import {Metadata} from "next";
 
-export const metadata = {
-    title: 'Ürünlerimiz | Ertip Medikal',
-    description: 'Ertip Medikal yenilikçi cihaz kataloğu ve tüm medikal çözümlerimiz.',
+export const metadata: Metadata = {
+    // Sadece sayfa adını yazıyoruz, layout.tsx sonuna "| Ertip Medikal" ekleyecek
+    title: 'Ürünlerimiz',
+    description: 'Ertip Medikal yenilikçi cihaz kataloğu. Saç ekim motorları, iğnesiz anestezi cihazları ve tüm medikal çözümlerimiz.',
+    openGraph: {
+        title: 'Tüm Ürünlerimiz',
+        description: 'Ertip Medikal yenilikçi cihaz kataloğu ve tüm medikal çözümlerimizi inceleyin.',
+        // url: '/urunler', // Opsiyonel: Canonical URL için
+        type: 'website',
+    }
 }
 
 export default async function ProductsPage() {

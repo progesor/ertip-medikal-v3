@@ -3,11 +3,52 @@ import configPromise from '@payload-config'
 import { notFound } from 'next/navigation'
 import { HeroBlock } from '@/components/blocks/HeroBlock'
 import { ContentBlock } from '@/components/blocks/ContentBlock'
+import {Metadata} from "next";
 
 type Args = {
     params: Promise<{
         slug: string
     }>
+}
+
+export async function generateMetadata({ params }: Args): Promise<Metadata> {
+    const { slug } = await params
+    const payload = await getPayload({ config: configPromise })
+
+    const { docs } = await payload.find({
+        collection: 'pages',
+        where: { slug: { equals: slug }, _status: { equals: 'published' } },
+        limit: 1,
+    })
+
+    const page = docs[0]
+    if (!page) return { title: 'Sayfa Bulunamadı' }
+
+    // 1. Manuel girilen SEO verilerini al (Admin panelindeki SEO sekmesi)
+    const manualMeta = page.meta || {}
+
+    // 2. Akıllı Fallback: Önce manuel SEO başlığı, yoksa sayfanın kendi adı
+    const finalTitle = manualMeta.title || page.title
+
+    // 3. Akıllı Fallback: Önce manuel açıklama, yoksa varsayılan kurumsal metin
+    const finalDesc = manualMeta.description || `Ertip Medikal kurumsal bilgi: ${page.title}.`
+
+    // 4. Görsel Önceliği: Manuel SEO Görseli > Sitenin Varsayılan OG Görseli
+    const ogImage = (typeof manualMeta.image === 'object' && manualMeta.image?.url)
+        ? manualMeta.image.url
+        : '/og-image.jpg'
+
+    return {
+        title: finalTitle,
+        description: finalDesc,
+        keywords: manualMeta.keywords || '',
+        openGraph: {
+            title: finalTitle,
+            description: finalDesc,
+            images: [ogImage],
+            type: 'website',
+        },
+    }
 }
 
 export default async function DynamicPage({ params }: Args) {

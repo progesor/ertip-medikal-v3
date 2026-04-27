@@ -74,6 +74,7 @@ export interface Config {
     inquiries: Inquiry;
     news: News;
     pages: Page;
+    'news-categories': NewsCategory;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -88,6 +89,7 @@ export interface Config {
     inquiries: InquiriesSelect<false> | InquiriesSelect<true>;
     news: NewsSelect<false> | NewsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
+    'news-categories': NewsCategoriesSelect<false> | NewsCategoriesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -106,6 +108,9 @@ export interface Config {
     'main-menu': MainMenuSelect<false> | MainMenuSelect<true>;
   };
   locale: null;
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -214,8 +219,6 @@ export interface Media {
 export interface Product {
   id: number;
   title: string;
-  sku?: string | null;
-  slug: string;
   shortDescription?: string | null;
   description?: {
     root: {
@@ -240,15 +243,6 @@ export interface Product {
       }[]
     | null;
   videoUrl?: string | null;
-  documents?:
-    | {
-        title: string;
-        file: number | Media;
-        id?: string | null;
-      }[]
-    | null;
-  category: (number | Category)[];
-  relatedProducts?: (number | Product)[] | null;
   specs?:
     | {
         key: string;
@@ -256,7 +250,42 @@ export interface Product {
         id?: string | null;
       }[]
     | null;
+  documents?:
+    | {
+        title: string;
+        file: number | Media;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Bu içeriğin Google, WhatsApp, LinkedIn gibi platformlarda nasıl görüneceğini belirleyin.
+   */
+  meta?: {
+    /**
+     * Boş bırakılırsa içeriğin ana başlığı kullanılır. (Önerilen: 50-60 karakter)
+     */
+    title?: string | null;
+    /**
+     * Arama sonuçlarında başlığın altında görünecek özet metin. (Önerilen: 150-160 karakter)
+     */
+    description?: string | null;
+    /**
+     * Link paylaşıldığında görünecek özel kapak fotoğrafı. 1200x630 piksel önerilir. Boş bırakılırsa ana görsel kullanılır.
+     */
+    image?: (number | null) | Media;
+    /**
+     * Kelimelerin arasına virgül koyarak yazın. (Örn: medikal cihaz, saç ekimi, fue)
+     */
+    keywords?: string | null;
+  };
+  sku?: string | null;
+  category: (number | Category)[];
+  relatedProducts?: (number | Product)[] | null;
   isFeatured?: boolean | null;
+  /**
+   * Otomatik oluşturulur. Gerekirse manuel olarak düzenleyebilirsiniz.
+   */
+  slug?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -296,8 +325,6 @@ export interface Inquiry {
 export interface News {
   id: number;
   title: string;
-  publishedDate: string;
-  image: number | Media;
   excerpt?: string | null;
   content: {
     root: {
@@ -314,9 +341,54 @@ export interface News {
     };
     [k: string]: unknown;
   };
+  image: number | Media;
+  gallery?:
+    | {
+        image: number | Media;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Bu içeriğin Google, WhatsApp, LinkedIn gibi platformlarda nasıl görüneceğini belirleyin.
+   */
+  meta?: {
+    /**
+     * Boş bırakılırsa içeriğin ana başlığı kullanılır. (Önerilen: 50-60 karakter)
+     */
+    title?: string | null;
+    /**
+     * Arama sonuçlarında başlığın altında görünecek özet metin. (Önerilen: 150-160 karakter)
+     */
+    description?: string | null;
+    /**
+     * Link paylaşıldığında görünecek özel kapak fotoğrafı. 1200x630 piksel önerilir. Boş bırakılırsa ana görsel kullanılır.
+     */
+    image?: (number | null) | Media;
+    /**
+     * Kelimelerin arasına virgül koyarak yazın. (Örn: medikal cihaz, saç ekimi, fue)
+     */
+    keywords?: string | null;
+  };
+  category?: (number | null) | NewsCategory;
+  publishedDate: string;
+  /**
+   * Otomatik oluşturulur. Gerekirse manuel olarak düzenleyebilirsiniz.
+   */
+  slug?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news-categories".
+ */
+export interface NewsCategory {
+  id: number;
+  title: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -325,44 +397,70 @@ export interface News {
 export interface Page {
   id: number;
   title: string;
-  slug: string;
-  layout: (
-    | {
-        heading: string;
-        subheading?: string | null;
-        backgroundImage?: (number | null) | Media;
-        buttons?:
-          | {
-              label: string;
-              link: string;
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'hero';
-      }
-    | {
-        content: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
+  layout?:
+    | (
+        | {
+            heading: string;
+            subheading?: string | null;
+            backgroundImage?: (number | null) | Media;
+            buttons?:
+              | {
+                  label: string;
+                  link: string;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hero';
+          }
+        | {
+            content: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
               [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        };
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'content';
-      }
-  )[];
+            };
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'content';
+          }
+      )[]
+    | null;
+  /**
+   * Bu içeriğin Google, WhatsApp, LinkedIn gibi platformlarda nasıl görüneceğini belirleyin.
+   */
+  meta?: {
+    /**
+     * Boş bırakılırsa içeriğin ana başlığı kullanılır. (Önerilen: 50-60 karakter)
+     */
+    title?: string | null;
+    /**
+     * Arama sonuçlarında başlığın altında görünecek özet metin. (Önerilen: 150-160 karakter)
+     */
+    description?: string | null;
+    /**
+     * Link paylaşıldığında görünecek özel kapak fotoğrafı. 1200x630 piksel önerilir. Boş bırakılırsa ana görsel kullanılır.
+     */
+    image?: (number | null) | Media;
+    /**
+     * Kelimelerin arasına virgül koyarak yazın. (Örn: medikal cihaz, saç ekimi, fue)
+     */
+    keywords?: string | null;
+  };
+  /**
+   * Otomatik oluşturulur. Gerekirse manuel olarak düzenleyebilirsiniz.
+   */
+  slug?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -418,6 +516,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'pages';
         value: number | Page;
+      } | null)
+    | ({
+        relationTo: 'news-categories';
+        value: number | NewsCategory;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -545,8 +647,6 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface ProductsSelect<T extends boolean = true> {
   title?: T;
-  sku?: T;
-  slug?: T;
   shortDescription?: T;
   description?: T;
   mainImage?: T;
@@ -557,15 +657,6 @@ export interface ProductsSelect<T extends boolean = true> {
         id?: T;
       };
   videoUrl?: T;
-  documents?:
-    | T
-    | {
-        title?: T;
-        file?: T;
-        id?: T;
-      };
-  category?: T;
-  relatedProducts?: T;
   specs?:
     | T
     | {
@@ -573,7 +664,26 @@ export interface ProductsSelect<T extends boolean = true> {
         value?: T;
         id?: T;
       };
+  documents?:
+    | T
+    | {
+        title?: T;
+        file?: T;
+        id?: T;
+      };
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        keywords?: T;
+      };
+  sku?: T;
+  category?: T;
+  relatedProducts?: T;
   isFeatured?: T;
+  slug?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -610,10 +720,26 @@ export interface InquiriesSelect<T extends boolean = true> {
  */
 export interface NewsSelect<T extends boolean = true> {
   title?: T;
-  publishedDate?: T;
-  image?: T;
   excerpt?: T;
   content?: T;
+  image?: T;
+  gallery?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        keywords?: T;
+      };
+  category?: T;
+  publishedDate?: T;
+  slug?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -624,7 +750,6 @@ export interface NewsSelect<T extends boolean = true> {
  */
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
-  slug?: T;
   layout?:
     | T
     | {
@@ -652,9 +777,28 @@ export interface PagesSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        keywords?: T;
+      };
+  slug?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news-categories_select".
+ */
+export interface NewsCategoriesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -775,6 +919,16 @@ export interface MainMenuSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

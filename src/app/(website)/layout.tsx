@@ -3,12 +3,37 @@ import { Inter } from 'next/font/google'
 import React from 'react'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
+import {Metadata} from "next";
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const metadata = {
-    title: 'Ertip Medikal | Yenilikçi Medikal Çözümler',
-    description: 'Türkiye\'nin öncü medikal cihaz tedarikçisi.',
+export const metadata: Metadata = {
+    // Sitenin ana URL'ini tanımlıyoruz (Arama motorları için zorunlu)
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.ertipmedikal.com.tr'),
+
+    title: {
+        default: 'Ertip Medikal | Yenilikçi Medikal Çözümler', // Hiçbir title girilmezse bu görünür
+        template: '%s | Ertip Medikal', // Alt sayfalara girilen başlıkların sonuna otomatik ekler
+    },
+    description: 'Sağlık sektörüne yön veren yenilikçi medikal cihazlar. Çeyrek asırlık tecrübemizle güvenilir çözüm ortağınız.',
+
+    // Sosyal Medya (WhatsApp, LinkedIn, Twitter) paylaşım ayarları
+    openGraph: {
+        type: 'website',
+        locale: 'tr_TR',
+        siteName: 'Ertip Medikal',
+        images: [
+            {
+                url: '/og-image.jpg', // public klasörüne sitenin şık bir kapak fotoğrafını koyabilirsin
+                width: 1200,
+                height: 630,
+                alt: 'Ertip Medikal Kurumsal',
+            },
+        ],
+    },
+    twitter: {
+        card: 'summary_large_image',
+    },
 }
 
 export default function RootLayout({

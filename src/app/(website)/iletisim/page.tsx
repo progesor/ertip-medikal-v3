@@ -1,8 +1,14 @@
 import { ContactForm } from '@/components/contact/ContactForm'
+import {Metadata} from "next";
 
-export const metadata = {
-    title: 'İletişim | Ertip Medikal',
-    description: 'Bize ulaşın, ürünlerimiz hakkında detaylı bilgi ve fiyat teklifi alın.',
+export const metadata: Metadata = {
+    title: 'İletişim ve Teklif Al',
+    description: 'Ertip Medikal ile iletişime geçin. Medikal cihazlar hakkında detaylı bilgi, teknik destek ve fiyat teklifi alın.',
+    openGraph: {
+        title: 'İletişim ve Teklif Al',
+        description: 'Ertip Medikal ile iletişime geçin. Teknik destek ve fiyat teklifi talepleriniz için bize ulaşın.',
+        type: 'website',
+    }
 }
 
 export default function ContactPage() {

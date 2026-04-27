@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import { ProductGallery } from '@/components/product/ProductGallery'
+import {Metadata} from "next";
 
 type Args = {
     params: Promise<{
@@ -20,6 +21,50 @@ function getYouTubeId(url: string) {
     const match = url.match(regExp);
     return (match && match[2].length === 11) ? match[2] : null;
 }
+
+// --- SEO FONKSİYONU ---
+export async function generateMetadata({ params }: Args): Promise<Metadata> {
+    const { slug } = await params
+    const payload = await getPayload({ config: configPromise })
+
+    const { docs } = await payload.find({
+        collection: 'products',
+        where: { slug: { equals: slug }, _status: { equals: 'published' } },
+        limit: 1,
+    })
+
+    const product = docs[0]
+    if (!product) return { title: 'Ürün Bulunamadı' }
+
+    // 1. Manuel girilen SEO verilerini al (Admin panelindeki SEO sekmesi)
+    const manualMeta = product.meta || {}
+
+    // 2. Akıllı Fallback: Önce manuel SEO başlığı, yoksa ürünün adı
+    const finalTitle = manualMeta.title || product.title
+
+    // 3. Akıllı Fallback: Önce manuel açıklama, yoksa ürün özeti, o da yoksa varsayılan metin
+    const finalDesc = manualMeta.description || product.shortDescription || `${product.title} hakkında detaylı teknik özellikler ve ürün görselleri.`
+
+    // 4. Görsel Önceliği: Manuel SEO Görseli > Ürün Ana Görseli > Sitenin Varsayılan OG Görseli
+    const ogImage = (typeof manualMeta.image === 'object' && manualMeta.image?.url)
+        ? manualMeta.image.url
+        : (typeof product.mainImage === 'object' && product.mainImage?.url)
+            ? product.mainImage.url
+            : '/og-image.jpg'
+
+    return {
+        title: finalTitle,
+        description: finalDesc,
+        keywords: manualMeta.keywords || '', // Anahtar kelimeleri ekledik
+        openGraph: {
+            title: finalTitle,
+            description: finalDesc,
+            images: [ogImage],
+            type: 'article',
+        },
+    }
+}
+// -----------------------------------
 
 export default async function ProductDetailPage({ params }: Args) {
     const { slug } = await params
@@ -110,9 +155,9 @@ export default async function ProductDetailPage({ params }: Args) {
                         </Button>
                         {product.documents && product.documents.length > 0 && (
                             <Button size="lg" variant="outline" className="flex-1 text-md" asChild>
-                                <a href={typeof product.documents[0].file === 'object' ? product.documents[0].file.url : '#'} target="_blank" rel="noreferrer">
-                                    Kataloğu İndir (PDF)
-                                </a>
+                                {/*<a href={typeof product.documents[0].file === 'object' ? product.documents[0].file.url : '#'} target="_blank" rel="noreferrer">*/}
+                                {/*    Kataloğu İndir (PDF)*/}
+                                {/*</a>*/}
                             </Button>
                         )}
                     </div>

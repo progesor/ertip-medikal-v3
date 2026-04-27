@@ -5,6 +5,20 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import {Metadata} from "next";
+
+export const metadata: Metadata = {
+    // absolute: layout.tsx'teki template kuralını ezer ve sadece buradaki metni kullanır
+    title: {
+        absolute: 'Ertip Medikal | Yenilikçi Medikal Cihazlar ve Çözümler'
+    },
+    description: 'Ertip Medikal ürün kataloğu, iğnesiz anestezi cihazları, mikro motorlar ve yenilikçi saç ekim teknolojileri.',
+    openGraph: {
+        title: 'Ertip Medikal | Yenilikçi Medikal Çözümler',
+        description: 'Ertip Medikal ürün kataloğu, iğnesiz anestezi cihazları, mikro motorlar ve yenilikçi saç ekim teknolojileri.',
+        type: 'website',
+    }
+}
 
 export default async function HomePage() {
     // 1. Payload Local API'yi başlat
