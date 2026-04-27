@@ -1213,6 +1213,10 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface SiteSetting {
   id: number;
+  general: {
+    siteLogo: number | Media;
+    whiteLogo?: (number | null) | Media;
+  };
   contact?: {
     email?: string | null;
     phone?: string | null;
@@ -1225,6 +1229,49 @@ export interface SiteSetting {
         id?: string | null;
       }[]
     | null;
+  footer?: {
+    columns?:
+      | (
+          | {
+              showLogo?: boolean | null;
+              text?: string | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'textColumn';
+            }
+          | {
+              title: string;
+              links?:
+                | {
+                    label: string;
+                    url: string;
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'menuColumn';
+            }
+          | {
+              title?: string | null;
+              showAddress?: boolean | null;
+              showPhone?: boolean | null;
+              showEmail?: boolean | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'contactColumn';
+            }
+        )[]
+      | null;
+    bottomLinks?:
+      | {
+          label: string;
+          url: string;
+          id?: string | null;
+        }[]
+      | null;
+    copyright?: string | null;
+  };
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1251,6 +1298,12 @@ export interface MainMenu {
  * via the `definition` "site-settings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
+  general?:
+    | T
+    | {
+        siteLogo?: T;
+        whiteLogo?: T;
+      };
   contact?:
     | T
     | {
@@ -1264,6 +1317,54 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         platform?: T;
         url?: T;
         id?: T;
+      };
+  footer?:
+    | T
+    | {
+        columns?:
+          | T
+          | {
+              textColumn?:
+                | T
+                | {
+                    showLogo?: T;
+                    text?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+              menuColumn?:
+                | T
+                | {
+                    title?: T;
+                    links?:
+                      | T
+                      | {
+                          label?: T;
+                          url?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+              contactColumn?:
+                | T
+                | {
+                    title?: T;
+                    showAddress?: T;
+                    showPhone?: T;
+                    showEmail?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+            };
+        bottomLinks?:
+          | T
+          | {
+              label?: T;
+              url?: T;
+              id?: T;
+            };
+        copyright?: T;
       };
   updatedAt?: T;
   createdAt?: T;
