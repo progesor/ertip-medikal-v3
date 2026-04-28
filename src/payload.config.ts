@@ -18,6 +18,7 @@ import { NewsCategories } from '@/collections/NewsCategories';
 // Global Importları
 import { SiteSettings } from '@/globals/SiteSettings';
 import { MainMenu } from '@/globals/MainMenu';
+import {QuoteRequests} from "@/collections/QuoteRequests";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -30,7 +31,7 @@ export default buildConfig({
         },
     },
     // Yeni koleksiyonları buraya ekledik
-    collections: [Users, Media, Products, Categories, Inquiries, News, Pages, NewsCategories],
+    collections: [Users, Media, Products, Categories, Inquiries, News, Pages, NewsCategories,QuoteRequests],
     // Globals dizisini buraya ekledik
     globals: [SiteSettings, MainMenu],
     editor: lexicalEditor({}),

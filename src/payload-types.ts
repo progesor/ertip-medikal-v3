@@ -75,6 +75,7 @@ export interface Config {
     news: News;
     pages: Page;
     'news-categories': NewsCategory;
+    'quote-requests': QuoteRequest;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -90,6 +91,7 @@ export interface Config {
     news: NewsSelect<false> | NewsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     'news-categories': NewsCategoriesSelect<false> | NewsCategoriesSelect<true>;
+    'quote-requests': QuoteRequestsSelect<false> | QuoteRequestsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -220,21 +222,17 @@ export interface Product {
   id: number;
   title: string;
   shortDescription?: string | null;
-  description?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  /**
+   * Buraya Markdown (## Başlık, | Tablo |) veya doğrudan HTML (<p><strong>...</strong></p>) yapıştırabilirsiniz.
+   */
+  description?: string | null;
+  specs?:
+    | {
+        key: string;
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
   mainImage: number | Media;
   gallery?:
     | {
@@ -243,17 +241,53 @@ export interface Product {
       }[]
     | null;
   videoUrl?: string | null;
-  specs?:
+  skuPrefix?: string | null;
+  skuSuffix?: string | null;
+  /**
+   * Değerleri TİRE (-) ile ayırarak yazın. Örn: 0.6-0.65-0.7
+   */
+  attributes?:
     | {
-        key: string;
-        value: string;
+        name: string;
+        values: string;
         id?: string | null;
       }[]
     | null;
-  documents?:
+  /**
+   * Bunu işaretleyip kaydettiğinizde, yukarıdaki özelliklerin tüm kombinasyonları hesaplanır, özel kurallara göre SKU kodları oluşturulur ve aşağıdaki listeye otomatik eklenir.
+   */
+  triggerVariantGeneration?: boolean | null;
+  /**
+   * Bu liste otomatik dolar ancak sonrasında manuel müdahale edip istisnai durumları düzeltebilirsiniz.
+   */
+  variants?:
     | {
         title: string;
-        file: number | Media;
+        sku: string;
+        price?: string | null;
+        isActive?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Teknik ve lojistik verilerin ürün sayfasındaki konumunu belirler.
+   */
+  logisticDisplayPosition?: ('below' | 'sidebar' | 'both') | null;
+  width?: string | null;
+  height?: string | null;
+  depth?: string | null;
+  weight?: string | null;
+  /**
+   * Ürünün farklı paketleme formlarını (Örn: Tekli Kutu, 50’li Ana Koli) buraya ekleyebilirsiniz.
+   */
+  packaging?:
+    | {
+        packageLabel: string;
+        quantity?: number | null;
+        grossWeight?: string | null;
+        p_width?: string | null;
+        p_height?: string | null;
+        p_depth?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -645,6 +679,28 @@ export interface Page {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quote-requests".
+ */
+export interface QuoteRequest {
+  id: number;
+  customerName: string;
+  company?: string | null;
+  email: string;
+  phone: string;
+  message?: string | null;
+  status?: ('new' | 'reviewing' | 'quoted' | 'closed') | null;
+  items: {
+    productTitle?: string | null;
+    variantInfo?: string | null;
+    sku?: string | null;
+    quantity?: number | null;
+    id?: string | null;
+  }[];
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -698,6 +754,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'news-categories';
         value: number | NewsCategory;
+      } | null)
+    | ({
+        relationTo: 'quote-requests';
+        value: number | QuoteRequest;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -827,6 +887,13 @@ export interface ProductsSelect<T extends boolean = true> {
   title?: T;
   shortDescription?: T;
   description?: T;
+  specs?:
+    | T
+    | {
+        key?: T;
+        value?: T;
+        id?: T;
+      };
   mainImage?: T;
   gallery?:
     | T
@@ -835,18 +902,39 @@ export interface ProductsSelect<T extends boolean = true> {
         id?: T;
       };
   videoUrl?: T;
-  specs?:
+  skuPrefix?: T;
+  skuSuffix?: T;
+  attributes?:
     | T
     | {
-        key?: T;
-        value?: T;
+        name?: T;
+        values?: T;
         id?: T;
       };
-  documents?:
+  triggerVariantGeneration?: T;
+  variants?:
     | T
     | {
         title?: T;
-        file?: T;
+        sku?: T;
+        price?: T;
+        isActive?: T;
+        id?: T;
+      };
+  logisticDisplayPosition?: T;
+  width?: T;
+  height?: T;
+  depth?: T;
+  weight?: T;
+  packaging?:
+    | T
+    | {
+        packageLabel?: T;
+        quantity?: T;
+        grossWeight?: T;
+        p_width?: T;
+        p_height?: T;
+        p_depth?: T;
         id?: T;
       };
   meta?:
@@ -1164,6 +1252,29 @@ export interface PagesSelect<T extends boolean = true> {
 export interface NewsCategoriesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quote-requests_select".
+ */
+export interface QuoteRequestsSelect<T extends boolean = true> {
+  customerName?: T;
+  company?: T;
+  email?: T;
+  phone?: T;
+  message?: T;
+  status?: T;
+  items?:
+    | T
+    | {
+        productTitle?: T;
+        variantInfo?: T;
+        sku?: T;
+        quantity?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

@@ -4,6 +4,7 @@ import React from 'react'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import {Metadata} from "next";
+import {CartProvider} from "@/providers/CartProvider";
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -44,12 +45,14 @@ export default function RootLayout({
     return (
         <html lang="tr" suppressHydrationWarning>
         <body className={`${inter.className} min-h-screen bg-background text-foreground antialiased flex flex-col`}>
+        <CartProvider>
         <Header />
         {/* main elementi sayfanın ortasını dolduracak şekilde flex-1 alır */}
         <main className="flex-1 flex flex-col">
             {children}
         </main>
         <Footer />
+        </CartProvider>
         </body>
         </html>
     )
