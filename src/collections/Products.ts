@@ -137,7 +137,6 @@ export const Products: CollectionConfig = {
                         { name: 'videoUrl', type: 'text', label: 'Tanıtım Videosu (YouTube Linki)' },
                     ]
                 },
-                // --- YENİ VARYANT VE OTOMATİK SKU SEKMESİ ---
                 {
                     label: 'Varyantlar ve Stok',
                     fields: [
@@ -226,6 +225,43 @@ export const Products: CollectionConfig = {
                                         { name: 'p_width', type: 'text', label: 'Ambalaj Genişlik (cm)', admin: { width: '33%' } },
                                         { name: 'p_height', type: 'text', label: 'Ambalaj Yükseklik (cm)', admin: { width: '33%' } },
                                         { name: 'p_depth', type: 'text', label: 'Ambalaj Derinlik (cm)', admin: { width: '34%' } },
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    label: 'Dokümanlar & Kılavuzlar',
+                    fields: [
+                        {
+                            name: 'publicDocs',
+                            type: 'array',
+                            label: 'Halka Açık Belgeler (Katalog, Broşür vb.)',
+                            fields: [
+                                { name: 'label', type: 'text', label: 'Belge Adı', required: true },
+                                { name: 'file', type: 'upload', relationTo: 'media', required: true },
+                            ]
+                        },
+                        {
+                            name: 'protectedDocs',
+                            type: 'array',
+                            label: 'Korumalı Belgeler (Kullanma Kılavuzu)',
+                            fields: [
+                                { name: 'label', type: 'text', label: 'Belge Adı', required: true },
+                                { name: 'file', type: 'upload', relationTo: 'media', required: true },
+                                {
+                                    name: 'accessCodes',
+                                    type: 'array',
+                                    label: 'Yetkili Kodlar / Seri Numaraları',
+                                    fields: [
+                                        {
+                                            type: 'row',
+                                            fields: [
+                                                { name: 'code', type: 'text', label: 'Kod', required: true, admin: { width: '70%' } },
+                                                { name: 'isActive', type: 'checkbox', label: 'Aktif', defaultValue: true, admin: { width: '30%' } },
+                                            ]
+                                        }
                                     ]
                                 }
                             ]

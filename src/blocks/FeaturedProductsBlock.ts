@@ -17,10 +17,11 @@ export const FeaturedProductsBlock: Block = {
             name: 'selectionType',
             type: 'select',
             label: 'Ürün Seçim Yöntemi',
-            defaultValue: 'latest',
+            defaultValue: 'featured', // Varsayılan olarak Vitrin yapıyoruz
             options: [
-                { label: 'En Son Eklenen 4 Ürün', value: 'latest' },
-                { label: 'Manuel Seçim (El ile Seç)', value: 'manual' },
+                { label: '🌟 Vitrin Ürünleri (isFeatured İşaretli Olanlar)', value: 'featured' },
+                { label: '🕒 En Son Eklenenler (Otomatik)', value: 'latest' },
+                { label: '✋ Manuel Seçim (El ile Seç)', value: 'manual' },
             ],
         },
         {

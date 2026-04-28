@@ -1,16 +1,17 @@
 "use client"
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import Image from 'next/image'
-import { Check, Info, ShoppingCart, Award, PlayCircle, PackageOpen, Ruler } from 'lucide-react'
+import { useSearchParams, ReadonlyURLSearchParams } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Check, Info, ShoppingCart, Award, PlayCircle, PackageOpen, Ruler, FileText, AlertCircle, X, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
-import {useCart} from "@/providers/CartProvider";
+import { useCart } from "@/providers/CartProvider"
 
-// YOUTUBE ID YAKALAYICI
 function getYouTubeId(url: string) {
     if (!url) return null;
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -19,8 +20,19 @@ function getYouTubeId(url: string) {
 }
 
 export function ProductView({ product }: any) {
-    const [selectedAttrs, setSelectedAttrs] = useState<Record<string, string>>({})
     const { addToCart } = useCart()
+    const [selectedAttrs, setSelectedAttrs] = useState<Record<string, string>>({})
+    const [manualCode, setManualCode] = useState('')
+    const [isVerifying, setIsVerifying] = useState(false)
+
+    // YENİ STATE'LER: Hata ve Başarı Durumları İçin
+    const [verifyError, setVerifyError] = useState<string | null>(null)
+    const [verifiedDoc, setVerifiedDoc] = useState<{ url: string, label: string } | null>(null)
+
+    // TS2339 Hatası Çözümü: Tip zorlaması ve optional chaining (?)
+    const searchParams = useSearchParams() as ReadonlyURLSearchParams | null
+    const activeTab = searchParams?.get('tab') || 'description'
+    const autoCode = searchParams?.get('code')
 
     const currentVariant = useMemo(() => {
         if (!product.variants || product.variants.length === 0) return null
@@ -28,6 +40,14 @@ export function ProductView({ product }: any) {
             return Object.values(selectedAttrs).every(val => v.title.includes(val))
         })
     }, [selectedAttrs, product.variants])
+
+    useEffect(() => {
+        if (activeTab === 'docs' && autoCode) {
+            if (product.protectedDocs && product.protectedDocs.length > 0) {
+                handleVerify(product.protectedDocs[0].label, autoCode)
+            }
+        }
+    }, [autoCode, activeTab])
 
     const handleAddToCart = () => {
         const itemToAdd = {
@@ -38,18 +58,44 @@ export function ProductView({ product }: any) {
             sku: currentVariant?.sku || product.sku,
             image: typeof product.mainImage === 'object' ? product.mainImage?.url : ''
         }
-        // const currentCart = JSON.parse(localStorage.getItem('quote_cart') || '[]')
-        // localStorage.setItem('quote_cart', JSON.stringify([...currentCart, itemToAdd]))
-        // alert('Ürün teklif listesine eklendi!')
         addToCart(itemToAdd)
     }
 
-    const videoId = getYouTubeId(product.videoUrl || '');
+    const handleVerify = async (docLabel: string, codeInput?: string) => {
+        setIsVerifying(true)
+        setVerifyError(null)
+        const codeToVerify = codeInput || manualCode
 
-    // Lojistik bilgilerin nerede gösterileceği ayarı
+        try {
+            const res = await fetch('/api/verify-manual', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    productId: product.id,
+                    code: codeToVerify,
+                    docLabel
+                }),
+            })
+            const data = await res.json()
+
+            if (data.success) {
+                // Popup blocker'a takılmamak için tarayıcıda yeni pencere açmıyor, kendi UI'mıza alıyoruz
+                setVerifiedDoc({ url: data.fileUrl, label: docLabel })
+            } else {
+                setVerifyError(data.message || 'Geçersiz kod.')
+                setTimeout(() => setVerifyError(null), 5000) // 5 Saniye sonra hatayı gizle
+            }
+        } catch (err) {
+            setVerifyError('Doğrulama servisine ulaşılamadı. Lütfen internet bağlantınızı kontrol edin.')
+            setTimeout(() => setVerifyError(null), 5000)
+        } finally {
+            setIsVerifying(false)
+        }
+    }
+
+    const videoId = getYouTubeId(product.videoUrl || '');
     const pos = product.logisticDisplayPosition || 'below';
 
-    // --- YARDIMCI BİLEŞEN: Net Ölçüler Kartı ---
     const NetDimensions = ({ mode }: { mode: 'sidebar' | 'wide' }) => {
         if (!product.width && !product.height && !product.depth && !product.weight) return null;
 
@@ -99,7 +145,6 @@ export function ProductView({ product }: any) {
         );
     };
 
-    // --- YARDIMCI BİLEŞEN: Ambalaj Tablosu ---
     const PackagingTable = ({ mode }: { mode: 'sidebar' | 'wide' }) => {
         if (!product.packaging || product.packaging.length === 0) return null;
 
@@ -154,11 +199,78 @@ export function ProductView({ product }: any) {
     };
 
     return (
-        <div className="container mx-auto px-4 max-w-7xl pt-12">
-            {/* Üst Kısım: Görsel ve Seçim Alanı (Değişiklik Yok) */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-20">
+        <div className="container mx-auto px-4 max-w-7xl pt-12 relative">
+            {/* GÖRÜNTÜLEYİCİ MODAL */}
+            {verifiedDoc && (
+                <div className="fixed inset-0 z-[100] flex flex-col bg-slate-900/95 backdrop-blur-md p-2 sm:p-8">
+                    <div className="bg-white flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-t-3xl max-w-6xl w-full mx-auto shadow-2xl gap-4">
+                        <div className="flex flex-col gap-1">
+                            <h3 className="font-bold text-slate-900 flex items-center gap-2 line-clamp-1">
+                                <FileText className="w-5 h-5 text-primary shrink-0" /> {verifiedDoc.label}
+                            </h3>
+                            {/* YENİ: Bilgilendirme Notu */}
+                            <p className="text-[10px] md:text-xs text-slate-400 flex items-center gap-1.5 italic">
+                                <Info className="w-3 h-3 text-slate-400" />
+                                Dosyayı cihazınıza kaydetmek için İndir butonuna sağ tıklayıp "Bağlantıyı farklı kaydet" seçeneğini kullanabilirsiniz.
+                            </p>
+                        </div>
 
-                {/* Sol: Görsel Galerisi */}
+                        <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                            {/* İndirme Butonu */}
+                            <a
+                                href={verifiedDoc.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 bg-primary/10 text-primary hover:bg-primary hover:text-white px-5 py-2.5 rounded-2xl text-sm font-bold transition-all shadow-sm"
+                            >
+                                <Download className="w-4 h-4" /> İndir / Yeni Sekmede Aç
+                            </a>
+
+                            <button
+                                onClick={() => setVerifiedDoc(null)}
+                                className="p-2.5 bg-red-50 text-red-600 hover:bg-red-500 hover:text-white rounded-2xl transition-all"
+                                title="Kapat"
+                            >
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Tarayıcı içi Görüntüleyici (iframe) */}
+                    <div className="bg-slate-200 flex-1 max-w-6xl w-full mx-auto rounded-b-3xl overflow-hidden shadow-2xl relative">
+                        <iframe
+                            src={`${verifiedDoc.url}#toolbar=0`}
+                            className="w-full h-full border-none"
+                            title={verifiedDoc.label}
+                        />
+                    </div>
+                </div>
+            )}
+
+            {/* HATA TOAST BİLDİRİMİ (BAŞARISIZ GİRİŞ) */}
+            <AnimatePresence>
+                {verifyError && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 20, scale: 0.9 }}
+                        className="fixed bottom-8 right-8 z-[110] bg-white p-4 rounded-2xl shadow-2xl border-l-4 border-l-red-500 flex items-center gap-3 min-w-[300px]"
+                    >
+                        <div className="w-10 h-10 bg-red-50 text-red-500 rounded-full flex items-center justify-center shrink-0">
+                            <AlertCircle className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1">
+                            <p className="text-sm font-bold text-slate-900">Erişim Reddedildi</p>
+                            <p className="text-xs text-slate-500">{verifyError}</p>
+                        </div>
+                        <button onClick={() => setVerifyError(null)} className="text-slate-400 hover:text-slate-900 p-1">
+                            <X className="w-4 h-4" />
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-20">
                 <div className="space-y-4">
                     <div className="relative aspect-square rounded-[3rem] overflow-hidden bg-slate-50 border border-slate-100 p-12">
                         <Image
@@ -180,7 +292,6 @@ export function ProductView({ product }: any) {
                     )}
                 </div>
 
-                {/* Sağ: Bilgi ve Varyantlar */}
                 <div className="flex flex-col space-y-8">
                     <div>
                         <h1 className="text-3xl md:text-4xl font-black text-slate-900 mb-4">{product.title}</h1>
@@ -198,7 +309,6 @@ export function ProductView({ product }: any) {
                         <p className="text-slate-500 leading-relaxed">{product.shortDescription}</p>
                     )}
 
-                    {/* Varyant Seçiciler */}
                     {product.attributes && product.attributes.length > 0 && (
                         <div className="space-y-6 pt-4">
                             {product.attributes.map((attr: any, i: number) => {
@@ -229,7 +339,6 @@ export function ProductView({ product }: any) {
                         </div>
                     )}
 
-                    {/* Aksiyon Butonları */}
                     <div className="pt-8 flex flex-col sm:flex-row gap-4">
                         <Button
                             size="lg"
@@ -242,8 +351,7 @@ export function ProductView({ product }: any) {
                 </div>
             </div>
 
-            {/* Alt Kısım: Detaylı Tablolar */}
-            <Tabs defaultValue="description" className="w-full">
+            <Tabs defaultValue={activeTab} className="w-full">
                 <TabsList className="w-full justify-start border-b rounded-none bg-transparent h-auto p-0 mb-12 flex-wrap gap-y-4">
                     <TabsTrigger value="description" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 md:px-8 py-4 font-bold text-base md:text-lg">Açıklama</TabsTrigger>
 
@@ -256,31 +364,31 @@ export function ProductView({ product }: any) {
                             <PlayCircle className="w-5 h-5" /> Tanıtım Videosu
                         </TabsTrigger>
                     )}
+
+                    {((product.publicDocs && product.publicDocs.length > 0) || (product.protectedDocs && product.protectedDocs.length > 0)) && (
+                        <TabsTrigger value="docs" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 md:px-8 py-4 font-bold text-base md:text-lg flex items-center gap-2">
+                            <FileText className="w-5 h-5" /> Dokümanlar
+                        </TabsTrigger>
+                    )}
                 </TabsList>
 
-                {/* AÇIKLAMA SEKMESİ VE DİNAMİK YERLEŞİMLER */}
                 <TabsContent value="description" className="max-w-none">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
-
-                        {/* SOL KOLON: Açıklama ve (Eğer seçildiyse) Alt Geniş Tablolar */}
                         <div className="lg:col-span-2 text-slate-700 leading-relaxed space-y-8">
-
-                            {/* MARKDOWN / HTML GÖSTERİM ALANI */}
                             {product.description ? (
                                 <div className="prose prose-slate prose-lg max-w-none
-    prose-headings:text-slate-900
-    prose-a:text-primary hover:prose-a:text-primary/80
-    prose-img:rounded-[2rem] prose-img:border prose-img:border-slate-100
-    prose-table:border-collapse prose-table:w-full
-    prose-th:bg-slate-50 prose-th:p-4
-    prose-td:p-4 prose-td:border-b prose-td:border-slate-100
+                                    prose-headings:text-slate-900
+                                    prose-a:text-primary hover:prose-a:text-primary/80
+                                    prose-img:rounded-[2rem] prose-img:border prose-img:border-slate-100
+                                    prose-table:border-collapse prose-table:w-full
+                                    prose-th:bg-slate-50 prose-th:p-4
+                                    prose-td:p-4 prose-td:border-b prose-td:border-slate-100
 
-    prose-code:bg-slate-100 prose-code:text-slate-700
-    prose-code:px-2.5 prose-code:py-1 prose-code:rounded-lg
-    prose-code:font-mono prose-code:text-sm prose-code:font-bold
-    prose-code:before:hidden prose-code:after:hidden
-">
-                                    {/* GÜVENLİK KONTROLÜ: Veri string (metin) değilse (eski lexical JSON ise) hata vermesini engelliyoruz */}
+                                    prose-code:bg-slate-100 prose-code:text-slate-700
+                                    prose-code:px-2.5 prose-code:py-1 prose-code:rounded-lg
+                                    prose-code:font-mono prose-code:text-sm prose-code:font-bold
+                                    prose-code:before:hidden prose-code:after:hidden
+                                ">
                                     {typeof product.description === 'string' ? (
                                         <ReactMarkdown
                                             remarkPlugins={[remarkGfm]}
@@ -298,7 +406,6 @@ export function ProductView({ product }: any) {
                                 <p className="italic text-slate-400">Bu ürün için detaylı bir açıklama girilmemiştir.</p>
                             )}
 
-                            {/* EĞER YERLEŞİM 'below' veya 'both' İSE BURADA GÖSTER */}
                             {(pos === 'below' || pos === 'both') && (
                                 <div className="mt-16 space-y-12 border-t border-slate-100 pt-10">
                                     <NetDimensions mode="wide" />
@@ -307,7 +414,6 @@ export function ProductView({ product }: any) {
                             )}
                         </div>
 
-                        {/* SAĞ KOLON (SİDEBAR): Özellikler Kartı ve (Eğer seçildiyse) Lojistik Kartları */}
                         <div className="space-y-6 sticky top-24">
                             {product.specs && product.specs.length > 0 && (
                                 <div className="bg-slate-50 p-8 rounded-[2rem] border border-slate-100 space-y-6">
@@ -323,7 +429,6 @@ export function ProductView({ product }: any) {
                                 </div>
                             )}
 
-                            {/* EĞER YERLEŞİM 'sidebar' veya 'both' İSE BURADA KART OLARAK GÖSTER */}
                             {(pos === 'sidebar' || pos === 'both') && (
                                 <>
                                     <NetDimensions mode="sidebar" />
@@ -334,7 +439,6 @@ export function ProductView({ product }: any) {
                     </div>
                 </TabsContent>
 
-                {/* VARYANTLAR (SKU) SEKMESİ */}
                 {product.variants && product.variants.length > 0 && (
                     <TabsContent value="variants">
                         <div className="overflow-x-auto rounded-[2rem] border border-slate-100 shadow-sm">
@@ -364,7 +468,6 @@ export function ProductView({ product }: any) {
                     </TabsContent>
                 )}
 
-                {/* VİDEO SEKMESİ */}
                 {videoId && (
                     <TabsContent value="video" className="pt-4">
                         <div className="max-w-4xl mx-auto">
@@ -383,6 +486,48 @@ export function ProductView({ product }: any) {
                         </div>
                     </TabsContent>
                 )}
+
+                <TabsContent value="docs" className="pt-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-4">
+                            <h3 className="font-bold text-slate-900 flex items-center gap-2 italic">
+                                <Info className="w-5 h-5 text-primary" /> Tanıtım Materyalleri
+                            </h3>
+                            {product.publicDocs?.map((doc: any, i: number) => (
+                                <a key={i} href={doc.file.url} target="_blank" className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-primary transition-all group">
+                                    <span className="font-medium text-slate-700">{doc.label}</span>
+                                    <Button size="sm" variant="ghost" className="group-hover:text-primary">İndir</Button>
+                                </a>
+                            ))}
+                        </div>
+
+                        <div className="space-y-4">
+                            <h3 className="font-bold text-slate-900 flex items-center gap-2 italic">
+                                <Award className="w-5 h-5 text-primary" /> Teknik Dokümantasyon (MDR)
+                            </h3>
+                            {product.protectedDocs?.map((doc: any, i: number) => (
+                                <div key={i} className="p-4 bg-white rounded-2xl border-2 border-dashed border-slate-200">
+                                    <p className="font-bold text-slate-900 mb-3">{doc.label}</p>
+                                    <div className="flex gap-2 relative">
+                                        <input
+                                            type="text"
+                                            placeholder="Erişim Kodu / Seri No"
+                                            className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-sm outline-none focus:border-primary"
+                                            onChange={(e) => setManualCode(e.target.value)}
+                                        />
+                                        <Button size="sm" onClick={() => handleVerify(doc.label)} disabled={isVerifying}>
+                                            {isVerifying ? '...' : 'Eriş'}
+                                        </Button>
+                                    </div>
+                                    <p className="text-[10px] text-slate-400 mt-2 italic">
+                                        * Bu belgeye erişiminiz kayıt altına alınmaktadır.
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </TabsContent>
+
             </Tabs>
         </div>
     )

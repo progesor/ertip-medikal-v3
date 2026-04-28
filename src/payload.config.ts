@@ -14,11 +14,12 @@ import { Inquiries } from '@/collections/Inquiries';
 import { News } from '@/collections/News';
 import { Pages } from '@/collections/Pages';
 import { NewsCategories } from '@/collections/NewsCategories';
+import {QuoteRequests} from "@/collections/QuoteRequests";
+import {DownloadLogs} from "@/collections/DownloadLogs";
 
 // Global Importları
 import { SiteSettings } from '@/globals/SiteSettings';
 import { MainMenu } from '@/globals/MainMenu';
-import {QuoteRequests} from "@/collections/QuoteRequests";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -31,7 +32,7 @@ export default buildConfig({
         },
     },
     // Yeni koleksiyonları buraya ekledik
-    collections: [Users, Media, Products, Categories, Inquiries, News, Pages, NewsCategories,QuoteRequests],
+    collections: [Users, Media, Products, Categories, Inquiries, News, Pages, NewsCategories,QuoteRequests, DownloadLogs],
     // Globals dizisini buraya ekledik
     globals: [SiteSettings, MainMenu],
     editor: lexicalEditor({}),

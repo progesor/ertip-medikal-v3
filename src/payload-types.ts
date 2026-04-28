@@ -76,6 +76,7 @@ export interface Config {
     pages: Page;
     'news-categories': NewsCategory;
     'quote-requests': QuoteRequest;
+    'download-logs': DownloadLog;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -92,6 +93,7 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     'news-categories': NewsCategoriesSelect<false> | NewsCategoriesSelect<true>;
     'quote-requests': QuoteRequestsSelect<false> | QuoteRequestsSelect<true>;
+    'download-logs': DownloadLogsSelect<false> | DownloadLogsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -291,6 +293,27 @@ export interface Product {
         id?: string | null;
       }[]
     | null;
+  publicDocs?:
+    | {
+        label: string;
+        file: number | Media;
+        id?: string | null;
+      }[]
+    | null;
+  protectedDocs?:
+    | {
+        label: string;
+        file: number | Media;
+        accessCodes?:
+          | {
+              code: string;
+              isActive?: boolean | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * Bu içeriğin Google, WhatsApp, LinkedIn gibi platformlarda nasıl görüneceğini belirleyin.
    */
@@ -485,7 +508,7 @@ export interface Page {
           }
         | {
             title?: string | null;
-            selectionType?: ('latest' | 'manual') | null;
+            selectionType?: ('featured' | 'latest' | 'manual') | null;
             selectedProducts?: (number | Product)[] | null;
             id?: string | null;
             blockName?: string | null;
@@ -701,6 +724,21 @@ export interface QuoteRequest {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "download-logs".
+ */
+export interface DownloadLog {
+  id: number;
+  productTitle?: string | null;
+  documentName?: string | null;
+  accessCode?: string | null;
+  ipAddress?: string | null;
+  country?: string | null;
+  deviceInfo?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -758,6 +796,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'quote-requests';
         value: number | QuoteRequest;
+      } | null)
+    | ({
+        relationTo: 'download-logs';
+        value: number | DownloadLog;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -935,6 +977,27 @@ export interface ProductsSelect<T extends boolean = true> {
         p_width?: T;
         p_height?: T;
         p_depth?: T;
+        id?: T;
+      };
+  publicDocs?:
+    | T
+    | {
+        label?: T;
+        file?: T;
+        id?: T;
+      };
+  protectedDocs?:
+    | T
+    | {
+        label?: T;
+        file?: T;
+        accessCodes?:
+          | T
+          | {
+              code?: T;
+              isActive?: T;
+              id?: T;
+            };
         id?: T;
       };
   meta?:
@@ -1275,6 +1338,20 @@ export interface QuoteRequestsSelect<T extends boolean = true> {
         quantity?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "download-logs_select".
+ */
+export interface DownloadLogsSelect<T extends boolean = true> {
+  productTitle?: T;
+  documentName?: T;
+  accessCode?: T;
+  ipAddress?: T;
+  country?: T;
+  deviceInfo?: T;
   updatedAt?: T;
   createdAt?: T;
 }
