@@ -1,14 +1,23 @@
 {
   "name": "ertip-medikal-v3",
   "version": "0.1.0",
+  "description": "Enterprise Grade Medical Application built with Next.js, Payload CMS, and Drizzle ORM",
+  "author": "Ertip Medikal",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "generate:types": "payload generate:types",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write \"src/**/*.{ts,tsx,md,json,css}\"",
+    "clean": "rimraf .next",
+    "payload:types": "payload generate:types",
+    "payload:graphql": "payload generate:graphQLSchema",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"
   },
@@ -41,6 +50,7 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.5",
     "@tailwindcss/typography": "^0.5.19",
     "@types/node": "^20.14.15",
     "@types/pg": "^8.11.6",
@@ -51,6 +61,9 @@
     "eslint": "^9.39.2",
     "eslint-config-next": "15.5.9",
     "postcss": "8.5.10",
+    "prettier": "^3.3.3",
+    "prettier-plugin-tailwindcss": "^0.6.6",
+    "rimraf": "^6.0.1",
     "tailwindcss": "^3.4.10",
     "typescript": "5.5.4"
   },

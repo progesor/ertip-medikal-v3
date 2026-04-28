@@ -1,6 +1,12 @@
 /* This file handles Payload API requests */
-import { REST_DELETE, REST_GET, REST_OPTIONS, REST_PATCH, REST_POST } from '@payloadcms/next/routes';
-import configPromise from '@/payload.config';
+import {
+  REST_DELETE,
+  REST_GET,
+  REST_OPTIONS,
+  REST_PATCH,
+  REST_POST,
+} from "@payloadcms/next/routes";
+import configPromise from "@/payload.config";
 
 export const GET = REST_GET(configPromise);
 export const POST = REST_POST(configPromise);
