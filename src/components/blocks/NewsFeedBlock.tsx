@@ -27,11 +27,11 @@ export async function NewsFeedBlock({ title, description, limit = 20, showFilter
             <div className="container mx-auto px-4 max-w-7xl">
                 {/* Başlık Alanı */}
                 <div className="max-w-3xl mx-auto text-center mb-12 space-y-4">
-                    <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900">
+                    <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-text-main">
                         {title}
                     </h2>
                     {description && (
-                        <p className="text-lg text-slate-600">
+                        <p className="text-lg text-text-muted">
                             {description}
                         </p>
                     )}

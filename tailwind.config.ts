@@ -51,12 +51,31 @@ const config = {
     			card: {
     				DEFAULT: 'hsl(var(--card))',
     				foreground: 'hsl(var(--card-foreground))'
+			},
+			surface: {
+				DEFAULT: 'hsl(var(--surface))',
+				muted: 'hsl(var(--surface-muted))',
+			},
+			text: {
+				main: 'hsl(var(--text-main))',
+				muted: 'hsl(var(--text-muted))',
+			},
+			success: {
+				DEFAULT: 'hsl(var(--success))',
+				foreground: 'hsl(var(--success-foreground))'
+			},
+			error: {
+				DEFAULT: 'hsl(var(--error))',
+				foreground: 'hsl(var(--error-foreground))'
     			}
     		},
     		borderRadius: {
     			lg: 'var(--radius)',
     			md: 'calc(var(--radius) - 2px)',
-    			sm: 'calc(var(--radius) - 4px)'
+			sm: 'calc(var(--radius) - 4px)',
+			xl: 'var(--radius-xl)',
+			'2xl': 'var(--radius-2xl)',
+			'3xl': 'var(--radius-3xl)',
     		},
     		keyframes: {
     			'accordion-down': {

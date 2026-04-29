@@ -23,7 +23,7 @@ export function CertificateGridBlock({ title, certificates }: { title?: string; 
     };
 
     return (
-        <section className="py-24 bg-slate-50/40">
+        <section className="py-24 bg-surface-muted/40">
             {/* GENİŞLETİLMİŞ KONTEYNER (5 Kolon için daha geniş alan) */}
             <div className="container mx-auto px-4 max-w-[1400px]">
 
@@ -32,7 +32,7 @@ export function CertificateGridBlock({ title, certificates }: { title?: string; 
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/10 text-primary font-bold text-sm mb-6 shadow-sm">
                         <CheckCircle2 className="w-5 h-5" /> Kurumsal Güven
                     </div>
-                    <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight">
+                    <h2 className="text-4xl md:text-5xl font-black text-text-main mb-4 tracking-tight">
                         {title || "Sertifikalarımız"}
                     </h2>
                 </div>
@@ -43,13 +43,13 @@ export function CertificateGridBlock({ title, certificates }: { title?: string; 
                         <div
                             key={cert.id || i}
                             onClick={() => setSelectedCertIndex(i)}
-                            className="group bg-white rounded-[2rem] border border-slate-200/60 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 cursor-pointer flex flex-col overflow-hidden"
+                            className="group bg-white rounded-2xl border border-border/60 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 cursor-pointer flex flex-col overflow-hidden"
                         >
                             {/* A4 Oranında (Dikey) Medya Alanı */}
-                            <div className="relative w-full aspect-[1/1.414] bg-slate-100/50 p-6 flex items-center justify-center overflow-hidden border-b border-slate-100">
+                            <div className="relative w-full aspect-[1/1.414] bg-border/50 p-6 flex items-center justify-center overflow-hidden border-b border-border">
 
                                 {/* Hover Büyüteç Efekti */}
-                                <div className="absolute inset-0 bg-slate-900/5 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-500 z-10 flex items-center justify-center">
+                                <div className="absolute inset-0 bg-text-main/5 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-500 z-10 flex items-center justify-center">
                                     <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-2xl transform scale-50 group-hover:scale-100 transition-transform duration-300">
                                         <Search className="w-6 h-6 text-primary" />
                                     </div>
@@ -67,11 +67,11 @@ export function CertificateGridBlock({ title, certificates }: { title?: string; 
 
                             {/* Alt Metin Alanı */}
                             <div className="p-6 text-center flex flex-col flex-grow justify-center bg-white relative z-20">
-                                <h3 className="text-base font-bold text-slate-900 mb-3 line-clamp-2 leading-snug group-hover:text-primary transition-colors">
+                                <h3 className="text-base font-bold text-text-main mb-3 line-clamp-2 leading-snug group-hover:text-primary transition-colors">
                                     {cert.name}
                                 </h3>
                                 {cert.issuer && (
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center justify-center gap-1.5 mt-auto">
+                                    <p className="text-xs font-bold text-text-muted uppercase tracking-widest flex items-center justify-center gap-1.5 mt-auto">
                                         <Award className="w-4 h-4 text-primary/40" /> {cert.issuer}
                                     </p>
                                 )}
@@ -84,22 +84,22 @@ export function CertificateGridBlock({ title, certificates }: { title?: string; 
             {/* DEV BOYUTLU LIGHTBOX (TAM EKRAN OKUMA MODU) */}
             {selectedCertIndex !== null && currentCert && (
                 <div
-                    className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/90 backdrop-blur-xl p-4 md:p-8"
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-primary/90 backdrop-blur-xl p-4 md:p-8"
                     onClick={() => setSelectedCertIndex(null)}
                 >
                     <div
-                        className="bg-white w-full max-w-[90rem] h-full max-h-[90vh] rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl flex flex-col lg:flex-row relative"
+                        className="bg-white w-full max-w-[90rem] h-full max-h-[90vh] rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl flex flex-col lg:flex-row relative"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Üst Navigasyon & Kapatma */}
                         <div className="absolute top-4 right-4 md:top-6 md:right-6 z-50 flex gap-2 md:gap-3">
-                            <button onClick={showPrev} className="p-3 md:p-4 bg-white/90 hover:bg-primary hover:text-white rounded-2xl shadow-xl transition-all text-slate-900"><ChevronLeft className="w-5 h-5 md:w-6 md:h-6"/></button>
-                            <button onClick={showNext} className="p-3 md:p-4 bg-white/90 hover:bg-primary hover:text-white rounded-2xl shadow-xl transition-all text-slate-900"><ChevronRight className="w-5 h-5 md:w-6 md:h-6"/></button>
+                            <button onClick={showPrev} className="p-3 md:p-4 bg-white/90 hover:bg-primary hover:text-white rounded-2xl shadow-xl transition-all text-text-main"><ChevronLeft className="w-5 h-5 md:w-6 md:h-6"/></button>
+                            <button onClick={showNext} className="p-3 md:p-4 bg-white/90 hover:bg-primary hover:text-white rounded-2xl shadow-xl transition-all text-text-main"><ChevronRight className="w-5 h-5 md:w-6 md:h-6"/></button>
                             <button onClick={() => setSelectedCertIndex(null)} className="p-3 md:p-4 bg-red-50 text-red-600 hover:bg-red-500 hover:text-white rounded-2xl shadow-xl transition-all"><X className="w-5 h-5 md:w-6 md:h-6"/></button>
                         </div>
 
                         {/* SOL KOLON: DEV EKRAN GÖRÜNTÜLEYİCİ */}
-                        <div className="relative w-full lg:w-2/3 h-[50vh] lg:h-auto bg-slate-100 border-r border-slate-200 flex items-center justify-center overflow-hidden">
+                        <div className="relative w-full lg:w-2/3 h-[50vh] lg:h-auto bg-border border-r border-border flex items-center justify-center overflow-hidden">
                             {currentCert.document?.url ? (
                                 <iframe
                                     src={`${currentCert.document.url}#toolbar=0&view=Fit`}
@@ -122,16 +122,16 @@ export function CertificateGridBlock({ title, certificates }: { title?: string; 
                         {/* SAĞ KOLON: BİLGİ VE İNDİRME PANELİ */}
                         <div className="w-full lg:w-1/3 p-8 md:p-14 flex flex-col bg-white overflow-y-auto">
                             <div className="mb-auto">
-                                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-50 border border-slate-100 text-slate-500 font-bold text-xs mb-8 uppercase tracking-widest">
+                                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface-muted border border-border text-text-muted font-bold text-xs mb-8 uppercase tracking-widest">
                                     <FileText className="w-4 h-4 text-primary" /> Resmi Belge
                                 </div>
 
-                                <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-6 leading-tight">
+                                <h2 className="text-3xl md:text-4xl font-black text-text-main mb-6 leading-tight">
                                     {currentCert.name}
                                 </h2>
 
                                 {currentCert.issuer && (
-                                    <div className="flex items-center gap-4 text-lg md:text-xl font-bold text-primary mb-10 pb-10 border-b border-slate-100">
+                                    <div className="flex items-center gap-4 text-lg md:text-xl font-bold text-primary mb-10 pb-10 border-b border-border">
                                         <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center">
                                             <Award className="w-6 h-6" />
                                         </div>
@@ -140,28 +140,28 @@ export function CertificateGridBlock({ title, certificates }: { title?: string; 
                                 )}
 
                                 <div className="space-y-4">
-                                    <h4 className="font-bold text-slate-900 text-base uppercase tracking-tight">Kapsam Detayları</h4>
-                                    <p className="text-slate-500 leading-relaxed text-base">
+                                    <h4 className="font-bold text-text-main text-base uppercase tracking-tight">Kapsam Detayları</h4>
+                                    <p className="text-text-muted leading-relaxed text-base">
                                         {currentCert.description || "Bu sertifika, Ertıp Medikal'in global standartlara, kalite kontrol süreçlerine ve medikal üretim yönetmeliklerine olan tam uygunluğunu tescillemektedir."}
                                     </p>
                                 </div>
                             </div>
 
-                            <div className="pt-10 mt-10 border-t border-slate-100">
+                            <div className="pt-10 mt-10 border-t border-border">
                                 {currentCert.document?.url ? (
                                     <div className="space-y-4">
-                                        <Button className="w-full h-16 rounded-2xl text-lg font-bold bg-slate-900 text-white hover:bg-primary transition-all shadow-xl hover:shadow-primary/20" asChild>
+                                        <Button className="w-full h-16 rounded-2xl text-lg font-bold bg-text-main text-white hover:bg-primary transition-all shadow-xl hover:shadow-primary/20" asChild>
                                             <a href={currentCert.document.url} target="_blank" rel="noopener noreferrer">
                                                 <Download className="w-6 h-6 mr-3" /> PDF Olarak Görüntüle
                                             </a>
                                         </Button>
-                                        <p className="text-xs text-slate-400 text-center flex justify-center items-center gap-1.5 leading-tight">
+                                        <p className="text-xs text-text-muted text-center flex justify-center items-center gap-1.5 leading-tight">
                                             <Info className="w-4 h-4" /> Cihazınıza kaydetmek için butona sağ tıklayıp "Farklı Kaydet" seçeneğini kullanabilirsiniz.
                                         </p>
                                     </div>
                                 ) : (
-                                    <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 text-center">
-                                        <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                                    <div className="bg-surface-muted p-5 rounded-2xl border border-border text-center">
+                                        <p className="text-xs text-text-muted font-semibold leading-relaxed">
                                             Bu belgenin ıslak imzalı orijinal nüshası merkez ofisimizde muhafaza edilmektedir.
                                         </p>
                                     </div>

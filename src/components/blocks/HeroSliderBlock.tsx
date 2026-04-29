@@ -20,7 +20,7 @@ export function HeroSliderBlock({ slides }: any) {
   if (!slides || slides.length === 0) return null;
 
   return (
-    <section className="relative h-[80vh] min-h-[600px] w-full overflow-hidden bg-slate-900">
+    <section className="relative h-[80vh] min-h-[600px] w-full overflow-hidden bg-primary">
       {slides.map((slide: any, index: number) => (
         <div
           key={index}

@@ -15,17 +15,17 @@ export function FeaturesBlock({ title, subtitle, features }: any) {
   if (!features || features.length === 0) return null;
 
   return (
-    <section className="py-20 bg-slate-50 border-y border-slate-100">
+    <section className="py-20 bg-surface-muted border-y border-border">
       <div className="container mx-auto px-4 max-w-6xl">
         {/* Başlık Alanı */}
         <div className="text-center mb-16 space-y-4">
           {title && (
-            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900">
+            <h2 className="text-3xl md:text-4xl font-extrabold text-text-main">
               {title}
             </h2>
           )}
           {subtitle && (
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+            <p className="text-lg text-text-muted max-w-2xl mx-auto">
               {subtitle}
             </p>
           )}
@@ -45,13 +45,13 @@ export function FeaturesBlock({ title, subtitle, features }: any) {
                   <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors duration-300 text-primary">
                     <IconComponent className="w-7 h-7" />
                   </div>
-                  <CardTitle className="text-xl font-bold text-slate-900">
+                  <CardTitle className="text-xl font-bold text-text-main">
                     {feature.featureTitle}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {feature.featureDescription && (
-                    <p className="text-slate-600 leading-relaxed">
+                    <p className="text-text-muted leading-relaxed">
                       {feature.featureDescription}
                     </p>
                   )}
