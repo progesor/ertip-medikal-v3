@@ -1,7 +1,7 @@
 import React from "react";
 import { getPayload } from "payload";
 import configPromise from "@payload-config";
-import { NewsGridClient } from "./NewsGridClient";
+import { NewsGridClient } from "@/components/blocks/NewsGridClient";
 
 // 1. SERVER COMPONENT: Verileri veritabanından SEO dostu şekilde çeker
 export async function NewsFeedBlock({ title, description, limit = 20, showFilters = true }: any) {

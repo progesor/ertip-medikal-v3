@@ -4,15 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { Search, X, Award, FileText, CheckCircle2, Download, ChevronLeft, ChevronRight, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-interface Certificate {
-    id: string;
-    image: { url: string; alt?: string };
-    document?: { url: string };
-    name: string;
-    issuer?: string;
-    description?: string;
-}
+import type { Certificate } from "@/types";
 
 export function CertificateGridBlock({ title, certificates }: { title?: string; certificates: Certificate[] }) {
     const [selectedCertIndex, setSelectedCertIndex] = useState<number | null>(null);

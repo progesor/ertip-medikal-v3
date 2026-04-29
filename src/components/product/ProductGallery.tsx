@@ -3,8 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-
-type ImageType = { url: string; alt?: string };
+import type { ImageType } from "@/types";
 
 export function ProductGallery({ images }: { images: ImageType[] }) {
   const [currentIndex, setCurrentIndex] = useState(0);

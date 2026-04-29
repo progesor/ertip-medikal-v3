@@ -1,6 +1,6 @@
 import type { CollectionConfig } from "payload";
-import { HeroBlock } from "../blocks/HeroBlock";
-import { ContentBlock } from "../blocks/ContentBlock";
+import { HeroBlock } from "@/blocks/HeroBlock";
+import { ContentBlock } from "@/blocks/ContentBlock";
 import { metaFields } from "@/fields/meta";
 import { slugField } from "@/fields/slug";
 import { FeaturesBlock } from "@/blocks/FeaturesBlock";
