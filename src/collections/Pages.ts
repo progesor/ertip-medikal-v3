@@ -17,6 +17,8 @@ import { HeroSliderBlock } from "@/blocks/HeroSliderBlock";
 import { CertificateGridBlock } from "@/blocks/CertificateGridBlock";
 import { ProcessBlock } from "@/blocks/ProcessBlock";
 import { CTABlock } from "@/blocks/CTABlock";
+import {ContactFormBlock} from "@/blocks/ContactFormBlock";
+import {NewsFeedBlock} from "@/blocks/NewsFeedBlock";
 
 export const Pages: CollectionConfig = {
   slug: "pages",
@@ -61,6 +63,8 @@ export const Pages: CollectionConfig = {
                 CertificateGridBlock,
                 ProcessBlock,
                 CTABlock,
+                ContactFormBlock,
+                NewsFeedBlock,
               ],
             },
           ],

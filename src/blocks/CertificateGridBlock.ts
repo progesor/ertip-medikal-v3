@@ -16,14 +16,37 @@ export const CertificateGridBlock: Block = {
       label: "Sertifikalar",
       fields: [
         {
-          name: "image",
-          type: "upload",
-          relationTo: "media",
-          required: true,
-          label: "Sertifika Görseli",
+          type: 'row',
+          fields: [
+            { name: "name", type: "text", label: "Sertifika Adı", required: true, admin: { width: '50%' } },
+            { name: "issuer", type: "text", label: "Düzenleyen Kurum", admin: { width: '50%' } },
+          ]
         },
-        { name: "name", type: "text", label: "Sertifika Adı", required: true },
-        { name: "issuer", type: "text", label: "Düzenleyen Kurum" },
+        {
+          type: 'row',
+          fields: [
+            {
+              name: "image",
+              type: "upload",
+              relationTo: "media",
+              required: true,
+              label: "Kapak Görseli / Mühür (Kartta Görünecek)",
+              admin: { width: '50%' }
+            },
+            {
+              name: "document",
+              type: "upload",
+              relationTo: "media",
+              label: "Orijinal Sertifika (PDF)",
+              admin: { width: '50%' }
+            },
+          ]
+        },
+        {
+          name: "description",
+          type: "textarea",
+          label: "Sertifika Açıklaması"
+        },
       ],
     },
   ],

@@ -579,14 +579,20 @@ export interface Page {
           }
         | {
             title?: string | null;
-            address: string;
-            phone?: string | null;
-            email?: string | null;
-            workingHours?: string | null;
-            /**
-             * Google Haritalar -> Paylaş -> Harita Yerleştirme (Embed) kısmındaki src="" içindeki linki buraya yapıştırın.
-             */
-            mapUrl?: string | null;
+            locations?:
+              | {
+                  title: string;
+                  address: string;
+                  phone?: string | null;
+                  email?: string | null;
+                  workingHours?: string | null;
+                  /**
+                   * Harita Yerleştirme (Embed) kısmındaki src="" içindeki linki buraya yapıştırın.
+                   */
+                  mapUrl?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
             id?: string | null;
             blockName?: string | null;
             blockType: 'location';
@@ -634,9 +640,11 @@ export interface Page {
             title?: string | null;
             certificates?:
               | {
-                  image: number | Media;
                   name: string;
                   issuer?: string | null;
+                  image: number | Media;
+                  document?: (number | null) | Media;
+                  description?: string | null;
                   id?: string | null;
                 }[]
               | null;
@@ -668,6 +676,40 @@ export interface Page {
             id?: string | null;
             blockName?: string | null;
             blockType: 'cta';
+          }
+        | {
+            title?: string | null;
+            formTitle?: string | null;
+            description?: string | null;
+            /**
+             * Kullanıcının formda seçebileceği departmanları belirleyin.
+             */
+            departments?:
+              | {
+                  label?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            quickContact?: {
+              phone?: string | null;
+              email?: string | null;
+              descriptionText?: string | null;
+            };
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'contactForm';
+          }
+        | {
+            title?: string | null;
+            description?: string | null;
+            limit?: number | null;
+            /**
+             * Anasayfa gibi vitrin kullanımlarında filtreleri gizlemek için tiki kaldırın.
+             */
+            showFilters?: boolean | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'newsFeed';
           }
       )[]
     | null;
@@ -1202,11 +1244,17 @@ export interface PagesSelect<T extends boolean = true> {
           | T
           | {
               title?: T;
-              address?: T;
-              phone?: T;
-              email?: T;
-              workingHours?: T;
-              mapUrl?: T;
+              locations?:
+                | T
+                | {
+                    title?: T;
+                    address?: T;
+                    phone?: T;
+                    email?: T;
+                    workingHours?: T;
+                    mapUrl?: T;
+                    id?: T;
+                  };
               id?: T;
               blockName?: T;
             };
@@ -1259,9 +1307,11 @@ export interface PagesSelect<T extends boolean = true> {
               certificates?:
                 | T
                 | {
-                    image?: T;
                     name?: T;
                     issuer?: T;
+                    image?: T;
+                    document?: T;
+                    description?: T;
                     id?: T;
                   };
               id?: T;
@@ -1291,6 +1341,38 @@ export interface PagesSelect<T extends boolean = true> {
               buttonText?: T;
               buttonLink?: T;
               theme?: T;
+              id?: T;
+              blockName?: T;
+            };
+        contactForm?:
+          | T
+          | {
+              title?: T;
+              formTitle?: T;
+              description?: T;
+              departments?:
+                | T
+                | {
+                    label?: T;
+                    id?: T;
+                  };
+              quickContact?:
+                | T
+                | {
+                    phone?: T;
+                    email?: T;
+                    descriptionText?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        newsFeed?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              limit?: T;
+              showFilters?: T;
               id?: T;
               blockName?: T;
             };

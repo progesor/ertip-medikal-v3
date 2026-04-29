@@ -18,6 +18,8 @@ import { HeroSliderBlock } from "@/components/blocks/HeroSliderBlock";
 import { CertificateGridBlock } from "@/components/blocks/CertificateGridBlock";
 import { ProcessBlock } from "@/components/blocks/ProcessBlock";
 import { CTABlock } from "@/components/blocks/CTABlock";
+import {ContactFormBlock} from "@/components/blocks/ContactFormBlock";
+import {NewsFeedBlock} from "@/components/blocks/NewsFeedBlock";
 
 type Args = {
   params: Promise<{
@@ -127,6 +129,10 @@ export default async function DynamicPage({ params }: Args) {
             return <ProcessBlock key={index} {...block} />;
           case "cta":
             return <CTABlock key={index} {...block} />;
+          case "contactForm":
+            return <ContactFormBlock key={index} {...block} />;
+          case "newsFeed":
+            return <NewsFeedBlock key={index} {...block} />;
           default:
             return (
               <div key={index} className="p-4 text-center text-red-500">
