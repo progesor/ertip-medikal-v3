@@ -51,12 +51,39 @@ const config = {
     			card: {
     				DEFAULT: 'hsl(var(--card))',
     				foreground: 'hsl(var(--card-foreground))'
-    			}
+    			},
+          brand: {
+            dark: 'hsl(var(--brand-dark))',
+            darker: 'hsl(var(--brand-darker))',
+          },
+          surface: {
+            DEFAULT: 'hsl(var(--surface))',
+            muted: 'hsl(var(--surface-muted))',
+            strong: 'hsl(var(--surface-strong))',
+            stronger: 'hsl(var(--surface-stronger))',
+            subtle: 'hsl(var(--surface-subtle))',
+          },
+          content: {
+            strong: 'hsl(var(--content-strong))',
+            DEFAULT: 'hsl(var(--content))',
+            muted: 'hsl(var(--content-muted))',
+            subtle: 'hsl(var(--content-subtle))',
+            soft: 'hsl(var(--content-soft))',
+          },
+          social: {
+            linkedin: 'hsl(var(--social-linkedin))',
+          },
+          neutral: {
+            darkBorder: 'hsl(var(--neutral-dark-border))',
+          },
     		},
     		borderRadius: {
     			lg: 'var(--radius)',
     			md: 'calc(var(--radius) - 2px)',
-    			sm: 'calc(var(--radius) - 4px)'
+    			sm: 'calc(var(--radius) - 4px)',
+          '4xl': 'var(--radius-4xl)',
+          '5xl': 'var(--radius-5xl)',
+          '6xl': 'var(--radius-6xl)',
     		},
     		keyframes: {
     			'accordion-down': {

@@ -51,10 +51,10 @@ export default async function HomePage() {
   if (!homePage) {
     return (
         <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-10">
-          <h1 className="text-2xl font-bold mb-4 text-slate-400">
+          <h1 className="text-2xl font-bold mb-4 text-content-subtle">
             Anasayfa Yapılandırılmadı
           </h1>
-          <p className="text-slate-500">
+          <p className="text-content-muted">
             Lütfen Payload CMS üzerinden 'home' slug değerine sahip bir sayfa
             oluşturun ve bloklarınızı ekleyin.
           </p>

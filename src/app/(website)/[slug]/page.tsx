@@ -20,9 +20,10 @@ import { ProcessBlock } from "@/components/blocks/ProcessBlock";
 import { CTABlock } from "@/components/blocks/CTABlock";
 import {ContactFormBlock} from "@/components/blocks/ContactFormBlock";
 import {NewsFeedBlock} from "@/components/blocks/NewsFeedBlock";
+import type { RouteParams } from "@/types/next";
 
 type Args = {
-  params: Promise<{
+  params: RouteParams<{
     slug: string;
   }>;
 };

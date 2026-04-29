@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Metadata } from "next";
+import type { NextSearchParams } from "@/types/next";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +32,7 @@ export const metadata: Metadata = {
 };
 
 type Props = {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: NextSearchParams;
 };
 
 export default async function ProductsPage({ searchParams }: Props) {
@@ -118,14 +119,14 @@ export default async function ProductsPage({ searchParams }: Props) {
   };
 
   return (
-    <div className="bg-slate-50 min-h-screen pt-12 pb-24">
+    <div className="bg-surface min-h-screen pt-12 pb-24">
       {/* Üst Başlık */}
-      <div className="bg-slate-900 py-16 mb-12 border-b-4 border-primary">
+      <div className="bg-brand-dark py-16 mb-12 border-b-4 border-primary">
         <div className="container mx-auto px-4 max-w-7xl text-center">
           <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">
             Ürün Kataloğu
           </h1>
-          <p className="text-lg text-slate-300 max-w-2xl mx-auto">
+          <p className="text-lg text-content-soft max-w-2xl mx-auto">
             İhtiyacınız olan medikal cihazı, modeli veya SKU kodunu hızlıca
             bulun.
           </p>
@@ -137,8 +138,8 @@ export default async function ProductsPage({ searchParams }: Props) {
           {/* SOL KENAR: SİDEBAR FİLTRELERİ */}
           <aside className="w-full lg:w-1/4 space-y-8">
             {/* Arama Kutusu */}
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-              <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <div className="bg-white p-6 rounded-3xl shadow-sm border border-surface-strong">
+              <h3 className="font-bold text-content-strong mb-4 flex items-center gap-2">
                 <Search className="w-5 h-5 text-primary" /> Ürün / SKU Ara
               </h3>
               <form action="/urunler" method="GET" className="relative">
@@ -150,7 +151,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                   name="q"
                   defaultValue={q}
                   placeholder="Örn: 110-0625 veya FUE..."
-                  className="w-full pl-4 pr-12 py-3 rounded-xl border border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm font-medium"
+                  className="w-full pl-4 pr-12 py-3 rounded-xl border border-surface-strong focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm font-medium"
                 />
                 <button
                   type="submit"
@@ -162,14 +163,14 @@ export default async function ProductsPage({ searchParams }: Props) {
             </div>
 
             {/* Kategoriler Ağacı (Aynı kaldı) */}
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 sticky top-24">
-              <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <div className="bg-white p-6 rounded-3xl shadow-sm border border-surface-strong sticky top-24">
+              <h3 className="font-bold text-content-strong mb-4 flex items-center gap-2">
                 <LayoutGrid className="w-5 h-5 text-primary" /> Kategoriler
               </h3>
               <div className="space-y-1.5">
                 <Link
                   href={`/urunler${q ? `?q=${q}` : ""}`}
-                  className={`block px-4 py-3 rounded-xl text-sm font-bold transition-all ${!categorySlug ? "bg-primary text-white shadow-md shadow-primary/20" : "text-slate-600 hover:bg-slate-100"}`}
+                  className={`block px-4 py-3 rounded-xl text-sm font-bold transition-all ${!categorySlug ? "bg-primary text-white shadow-md shadow-primary/20" : "text-content hover:bg-surface-muted"}`}
                 >
                   Tüm Ürünler
                 </Link>
@@ -186,20 +187,20 @@ export default async function ProductsPage({ searchParams }: Props) {
                     <div key={parent.id} className="pt-1">
                       <Link
                         href={`/urunler?category=${parent.slug}${q ? `&q=${q}` : ""}`}
-                        className={`block px-4 py-3 rounded-xl text-sm font-bold transition-all ${isParentActive ? "bg-primary text-white shadow-md shadow-primary/20" : isExpanded ? "text-primary bg-primary/5" : "text-slate-600 hover:bg-slate-100"}`}
+                        className={`block px-4 py-3 rounded-xl text-sm font-bold transition-all ${isParentActive ? "bg-primary text-white shadow-md shadow-primary/20" : isExpanded ? "text-primary bg-primary/5" : "text-content hover:bg-surface-muted"}`}
                       >
                         {parent.title}
                       </Link>
 
                       {children.length > 0 && (
-                        <div className="ml-5 mt-1.5 mb-3 space-y-1 border-l-2 border-slate-100 pl-3">
+                        <div className="ml-5 mt-1.5 mb-3 space-y-1 border-l-2 border-surface-muted pl-3">
                           {children.map((child: any) => {
                             const isCurrentChild = categorySlug === child.slug;
                             return (
                               <Link
                                 key={child.id}
                                 href={`/urunler?category=${child.slug}${q ? `&q=${q}` : ""}`}
-                                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${isCurrentChild ? "text-primary bg-primary/10 font-bold" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"}`}
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${isCurrentChild ? "text-primary bg-primary/10 font-bold" : "text-content-muted hover:text-content-strong hover:bg-surface-muted"}`}
                               >
                                 <CornerDownRight
                                   className={`w-3.5 h-3.5 ${isCurrentChild ? "text-primary" : "opacity-40"}`}
@@ -220,10 +221,10 @@ export default async function ProductsPage({ searchParams }: Props) {
           {/* SAĞ KENAR: ÜRÜN LİSTESİ VE ÇİPLER */}
           <main className="w-full lg:w-3/4">
             {/* Üst Bilgi Barı */}
-            <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-              <p className="text-sm text-slate-500 font-medium">
+            <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-surface-strong shadow-sm">
+              <p className="text-sm text-content-muted font-medium">
                 Toplam{" "}
-                <strong className="text-slate-900 text-base">
+                <strong className="text-content-strong text-base">
                   {totalDocs}
                 </strong>{" "}
                 ürün bulundu. (Sayfa {currentPage}/{totalPages || 1})
@@ -235,7 +236,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                   {q && (
                     <Link
                       href={`/urunler${categorySlug ? `?category=${categorySlug}` : ""}`}
-                      className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-red-600 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
+                      className="inline-flex items-center gap-1.5 bg-surface-muted hover:bg-red-50 text-content hover:text-red-600 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
                     >
                       Arama: "{q}" <X className="w-3.5 h-3.5" />
                     </Link>
@@ -251,7 +252,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                   )}
                   <Link
                     href="/urunler"
-                    className="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-900 px-2 py-1.5 text-xs font-bold transition-colors ml-2 underline"
+                    className="inline-flex items-center gap-1.5 text-content-subtle hover:text-content-strong px-2 py-1.5 text-xs font-bold transition-colors ml-2 underline"
                   >
                     Tümünü Temizle
                   </Link>
@@ -261,14 +262,14 @@ export default async function ProductsPage({ searchParams }: Props) {
 
             {/* İçerik: Boş Durum veya Izgara */}
             {products.length === 0 ? (
-              <div className="bg-white p-16 rounded-[2rem] border border-slate-200 shadow-sm text-center flex flex-col items-center justify-center min-h-[400px]">
-                <div className="w-20 h-20 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mb-6">
+              <div className="bg-white p-16 rounded-4xl border border-surface-strong shadow-sm text-center flex flex-col items-center justify-center min-h-[400px]">
+                <div className="w-20 h-20 bg-surface text-content-soft rounded-full flex items-center justify-center mb-6">
                   <PackageX className="w-10 h-10" />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-2">
+                <h3 className="text-2xl font-bold text-content-strong mb-2">
                   Sonuç Bulunamadı
                 </h3>
-                <p className="text-slate-500 mb-8 max-w-md">
+                <p className="text-content-muted mb-8 max-w-md">
                   Aradığınız kriterlere uygun ürün veya SKU kodu sistemimizde
                   bulunmuyor. Farklı kelimelerle aramayı deneyebilirsiniz.
                 </p>
@@ -289,11 +290,11 @@ export default async function ProductsPage({ searchParams }: Props) {
                     return (
                       <Card
                         key={product.id}
-                        className="group overflow-hidden rounded-[2rem] border-slate-200 shadow-sm hover:shadow-xl hover:border-primary/20 transition-all duration-300 flex flex-col bg-white"
+                        className="group overflow-hidden rounded-4xl border-surface-strong shadow-sm hover:shadow-xl hover:border-primary/20 transition-all duration-300 flex flex-col bg-white"
                       >
                         <Link
                           href={`/urunler/${product.slug}`}
-                          className="relative aspect-square bg-slate-50 p-6 flex items-center justify-center overflow-hidden"
+                          className="relative aspect-square bg-surface p-6 flex items-center justify-center overflow-hidden"
                         >
                           <Image
                             src={imageUrl}
@@ -304,7 +305,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                           />
                           <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
                             {product.sku && (
-                              <span className="bg-white text-slate-600 text-[10px] px-2.5 py-1 rounded-md font-mono font-bold shadow-sm border border-slate-100">
+                              <span className="bg-white text-content text-[10px] px-2.5 py-1 rounded-md font-mono font-bold shadow-sm border border-surface-muted">
                                 {product.sku}
                               </span>
                             )}
@@ -320,20 +321,20 @@ export default async function ProductsPage({ searchParams }: Props) {
                           <CardTitle className="text-lg line-clamp-2 leading-snug font-bold">
                             <Link
                               href={`/urunler/${product.slug}`}
-                              className="hover:text-primary transition-colors text-slate-900"
+                              className="hover:text-primary transition-colors text-content-strong"
                             >
                               {product.title}
                             </Link>
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="flex-1 pb-4">
-                          <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed">
+                          <p className="text-sm text-content-muted line-clamp-2 leading-relaxed">
                             {product.shortDescription}
                           </p>
                         </CardContent>
                         <CardFooter className="pt-0 pb-6 px-6">
                           <Button
-                            className="w-full rounded-xl font-bold bg-slate-900 hover:bg-primary transition-colors"
+                            className="w-full rounded-xl font-bold bg-brand-dark hover:bg-primary transition-colors"
                             asChild
                           >
                             <Link href={`/urunler/${product.slug}`}>
@@ -353,18 +354,18 @@ export default async function ProductsPage({ searchParams }: Props) {
                     {hasPrevPage ? (
                       <Link
                         href={buildPageUrl(prevPage!)}
-                        className="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all shadow-sm bg-white"
+                        className="w-10 h-10 flex items-center justify-center rounded-xl border border-surface-strong text-content hover:border-primary hover:text-primary hover:bg-primary/5 transition-all shadow-sm bg-white"
                       >
                         <ChevronLeft className="w-5 h-5" />
                       </Link>
                     ) : (
-                      <div className="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-100 text-slate-300 bg-slate-50 cursor-not-allowed">
+                      <div className="w-10 h-10 flex items-center justify-center rounded-xl border border-surface-muted text-content-soft bg-surface cursor-not-allowed">
                         <ChevronLeft className="w-5 h-5" />
                       </div>
                     )}
 
                     {/* Sayfa Numaraları */}
-                    <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-2 h-10 shadow-sm">
+                    <div className="flex items-center gap-2 bg-white border border-surface-strong rounded-xl px-2 h-10 shadow-sm">
                       {Array.from({ length: totalPages }, (_, i) => i + 1).map(
                         (pageNum) => (
                           <Link
@@ -373,7 +374,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                             className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-bold transition-all ${
                               currentPage === pageNum
                                 ? "bg-primary text-white shadow-md shadow-primary/20"
-                                : "text-slate-600 hover:bg-slate-100"
+                                : "text-content hover:bg-surface-muted"
                             }`}
                           >
                             {pageNum}
@@ -386,12 +387,12 @@ export default async function ProductsPage({ searchParams }: Props) {
                     {hasNextPage ? (
                       <Link
                         href={buildPageUrl(nextPage!)}
-                        className="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all shadow-sm bg-white"
+                        className="w-10 h-10 flex items-center justify-center rounded-xl border border-surface-strong text-content hover:border-primary hover:text-primary hover:bg-primary/5 transition-all shadow-sm bg-white"
                       >
                         <ChevronRight className="w-5 h-5" />
                       </Link>
                     ) : (
-                      <div className="w-10 h-10 flex items-center justify-center rounded-xl border border-slate-100 text-slate-300 bg-slate-50 cursor-not-allowed">
+                      <div className="w-10 h-10 flex items-center justify-center rounded-xl border border-surface-muted text-content-soft bg-surface cursor-not-allowed">
                         <ChevronRight className="w-5 h-5" />
                       </div>
                     )}

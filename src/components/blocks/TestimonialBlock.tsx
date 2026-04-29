@@ -11,7 +11,7 @@ export function TestimonialBlock({ title, testimonials }: any) {
       <div className="container mx-auto px-4 max-w-7xl">
         {title && (
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
+            <h2 className="text-3xl md:text-4xl font-extrabold text-content-strong tracking-tight">
               {title}
             </h2>
             <div className="w-16 h-1.5 bg-primary mx-auto mt-4 rounded-full" />
@@ -28,14 +28,14 @@ export function TestimonialBlock({ title, testimonials }: any) {
             return (
               <Card
                 key={index}
-                className="relative border-none bg-slate-50 rounded-[2.5rem] p-4 group hover:bg-slate-100 transition-colors duration-300"
+                className="relative border-none bg-surface rounded-5xl p-4 group hover:bg-surface-muted transition-colors duration-300"
               >
                 <CardContent className="pt-10 pb-8 px-8">
                   {/* Dekoratif Tırnak İkonu */}
                   <Quote className="absolute top-8 left-8 w-10 h-10 text-primary/10 group-hover:text-primary/20 transition-colors" />
 
                   <blockquote className="relative z-10">
-                    <p className="text-lg text-slate-700 leading-relaxed italic mb-8">
+                    <p className="text-lg text-content leading-relaxed italic mb-8">
                       "{item.content}"
                     </p>
 
@@ -56,11 +56,11 @@ export function TestimonialBlock({ title, testimonials }: any) {
                         </div>
                       )}
                       <div>
-                        <cite className="not-italic font-bold text-slate-900 block text-lg">
+                        <cite className="not-italic font-bold text-content-strong block text-lg">
                           {item.name}
                         </cite>
                         {/* Eğer ünvan alanı eklenirse buraya gelebilir */}
-                        <span className="text-sm text-slate-500 font-medium lowercase">
+                        <span className="text-sm text-content-muted font-medium lowercase">
                           Referans
                         </span>
                       </div>

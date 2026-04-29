@@ -123,15 +123,15 @@ export function ProductView({ product }: any) {
 
     if (mode === "sidebar") {
       return (
-        <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 space-y-4">
-          <h4 className="font-bold flex items-center gap-2 text-md text-slate-900">
+        <div className="bg-surface p-6 rounded-4xl border border-surface-muted space-y-4">
+          <h4 className="font-bold flex items-center gap-2 text-md text-content-strong">
             <Ruler className="text-primary w-4 h-4" /> Net Ürün Boyutları
           </h4>
           <ul className="space-y-2 text-sm">
             {(product.width || product.height || product.depth) && (
-              <li className="flex justify-between border-b border-slate-200 pb-2">
-                <span className="text-slate-500">Ölçüler (G-Y-D):</span>
-                <strong className="text-slate-900">
+              <li className="flex justify-between border-b border-surface-strong pb-2">
+                <span className="text-content-muted">Ölçüler (G-Y-D):</span>
+                <strong className="text-content-strong">
                   {product.width || "-"}x{product.height || "-"}x
                   {product.depth || "-"} mm
                 </strong>
@@ -139,8 +139,8 @@ export function ProductView({ product }: any) {
             )}
             {product.weight && (
               <li className="flex justify-between pt-1">
-                <span className="text-slate-500">Net Ağırlık:</span>
-                <strong className="text-slate-900">{product.weight} gr</strong>
+                <span className="text-content-muted">Net Ağırlık:</span>
+                <strong className="text-content-strong">{product.weight} gr</strong>
               </li>
             )}
           </ul>
@@ -150,7 +150,7 @@ export function ProductView({ product }: any) {
 
     return (
       <div className="space-y-4">
-        <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+        <h3 className="text-xl font-bold text-content-strong flex items-center gap-2">
           <div className="w-1.5 h-6 bg-primary rounded-full" /> Ürün Boyut ve
           Ağırlığı (Net)
         </h3>
@@ -165,14 +165,14 @@ export function ProductView({ product }: any) {
               item.value && (
                 <div
                   key={idx}
-                  className="bg-white border border-slate-100 p-5 rounded-2xl shadow-sm"
+                  className="bg-white border border-surface-muted p-5 rounded-2xl shadow-sm"
                 >
-                  <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">
+                  <p className="text-xs text-content-subtle font-bold uppercase tracking-wider mb-1">
                     {item.label}
                   </p>
-                  <p className="text-lg font-black text-slate-900">
+                  <p className="text-lg font-black text-content-strong">
                     {item.value}{" "}
-                    <span className="text-sm font-normal text-slate-500">
+                    <span className="text-sm font-normal text-content-muted">
                       {item.unit}
                     </span>
                   </p>
@@ -189,26 +189,26 @@ export function ProductView({ product }: any) {
 
     if (mode === "sidebar") {
       return (
-        <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 space-y-4">
-          <h4 className="font-bold flex items-center gap-2 text-md text-slate-900">
+        <div className="bg-surface p-6 rounded-4xl border border-surface-muted space-y-4">
+          <h4 className="font-bold flex items-center gap-2 text-md text-content-strong">
             <PackageOpen className="text-primary w-4 h-4" /> Lojistik Bilgisi
           </h4>
           <div className="space-y-3">
             {product.packaging.map((p: any, i: number) => (
               <div
                 key={i}
-                className="text-sm border-b border-slate-200 pb-3 last:border-0 last:pb-0"
+                className="text-sm border-b border-surface-strong pb-3 last:border-0 last:pb-0"
               >
-                <p className="font-bold text-slate-800 mb-1">
+                <p className="font-bold text-content-strong mb-1">
                   {p.packageLabel}{" "}
                   <span className="text-primary">({p.quantity} Adet)</span>
                 </p>
-                <p className="text-slate-500 text-xs">
+                <p className="text-content-muted text-xs">
                   Boyut: {p.p_width}x{p.p_height}x{p.p_depth} cm
                 </p>
-                <p className="text-slate-500 text-xs mt-0.5">
+                <p className="text-content-muted text-xs mt-0.5">
                   Brüt Ağırlık:{" "}
-                  <strong className="text-slate-700">{p.grossWeight} kg</strong>
+                  <strong className="text-content">{p.grossWeight} kg</strong>
                 </p>
               </div>
             ))}
@@ -219,41 +219,41 @@ export function ProductView({ product }: any) {
 
     return (
       <div className="space-y-4 mt-10">
-        <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+        <h3 className="text-xl font-bold text-content-strong flex items-center gap-2">
           <div className="w-1.5 h-6 bg-primary rounded-full" /> Lojistik ve
           Ambalaj Bilgileri
         </h3>
-        <div className="overflow-hidden rounded-[2rem] border border-slate-100 shadow-sm">
+        <div className="overflow-hidden rounded-4xl border border-surface-muted shadow-sm">
           <table className="w-full text-left border-collapse text-sm">
-            <thead className="bg-slate-50 border-b border-slate-100">
+            <thead className="bg-surface border-b border-surface-muted">
               <tr>
-                <th className="px-6 py-4 font-bold text-slate-900">
+                <th className="px-6 py-4 font-bold text-content-strong">
                   Paketleme Formu
                 </th>
-                <th className="px-6 py-4 font-bold text-slate-900">
+                <th className="px-6 py-4 font-bold text-content-strong">
                   İçerik Adedi
                 </th>
-                <th className="px-6 py-4 font-bold text-slate-900">
+                <th className="px-6 py-4 font-bold text-content-strong">
                   Ölçüler (cm)
                 </th>
-                <th className="px-6 py-4 font-bold text-slate-900">
+                <th className="px-6 py-4 font-bold text-content-strong">
                   Brüt Ağırlık
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {product.packaging.map((p: any, i: number) => (
-                <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="px-6 py-4 font-bold text-slate-800">
+                <tr key={i} className="hover:bg-surface-subtle transition-colors">
+                  <td className="px-6 py-4 font-bold text-content-strong">
                     {p.packageLabel}
                   </td>
-                  <td className="px-6 py-4 text-slate-600">
+                  <td className="px-6 py-4 text-content">
                     {p.quantity} Adet
                   </td>
-                  <td className="px-6 py-4 font-mono text-slate-500">
+                  <td className="px-6 py-4 font-mono text-content-muted">
                     {p.p_width}x{p.p_height}x{p.p_depth}
                   </td>
-                  <td className="px-6 py-4 text-slate-900 font-bold">
+                  <td className="px-6 py-4 text-content-strong font-bold">
                     {p.grossWeight} kg
                   </td>
                 </tr>
@@ -269,16 +269,16 @@ export function ProductView({ product }: any) {
     <div className="container mx-auto px-4 max-w-7xl pt-12 relative">
       {/* GÖRÜNTÜLEYİCİ MODAL */}
       {verifiedDoc && (
-        <div className="fixed inset-0 z-[100] flex flex-col bg-slate-900/95 backdrop-blur-md p-2 sm:p-8">
+        <div className="fixed inset-0 z-[100] flex flex-col bg-brand-dark/95 backdrop-blur-md p-2 sm:p-8">
           <div className="bg-white flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-t-3xl max-w-6xl w-full mx-auto shadow-2xl gap-4">
             <div className="flex flex-col gap-1">
-              <h3 className="font-bold text-slate-900 flex items-center gap-2 line-clamp-1">
+              <h3 className="font-bold text-content-strong flex items-center gap-2 line-clamp-1">
                 <FileText className="w-5 h-5 text-primary shrink-0" />{" "}
                 {verifiedDoc.label}
               </h3>
               {/* YENİ: Bilgilendirme Notu */}
-              <p className="text-[10px] md:text-xs text-slate-400 flex items-center gap-1.5 italic">
-                <Info className="w-3 h-3 text-slate-400" />
+              <p className="text-[10px] md:text-xs text-content-subtle flex items-center gap-1.5 italic">
+                <Info className="w-3 h-3 text-content-subtle" />
                 Dosyayı cihazınıza kaydetmek için İndir butonuna sağ tıklayıp
                 "Bağlantıyı farklı kaydet" seçeneğini kullanabilirsiniz.
               </p>
@@ -306,7 +306,7 @@ export function ProductView({ product }: any) {
           </div>
 
           {/* Tarayıcı içi Görüntüleyici (iframe) */}
-          <div className="bg-slate-200 flex-1 max-w-6xl w-full mx-auto rounded-b-3xl overflow-hidden shadow-2xl relative">
+          <div className="bg-surface-strong flex-1 max-w-6xl w-full mx-auto rounded-b-3xl overflow-hidden shadow-2xl relative">
             <iframe
               src={`${verifiedDoc.url}#toolbar=0`}
               className="w-full h-full border-none"
@@ -329,14 +329,14 @@ export function ProductView({ product }: any) {
               <AlertCircle className="w-5 h-5" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-bold text-slate-900">
+              <p className="text-sm font-bold text-content-strong">
                 Erişim Reddedildi
               </p>
-              <p className="text-xs text-slate-500">{verifyError}</p>
+              <p className="text-xs text-content-muted">{verifyError}</p>
             </div>
             <button
               onClick={() => setVerifyError(null)}
-              className="text-slate-400 hover:text-slate-900 p-1"
+              className="text-content-subtle hover:text-content-strong p-1"
             >
               <X className="w-4 h-4" />
             </button>
@@ -346,13 +346,12 @@ export function ProductView({ product }: any) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-20">
         <div className="space-y-4">
-          <div className="relative aspect-square rounded-[3rem] overflow-hidden bg-slate-50 border border-slate-100 p-12">
+          <div className="relative aspect-square rounded-6xl overflow-hidden bg-surface border border-surface-muted p-12">
             <Image
               src={product.mainImage?.url || "/placeholder.jpg"}
               alt={product.title}
               fill
               className="object-contain p-8"
-              unoptimized
             />
           </div>
           {product.gallery && product.gallery.length > 0 && (
@@ -360,14 +359,13 @@ export function ProductView({ product }: any) {
               {product.gallery.map((item: any, i: number) => (
                 <div
                   key={i}
-                  className="relative aspect-square rounded-2xl overflow-hidden bg-slate-50 border border-slate-100 cursor-pointer hover:border-primary transition-colors"
+                  className="relative aspect-square rounded-2xl overflow-hidden bg-surface border border-surface-muted cursor-pointer hover:border-primary transition-colors"
                 >
                   <Image
                     src={item.image?.url}
                     alt={product.title}
                     fill
                     className="object-contain p-2"
-                    unoptimized
                   />
                 </div>
               ))}
@@ -377,11 +375,11 @@ export function ProductView({ product }: any) {
 
         <div className="flex flex-col space-y-8">
           <div>
-            <h1 className="text-3xl md:text-4xl font-black text-slate-900 mb-4">
+            <h1 className="text-3xl md:text-4xl font-black text-content-strong mb-4">
               {product.title}
             </h1>
             <div className="flex items-center gap-4">
-              <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-mono font-bold">
+              <span className="bg-surface-muted text-content px-3 py-1 rounded-full text-xs font-mono font-bold">
                 SKU: {currentVariant?.sku || product.sku || "Belirtilmedi"}
               </span>
               <span className="text-primary text-sm font-bold flex items-center gap-1">
@@ -391,7 +389,7 @@ export function ProductView({ product }: any) {
           </div>
 
           {product.shortDescription && (
-            <p className="text-slate-500 leading-relaxed">
+            <p className="text-content-muted leading-relaxed">
               {product.shortDescription}
             </p>
           )}
@@ -404,7 +402,7 @@ export function ProductView({ product }: any) {
                   .map((v: string) => v.trim());
                 return (
                   <div key={i} className="space-y-3">
-                    <label className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+                    <label className="text-sm font-bold text-content-strong uppercase tracking-wider">
                       {attr.name} Seçimi
                     </label>
                     <div className="flex flex-wrap gap-2">
@@ -419,7 +417,7 @@ export function ProductView({ product }: any) {
                           }
                           className={`px-5 py-2.5 rounded-xl text-sm font-bold border transition-all ${selectedAttrs[attr.name] === val
                             ? "bg-primary border-primary text-white shadow-lg shadow-primary/20"
-                            : "bg-white border-slate-200 text-slate-600 hover:border-primary hover:text-primary"
+                            : "bg-white border-surface-strong text-content hover:border-primary hover:text-primary"
                             }`}
                         >
                           {val}
@@ -484,18 +482,18 @@ export function ProductView({ product }: any) {
 
         <TabsContent value="description" className="max-w-none">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
-            <div className="lg:col-span-2 text-slate-700 leading-relaxed space-y-8">
+            <div className="lg:col-span-2 text-content leading-relaxed space-y-8">
               {product.description ? (
                 <div
                   className="prose prose-slate prose-lg max-w-none
-                                    prose-headings:text-slate-900
+                                    prose-headings:text-content-strong
                                     prose-a:text-primary hover:prose-a:text-primary/80
-                                    prose-img:rounded-[2rem] prose-img:border prose-img:border-slate-100
+                                    prose-img:rounded-4xl prose-img:border prose-img:border-surface-muted
                                     prose-table:border-collapse prose-table:w-full
-                                    prose-th:bg-slate-50 prose-th:p-4
-                                    prose-td:p-4 prose-td:border-b prose-td:border-slate-100
+                                    prose-th:bg-surface prose-th:p-4
+                                    prose-td:p-4 prose-td:border-b prose-td:border-surface-muted
 
-                                    prose-code:bg-slate-100 prose-code:text-slate-700
+                                    prose-code:bg-surface-muted prose-code:text-content
                                     prose-code:px-2.5 prose-code:py-1 prose-code:rounded-lg
                                     prose-code:font-mono prose-code:text-sm prose-code:font-bold
                                     prose-code:before:hidden prose-code:after:hidden
@@ -518,13 +516,13 @@ export function ProductView({ product }: any) {
                   )}
                 </div>
               ) : (
-                <p className="italic text-slate-400">
+                <p className="italic text-content-subtle">
                   Bu ürün için detaylı bir açıklama girilmemiştir.
                 </p>
               )}
 
               {(pos === "below" || pos === "both") && (
-                <div className="mt-16 space-y-12 border-t border-slate-100 pt-10">
+                <div className="mt-16 space-y-12 border-t border-surface-muted pt-10">
                   <NetDimensions mode="wide" />
                   <PackagingTable mode="wide" />
                 </div>
@@ -533,7 +531,7 @@ export function ProductView({ product }: any) {
 
             <div className="space-y-6 sticky top-24">
               {product.specs && product.specs.length > 0 && (
-                <div className="bg-slate-50 p-8 rounded-[2rem] border border-slate-100 space-y-6">
+                <div className="bg-surface p-8 rounded-4xl border border-surface-muted space-y-6">
                   <h4 className="font-bold flex items-center gap-2 text-lg">
                     <Info className="text-primary w-5 h-5" /> Temel Özellikler
                   </h4>
@@ -541,10 +539,10 @@ export function ProductView({ product }: any) {
                     {product.specs.map((spec: any, i: number) => (
                       <li
                         key={i}
-                        className="flex justify-between items-center border-b border-slate-200 pb-3 last:border-0 last:pb-0"
+                        className="flex justify-between items-center border-b border-surface-strong pb-3 last:border-0 last:pb-0"
                       >
-                        <span className="text-slate-500">{spec.key}:</span>
-                        <strong className="text-slate-900 text-right max-w-[60%]">
+                        <span className="text-content-muted">{spec.key}:</span>
+                        <strong className="text-content-strong text-right max-w-[60%]">
                           {spec.value}
                         </strong>
                       </li>
@@ -565,17 +563,17 @@ export function ProductView({ product }: any) {
 
         {product.variants && product.variants.length > 0 && (
           <TabsContent value="variants">
-            <div className="overflow-x-auto rounded-[2rem] border border-slate-100 shadow-sm">
+            <div className="overflow-x-auto rounded-4xl border border-surface-muted shadow-sm">
               <table className="w-full text-left border-collapse min-w-[600px]">
-                <thead className="bg-slate-50 border-b border-slate-100">
+                <thead className="bg-surface border-b border-surface-muted">
                   <tr>
-                    <th className="px-6 py-4 font-bold text-slate-900">
+                    <th className="px-6 py-4 font-bold text-content-strong">
                       Varyant Modeli
                     </th>
-                    <th className="px-6 py-4 font-bold text-slate-900">
+                    <th className="px-6 py-4 font-bold text-content-strong">
                       Ürün Kodu (SKU)
                     </th>
-                    <th className="px-6 py-4 font-bold text-slate-900">
+                    <th className="px-6 py-4 font-bold text-content-strong">
                       Durum
                     </th>
                   </tr>
@@ -584,9 +582,9 @@ export function ProductView({ product }: any) {
                   {product.variants.map((v: any, i: number) => (
                     <tr
                       key={i}
-                      className={`hover:bg-slate-50/50 transition-colors ${currentVariant?.sku === v.sku ? "bg-primary/5" : ""}`}
+                      className={`hover:bg-surface-subtle transition-colors ${currentVariant?.sku === v.sku ? "bg-primary/5" : ""}`}
                     >
-                      <td className="px-6 py-4 text-sm font-medium text-slate-700">
+                      <td className="px-6 py-4 text-sm font-medium text-content">
                         {v.title}
                       </td>
                       <td className="px-6 py-4 text-sm font-mono text-primary font-bold">
@@ -608,7 +606,7 @@ export function ProductView({ product }: any) {
         {videoId && (
           <TabsContent value="video" className="pt-4">
             <div className="max-w-4xl mx-auto">
-              <div className="aspect-video w-full rounded-[2rem] overflow-hidden shadow-xl border border-slate-200 bg-black">
+              <div className="aspect-video w-full rounded-4xl overflow-hidden shadow-xl border border-surface-strong bg-black">
                 <iframe
                   width="100%"
                   height="100%"
@@ -627,7 +625,7 @@ export function ProductView({ product }: any) {
         <TabsContent value="docs" className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-4">
-              <h3 className="font-bold text-slate-900 flex items-center gap-2 italic">
+              <h3 className="font-bold text-content-strong flex items-center gap-2 italic">
                 <Info className="w-5 h-5 text-primary" /> Tanıtım Materyalleri
               </h3>
               {product.publicDocs?.map((doc: any, i: number) => (
@@ -635,9 +633,9 @@ export function ProductView({ product }: any) {
                   key={i}
                   href={doc.file.url}
                   target="_blank"
-                  className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-primary transition-all group"
+                  className="flex items-center justify-between p-4 bg-surface rounded-2xl border border-surface-muted hover:border-primary transition-all group"
                 >
-                  <span className="font-medium text-slate-700">
+                  <span className="font-medium text-content">
                     {doc.label}
                   </span>
                   <Button
@@ -652,21 +650,21 @@ export function ProductView({ product }: any) {
             </div>
 
             <div className="space-y-4">
-              <h3 className="font-bold text-slate-900 flex items-center gap-2 italic">
+              <h3 className="font-bold text-content-strong flex items-center gap-2 italic">
                 <Award className="w-5 h-5 text-primary" /> Teknik Dokümantasyon
                 (MDR)
               </h3>
               {product.protectedDocs?.map((doc: any, i: number) => (
                 <div
                   key={i}
-                  className="p-4 bg-white rounded-2xl border-2 border-dashed border-slate-200"
+                  className="p-4 bg-white rounded-2xl border-2 border-dashed border-surface-strong"
                 >
-                  <p className="font-bold text-slate-900 mb-3">{doc.label}</p>
+                  <p className="font-bold text-content-strong mb-3">{doc.label}</p>
                   <div className="flex gap-2 relative">
                     <input
                       type="text"
                       placeholder="Erişim Kodu / Seri No"
-                      className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-sm outline-none focus:border-primary"
+                      className="flex-1 px-3 py-2 rounded-xl border border-surface-strong text-sm outline-none focus:border-primary"
                       onChange={(e) => setManualCode(e.target.value)}
                     />
                     <Button
@@ -677,7 +675,7 @@ export function ProductView({ product }: any) {
                       {isVerifying ? "..." : "Eriş"}
                     </Button>
                   </div>
-                  <p className="text-[10px] text-slate-400 mt-2 italic">
+                  <p className="text-[10px] text-content-subtle mt-2 italic">
                     * Bu belgeye erişiminiz kayıt altına alınmaktadır.
                   </p>
                 </div>

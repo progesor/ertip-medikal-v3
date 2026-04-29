@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
 import configPromise from "@payload-config";
 import { RootPage, generatePageMetadata } from "@payloadcms/next/views";
+import type {
+  PayloadAdminSearchParams,
+  RouteParams,
+} from "@/types/next";
 
 import { importMap } from "../importMap";
 
 type Args = {
-  params: Promise<{
+  params: RouteParams<{
     segments: string[];
   }>;
-  searchParams: Promise<{
-    [key: string]: string | string[];
-  }>;
+  searchParams: PayloadAdminSearchParams;
 };
 
 export const generateMetadata = ({

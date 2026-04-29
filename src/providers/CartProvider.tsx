@@ -123,25 +123,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            className="fixed bottom-8 right-8 z-50 bg-white p-4 rounded-3xl shadow-2xl border border-slate-100 flex items-center gap-4 min-w-[320px] max-w-[400px]"
+            className="fixed bottom-8 right-8 z-50 bg-white p-4 rounded-3xl shadow-2xl border border-surface-muted flex items-center gap-4 min-w-[320px] max-w-[400px]"
           >
-            <div className="w-16 h-16 relative bg-slate-50 rounded-2xl p-1 shrink-0 border border-slate-100">
+            <div className="w-16 h-16 relative bg-surface rounded-2xl p-1 shrink-0 border border-surface-muted">
               <Image
                 src={toast.item.image || "/placeholder.jpg"}
                 alt="Ürün"
                 fill
                 className="object-contain"
-                unoptimized
               />
             </div>
             <div className="flex-1">
               <p className="text-xs font-bold text-green-600 flex items-center gap-1 mb-1">
                 <CheckCircle2 className="w-4 h-4" /> Teklif Listesine Eklendi
               </p>
-              <p className="text-sm font-bold text-slate-900 line-clamp-1">
+              <p className="text-sm font-bold text-content-strong line-clamp-1">
                 {toast.item.title}
               </p>
-              <p className="text-xs text-slate-500 font-mono mt-0.5">
+              <p className="text-xs text-content-muted font-mono mt-0.5">
                 {toast.item.sku}
               </p>
             </div>
@@ -154,7 +153,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             </Link>
             <button
               onClick={() => setToast({ show: false, item: null })}
-              className="absolute -top-2 -right-2 bg-white text-slate-400 hover:text-slate-900 border border-slate-100 rounded-full p-1 shadow-sm"
+              className="absolute -top-2 -right-2 bg-white text-content-subtle hover:text-content-strong border border-surface-muted rounded-full p-1 shadow-sm"
             >
               <X className="w-3 h-3" />
             </button>

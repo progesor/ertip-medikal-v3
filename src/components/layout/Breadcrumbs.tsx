@@ -8,7 +8,7 @@ type BreadcrumbItem = {
 
 export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
   return (
-    <nav className="flex items-center space-x-2 text-sm text-slate-400 mb-8 overflow-x-auto whitespace-nowrap pb-2 md:pb-0">
+    <nav className="flex items-center space-x-2 text-sm text-content-subtle mb-8 overflow-x-auto whitespace-nowrap pb-2 md:pb-0">
       <Link
         href="/"
         className="hover:text-primary transition-colors flex items-center gap-1.5 font-medium"
@@ -28,7 +28,7 @@ export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
               {item.label}
             </Link>
           ) : (
-            <span className="text-slate-900 font-bold truncate max-w-[200px]">
+            <span className="text-content-strong font-bold truncate max-w-[200px]">
               {item.label}
             </span>
           )}

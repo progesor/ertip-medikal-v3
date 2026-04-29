@@ -28,7 +28,6 @@ export function ProductGallery({ images }: { images: ImageType[] }) {
           className="object-contain p-4"
           sizes="(max-width: 1024px) 100vw, 50vw"
           priority
-          unoptimized
         />
       </div>
 
@@ -51,7 +50,6 @@ export function ProductGallery({ images }: { images: ImageType[] }) {
                 alt={img.alt || "Küçük Görsel"}
                 fill
                 className="object-cover"
-                unoptimized
               />
             </button>
           ))}

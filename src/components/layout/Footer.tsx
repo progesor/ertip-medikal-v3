@@ -25,7 +25,7 @@ export async function Footer() {
   const gridClass = gridClasses[columnCount as number] || "lg:grid-cols-4";
 
   return (
-    <footer className="bg-slate-950 text-slate-300 pt-20 pb-10 border-t border-slate-900">
+    <footer className="bg-brand-darker text-content-soft pt-20 pb-10 border-t border-brand-dark">
       <div className="container mx-auto px-4">
         {/* Sütun sayısına göre kendini ayarlayan akıllı grid */}
         <div
@@ -51,7 +51,7 @@ export async function Footer() {
                         />
                       </Link>
                     )}
-                    <p className="text-sm leading-relaxed text-slate-400 max-w-sm">
+                    <p className="text-sm leading-relaxed text-content-subtle max-w-sm">
                       {column.text}
                     </p>
                   </div>
@@ -113,8 +113,8 @@ export async function Footer() {
         </div>
 
         {/* Alt Bar: Copyright, Yasal Linkler ve Sosyal Medya */}
-        <div className="mt-16 pt-8 border-t border-slate-900">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 text-sm text-slate-500">
+        <div className="mt-16 pt-8 border-t border-brand-dark">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 text-sm text-content-muted">
             {/* Sol: Copyright ve Yasal Linkler */}
             <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8 text-center md:text-left">
               <p>{footer?.copyright}</p>
@@ -143,7 +143,7 @@ export async function Footer() {
                     href={social.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-slate-400 hover:text-white transition-all duration-300 font-medium flex items-center gap-2 group"
+                    className="text-content-subtle hover:text-white transition-all duration-300 font-medium flex items-center gap-2 group"
                   >
                     {/* Platform isminin yanında küçük bir nokta veya çizgi dekoru */}
                     <span className="w-1 h-1 bg-primary rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />

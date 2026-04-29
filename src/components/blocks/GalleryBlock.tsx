@@ -11,14 +11,14 @@ export function GalleryBlock({ title, images }: any) {
   if (!images || images.length === 0) return null;
 
   return (
-    <section className="py-24 bg-slate-50">
+    <section className="py-24 bg-surface">
       <div className="container mx-auto px-4 max-w-7xl">
         {title && (
           <div className="flex flex-col md:flex-row items-baseline justify-between mb-12 gap-4">
-            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
+            <h2 className="text-3xl md:text-4xl font-extrabold text-content-strong tracking-tight">
               {title}
             </h2>
-            <p className="text-slate-500 font-medium">
+            <p className="text-content-muted font-medium">
               Görsellere tıklayarak detaylı inceleyebilirsiniz
             </p>
           </div>
@@ -35,7 +35,7 @@ export function GalleryBlock({ title, images }: any) {
             return (
               <div
                 key={index}
-                className="relative break-inside-avoid rounded-[2rem] overflow-hidden group bg-white shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer"
+                className="relative break-inside-avoid rounded-4xl overflow-hidden group bg-white shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer"
                 onClick={() => setSelectedImage(imgUrl)} // Tıklanınca resmi state'e at
               >
                 {/* Resim Overlay (Hover Efekti) */}
@@ -51,7 +51,6 @@ export function GalleryBlock({ title, images }: any) {
                   width={item.image?.width || 800}
                   height={item.image?.height || 600}
                   className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-110"
-                  unoptimized
                 />
               </div>
             );
@@ -62,7 +61,7 @@ export function GalleryBlock({ title, images }: any) {
       {/* Tam Ekran Lightbox (Pop-up) Modülü */}
       {selectedImage && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/95 backdrop-blur-sm p-4 md:p-8"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-brand-dark/95 backdrop-blur-sm p-4 md:p-8"
           onClick={() => setSelectedImage(null)} // Siyah alana tıklayınca kapat
         >
           {/* Kapatma Butonu */}
@@ -84,7 +83,6 @@ export function GalleryBlock({ title, images }: any) {
               width={1920}
               height={1080}
               className="w-full h-auto max-h-[85vh] object-contain rounded-lg shadow-2xl"
-              unoptimized
             />
           </div>
         </div>

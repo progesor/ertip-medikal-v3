@@ -22,8 +22,8 @@ export function NewsGridClient({ initialNews, categories, showFilters }: any) {
         <div>
             {/* Kategori Filtreleri */}
             {showFilters && categories?.length > 0 && (
-                <div className="flex flex-wrap items-center justify-center gap-3 mb-12 bg-slate-50 p-4 rounded-3xl border border-slate-100">
-          <span className="text-sm font-semibold text-slate-500 mr-2 flex items-center gap-2">
+                <div className="flex flex-wrap items-center justify-center gap-3 mb-12 bg-surface p-4 rounded-3xl border border-surface-muted">
+          <span className="text-sm font-semibold text-content-muted mr-2 flex items-center gap-2">
             <SlidersHorizontal className="w-4 h-4" /> Filtrele:
           </span>
                     <button
@@ -31,7 +31,7 @@ export function NewsGridClient({ initialNews, categories, showFilters }: any) {
                         className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
                             activeCategory === null
                                 ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105"
-                                : "bg-white text-slate-600 hover:bg-slate-200 border border-slate-200"
+                                : "bg-white text-content hover:bg-surface-strong border border-surface-strong"
                         }`}
                     >
                         Tümü
@@ -43,7 +43,7 @@ export function NewsGridClient({ initialNews, categories, showFilters }: any) {
                             className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
                                 activeCategory === cat.id
                                     ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105"
-                                    : "bg-white text-slate-600 hover:bg-slate-200 border border-slate-200"
+                                    : "bg-white text-content hover:bg-surface-strong border border-surface-strong"
                             }`}
                         >
                             {cat.title}
@@ -54,8 +54,8 @@ export function NewsGridClient({ initialNews, categories, showFilters }: any) {
 
             {/* Haber Kartları Grid'i */}
             {filteredNews.length === 0 ? (
-                <div className="text-center py-24 bg-slate-50 rounded-3xl border border-dashed border-slate-300">
-                    <p className="text-xl text-slate-500 font-medium mb-4">
+                <div className="text-center py-24 bg-surface rounded-3xl border border-dashed border-surface-stronger">
+                    <p className="text-xl text-content-muted font-medium mb-4">
                         Bu kategoriye ait bir haber bulunamadı.
                     </p>
                     <button
@@ -73,7 +73,7 @@ export function NewsGridClient({ initialNews, categories, showFilters }: any) {
                         const categoryTitle = typeof item.category === "object" ? item.category?.title : null;
 
                         return (
-                            <Card key={item.id} className="group overflow-hidden rounded-[2rem] border-0 bg-white shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 flex flex-col">
+                            <Card key={item.id} className="group overflow-hidden rounded-4xl border-0 bg-white shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 flex flex-col">
                                 <Link href={`/haberler/${item.slug || item.id}`} className="relative block aspect-[16/9] overflow-hidden">
                                     <Image
                                         src={imageUrl}
@@ -81,7 +81,6 @@ export function NewsGridClient({ initialNews, categories, showFilters }: any) {
                                         fill
                                         className="object-cover transition-transform duration-700 group-hover:scale-105"
                                         sizes="(max-width: 768px) 100vw, 33vw"
-                                        unoptimized
                                     />
                                     {categoryTitle && (
                                         <div className="absolute top-4 left-4 z-10">
@@ -94,7 +93,7 @@ export function NewsGridClient({ initialNews, categories, showFilters }: any) {
                                 </Link>
 
                                 <CardContent className="p-8 flex flex-col flex-grow">
-                                    <div className="flex items-center gap-2 text-sm text-slate-500 mb-4 font-bold">
+                                    <div className="flex items-center gap-2 text-sm text-content-muted mb-4 font-bold">
                                         <CalendarDays className="w-4 h-4 text-primary" />
                                         <time>{formattedDate}</time>
                                     </div>
@@ -102,7 +101,7 @@ export function NewsGridClient({ initialNews, categories, showFilters }: any) {
                                         <Link href={`/haberler/${item.slug || item.id}`}>{item.title}</Link>
                                     </h3>
                                     {item.excerpt && (
-                                        <p className="text-slate-500 line-clamp-2 mb-8 text-base leading-relaxed flex-grow">
+                                        <p className="text-content-muted line-clamp-2 mb-8 text-base leading-relaxed flex-grow">
                                             {item.excerpt}
                                         </p>
                                     )}

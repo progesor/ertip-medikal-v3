@@ -5,11 +5,11 @@ export function LocationBlock({ title, locations }: any) {
     if (!locations || locations.length === 0) return null;
 
     return (
-        <section className="py-24 bg-slate-50/50">
+        <section className="py-24 bg-surface-subtle">
             <div className="container mx-auto px-4 max-w-7xl">
                 {title && (
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">{title}</h2>
+                        <h2 className="text-3xl md:text-5xl font-black text-content-strong tracking-tight">{title}</h2>
                         <div className="w-20 h-1.5 bg-primary mx-auto mt-6 rounded-full" />
                     </div>
                 )}
@@ -17,43 +17,43 @@ export function LocationBlock({ title, locations }: any) {
                 {/* Çoklu Lokasyon Izgarası (Grid) */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {locations.map((loc: any, i: number) => (
-                        <div key={i} className="flex flex-col bg-white rounded-[2.5rem] shadow-sm hover:shadow-xl transition-shadow border border-slate-200 overflow-hidden">
+                        <div key={i} className="flex flex-col bg-white rounded-5xl shadow-sm hover:shadow-xl transition-shadow border border-surface-strong overflow-hidden">
 
                             {/* Harita Alanı (Üstte) */}
-                            <div className="h-64 w-full bg-slate-200 relative border-b border-slate-100">
+                            <div className="h-64 w-full bg-surface-strong relative border-b border-surface-muted">
                                 {loc.mapUrl ? (
                                     <iframe src={loc.mapUrl} className="w-full h-full border-none" allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
                                 ) : (
-                                    <div className="absolute inset-0 flex items-center justify-center text-slate-400">Harita Yüklenmedi</div>
+                                    <div className="absolute inset-0 flex items-center justify-center text-content-subtle">Harita Yüklenmedi</div>
                                 )}
                             </div>
 
                             {/* İletişim Detayları (Altta) */}
                             <div className="p-8 md:p-12 flex-1 flex flex-col justify-center">
-                                <h3 className="text-2xl font-extrabold text-slate-900 mb-6">{loc.title}</h3>
+                                <h3 className="text-2xl font-extrabold text-content-strong mb-6">{loc.title}</h3>
                                 <div className="space-y-5">
                                     {loc.address && (
                                         <div className="flex items-start gap-4">
                                             <MapPin className="w-6 h-6 text-primary shrink-0 mt-1" />
-                                            <p className="text-slate-600 leading-relaxed">{loc.address}</p>
+                                            <p className="text-content leading-relaxed">{loc.address}</p>
                                         </div>
                                     )}
                                     {loc.phone && (
                                         <div className="flex items-center gap-4">
                                             <Phone className="w-6 h-6 text-primary shrink-0" />
-                                            <p className="text-slate-600 font-medium">{loc.phone}</p>
+                                            <p className="text-content font-medium">{loc.phone}</p>
                                         </div>
                                     )}
                                     {loc.email && (
                                         <div className="flex items-center gap-4">
                                             <Mail className="w-6 h-6 text-primary shrink-0" />
-                                            <p className="text-slate-600 font-medium">{loc.email}</p>
+                                            <p className="text-content font-medium">{loc.email}</p>
                                         </div>
                                     )}
                                     {loc.workingHours && (
                                         <div className="flex items-center gap-4">
                                             <Clock className="w-6 h-6 text-primary shrink-0" />
-                                            <p className="text-slate-600 font-medium">{loc.workingHours}</p>
+                                            <p className="text-content font-medium">{loc.workingHours}</p>
                                         </div>
                                     )}
                                 </div>

@@ -15,7 +15,7 @@ export function FAQBlock({ title, questions }: any) {
             <AccordionTrigger className="text-left font-semibold">
               {item.question}
             </AccordionTrigger>
-            <AccordionContent className="text-slate-600 leading-relaxed">
+            <AccordionContent className="text-content leading-relaxed">
               {item.answer}
             </AccordionContent>
           </AccordionItem>

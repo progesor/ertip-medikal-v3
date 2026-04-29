@@ -15,7 +15,7 @@ export function CTABlock({
   return (
     <section className="py-12 container mx-auto px-4">
       <div
-        className={`rounded-[3rem] p-12 md:p-20 text-center space-y-8 shadow-2xl relative overflow-hidden ${isDark ? "bg-slate-950 text-white" : "bg-primary text-white"}`}
+        className={`rounded-6xl p-12 md:p-20 text-center space-y-8 shadow-2xl relative overflow-hidden ${isDark ? "bg-brand-darker text-white" : "bg-primary text-white"}`}
       >
         <div className="relative z-10 space-y-6">
           <h2 className="text-3xl md:text-5xl font-black tracking-tight max-w-4xl mx-auto">
@@ -30,7 +30,7 @@ export function CTABlock({
             <Button
               size="lg"
               variant="secondary"
-              className="rounded-full px-10 h-14 text-lg font-bold bg-white text-primary hover:bg-slate-100"
+              className="rounded-full px-10 h-14 text-lg font-bold bg-white text-primary hover:bg-surface-muted"
               asChild
             >
               <Link href={buttonLink}>

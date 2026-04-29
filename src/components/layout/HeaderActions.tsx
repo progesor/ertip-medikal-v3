@@ -31,11 +31,11 @@ export function HeaderActions() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Ürün veya SKU Ara..."
-          className="w-full bg-slate-50 border border-slate-200 text-sm rounded-full pl-4 pr-10 py-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+          className="w-full bg-surface border border-surface-strong text-sm rounded-full pl-4 pr-10 py-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
         />
         <button
           type="submit"
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-content-subtle hover:text-primary"
         >
           <Search className="w-4 h-4" />
         </button>
@@ -44,7 +44,7 @@ export function HeaderActions() {
       {/* SEPET İKONU (Bildirimli) */}
       <Link
         href="/teklif-sepeti"
-        className="relative p-2 text-slate-600 hover:text-primary transition-colors"
+        className="relative p-2 text-content hover:text-primary transition-colors"
       >
         <ShoppingCart className="w-6 h-6" />
         {cartItems.length > 0 && (

@@ -14,7 +14,7 @@ export function HeroBlock({
       : null;
 
   return (
-    <section className="relative w-full py-24 md:py-32 flex items-center justify-center overflow-hidden bg-slate-900 text-white">
+    <section className="relative w-full py-24 md:py-32 flex items-center justify-center overflow-hidden bg-brand-dark text-white">
       {/* Arkaplan Görseli */}
       {bgUrl && (
         <Image
@@ -23,7 +23,6 @@ export function HeroBlock({
           fill
           className="object-cover opacity-40 mix-blend-overlay"
           priority
-          unoptimized
         />
       )}
 
@@ -33,7 +32,7 @@ export function HeroBlock({
           {heading}
         </h1>
         {subheading && (
-          <p className="text-lg md:text-xl text-slate-300 max-w-2xl leading-relaxed">
+          <p className="text-lg md:text-xl text-content-soft max-w-2xl leading-relaxed">
             {subheading}
           </p>
         )}
@@ -48,7 +47,7 @@ export function HeroBlock({
                 variant={idx === 0 ? "default" : "outline"}
                 asChild
                 className={
-                  idx !== 0 ? "text-slate-900 bg-white hover:bg-slate-100" : ""
+                  idx !== 0 ? "text-content-strong bg-white hover:bg-surface-muted" : ""
                 }
               >
                 <Link href={btn.link || "#"}>{btn.label}</Link>
