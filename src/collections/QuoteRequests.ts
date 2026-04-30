@@ -83,4 +83,48 @@ export const QuoteRequests: CollectionConfig = {
       ],
     },
   ],
+
+  hooks: {
+    afterChange: [
+      async ({ doc, operation, req }) => {
+        // Sadece YENİ bir teklif oluşturulduğunda çalıştır (güncellemelerde mail atma)
+        if (operation === 'create') {
+          try {
+            // 1. Admin panelinden ayarladığımız "Alıcılar" listesini çek
+            const emailSettings = await req.payload.findGlobal({ slug: 'emailSettings' });
+
+            // Eğer alıcı girilmemişse boş bir dizi döndür
+            const receivers = emailSettings.quoteReceivers?.map((r: any) => r.email) || [];
+
+            if (receivers.length > 0) {
+              // 2. Mail içeriğini oluştur (Şık bir HTML formatı)
+              const htmlContent = `
+                <h2>Yeni Bir B2B Teklif Talebi Geldi!</h2>
+                <p><strong>Müşteri:</strong> ${doc.customerName}</p>
+                <p><strong>Firma:</strong> ${doc.company || 'Belirtilmedi'}</p>
+                <p><strong>E-Posta:</strong> ${doc.email}</p>
+                <p><strong>Telefon:</strong> ${doc.phone}</p>
+                <hr/>
+                <h3>Talep Edilen Ürünler:</h3>
+                <ul>
+                  ${doc.items.map((item: any) => `<li>${item.quantity}x ${item.productTitle} (SKU: ${item.sku})</li>`).join('')}
+                </ul>
+                <p><strong>Not:</strong> ${doc.message || '-'}</p>
+              `;
+
+              // 3. Payload'un dahili sistemiyle maili gönder
+              await req.payload.sendEmail({
+                to: receivers.join(','), // [satis@..., info@...] listesini stringe çevirir
+                subject: `YENİ TEKLİF: ${doc.customerName} - Ertıp Medikal`,
+                html: htmlContent,
+              });
+            }
+          } catch (error) {
+            console.error("Mail gönderme hatası:", error);
+          }
+        }
+        return doc;
+      },
+    ],
+  },
 };

@@ -4,6 +4,7 @@ import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import sharp from "sharp";
 import path from "path";
 import { fileURLToPath } from "url";
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 
 // Koleksiyon Importları
 import { Users } from "@/collections/Users";
@@ -20,6 +21,7 @@ import { DownloadLogs } from "@/collections/DownloadLogs";
 // Global Importları
 import { SiteSettings } from "@/globals/SiteSettings";
 import { MainMenu } from "@/globals/MainMenu";
+import {EmailSettings} from "@/globals/EmailSettings";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -45,7 +47,7 @@ export default buildConfig({
     DownloadLogs,
   ],
   // Globals dizisini buraya ekledik
-  globals: [SiteSettings, MainMenu],
+  globals: [SiteSettings, MainMenu, EmailSettings],
   editor: lexicalEditor({}),
   secret: process.env.PAYLOAD_SECRET || "SECRET_KEY_MISSING",
   typescript: {
@@ -57,4 +59,16 @@ export default buildConfig({
     },
   }),
   sharp,
+  email: nodemailerAdapter({
+    defaultFromName: process.env.SMTP_FROM_NAME || 'Ertıp Medikal',
+    defaultFromAddress: process.env.SMTP_FROM_ADDRESS || 'iletisim@ertip.com.tr',
+    transportOptions: {
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT),
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    },
+  }),
 });

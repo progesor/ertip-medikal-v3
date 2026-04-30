@@ -11,7 +11,6 @@ export const Inquiries: CollectionConfig = {
     defaultColumns: ["name", "email", "status", "createdAt"],
   },
   access: {
-    // Dışarıdan sadece veri oluşturulabilir (form gönderimi), okuma ve silme sadece admin yapabilir
     create: () => true,
     read: ({ req: { user } }) => Boolean(user),
     update: ({ req: { user } }) => Boolean(user),
@@ -34,4 +33,39 @@ export const Inquiries: CollectionConfig = {
     { name: "phone", type: "text", label: "Telefon" },
     { name: "message", type: "textarea", required: true, label: "Mesaj" },
   ],
+  // SADECE BURASI EKLENDİ
+  hooks: {
+    afterChange: [
+      async ({ doc, operation, req }) => {
+        if (operation === "create") {
+          try {
+            const emailSettings = await req.payload.findGlobal({ slug: "emailSettings" });
+            const receivers = emailSettings.contactReceivers?.map((r: any) => r.email) || [];
+
+            if (receivers.length > 0) {
+              const htmlContent = `
+                <div style="font-family: sans-serif; max-width: 600px; padding: 20px;">
+                  <h2>Web Sitesinden Yeni Talep Geldi</h2>
+                  <p><strong>Gönderen:</strong> ${doc.name}</p>
+                  <p><strong>E-Posta:</strong> ${doc.email}</p>
+                  <p><strong>Telefon:</strong> ${doc.phone || "-"}</p>
+                  <hr/>
+                  <p><strong>Mesaj:</strong><br/>${doc.message}</p>
+                </div>
+              `;
+
+              await req.payload.sendEmail({
+                to: receivers.join(","),
+                subject: `YENİ TALEP: ${doc.name} - Ertıp Medikal`,
+                html: htmlContent,
+              });
+            }
+          } catch (error) {
+            console.error("Mail gönderme hatası:", error);
+          }
+        }
+        return doc;
+      },
+    ],
+  },
 };

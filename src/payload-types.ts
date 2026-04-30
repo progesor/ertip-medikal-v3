@@ -106,10 +106,12 @@ export interface Config {
   globals: {
     'site-settings': SiteSetting;
     'main-menu': MainMenu;
+    emailSettings: EmailSetting;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     'main-menu': MainMenuSelect<false> | MainMenuSelect<true>;
+    emailSettings: EmailSettingsSelect<false> | EmailSettingsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -1565,6 +1567,27 @@ export interface MainMenu {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "emailSettings".
+ */
+export interface EmailSetting {
+  id: number;
+  quoteReceivers?:
+    | {
+        email: string;
+        id?: string | null;
+      }[]
+    | null;
+  contactReceivers?:
+    | {
+        email: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
@@ -1652,6 +1675,27 @@ export interface MainMenuSelect<T extends boolean = true> {
         type?: T;
         reference?: T;
         url?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "emailSettings_select".
+ */
+export interface EmailSettingsSelect<T extends boolean = true> {
+  quoteReceivers?:
+    | T
+    | {
+        email?: T;
+        id?: T;
+      };
+  contactReceivers?:
+    | T
+    | {
+        email?: T;
         id?: T;
       };
   updatedAt?: T;

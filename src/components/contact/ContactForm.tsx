@@ -1,132 +1,164 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { submitInquiry } from "@/app/actions/submitInquiry";
+import { Send, CheckCircle2 } from "lucide-react";
 
-// CMS'ten gelecek departman prop'unu tanımlıyoruz
-export function ContactForm({ departments }: { departments?: { label: string }[] }) {
-    const [isPending, startTransition] = useTransition();
-    const [status, setStatus] = useState<{
-        success?: boolean;
-        error?: string;
-    } | null>(null);
+export function ContactForm({ departments }: { departments?: any[] }) {
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleSubmit = (formData: FormData) => {
-        setStatus(null);
-        startTransition(async () => {
-            const result = await submitInquiry(formData);
-            setStatus(result);
-        });
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        setError(null);
+
+        const formData = new FormData(e.currentTarget);
+        const selectedDepartment = formData.get("department");
+        const rawMessage = formData.get("message");
+
+        // Inquiries koleksiyonunda 'department' alanı olmadığı için mesajın başına ekliyoruz
+        const finalMessage = selectedDepartment
+            ? `[İlgili Departman: ${selectedDepartment}]\n\n${rawMessage}`
+            : rawMessage;
+
+        // Payload CMS API'sine gönderilecek veri objesi
+        const payloadData = {
+            name: formData.get("name"),
+            email: formData.get("email"),
+            phone: formData.get("phone"),
+            message: finalMessage,
+        };
+
+        try {
+            // Doğrudan senin mevcut Inquiries koleksiyonuna POST atıyoruz
+            const res = await fetch("/api/inquiries", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payloadData),
+            });
+
+            if (res.ok) {
+                setIsSuccess(true);
+                (e.target as HTMLFormElement).reset();
+            } else {
+                const errorData = await res.json();
+                setError(errorData.errors?.[0]?.message || "Bir hata oluştu. Lütfen tekrar deneyin.");
+            }
+        } catch (err) {
+            console.error("Form submission error:", err);
+            setError("Bağlantı hatası yaşandı. Lütfen internetinizi kontrol edin.");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    if (status?.success) {
+    // Başarılı gönderim ekranı
+    if (isSuccess) {
         return (
-            <div className="p-8 bg-green-50 text-green-800 rounded-2xl border border-green-200 text-center space-y-4">
-                <h3 className="text-2xl font-bold">Talebiniz Alındı!</h3>
-                <p className="text-lg">
-                    Mesajınız ilgili departmanımıza başarıyla ulaştı. En kısa sürede sizinle iletişime geçeceğiz.
+            <div className="flex flex-col items-center justify-center text-center p-8 bg-green-50 rounded-2xl border border-green-100">
+                <CheckCircle2 className="w-16 h-16 text-green-600 mb-4" />
+                <h3 className="text-2xl font-bold text-text-main mb-2">Mesajınız Alındı!</h3>
+                <p className="text-text-muted mb-6">
+                    Talebiniz ilgili departmanımıza başarıyla iletildi. En kısa sürede sizinle iletişime geçeceğiz.
                 </p>
+                <Button
+                    variant="outline"
+                    onClick={() => setIsSuccess(false)}
+                    className="font-bold border-border text-text-main"
+                >
+                    Yeni Mesaj Gönder
+                </Button>
             </div>
         );
     }
 
     return (
-        <form action={handleSubmit} className="space-y-6">
-            {status?.error && (
-                <div className="p-4 bg-red-50 text-red-800 rounded-lg border border-red-200">
-                    {status.error}
+        <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+                <div className="p-4 bg-red-50 text-red-600 text-sm font-semibold rounded-xl border border-red-100">
+                    {error}
                 </div>
             )}
 
-            {/* DİNAMİK DEPARTMAN SEÇİCİ */}
-            {departments && departments.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                    <Label htmlFor="subject">
-                        İlgili Departman / Konu <span className="text-red-500">*</span>
-                    </Label>
-                    <select
-                        id="subject"
-                        name="subject"
+                    <label className="text-sm font-bold text-text-main">Ad Soyad *</label>
+                    <input
                         required
-                        className="flex h-12 w-full rounded-xl border border-border bg-surface-muted px-4 py-2 text-sm text-text-main focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all disabled:opacity-50"
-                        disabled={isPending}
-                    >
-                        <option value="">Lütfen seçiniz...</option>
-                        {departments.map((dep, i) => (
-                            <option key={i} value={dep.label}>{dep.label}</option>
-                        ))}
-                    </select>
+                        name="name"
+                        type="text"
+                        className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                        placeholder="Örn: Dr. Ahmet Yılmaz"
+                    />
                 </div>
-            )}
-
-            <div className="space-y-2">
-                <Label htmlFor="name">
-                    Ad Soyad veya Firma Ünvanı <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                    id="name"
-                    name="name"
-                    required
-                    className="h-12 rounded-xl bg-surface-muted focus:bg-white"
-                    placeholder="Adınız veya Kurumunuz"
-                    disabled={isPending}
-                />
+                <div className="space-y-2">
+                    <label className="text-sm font-bold text-text-main">E-Posta *</label>
+                    <input
+                        required
+                        name="email"
+                        type="email"
+                        className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                        placeholder="ornek@klinik.com"
+                    />
+                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                    <Label htmlFor="email">
-                        E-Posta <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        required
-                        className="h-12 rounded-xl bg-surface-muted focus:bg-white"
-                        placeholder="ornek@sirket.com"
-                        disabled={isPending}
-                    />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="phone">Telefon Numaranız</Label>
-                    <Input
-                        id="phone"
+                    <label className="text-sm font-bold text-text-main">Telefon</label>
+                    <input
                         name="phone"
                         type="tel"
-                        className="h-12 rounded-xl bg-surface-muted focus:bg-white"
-                        placeholder="+90 (555) 000 00 00"
-                        disabled={isPending}
+                        className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                        placeholder="+90 5XX XXX XX XX"
                     />
                 </div>
+
+                {/* CMS'ten gelen dinamik departmanlar */}
+                {departments && departments.length > 0 && (
+                    <div className="space-y-2">
+                        <label className="text-sm font-bold text-text-main">İlgili Departman</label>
+                        <select
+                            name="department"
+                            className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-white"
+                        >
+                            <option value="">Genel / Diğer</option>
+                            {departments.map((dep: any, index: number) => (
+                                <option key={index} value={dep.label}>
+                                    {dep.label}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
             </div>
 
             <div className="space-y-2">
-                <Label htmlFor="message">
-                    Mesajınız / Talep Detayınız <span className="text-red-500">*</span>
-                </Label>
-                <Textarea
-                    id="message"
-                    name="message"
+                <label className="text-sm font-bold text-text-main">Mesajınız *</label>
+                <textarea
                     required
-                    className="rounded-xl bg-surface-muted focus:bg-white p-4"
-                    placeholder="Size nasıl yardımcı olabiliriz?"
-                    rows={5}
-                    disabled={isPending}
+                    name="message"
+                    rows={4}
+                    className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
+                    placeholder="Talebinizi detaylıca buraya yazabilirsiniz..."
                 />
             </div>
 
             <Button
                 type="submit"
-                size="lg"
-                className="w-full h-14 rounded-xl text-md font-bold hover:shadow-lg transition-all"
-                disabled={isPending}
+                disabled={isSubmitting}
+                className="w-full h-14 rounded-xl text-lg font-bold group"
             >
-                {isPending ? "Gönderiliyor..." : "Mesajı Gönder"}
+                {isSubmitting ? (
+                    "Gönderiliyor..."
+                ) : (
+                    <>
+                        Mesajı Gönder
+                        <Send className="w-5 h-5 ml-2 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                    </>
+                )}
             </Button>
         </form>
     );
