@@ -52,7 +52,7 @@ export function ContactForm({ departments }: { departments?: { label: string }[]
                         id="subject"
                         name="subject"
                         required
-                        className="flex h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all disabled:opacity-50"
+                        className="flex h-12 w-full rounded-xl border border-border bg-surface-muted px-4 py-2 text-sm text-text-main focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all disabled:opacity-50"
                         disabled={isPending}
                     >
                         <option value="">Lütfen seçiniz...</option>
@@ -71,7 +71,7 @@ export function ContactForm({ departments }: { departments?: { label: string }[]
                     id="name"
                     name="name"
                     required
-                    className="h-12 rounded-xl bg-slate-50 focus:bg-white"
+                    className="h-12 rounded-xl bg-surface-muted focus:bg-white"
                     placeholder="Adınız veya Kurumunuz"
                     disabled={isPending}
                 />
@@ -87,7 +87,7 @@ export function ContactForm({ departments }: { departments?: { label: string }[]
                         name="email"
                         type="email"
                         required
-                        className="h-12 rounded-xl bg-slate-50 focus:bg-white"
+                        className="h-12 rounded-xl bg-surface-muted focus:bg-white"
                         placeholder="ornek@sirket.com"
                         disabled={isPending}
                     />
@@ -98,7 +98,7 @@ export function ContactForm({ departments }: { departments?: { label: string }[]
                         id="phone"
                         name="phone"
                         type="tel"
-                        className="h-12 rounded-xl bg-slate-50 focus:bg-white"
+                        className="h-12 rounded-xl bg-surface-muted focus:bg-white"
                         placeholder="+90 (555) 000 00 00"
                         disabled={isPending}
                     />
@@ -113,7 +113,7 @@ export function ContactForm({ departments }: { departments?: { label: string }[]
                     id="message"
                     name="message"
                     required
-                    className="rounded-xl bg-slate-50 focus:bg-white p-4"
+                    className="rounded-xl bg-surface-muted focus:bg-white p-4"
                     placeholder="Size nasıl yardımcı olabiliriz?"
                     rows={5}
                     disabled={isPending}

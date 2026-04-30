@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getPayload } from "payload";
 import configPromise from "@payload-config";
-import { HeaderActions } from "./HeaderActions"; // YENİ EKLENDİ
+import { HeaderActions } from "@/components/layout/HeaderActions"; // YENİ EKLENDİ
 
 // Artık asenkron bir Server Component olarak kalmaya devam ediyor
 export async function Header() {

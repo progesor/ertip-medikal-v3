@@ -57,7 +57,7 @@ export async function FeaturedProductsBlock({
   if (productsToDisplay.length === 0) return null;
 
   return (
-    <section className="py-24 bg-slate-50/50 border-t border-slate-100">
+    <section className="py-24 bg-surface-muted/50 border-t border-border">
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Üst Kısım: Başlık ve Tümünü Gör Butonu */}
         <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
@@ -65,7 +65,7 @@ export async function FeaturedProductsBlock({
             {/*<div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary font-bold text-sm mb-4">*/}
             {/*    <Star className="w-4 h-4 fill-primary" /> Vitrin*/}
             {/*</div>*/}
-            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-text-main mb-4">
               {title || "Öne Çıkan Ürünler"}
             </h2>
           </div>
@@ -91,11 +91,11 @@ export async function FeaturedProductsBlock({
             return (
               <Card
                 key={product.id}
-                className="group overflow-hidden rounded-[2rem] border-slate-200 shadow-sm hover:shadow-xl hover:border-primary/20 transition-all duration-300 flex flex-col bg-white"
+                className="group overflow-hidden rounded-2xl border-border shadow-sm hover:shadow-xl hover:border-primary/20 transition-all duration-300 flex flex-col bg-white"
               >
                 <Link
                   href={`/urunler/${product.slug}`}
-                  className="relative aspect-square overflow-hidden bg-slate-50 p-6 flex items-center justify-center"
+                  className="relative aspect-square overflow-hidden bg-surface-muted p-6 flex items-center justify-center"
                 >
                   <Image
                     src={imageUrl}
@@ -107,7 +107,7 @@ export async function FeaturedProductsBlock({
                   />
                   {/* SKU Rozeti */}
                   {product.sku && (
-                    <div className="absolute top-4 right-4 bg-white text-slate-600 text-[10px] px-2.5 py-1 rounded-md font-mono font-bold shadow-sm border border-slate-100">
+                    <div className="absolute top-4 right-4 bg-white text-text-muted text-[10px] px-2.5 py-1 rounded-md font-mono font-bold shadow-sm border border-border">
                       {product.sku}
                     </div>
                   )}
@@ -116,7 +116,7 @@ export async function FeaturedProductsBlock({
                   <CardTitle className="text-lg line-clamp-2 leading-snug font-bold">
                     <Link
                       href={`/urunler/${product.slug}`}
-                      className="hover:text-primary transition-colors text-slate-900"
+                      className="hover:text-primary transition-colors text-text-main"
                     >
                       {product.title}
                     </Link>
@@ -124,7 +124,7 @@ export async function FeaturedProductsBlock({
                 </CardHeader>
                 <CardContent className="flex-1 pb-4">
                   {product.shortDescription ? (
-                    <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed">
+                    <p className="text-sm text-text-muted line-clamp-2 leading-relaxed">
                       {product.shortDescription}
                     </p>
                   ) : (
@@ -133,7 +133,7 @@ export async function FeaturedProductsBlock({
                 </CardContent>
                 <CardFooter className="pt-0 pb-6 px-6">
                   <Button
-                    className="w-full rounded-xl font-bold bg-slate-900 hover:bg-primary transition-colors"
+                    className="w-full rounded-xl font-bold bg-primary hover:bg-primary transition-colors"
                     asChild
                   >
                     <Link href={`/urunler/${product.slug}`}>Ürünü İncele</Link>

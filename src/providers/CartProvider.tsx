@@ -5,24 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle2, X, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-
-type CartItem = {
-  id: string;
-  title: string;
-  slug: string;
-  variant: string;
-  sku: string;
-  image: string;
-  quantity: number;
-};
-
-type CartContextType = {
-  cartItems: CartItem[];
-  addToCart: (item: Omit<CartItem, "quantity">) => void;
-  updateQuantity: (index: number, newQuantity: number) => void;
-  removeFromCart: (index: number) => void;
-  clearCart: () => void;
-};
+import type { CartItem, CartContextType } from "@/types";
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 

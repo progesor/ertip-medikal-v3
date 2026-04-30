@@ -8,9 +8,9 @@ export function ContentBlock({ content }: any) {
       <div className="container mx-auto px-4 max-w-4xl">
         <div
           className="
-          text-slate-700 leading-relaxed space-y-6
-          [&>h2]:text-3xl [&>h2]:font-bold [&>h2]:text-slate-900 [&>h2]:mt-12 [&>h2]:mb-6
-          [&>h3]:text-2xl [&>h3]:font-semibold [&>h3]:text-slate-900 [&>h3]:mt-8 [&>h3]:mb-4
+          text-text-muted leading-relaxed space-y-6
+          [&>h2]:text-3xl [&>h2]:font-bold [&>h2]:text-text-main [&>h2]:mt-12 [&>h2]:mb-6
+          [&>h3]:text-2xl [&>h3]:font-semibold [&>h3]:text-text-main [&>h3]:mt-8 [&>h3]:mb-4
           [&>p]:text-lg
           [&>ul]:list-disc [&>ul]:pl-6 [&>ul>li]:mb-2 [&>ul>li]:text-lg
           [&>ol]:list-decimal [&>ol]:pl-6 [&>ol>li]:mb-2 [&>ol>li]:text-lg
