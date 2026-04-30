@@ -9,6 +9,12 @@ export const TestimonialBlock: Block = {
       name: "testimonials",
       type: "array",
       label: "Yorumlar",
+      admin: {
+        initCollapsed: true,
+        components: {
+          RowLabel: "/components/admin/AdminArrayRowLabel#AdminArrayRowLabel",
+        },
+      },
       fields: [
         { name: "name", type: "text", label: "İsim / Ünvan", required: true },
         { name: "content", type: "textarea", label: "Yorum", required: true },

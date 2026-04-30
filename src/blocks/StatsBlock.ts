@@ -8,6 +8,11 @@ export const StatsBlock: Block = {
       name: "stats",
       type: "array",
       label: "Rakamlar",
+      admin: {
+        components: {
+          RowLabel: "/components/admin/AdminArrayRowLabel#AdminArrayRowLabel",
+        },
+      },
       fields: [
         {
           name: "label",

@@ -14,6 +14,11 @@ export const CertificateGridBlock: Block = {
       name: "certificates",
       type: "array",
       label: "Sertifikalar",
+      admin: {
+        components: {
+          RowLabel: "/components/admin/AdminArrayRowLabel#AdminArrayRowLabel",
+        },
+      },
       fields: [
         {
           type: 'row',

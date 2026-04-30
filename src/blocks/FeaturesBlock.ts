@@ -24,6 +24,12 @@ export const FeaturesBlock: Block = {
       label: "Özellikler",
       minRows: 1,
       maxRows: 6,
+      admin: {
+        initCollapsed: true,
+        components: {
+          RowLabel: "/components/admin/AdminArrayRowLabel#AdminArrayRowLabel",
+        },
+      },
       fields: [
         {
           name: "icon",

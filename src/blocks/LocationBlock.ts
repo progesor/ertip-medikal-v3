@@ -15,6 +15,12 @@ export const LocationBlock: Block = {
       type: "array",
       label: "Lokasyonlar / Ofisler",
       minRows: 1,
+      admin: {
+        initCollapsed: true,
+        components: {
+          RowLabel: "/components/admin/AdminArrayRowLabel#AdminArrayRowLabel",
+        },
+      },
       fields: [
         { name: "title", type: "text", label: "Tesis Adı (Örn: Merkez Ofis - Şişli)", required: true },
         { name: "address", type: "textarea", label: "Açık Adres", required: true },

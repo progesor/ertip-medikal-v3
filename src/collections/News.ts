@@ -6,11 +6,26 @@ export const News: CollectionConfig = {
   slug: "news",
   labels: { singular: "Haber / Duyuru", plural: "Haberler ve Duyurular" },
   admin: {
+    group: "İçerik Yönetimi",
     useAsTitle: "title",
     defaultColumns: ["title", "category", "publishedDate", "_status"],
+    components: {
+      beforeListTable: [
+        "/components/admin/CollectionViewControls#CollectionViewControls",
+      ],
+    },
   },
   versions: { drafts: true },
   fields: [
+    {
+      name: "editOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+        },
+      },
+    },
     {
       type: "tabs",
       tabs: [
@@ -41,6 +56,12 @@ export const News: CollectionConfig = {
               name: "gallery",
               type: "array",
               label: "Etkinlik / Fuar Galerisi (Opsiyonel)",
+              admin: {
+                components: {
+                  RowLabel:
+                    "/components/admin/AdminArrayRowLabel#AdminArrayRowLabel",
+                },
+              },
               fields: [
                 {
                   name: "image",

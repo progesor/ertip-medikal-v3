@@ -15,6 +15,12 @@ export const TeamBlock: Block = {
       type: "array",
       label: "Ekip Üyeleri",
       minRows: 1,
+      admin: {
+        initCollapsed: true,
+        components: {
+          RowLabel: "/components/admin/AdminArrayRowLabel#AdminArrayRowLabel",
+        },
+      },
       fields: [
         { name: "name", type: "text", label: "İsim Soyisim", required: true },
         { name: "role", type: "text", label: "Ünvan / Görev", required: true },

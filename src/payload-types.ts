@@ -67,16 +67,16 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    users: User;
-    media: Media;
     products: Product;
     categories: Category;
-    inquiries: Inquiry;
-    news: News;
     pages: Page;
+    media: Media;
+    news: News;
     'news-categories': NewsCategory;
+    inquiries: Inquiry;
     'quote-requests': QuoteRequest;
     'download-logs': DownloadLog;
+    users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -84,16 +84,16 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
-    inquiries: InquiriesSelect<false> | InquiriesSelect<true>;
-    news: NewsSelect<false> | NewsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
+    news: NewsSelect<false> | NewsSelect<true>;
     'news-categories': NewsCategoriesSelect<false> | NewsCategoriesSelect<true>;
+    inquiries: InquiriesSelect<false> | InquiriesSelect<true>;
     'quote-requests': QuoteRequestsSelect<false> | QuoteRequestsSelect<true>;
     'download-logs': DownloadLogsSelect<false> | DownloadLogsSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -104,12 +104,12 @@ export interface Config {
   };
   fallbackLocale: null;
   globals: {
-    'site-settings': SiteSetting;
     'main-menu': MainMenu;
+    'site-settings': SiteSetting;
   };
   globalsSelect: {
-    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     'main-menu': MainMenuSelect<false> | MainMenuSelect<true>;
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -137,83 +137,6 @@ export interface UserAuthOperations {
   unlock: {
     email: string;
     password: string;
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: number;
-  role: 'admin' | 'editor';
-  firstName?: string | null;
-  lastName?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: number;
-  /**
-   * Görseller için SEO metni, PDF'ler için dosya başlığı olarak kullanılır.
-   */
-  alt: string;
-  caption?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-  sizes?: {
-    thumbnail?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    card?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    hero?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
   };
 }
 /**
@@ -349,6 +272,55 @@ export interface Product {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  /**
+   * Görseller için SEO metni, PDF'ler için dosya başlığı olarak kullanılır.
+   */
+  alt: string;
+  caption?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    hero?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories".
  */
 export interface Category {
@@ -358,92 +330,6 @@ export interface Category {
   parent?: (number | null) | Category;
   description?: string | null;
   image?: (number | null) | Media;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "inquiries".
- */
-export interface Inquiry {
-  id: number;
-  status?: ('unread' | 'pending' | 'resolved') | null;
-  name: string;
-  email: string;
-  phone?: string | null;
-  message: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "news".
- */
-export interface News {
-  id: number;
-  title: string;
-  excerpt?: string | null;
-  content: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  image: number | Media;
-  gallery?:
-    | {
-        image: number | Media;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Bu içeriğin Google, WhatsApp, LinkedIn gibi platformlarda nasıl görüneceğini belirleyin.
-   */
-  meta?: {
-    /**
-     * Boş bırakılırsa içeriğin ana başlığı kullanılır. (Önerilen: 50-60 karakter)
-     */
-    title?: string | null;
-    /**
-     * Arama sonuçlarında başlığın altında görünecek özet metin. (Önerilen: 150-160 karakter)
-     */
-    description?: string | null;
-    /**
-     * Link paylaşıldığında görünecek özel kapak fotoğrafı. 1200x630 piksel önerilir. Boş bırakılırsa ana görsel kullanılır.
-     */
-    image?: (number | null) | Media;
-    /**
-     * Kelimelerin arasına virgül koyarak yazın. (Örn: medikal cihaz, saç ekimi, fue)
-     */
-    keywords?: string | null;
-  };
-  category?: (number | null) | NewsCategory;
-  publishedDate: string;
-  /**
-   * Otomatik oluşturulur. Gerekirse manuel olarak düzenleyebilirsiniz.
-   */
-  slug?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "news-categories".
- */
-export interface NewsCategory {
-  id: number;
-  title: string;
-  slug: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -744,6 +630,92 @@ export interface Page {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news".
+ */
+export interface News {
+  id: number;
+  title: string;
+  excerpt?: string | null;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  image: number | Media;
+  gallery?:
+    | {
+        image: number | Media;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Bu içeriğin Google, WhatsApp, LinkedIn gibi platformlarda nasıl görüneceğini belirleyin.
+   */
+  meta?: {
+    /**
+     * Boş bırakılırsa içeriğin ana başlığı kullanılır. (Önerilen: 50-60 karakter)
+     */
+    title?: string | null;
+    /**
+     * Arama sonuçlarında başlığın altında görünecek özet metin. (Önerilen: 150-160 karakter)
+     */
+    description?: string | null;
+    /**
+     * Link paylaşıldığında görünecek özel kapak fotoğrafı. 1200x630 piksel önerilir. Boş bırakılırsa ana görsel kullanılır.
+     */
+    image?: (number | null) | Media;
+    /**
+     * Kelimelerin arasına virgül koyarak yazın. (Örn: medikal cihaz, saç ekimi, fue)
+     */
+    keywords?: string | null;
+  };
+  category?: (number | null) | NewsCategory;
+  publishedDate: string;
+  /**
+   * Otomatik oluşturulur. Gerekirse manuel olarak düzenleyebilirsiniz.
+   */
+  slug?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news-categories".
+ */
+export interface NewsCategory {
+  id: number;
+  title: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inquiries".
+ */
+export interface Inquiry {
+  id: number;
+  status?: ('unread' | 'pending' | 'resolved') | null;
+  name: string;
+  email: string;
+  phone?: string | null;
+  message: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "quote-requests".
  */
 export interface QuoteRequest {
@@ -781,6 +753,34 @@ export interface DownloadLog {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: number;
+  role: 'admin' | 'editor';
+  firstName?: string | null;
+  lastName?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -804,14 +804,6 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
-        relationTo: 'users';
-        value: number | User;
-      } | null)
-    | ({
-        relationTo: 'media';
-        value: number | Media;
-      } | null)
-    | ({
         relationTo: 'products';
         value: number | Product;
       } | null)
@@ -820,20 +812,24 @@ export interface PayloadLockedDocument {
         value: number | Category;
       } | null)
     | ({
-        relationTo: 'inquiries';
-        value: number | Inquiry;
+        relationTo: 'pages';
+        value: number | Page;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: number | Media;
       } | null)
     | ({
         relationTo: 'news';
         value: number | News;
       } | null)
     | ({
-        relationTo: 'pages';
-        value: number | Page;
-      } | null)
-    | ({
         relationTo: 'news-categories';
         value: number | NewsCategory;
+      } | null)
+    | ({
+        relationTo: 'inquiries';
+        value: number | Inquiry;
       } | null)
     | ({
         relationTo: 'quote-requests';
@@ -842,6 +838,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'download-logs';
         value: number | DownloadLog;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -884,84 +884,6 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_select".
- */
-export interface UsersSelect<T extends boolean = true> {
-  role?: T;
-  firstName?: T;
-  lastName?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
-  sessions?:
-    | T
-    | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
-      };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_select".
- */
-export interface MediaSelect<T extends boolean = true> {
-  alt?: T;
-  caption?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
-  sizes?:
-    | T
-    | {
-        thumbnail?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        card?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        hero?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1071,49 +993,6 @@ export interface CategoriesSelect<T extends boolean = true> {
   image?: T;
   updatedAt?: T;
   createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "inquiries_select".
- */
-export interface InquiriesSelect<T extends boolean = true> {
-  status?: T;
-  name?: T;
-  email?: T;
-  phone?: T;
-  message?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "news_select".
- */
-export interface NewsSelect<T extends boolean = true> {
-  title?: T;
-  excerpt?: T;
-  content?: T;
-  image?: T;
-  gallery?:
-    | T
-    | {
-        image?: T;
-        id?: T;
-      };
-  meta?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        image?: T;
-        keywords?: T;
-      };
-  category?: T;
-  publishedDate?: T;
-  slug?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1392,11 +1271,107 @@ export interface PagesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  caption?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        hero?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news_select".
+ */
+export interface NewsSelect<T extends boolean = true> {
+  title?: T;
+  excerpt?: T;
+  content?: T;
+  image?: T;
+  gallery?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        keywords?: T;
+      };
+  category?: T;
+  publishedDate?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "news-categories_select".
  */
 export interface NewsCategoriesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inquiries_select".
+ */
+export interface InquiriesSelect<T extends boolean = true> {
+  status?: T;
+  name?: T;
+  email?: T;
+  phone?: T;
+  message?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1439,6 +1414,31 @@ export interface DownloadLogsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  role?: T;
+  firstName?: T;
+  lastName?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -1476,6 +1476,24 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "main-menu".
+ */
+export interface MainMenu {
+  id: number;
+  items?:
+    | {
+        label: string;
+        type?: ('reference' | 'custom') | null;
+        reference?: (number | null) | Page;
+        url?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1547,21 +1565,21 @@ export interface SiteSetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "main-menu".
+ * via the `definition` "main-menu_select".
  */
-export interface MainMenu {
-  id: number;
+export interface MainMenuSelect<T extends boolean = true> {
   items?:
+    | T
     | {
-        label: string;
-        type?: ('reference' | 'custom') | null;
-        reference?: (number | null) | Page;
-        url?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
+        label?: T;
+        type?: T;
+        reference?: T;
+        url?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1635,24 +1653,6 @@ export interface SiteSettingsSelect<T extends boolean = true> {
               id?: T;
             };
         copyright?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "main-menu_select".
- */
-export interface MainMenuSelect<T extends boolean = true> {
-  items?:
-    | T
-    | {
-        label?: T;
-        type?: T;
-        reference?: T;
-        url?: T;
-        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;

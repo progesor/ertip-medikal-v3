@@ -24,11 +24,26 @@ export const Pages: CollectionConfig = {
   slug: "pages",
   labels: { singular: "Sayfa", plural: "Sayfalar" },
   admin: {
+    group: "İçerik Yönetimi",
     useAsTitle: "title",
     defaultColumns: ["title", "slug", "updatedAt"],
+    components: {
+      beforeListTable: [
+        "/components/admin/CollectionViewControls#CollectionViewControls",
+      ],
+    },
   },
   versions: { drafts: true },
   fields: [
+    {
+      name: "editOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+        },
+      },
+    },
     {
       type: "tabs",
       tabs: [
@@ -40,6 +55,15 @@ export const Pages: CollectionConfig = {
               type: "text",
               required: true,
               label: "Sayfa Başlığı",
+            },
+            {
+              name: "pageBuilderStudio",
+              type: "ui",
+              admin: {
+                components: {
+                  Field: "/components/admin/PageBuilderStudio#PageBuilderStudio",
+                },
+              },
             },
             {
               name: "layout",

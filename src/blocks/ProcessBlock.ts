@@ -22,6 +22,11 @@ export const ProcessBlock: Block = {
       label: "Adımlar",
       minRows: 3,
       maxRows: 5,
+      admin: {
+        components: {
+          RowLabel: "/components/admin/AdminArrayRowLabel#AdminArrayRowLabel",
+        },
+      },
       fields: [
         {
           name: "stepNumber",

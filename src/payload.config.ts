@@ -27,25 +27,46 @@ const dirname = path.dirname(filename);
 export default buildConfig({
   admin: {
     user: Users.slug,
+    avatar: "default",
+    dateFormat: "dd.MM.yyyy HH:mm",
+    meta: {
+      titleSuffix: "- Ertip Medikal Admin",
+    },
+    theme: "all",
+    components: {
+      actions: [
+        "/components/admin/AdminSurfaceEnhancer#AdminSurfaceEnhancer",
+        "/components/admin/ErtipAdminBrand#AdminHeaderBadge",
+      ],
+      beforeDashboard: [
+        "/components/admin/ErtipAdminBrand#AdminDashboardIntro",
+      ],
+      beforeLogin: ["/components/admin/ErtipAdminBrand#AdminLoginIntro"],
+      beforeNavLinks: ["/components/admin/ErtipAdminBrand#AdminNavIntro"],
+      graphics: {
+        Icon: "/components/admin/ErtipAdminBrand#AdminIcon",
+        Logo: "/components/admin/ErtipAdminBrand#AdminLogo",
+      },
+    },
     importMap: {
       baseDir: path.resolve(dirname),
     },
   },
   // Yeni koleksiyonları buraya ekledik
   collections: [
-    Users,
-    Media,
     Products,
     Categories,
-    Inquiries,
-    News,
     Pages,
+    Media,
+    News,
     NewsCategories,
+    Inquiries,
     QuoteRequests,
     DownloadLogs,
+    Users,
   ],
   // Globals dizisini buraya ekledik
-  globals: [SiteSettings, MainMenu],
+  globals: [MainMenu, SiteSettings],
   editor: lexicalEditor({}),
   secret: process.env.PAYLOAD_SECRET || "SECRET_KEY_MISSING",
   typescript: {

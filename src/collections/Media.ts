@@ -4,6 +4,14 @@ import path from "path";
 export const Media: CollectionConfig = {
   slug: "media",
   labels: { singular: "Medya", plural: "Medyalar" },
+  admin: {
+    group: "İçerik Yönetimi",
+    components: {
+      beforeListTable: [
+        "/components/admin/CollectionViewControls#CollectionViewControls",
+      ],
+    },
+  },
   access: {
     read: () => true,
   },
@@ -20,6 +28,15 @@ export const Media: CollectionConfig = {
     mimeTypes: ["image/*", "application/pdf"],
   },
   fields: [
+    {
+      name: "editOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+        },
+      },
+    },
     {
       name: "alt",
       type: "text",

@@ -17,8 +17,14 @@ export const Products: CollectionConfig = {
   slug: "products",
   labels: { singular: "Ürün", plural: "Ürünler" },
   admin: {
+    group: "Katalog Yönetimi",
     useAsTitle: "title",
     defaultColumns: ["title", "sku", "_status"],
+    components: {
+      beforeListTable: [
+        "/components/admin/CollectionViewControls#CollectionViewControls",
+      ],
+    },
   },
   versions: { drafts: true },
   // --- AKILLI SKU VE VARYANT MOTORU (HOOK) ---
@@ -103,6 +109,34 @@ export const Products: CollectionConfig = {
   },
   fields: [
     {
+      name: "productOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/ProductEditOverview#ProductEditOverview",
+        },
+      },
+    },
+    {
+      name: "productArrayEnhancer",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/ProductArrayEnhancer#ProductArrayEnhancer",
+        },
+      },
+    },
+    {
+      name: "productWorkspaceStudio",
+      type: "ui",
+      admin: {
+        components: {
+          Field:
+            "/components/admin/ProductWorkspaceStudio#ProductWorkspaceStudio",
+        },
+      },
+    },
+    {
       type: "tabs",
       tabs: [
         {
@@ -138,6 +172,13 @@ export const Products: CollectionConfig = {
               name: "specs",
               type: "array",
               label: "Temel/Teknik Özellikler",
+              admin: {
+                initCollapsed: true,
+                components: {
+                  RowLabel:
+                    "/components/admin/ProductArrayRowLabel#ProductArrayRowLabel",
+                },
+              },
               fields: [
                 {
                   name: "key",
@@ -171,6 +212,13 @@ export const Products: CollectionConfig = {
               name: "gallery",
               type: "array",
               label: "Ürün Galerisi",
+              admin: {
+                initCollapsed: true,
+                components: {
+                  RowLabel:
+                    "/components/admin/ProductArrayRowLabel#ProductArrayRowLabel",
+                },
+              },
               fields: [
                 {
                   name: "image",
@@ -213,6 +261,10 @@ export const Products: CollectionConfig = {
               type: "array",
               label: "Ürün Özellikleri (Çap, Uzunluk vb.)",
               admin: {
+                components: {
+                  RowLabel:
+                    "/components/admin/ProductArrayRowLabel#ProductArrayRowLabel",
+                },
                 description:
                   "Değerleri TİRE (-) ile ayırarak yazın. Örn: 0.6-0.65-0.7",
               },
@@ -245,6 +297,10 @@ export const Products: CollectionConfig = {
               type: "array",
               label: "Üretilen Varyantlar",
               admin: {
+                components: {
+                  RowLabel:
+                    "/components/admin/ProductArrayRowLabel#ProductArrayRowLabel",
+                },
                 description:
                   "Bu liste otomatik dolar ancak sonrasında manuel müdahale edip istisnai durumları düzeltebilirsiniz.",
               },
@@ -331,6 +387,10 @@ export const Products: CollectionConfig = {
               type: "array",
               label: "Ambalaj ve Paketleme Seçenekleri",
               admin: {
+                components: {
+                  RowLabel:
+                    "/components/admin/ProductArrayRowLabel#ProductArrayRowLabel",
+                },
                 description:
                   "Ürünün farklı paketleme formlarını (Örn: Tekli Kutu, 50’li Ana Koli) buraya ekleyebilirsiniz.",
               },
@@ -393,6 +453,12 @@ export const Products: CollectionConfig = {
               name: "publicDocs",
               type: "array",
               label: "Halka Açık Belgeler (Katalog, Broşür vb.)",
+              admin: {
+                components: {
+                  RowLabel:
+                    "/components/admin/ProductArrayRowLabel#ProductArrayRowLabel",
+                },
+              },
               fields: [
                 {
                   name: "label",
@@ -412,6 +478,12 @@ export const Products: CollectionConfig = {
               name: "protectedDocs",
               type: "array",
               label: "Korumalı Belgeler (Kullanma Kılavuzu)",
+              admin: {
+                components: {
+                  RowLabel:
+                    "/components/admin/ProductArrayRowLabel#ProductArrayRowLabel",
+                },
+              },
               fields: [
                 {
                   name: "label",
@@ -429,6 +501,12 @@ export const Products: CollectionConfig = {
                   name: "accessCodes",
                   type: "array",
                   label: "Yetkili Kodlar / Seri Numaraları",
+                  admin: {
+                    components: {
+                      RowLabel:
+                        "/components/admin/ProductArrayRowLabel#ProductArrayRowLabel",
+                    },
+                  },
                   fields: [
                     {
                       type: "row",

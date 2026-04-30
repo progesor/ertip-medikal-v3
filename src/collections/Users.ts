@@ -3,9 +3,26 @@ import type { CollectionConfig } from "payload";
 export const Users: CollectionConfig = {
   slug: "users",
   labels: { singular: "Kullanıcı", plural: "Kullanıcılar" },
-  admin: { useAsTitle: "email" },
+  admin: {
+    group: "Sistem",
+    useAsTitle: "email",
+    components: {
+      beforeListTable: [
+        "/components/admin/CollectionViewControls#CollectionViewControls",
+      ],
+    },
+  },
   auth: true,
   fields: [
+    {
+      name: "editOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+        },
+      },
+    },
     {
       name: "role",
       type: "select",

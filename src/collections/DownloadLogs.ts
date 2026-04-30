@@ -4,8 +4,14 @@ export const DownloadLogs: CollectionConfig = {
   slug: "download-logs",
   labels: { singular: "Kılavuz Logu", plural: "Kılavuz Logları" },
   admin: {
+    group: "Uyumluluk ve Loglar",
     useAsTitle: "accessCode",
     defaultColumns: ["productTitle", "accessCode", "ipAddress", "createdAt"],
+    components: {
+      beforeListTable: [
+        "/components/admin/CollectionViewControls#CollectionViewControls",
+      ],
+    },
   },
   access: {
     create: () => true, // API üzerinden veri yazılabilmesi için
@@ -14,6 +20,15 @@ export const DownloadLogs: CollectionConfig = {
     delete: ({ req: { user } }) => Boolean(user),
   },
   fields: [
+    {
+      name: "editOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+        },
+      },
+    },
     {
       name: "productTitle",
       type: "text",

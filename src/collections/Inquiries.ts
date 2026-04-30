@@ -7,8 +7,14 @@ export const Inquiries: CollectionConfig = {
     plural: "Gelen Talepler",
   },
   admin: {
+    group: "İletişim ve Talepler",
     useAsTitle: "name",
     defaultColumns: ["name", "email", "status", "createdAt"],
+    components: {
+      beforeListTable: [
+        "/components/admin/CollectionViewControls#CollectionViewControls",
+      ],
+    },
   },
   access: {
     // Dışarıdan sadece veri oluşturulabilir (form gönderimi), okuma ve silme sadece admin yapabilir
@@ -18,6 +24,15 @@ export const Inquiries: CollectionConfig = {
     delete: ({ req: { user } }) => Boolean(user),
   },
   fields: [
+    {
+      name: "editOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+        },
+      },
+    },
     {
       name: "status",
       type: "select",

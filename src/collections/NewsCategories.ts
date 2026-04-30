@@ -3,8 +3,25 @@ import type { CollectionConfig } from "payload";
 export const NewsCategories: CollectionConfig = {
   slug: "news-categories",
   labels: { singular: "Haber Kategorisi", plural: "Haber Kategorileri" },
-  admin: { useAsTitle: "title" },
+  admin: {
+    group: "İçerik Yönetimi",
+    useAsTitle: "title",
+    components: {
+      beforeListTable: [
+        "/components/admin/CollectionViewControls#CollectionViewControls",
+      ],
+    },
+  },
   fields: [
+    {
+      name: "editOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+        },
+      },
+    },
     {
       name: "title",
       type: "text",

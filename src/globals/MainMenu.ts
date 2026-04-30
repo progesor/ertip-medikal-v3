@@ -3,14 +3,31 @@ import type { GlobalConfig } from "payload";
 export const MainMenu: GlobalConfig = {
   slug: "main-menu",
   label: "Ana Menü",
+  admin: {
+    group: "İçerik Yönetimi",
+  },
   access: {
     read: () => true, // Frontend'in okuyabilmesi için herkese açık
   },
   fields: [
     {
+      name: "editOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+        },
+      },
+    },
+    {
       name: "items",
       type: "array",
       label: "Menü Linkleri",
+      admin: {
+        components: {
+          RowLabel: "/components/admin/AdminArrayRowLabel#AdminArrayRowLabel",
+        },
+      },
       labels: {
         singular: "Link",
         plural: "Linkler",

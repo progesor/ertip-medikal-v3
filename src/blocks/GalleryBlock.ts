@@ -10,6 +10,12 @@ export const GalleryBlock: Block = {
       type: "array",
       label: "Görseller",
       minRows: 2,
+      admin: {
+        initCollapsed: true,
+        components: {
+          RowLabel: "/components/admin/AdminArrayRowLabel#AdminArrayRowLabel",
+        },
+      },
       fields: [
         { name: "image", type: "upload", relationTo: "media", required: true },
       ],

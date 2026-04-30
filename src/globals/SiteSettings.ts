@@ -3,10 +3,31 @@ import type { GlobalConfig } from "payload";
 export const SiteSettings: GlobalConfig = {
   slug: "site-settings",
   label: "Site Ayarları",
+  admin: {
+    group: "Sistem",
+  },
   access: {
     read: () => true, // Frontend'den okunabilmesi için herkese açık
   },
   fields: [
+    {
+      name: "editOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+        },
+      },
+    },
+    {
+      name: "siteSettingsStudio",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/SiteSettingsStudio#SiteSettingsStudio",
+        },
+      },
+    },
     {
       name: "general",
       label: "Genel Site Ayarları",
@@ -41,6 +62,11 @@ export const SiteSettings: GlobalConfig = {
       name: "socialMedia",
       label: "Sosyal Medya Linkleri",
       type: "array",
+      admin: {
+        components: {
+          RowLabel: "/components/admin/AdminArrayRowLabel#AdminArrayRowLabel",
+        },
+      },
       fields: [
         {
           name: "platform",
@@ -93,6 +119,12 @@ export const SiteSettings: GlobalConfig = {
                   name: "links",
                   type: "array",
                   label: "Sütun Linkleri",
+                  admin: {
+                    components: {
+                      RowLabel:
+                        "/components/admin/AdminArrayRowLabel#AdminArrayRowLabel",
+                    },
+                  },
                   fields: [
                     {
                       name: "label",
@@ -150,6 +182,12 @@ export const SiteSettings: GlobalConfig = {
           name: "bottomLinks",
           type: "array",
           label: "Alt Bar Linkleri (Yasal/Ek)",
+          admin: {
+            components: {
+              RowLabel:
+                "/components/admin/AdminArrayRowLabel#AdminArrayRowLabel",
+            },
+          },
           fields: [
             {
               name: "label",
