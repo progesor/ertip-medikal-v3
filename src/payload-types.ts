@@ -1628,7 +1628,16 @@ export interface ThemeSetting {
   /**
    * Sitenin genel kurumsal kimliğini ve vurgu renklerini belirler.
    */
-  colorPalette: 'dark-luxury' | 'ocean' | 'emerald' | 'ruby';
+  colorPalette:
+    | 'dark-luxury'
+    | 'medical-blue'
+    | 'medical-aqua'
+    | 'ocean'
+    | 'emerald'
+    | 'clinical-mint'
+    | 'premium-navy'
+    | 'surgical-teal'
+    | 'ruby';
   /**
    * Kartların, butonların ve formların ne kadar yuvarlak hatlı olacağını belirler.
    */
