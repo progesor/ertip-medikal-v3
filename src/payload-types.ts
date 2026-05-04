@@ -1719,11 +1719,21 @@ export interface ThemeSetting {
     | 'clinical-mint'
     | 'premium-navy'
     | 'surgical-teal'
-    | 'ruby';
+    | 'ruby'
+    | 'pure-black'
+    | 'graphite-gray'
+    | 'platinum-silver'
+    | 'obsidian-gold'
+    | 'arctic-white'
+    | 'royal-indigo'
+    | 'corporate-steel'
+    | 'warm-sand'
+    | 'violet-lab'
+    | 'clean-rose';
   /**
    * Kartların, butonların ve formların ne kadar yuvarlak hatlı olacağını belirler.
    */
-  borderRadius: 'sharp' | 'modern' | 'bubbly';
+  borderRadius: 'sharp' | 'subtle' | 'modern' | 'premium' | 'soft' | 'bubbly' | 'pill';
   updatedAt?: string | null;
   createdAt?: string | null;
 }
