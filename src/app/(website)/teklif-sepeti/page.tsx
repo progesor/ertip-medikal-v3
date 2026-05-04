@@ -85,6 +85,7 @@ export default function QuoteCartPage() {
   return (
       <div className="bg-background min-h-screen pt-12 pb-24">
         {/* Üst Kısım: Her temada şık duran koyu zemin */}
+        {/*
         <div className="bg-primary py-[4.5rem] mb-12">
           <div className="container mx-auto px-4 max-w-7xl">
             <div className="mb-5 inline-flex items-center rounded-full border border-surface-inverse-foreground/10 bg-surface-inverse-foreground/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-surface-inverse-foreground/75">
@@ -95,6 +96,19 @@ export default function QuoteCartPage() {
             </h1>
             <p className="text-lg text-surface-inverse-foreground/70">
               Seçtiğiniz medikal ürünler için hızlıca fiyat teklifi isteyin.
+            </p>
+          </div>
+        </div>
+        */}
+
+        {/* Minimal ve şık üst kısım */}
+        <div className="py-2 mb-8">
+          <div className="container mx-auto px-4 max-w-7xl text-center">
+            <h1 className="text-3xl font-bold text-text-main mb-2">
+              Teklif Sepeti
+            </h1>
+            <p className="text-text-muted">
+              Seçtiğiniz ürünler için fiyat teklifi isteyin.
             </p>
           </div>
         </div>
