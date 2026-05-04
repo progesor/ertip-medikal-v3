@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Metadata } from "next";
 import { CartProvider } from "@/providers/CartProvider";
+import { FloatingActionButton } from "@/components/layout/FloatingActionButton";
 
 // Payload ve Tema Importları
 import { getPayload } from "payload";
@@ -79,6 +80,7 @@ export default async function RootLayout({
       <CartProvider>
         <Header />
         <main className="flex-1 flex flex-col">{children}</main>
+        <FloatingActionButton />
         <Footer />
       </CartProvider>
       </body>

@@ -149,6 +149,204 @@ export const SiteSettings: GlobalConfig = {
       ],
     },
     {
+      name: "floatingAction",
+      label: "Hızlı İletişim Butonu",
+      type: "group",
+      fields: [
+        {
+          name: "enabled",
+          type: "checkbox",
+          label: "Hızlı iletişim butonunu göster",
+          defaultValue: false,
+          admin: {
+            description:
+                "Sitenin sağ veya sol alt köşesinde sabit hızlı iletişim butonu gösterir.",
+          },
+        },
+        {
+          type: "row",
+          fields: [
+            {
+              name: "type",
+              type: "select",
+              label: "Buton Türü",
+              defaultValue: "whatsapp",
+              options: [
+                { label: "WhatsApp", value: "whatsapp" },
+                { label: "Telefon", value: "phone" },
+                { label: "E-posta", value: "email" },
+                { label: "Özel Link", value: "custom" },
+              ],
+              admin: {
+                width: "50%",
+                description:
+                    "WhatsApp seçildiğinde mesaj ve WhatsApp'a özel görünüm seçenekleri kullanılabilir.",
+              },
+            },
+            {
+              name: "position",
+              type: "select",
+              label: "Konum",
+              defaultValue: "bottom-right",
+              options: [
+                { label: "Sağ Alt", value: "bottom-right" },
+                { label: "Sol Alt", value: "bottom-left" },
+              ],
+              admin: {
+                width: "50%",
+              },
+            },
+          ],
+        },
+        {
+          type: "row",
+          fields: [
+            {
+              name: "label",
+              type: "text",
+              label: "Buton Metni",
+              defaultValue: "WhatsApp ile İletişim",
+              admin: {
+                width: "50%",
+                description:
+                    "Buton üzerinde görünecek metin. Sadece ikon görünümünde aria-label olarak kullanılır.",
+              },
+            },
+            {
+              name: "openInNewTab",
+              type: "checkbox",
+              label: "Yeni sekmede aç",
+              defaultValue: true,
+              admin: {
+                width: "50%",
+              },
+            },
+          ],
+        },
+        {
+          type: "row",
+          fields: [
+            {
+              name: "styleMode",
+              type: "select",
+              label: "Renk Stili",
+              defaultValue: "whatsapp",
+              options: [
+                { label: "Tema Rengi ile Uyumlu", value: "theme" },
+                { label: "WhatsApp Yeşili", value: "whatsapp" },
+              ],
+              admin: {
+                width: "50%",
+                description:
+                    "WhatsApp yeşili sadece WhatsApp türü için özel marka görünümü sağlar.",
+              },
+            },
+            {
+              name: "appearance",
+              type: "select",
+              label: "Görünüm Tipi",
+              defaultValue: "pill",
+              options: [
+                { label: "Kapsül Buton", value: "pill" },
+                { label: "Mesaj Balonu", value: "chat-bubble" },
+                { label: "Sadece İkon", value: "icon-only" },
+              ],
+              admin: {
+                width: "50%",
+              },
+            },
+          ],
+        },
+        {
+          type: "row",
+          fields: [
+            {
+              name: "showIcon",
+              type: "checkbox",
+              label: "İkonu göster",
+              defaultValue: true,
+              admin: {
+                width: "50%",
+              },
+            },
+            {
+              name: "showPulse",
+              type: "checkbox",
+              label: "Hafif kıpırdama efekti göster",
+              defaultValue: true,
+              admin: {
+                width: "50%",
+                description:
+                    "Butona belirli aralıklarla çok hafif bir dikkat çekme hareketi verir.",
+              },
+            },
+          ],
+        },
+        {
+          type: "row",
+          fields: [
+            {
+              name: "showHelperText",
+              type: "checkbox",
+              label: "Yardımcı metin göster",
+              defaultValue: false,
+              admin: {
+                width: "50%",
+                description:
+                    "Butonun üstünde küçük bir açıklama balonu gösterir.",
+              },
+            },
+            {
+              name: "helperText",
+              type: "text",
+              label: "Yardımcı Metin",
+              defaultValue: "Size nasıl yardımcı olabiliriz?",
+              admin: {
+                width: "50%",
+              },
+            },
+          ],
+        },
+        {
+          name: "phoneNumber",
+          type: "text",
+          label: "Telefon / WhatsApp Numarası",
+          admin: {
+            description:
+                "WhatsApp ve telefon için ülke kodu ile boşluksuz girin. Örn: 905315149711",
+          },
+        },
+        {
+          name: "message",
+          type: "textarea",
+          label: "Varsayılan WhatsApp Mesajı",
+          defaultValue:
+              "Merhaba, ürünleriniz hakkında bilgi almak istiyorum.",
+          admin: {
+            description:
+                "Sadece WhatsApp türünde kullanılır. Link içinde otomatik encode edilir.",
+          },
+        },
+        {
+          name: "email",
+          type: "email",
+          label: "E-posta Adresi",
+          admin: {
+            description: "Buton türü E-posta ise kullanılır.",
+          },
+        },
+        {
+          name: "customUrl",
+          type: "text",
+          label: "Özel Link",
+          admin: {
+            description:
+                "Buton türü Özel Link ise kullanılır. Örn: /iletisim veya https://...",
+          },
+        },
+      ],
+    },
+    {
       name: "socialMedia",
       label: "Sosyal Medya Linkleri",
       type: "array",

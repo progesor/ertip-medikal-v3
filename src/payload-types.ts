@@ -1562,6 +1562,53 @@ export interface SiteSetting {
     phone?: string | null;
     address?: string | null;
   };
+  floatingAction?: {
+    /**
+     * Sitenin sağ veya sol alt köşesinde sabit hızlı iletişim butonu gösterir.
+     */
+    enabled?: boolean | null;
+    /**
+     * WhatsApp seçildiğinde mesaj ve WhatsApp'a özel görünüm seçenekleri kullanılabilir.
+     */
+    type?: ('whatsapp' | 'phone' | 'email' | 'custom') | null;
+    position?: ('bottom-right' | 'bottom-left') | null;
+    /**
+     * Buton üzerinde görünecek metin. Sadece ikon görünümünde aria-label olarak kullanılır.
+     */
+    label?: string | null;
+    openInNewTab?: boolean | null;
+    /**
+     * WhatsApp yeşili sadece WhatsApp türü için özel marka görünümü sağlar.
+     */
+    styleMode?: ('theme' | 'whatsapp') | null;
+    appearance?: ('pill' | 'chat-bubble' | 'icon-only') | null;
+    showIcon?: boolean | null;
+    /**
+     * Butona belirli aralıklarla çok hafif bir dikkat çekme hareketi verir.
+     */
+    showPulse?: boolean | null;
+    /**
+     * Butonun üstünde küçük bir açıklama balonu gösterir.
+     */
+    showHelperText?: boolean | null;
+    helperText?: string | null;
+    /**
+     * WhatsApp ve telefon için ülke kodu ile boşluksuz girin. Örn: 905315149711
+     */
+    phoneNumber?: string | null;
+    /**
+     * Sadece WhatsApp türünde kullanılır. Link içinde otomatik encode edilir.
+     */
+    message?: string | null;
+    /**
+     * Buton türü E-posta ise kullanılır.
+     */
+    email?: string | null;
+    /**
+     * Buton türü Özel Link ise kullanılır. Örn: /iletisim veya https://...
+     */
+    customUrl?: string | null;
+  };
   socialMedia?:
     | {
         platform?: string | null;
@@ -1711,6 +1758,25 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         email?: T;
         phone?: T;
         address?: T;
+      };
+  floatingAction?:
+    | T
+    | {
+        enabled?: T;
+        type?: T;
+        position?: T;
+        label?: T;
+        openInNewTab?: T;
+        styleMode?: T;
+        appearance?: T;
+        showIcon?: T;
+        showPulse?: T;
+        showHelperText?: T;
+        helperText?: T;
+        phoneNumber?: T;
+        message?: T;
+        email?: T;
+        customUrl?: T;
       };
   socialMedia?:
     | T
