@@ -17,11 +17,13 @@ import { Pages } from "@/collections/Pages";
 import { NewsCategories } from "@/collections/NewsCategories";
 import { QuoteRequests } from "@/collections/QuoteRequests";
 import { DownloadLogs } from "@/collections/DownloadLogs";
+import {Subscribers } from "@/collections/Subscribers";
 
 // Global Importları
 import { SiteSettings } from "@/globals/SiteSettings";
 import { MainMenu } from "@/globals/MainMenu";
 import {EmailSettings} from "@/globals/EmailSettings";
+import {ThemeSettings} from "@/globals/ThemeSettings";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -45,9 +47,10 @@ export default buildConfig({
     NewsCategories,
     QuoteRequests,
     DownloadLogs,
+    Subscribers,
   ],
   // Globals dizisini buraya ekledik
-  globals: [SiteSettings, MainMenu, EmailSettings],
+  globals: [SiteSettings, MainMenu, EmailSettings, ThemeSettings],
   editor: lexicalEditor({}),
   secret: process.env.PAYLOAD_SECRET || "SECRET_KEY_MISSING",
   typescript: {

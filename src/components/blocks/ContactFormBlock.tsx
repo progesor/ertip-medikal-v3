@@ -21,7 +21,8 @@ export function ContactFormBlock({ title, formTitle, description, departments, q
 
                         <div className="space-y-6">
                             {quickContact?.phone && (
-                                <div className="flex items-center gap-6 p-6 bg-white rounded-3xl shadow-sm border border-border">
+                                // bg-white yerine bg-surface kullanıldı
+                                <div className="flex items-center gap-6 p-6 bg-surface rounded-3xl shadow-sm border border-border">
                                     <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
                                         <PhoneCall className="w-6 h-6" />
                                     </div>
@@ -33,7 +34,7 @@ export function ContactFormBlock({ title, formTitle, description, departments, q
                             )}
 
                             {quickContact?.email && (
-                                <div className="flex items-center gap-6 p-6 bg-white rounded-3xl shadow-sm border border-border">
+                                <div className="flex items-center gap-6 p-6 bg-surface rounded-3xl shadow-sm border border-border">
                                     <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
                                         <Mail className="w-6 h-6" />
                                     </div>
@@ -45,12 +46,13 @@ export function ContactFormBlock({ title, formTitle, description, departments, q
                             )}
                         </div>
 
-                        <div className="p-8 bg-text-main rounded-3xl text-white">
+                        {/* bg-text-main yerine temanın en derin rengi olan bg-foreground kullanıldı */}
+                        <div className="p-8 bg-foreground rounded-3xl text-background">
                             <div className="flex items-center gap-3 mb-3">
                                 <ShieldCheck className="w-6 h-6 text-primary" />
                                 <span className="font-bold text-primary">MDR & ISO Kalitesi</span>
                             </div>
-                            <p className="text-sm text-text-muted leading-relaxed italic">
+                            <p className="text-sm text-background/80 leading-relaxed italic">
                                 {quickContact?.descriptionText || "Tüm talepleriniz uluslararası kalite standartları çerçevesinde kayıt altına alınarak en kısa sürede yanıtlanmaktadır."}
                             </p>
                         </div>
@@ -58,7 +60,8 @@ export function ContactFormBlock({ title, formTitle, description, departments, q
 
                     {/* SAĞ BÖLÜM: Dinamik Form */}
                     <div className="lg:col-span-7">
-                        <div className="bg-white p-8 md:p-14 rounded-3xl shadow-2xl shadow-slate-200/50 border border-border">
+                        {/* Statik slate gölgesi kaldırılıp, evrensel black/5 gölgesi eklendi */}
+                        <div className="bg-surface p-8 md:p-14 rounded-3xl shadow-2xl shadow-black/5 border border-border">
                             <div className="mb-10">
                                 <h3 className="text-3xl font-black text-text-main mb-3">{formTitle || "Talep Formu"}</h3>
                                 <div className="w-12 h-1.5 bg-primary rounded-full" />

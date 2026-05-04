@@ -77,6 +77,7 @@ export interface Config {
     'news-categories': NewsCategory;
     'quote-requests': QuoteRequest;
     'download-logs': DownloadLog;
+    subscribers: Subscriber;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -94,6 +95,7 @@ export interface Config {
     'news-categories': NewsCategoriesSelect<false> | NewsCategoriesSelect<true>;
     'quote-requests': QuoteRequestsSelect<false> | QuoteRequestsSelect<true>;
     'download-logs': DownloadLogsSelect<false> | DownloadLogsSelect<true>;
+    subscribers: SubscribersSelect<false> | SubscribersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -107,11 +109,13 @@ export interface Config {
     'site-settings': SiteSetting;
     'main-menu': MainMenu;
     emailSettings: EmailSetting;
+    themeSettings: ThemeSetting;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     'main-menu': MainMenuSelect<false> | MainMenuSelect<true>;
     emailSettings: EmailSettingsSelect<false> | EmailSettingsSelect<true>;
+    themeSettings: ThemeSettingsSelect<false> | ThemeSettingsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -782,6 +786,20 @@ export interface DownloadLog {
   createdAt: string;
 }
 /**
+ * E-bültene kayıt olan kullanıcıların listesi.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subscribers".
+ */
+export interface Subscriber {
+  id: number;
+  email: string;
+  status?: ('active' | 'unsubscribed') | null;
+  source?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -844,6 +862,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'download-logs';
         value: number | DownloadLog;
+      } | null)
+    | ({
+        relationTo: 'subscribers';
+        value: number | Subscriber;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1441,6 +1463,17 @@ export interface DownloadLogsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subscribers_select".
+ */
+export interface SubscribersSelect<T extends boolean = true> {
+  email?: T;
+  status?: T;
+  source?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -1588,6 +1621,23 @@ export interface EmailSetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "themeSettings".
+ */
+export interface ThemeSetting {
+  id: number;
+  /**
+   * Sitenin genel kurumsal kimliğini ve vurgu renklerini belirler.
+   */
+  colorPalette: 'dark-luxury' | 'ocean' | 'emerald' | 'ruby';
+  /**
+   * Kartların, butonların ve formların ne kadar yuvarlak hatlı olacağını belirler.
+   */
+  borderRadius: 'sharp' | 'modern' | 'bubbly';
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
@@ -1698,6 +1748,17 @@ export interface EmailSettingsSelect<T extends boolean = true> {
         email?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "themeSettings_select".
+ */
+export interface ThemeSettingsSelect<T extends boolean = true> {
+  colorPalette?: T;
+  borderRadius?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

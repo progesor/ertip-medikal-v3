@@ -6,29 +6,30 @@ import { Footer } from "@/components/layout/Footer";
 import { Metadata } from "next";
 import { CartProvider } from "@/providers/CartProvider";
 
+// Payload ve Tema Importları
+import { getPayload } from "payload";
+import configPromise from "@payload-config";
+import { themePalettes, radiusConfig } from "@/lib/themeConfig";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  // Sitenin ana URL'ini tanımlıyoruz (Arama motorları için zorunlu)
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "https://www.ertipmedikal.com.tr",
+      process.env.NEXT_PUBLIC_SITE_URL || "https://www.ertipmedikal.com.tr",
   ),
-
   title: {
-    default: "Ertip Medikal | Yenilikçi Medikal Çözümler", // Hiçbir title girilmezse bu görünür
-    template: "%s | Ertip Medikal", // Alt sayfalara girilen başlıkların sonuna otomatik ekler
+    default: "Ertip Medikal | Yenilikçi Medikal Çözümler",
+    template: "%s | Ertip Medikal",
   },
   description:
-    "Sağlık sektörüne yön veren yenilikçi medikal cihazlar. Çeyrek asırlık tecrübemizle güvenilir çözüm ortağınız.",
-
-  // Sosyal Medya (WhatsApp, LinkedIn, Twitter) paylaşım ayarları
+      "Sağlık sektörüne yön veren yenilikçi medikal cihazlar. Çeyrek asırlık tecrübemizle güvenilir çözüm ortağınız.",
   openGraph: {
     type: "website",
     locale: "tr_TR",
     siteName: "Ertip Medikal",
     images: [
       {
-        url: "/og-image.jpg", // public klasörüne sitenin şık bir kapak fotoğrafını koyabilirsin
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "Ertip Medikal Kurumsal",
@@ -40,23 +41,47 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
+export default async function RootLayout({
+                                           children,
+                                         }: {
   children: React.ReactNode;
 }) {
-  return (
-    <html lang="tr" suppressHydrationWarning>
-      <body
-        className={`${inter.className} min-h-screen bg-background text-foreground antialiased flex flex-col`}
-      >
-        <CartProvider>
-          <Header />
-          {/* main elementi sayfanın ortasını dolduracak şekilde flex-1 alır */}
-          <main className="flex-1 flex flex-col">{children}</main>
-          <Footer />
-        </CartProvider>
+  const payload = await getPayload({ config: configPromise });
+
+    let themeSettings;
+    try {
+        themeSettings = await payload.findGlobal({ slug: "themeSettings" });
+    } catch (error) {
+        themeSettings = { colorPalette: "dark-luxury", borderRadius: "modern" };
+    }
+
+    // Seçilen paleti ve yuvarlaklığı config'den al
+    const currentPalette = themePalettes[themeSettings.colorPalette as keyof typeof themePalettes] || themePalettes["dark-luxury"];
+    const currentRadius = radiusConfig[themeSettings.borderRadius as keyof typeof radiusConfig] || radiusConfig["modern"];
+
+    // Seçilen iki objeyi birleştirip :root altına dinamik olarak basıyoruz
+    const themeVariables = { ...currentPalette, ...currentRadius };
+
+    const themeStyleString = `
+    :root {
+      ${Object.entries(themeVariables)
+        .map(([key, value]) => `${key}: ${value};`)
+        .join("\n      ")}
+    }
+  `;
+
+    return (
+        <html lang="tr" suppressHydrationWarning>
+        <body className={`${inter.className} min-h-screen bg-background text-foreground antialiased flex flex-col`}>
+        {/* Tüm CSS değişkenleri burada çalışma anında ezilir */}
+        <style dangerouslySetInnerHTML={{ __html: themeStyleString }} />
+
+      <CartProvider>
+        <Header />
+        <main className="flex-1 flex flex-col">{children}</main>
+        <Footer />
+      </CartProvider>
       </body>
-    </html>
+      </html>
   );
 }

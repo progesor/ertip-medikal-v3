@@ -16,9 +16,9 @@ import { HeroSliderBlock } from "@/components/blocks/HeroSliderBlock";
 import { CertificateGridBlock } from "@/components/blocks/CertificateGridBlock";
 import { ProcessBlock } from "@/components/blocks/ProcessBlock";
 import { CTABlock } from "@/components/blocks/CTABlock";
-import {ContactFormBlock} from "@/components/blocks/ContactFormBlock";
+import { ContactFormBlock } from "@/components/blocks/ContactFormBlock";
 import { Metadata } from "next";
-import {NewsFeedBlock} from "@/components/blocks/NewsFeedBlock";
+import { NewsFeedBlock } from "@/components/blocks/NewsFeedBlock";
 
 export const metadata: Metadata = {
   // absolute: layout.tsx'teki template kuralını ezer ve sadece buradaki metni kullanır
@@ -50,11 +50,11 @@ export default async function HomePage() {
   // Eğer CMS'te 'home' sayfası henüz oluşturulmadıysa bir uyarı gösterelim (veya fallback yapalım)
   if (!homePage) {
     return (
-        <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-10">
-          <h1 className="text-2xl font-bold mb-4 text-slate-400">
+        <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-10 bg-background">
+          <h1 className="text-2xl font-bold mb-4 text-text-main/70">
             Anasayfa Yapılandırılmadı
           </h1>
-          <p className="text-slate-500">
+          <p className="text-text-muted">
             Lütfen Payload CMS üzerinden 'home' slug değerine sahip bir sayfa
             oluşturun ve bloklarınızı ekleyin.
           </p>
@@ -63,7 +63,7 @@ export default async function HomePage() {
   }
 
   return (
-      <main className="flex flex-col">
+      <main className="flex flex-col bg-background">
         {homePage.layout?.map((block: any, index: number) => {
           switch (block.blockType) {
             case "hero":
@@ -104,7 +104,7 @@ export default async function HomePage() {
               return <NewsFeedBlock key={index} {...block} />;
             default:
               return (
-                  <section key={index} className="p-8 bg-red-50 text-red-700">
+                  <section key={index} className="p-8 bg-error/10 text-error font-medium border-y border-error/20">
                     Tanımsız blok: {String(block.blockType)}
                   </section>
               );
