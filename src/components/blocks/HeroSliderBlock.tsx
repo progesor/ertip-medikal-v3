@@ -38,23 +38,23 @@ export function HeroSliderBlock({ slides }: any) {
             />
           ) : (
             // Resim yoksa şık bir kurumsal gradyan
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-primary/20 to-slate-900" />
+            <div className="absolute inset-0 bg-gradient-to-br from-surface-inverse via-primary/20 to-surface-inverse" />
           )}
 
           {/* Karartma Overlay */}
           <div
-            className="absolute inset-0 bg-black"
+            className="absolute inset-0 bg-surface-inverse"
             style={{ opacity: parseFloat(slide.overlayOpacity || "0.4") }}
           />
 
           {/* İçerik */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="container mx-auto px-4 text-center text-white space-y-6">
+            <div className="container mx-auto px-4 text-center text-surface-inverse-foreground space-y-6">
               <h1 className="text-4xl md:text-7xl font-black tracking-tight animate-in fade-in slide-in-from-bottom-8 duration-700">
                 {slide.title}
               </h1>
               {slide.subtitle && (
-                <p className="text-lg md:text-2xl text-white/80 max-w-3xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-12 duration-1000">
+                <p className="text-lg md:text-2xl text-surface-inverse-foreground/80 max-w-3xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-12 duration-1000">
                   {slide.subtitle}
                 </p>
               )}
@@ -79,7 +79,7 @@ export function HeroSliderBlock({ slides }: any) {
         onClick={() =>
           setCurrent(current === 0 ? slides.length - 1 : current - 1)
         }
-        className="absolute left-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur-md transition-all"
+        className="absolute left-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-surface-inverse-foreground/10 hover:bg-surface-inverse-foreground/20 text-surface-inverse-foreground flex items-center justify-center backdrop-blur-md transition-all"
       >
         <ChevronLeft className="w-8 h-8" />
       </button>
@@ -87,7 +87,7 @@ export function HeroSliderBlock({ slides }: any) {
         onClick={() =>
           setCurrent(current === slides.length - 1 ? 0 : current + 1)
         }
-        className="absolute right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur-md transition-all"
+        className="absolute right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-surface-inverse-foreground/10 hover:bg-surface-inverse-foreground/20 text-surface-inverse-foreground flex items-center justify-center backdrop-blur-md transition-all"
       >
         <ChevronRight className="w-8 h-8" />
       </button>
@@ -98,7 +98,7 @@ export function HeroSliderBlock({ slides }: any) {
           <button
             key={i}
             onClick={() => setCurrent(i)}
-            className={`w-3 h-3 rounded-full transition-all ${i === current ? "bg-primary w-8" : "bg-white/30"}`}
+            className={`w-3 h-3 rounded-full transition-all ${i === current ? "bg-primary w-8" : "bg-surface-inverse-foreground/30"}`}
           />
         ))}
       </div>

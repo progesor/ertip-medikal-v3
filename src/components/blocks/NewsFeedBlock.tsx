@@ -23,7 +23,7 @@ export async function NewsFeedBlock({ title, description, limit = 20, showFilter
     });
 
     return (
-        <section className="py-16 md:py-24 bg-white relative">
+        <section className="py-16 md:py-24 bg-background relative">
             <div className="container mx-auto px-4 max-w-7xl">
                 {/* Başlık Alanı */}
                 <div className="max-w-3xl mx-auto text-center mb-12 space-y-4">

@@ -25,7 +25,7 @@ export async function Footer() {
   const gridClass = gridClasses[columnCount as number] || "lg:grid-cols-4";
 
   return (
-  <footer className="bg-foreground text-white/70 pt-20 pb-10 border-t border-white/10">
+  <footer className="bg-surface-inverse text-surface-inverse-foreground/70 pt-20 pb-10 border-t border-surface-inverse-foreground/10">
     <div className="container mx-auto px-4">
       {/* Sütun sayısına göre kendini ayarlayan akıllı grid */}
       <div
@@ -60,7 +60,7 @@ export async function Footer() {
             case "menuColumn":
               return (
                   <div key={index} className="space-y-6">
-                    <h4 className="text-white font-bold uppercase tracking-widest text-sm">
+                    <h4 className="text-surface-inverse-foreground font-bold uppercase tracking-widest text-sm">
                       {column.title}
                     </h4>
                     <ul className="space-y-3">
@@ -68,7 +68,7 @@ export async function Footer() {
                           <li key={i}>
                             <Link
                                 href={item.url || "#"}
-                                className="hover:text-white hover:translate-x-1 transition-all duration-300 inline-block text-sm"
+                                className="hover:text-surface-inverse-foreground hover:translate-x-1 transition-all duration-300 inline-block text-sm"
                             >
                               {item.label}
                             </Link>
@@ -81,7 +81,7 @@ export async function Footer() {
             case "contactColumn":
               return (
                   <div key={index} className="space-y-6">
-                    <h4 className="text-white font-bold uppercase tracking-widest text-sm">
+                    <h4 className="text-surface-inverse-foreground font-bold uppercase tracking-widest text-sm">
                       {column.title}
                     </h4>
                     <ul className="space-y-4">
@@ -114,7 +114,7 @@ export async function Footer() {
       </div>
 
       {/* Alt Bar: Copyright, Yasal Linkler ve Sosyal Medya */}
-      <div className="mt-16 pt-8 border-t border-white/10">
+      <div className="mt-16 pt-8 border-t border-surface-inverse-foreground/10">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-8 text-sm">
           {/* Sol: Copyright ve Yasal Linkler */}
           <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8 text-center md:text-left">
@@ -126,7 +126,7 @@ export async function Footer() {
                       <Link
                           key={i}
                           href={link.url}
-                          className="hover:text-white transition-colors hover:underline underline-offset-4 decoration-primary/50"
+                          className="hover:text-surface-inverse-foreground transition-colors hover:underline underline-offset-4 decoration-primary/50"
                       >
                         {link.label}
                       </Link>
@@ -144,7 +144,7 @@ export async function Footer() {
                         href={social.url}
                         target="_blank"
                         rel="noreferrer"
-                        className="hover:text-white transition-all duration-300 font-medium flex items-center gap-2 group"
+                        className="hover:text-surface-inverse-foreground transition-all duration-300 font-medium flex items-center gap-2 group"
                     >
                       <span className="w-1 h-1 bg-primary rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
                       {social.platform}

@@ -55,6 +55,8 @@ const config = {
 			surface: {
 				DEFAULT: 'hsl(var(--surface))',
 				muted: 'hsl(var(--surface-muted))',
+				inverse: 'hsl(var(--surface-inverse))',
+				'inverse-foreground': 'hsl(var(--surface-inverse-foreground))',
 			},
 			text: {
 				main: 'hsl(var(--text-main))',
@@ -67,6 +69,14 @@ const config = {
 			error: {
 				DEFAULT: 'hsl(var(--error))',
 				foreground: 'hsl(var(--error-foreground))'
+			},
+			warning: {
+				DEFAULT: 'hsl(var(--warning))',
+				foreground: 'hsl(var(--warning-foreground))'
+			},
+			info: {
+				DEFAULT: 'hsl(var(--info))',
+				foreground: 'hsl(var(--info-foreground))'
     			}
     		},
     		borderRadius: {

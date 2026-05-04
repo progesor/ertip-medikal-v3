@@ -63,7 +63,7 @@ export default function QuoteCartPage() {
   if (isSuccess) {
     return (
         <div className="min-h-screen bg-background py-24 flex items-center justify-center">
-          <div className="bg-surface p-12 rounded-[3rem] shadow-sm border border-border text-center max-w-lg">
+          <div className="bg-surface p-12 rounded-[var(--radius-3xl)] shadow-sm border border-border text-center max-w-lg">
             <div className="w-24 h-24 bg-success/10 text-success rounded-full flex items-center justify-center mx-auto mb-6">
               <Send className="w-10 h-10" />
             </div>
@@ -85,12 +85,12 @@ export default function QuoteCartPage() {
   return (
       <div className="bg-background min-h-screen pt-12 pb-24">
         {/* Üst Kısım: Her temada şık duran koyu zemin */}
-        <div className="bg-foreground py-16 mb-12">
+        <div className="bg-surface-inverse py-16 mb-12">
           <div className="container mx-auto px-4 max-w-7xl">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-surface-inverse-foreground mb-4 tracking-tight">
               Teklif Sepeti
             </h1>
-            <p className="text-lg text-white/70">
+            <p className="text-lg text-surface-inverse-foreground/70">
               Seçtiğiniz medikal ürünler için hızlıca fiyat teklifi isteyin.
             </p>
           </div>
@@ -98,7 +98,7 @@ export default function QuoteCartPage() {
 
         <div className="container mx-auto px-4 max-w-7xl">
           {cartItems.length === 0 ? (
-              <div className="bg-surface p-16 rounded-[3rem] shadow-sm border border-border text-center flex flex-col items-center">
+              <div className="bg-surface p-16 rounded-[var(--radius-3xl)] shadow-sm border border-border text-center flex flex-col items-center">
                 <ShoppingCart className="w-20 h-20 text-text-muted/30 mb-6" />
                 <h3 className="text-2xl font-bold text-text-main mb-2">
                   Listeniz Şimdilik Boş
@@ -193,7 +193,7 @@ export default function QuoteCartPage() {
 
                           <button
                               onClick={() => removeFromCart(index)}
-                              className="w-12 h-12 rounded-full flex items-center justify-center text-error/60 hover:text-white hover:bg-error transition-all shrink-0"
+                              className="w-12 h-12 rounded-full flex items-center justify-center text-error/60 hover:text-error-foreground hover:bg-error transition-all shrink-0"
                           >
                             <Trash2 className="w-5 h-5" />
                           </button>
@@ -204,7 +204,7 @@ export default function QuoteCartPage() {
 
                 {/* SAĞ BÖLÜM: İletişim Formu */}
                 <div className="lg:col-span-2">
-                  <div className="bg-surface p-8 rounded-3xl border border-border shadow-xl shadow-black/5 sticky top-24">
+                  <div className="bg-surface p-8 rounded-3xl border border-border shadow-xl shadow-surface-inverse/5 sticky top-24">
                     <h3 className="text-2xl font-bold text-text-main mb-6">
                       İletişim Bilgileriniz
                     </h3>
@@ -218,7 +218,7 @@ export default function QuoteCartPage() {
                             required
                             name="customerName"
                             type="text"
-                            className="w-full px-4 py-3 rounded-xl border border-border bg-background text-text-main focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-text-muted/50"
+                            className="w-full px-4 py-3 rounded-xl border border-border bg-background text-text-main focus:border-primary focus:ring-1 focus:ring-ring outline-none transition-all placeholder:text-text-muted/50"
                             placeholder="Örn: Dr. Ahmet Yılmaz"
                         />
                       </div>
@@ -229,7 +229,7 @@ export default function QuoteCartPage() {
                         <input
                             name="company"
                             type="text"
-                            className="w-full px-4 py-3 rounded-xl border border-border bg-background text-text-main focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-text-muted/50"
+                            className="w-full px-4 py-3 rounded-xl border border-border bg-background text-text-main focus:border-primary focus:ring-1 focus:ring-ring outline-none transition-all placeholder:text-text-muted/50"
                             placeholder="Opsiyonel"
                         />
                       </div>
@@ -242,7 +242,7 @@ export default function QuoteCartPage() {
                               required
                               name="email"
                               type="email"
-                              className="w-full px-4 py-3 rounded-xl border border-border bg-background text-text-main focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-text-muted/50"
+                              className="w-full px-4 py-3 rounded-xl border border-border bg-background text-text-main focus:border-primary focus:ring-1 focus:ring-ring outline-none transition-all placeholder:text-text-muted/50"
                               placeholder="ornek@klinik.com"
                           />
                         </div>
@@ -254,7 +254,7 @@ export default function QuoteCartPage() {
                               required
                               name="phone"
                               type="tel"
-                              className="w-full px-4 py-3 rounded-xl border border-border bg-background text-text-main focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-text-muted/50"
+                              className="w-full px-4 py-3 rounded-xl border border-border bg-background text-text-main focus:border-primary focus:ring-1 focus:ring-ring outline-none transition-all placeholder:text-text-muted/50"
                               placeholder="+90 5XX XXX XX XX"
                           />
                         </div>
@@ -266,7 +266,7 @@ export default function QuoteCartPage() {
                         <textarea
                             name="message"
                             rows={3}
-                            className="w-full px-4 py-3 rounded-xl border border-border bg-background text-text-main focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none placeholder:text-text-muted/50"
+                            className="w-full px-4 py-3 rounded-xl border border-border bg-background text-text-main focus:border-primary focus:ring-1 focus:ring-ring outline-none transition-all resize-none placeholder:text-text-muted/50"
                             placeholder="Belirtmek istediğiniz özel bir durum var mı?"
                         ></textarea>
                       </div>

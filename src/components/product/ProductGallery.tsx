@@ -19,7 +19,7 @@ export function ProductGallery({ images }: { images: ImageType[] }) {
   return (
     <div className="flex flex-col gap-4">
       {/* Ana Görsel (Büyük) */}
-      <div className="relative aspect-square bg-white rounded-2xl overflow-hidden border shadow-sm">
+      <div className="relative aspect-square bg-surface rounded-2xl overflow-hidden border shadow-sm">
         <Image
           src={images[currentIndex].url}
           alt={images[currentIndex].alt || "Ürün Görseli"}
@@ -39,7 +39,7 @@ export function ProductGallery({ images }: { images: ImageType[] }) {
               key={idx}
               onClick={() => setCurrentIndex(idx)}
               className={cn(
-                "relative aspect-square bg-white rounded-lg overflow-hidden transition-all",
+                "relative aspect-square bg-surface rounded-lg overflow-hidden transition-all",
                 currentIndex === idx
                   ? "border-2 border-primary ring-2 ring-primary/20"
                   : "border border-border hover:border-primary/50",

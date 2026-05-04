@@ -4,7 +4,7 @@ export function ContentBlock({ content }: any) {
   if (!content) return null;
 
   return (
-    <section className="w-full py-16 md:py-24 bg-white">
+    <section className="w-full py-16 md:py-24 bg-background">
       <div className="container mx-auto px-4 max-w-4xl">
         <div
           className="

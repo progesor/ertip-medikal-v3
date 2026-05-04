@@ -120,12 +120,12 @@ export default async function ProductsPage({ searchParams }: Props) {
   return (
       <div className="bg-background min-h-screen pt-12 pb-24">
         {/* Üst Başlık (Her temada koyu ve şık durur) */}
-        <div className="bg-foreground py-16 mb-12 border-b-4 border-primary">
+        <div className="bg-surface-inverse py-16 mb-12 border-b-4 border-primary">
           <div className="container mx-auto px-4 max-w-7xl text-center">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-surface-inverse-foreground mb-6 tracking-tight">
               Ürün Kataloğu
             </h1>
-            <p className="text-lg text-white/70 max-w-2xl mx-auto">
+            <p className="text-lg text-surface-inverse-foreground/70 max-w-2xl mx-auto">
               İhtiyacınız olan medikal cihazı, modeli veya SKU kodunu hızlıca
               bulun.
             </p>
@@ -150,7 +150,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                       name="q"
                       defaultValue={q}
                       placeholder="Örn: 110-0625 veya FUE..."
-                      className="w-full pl-4 pr-12 py-3 rounded-xl border border-border bg-background focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm font-medium text-text-main"
+                      className="w-full pl-4 pr-12 py-3 rounded-xl border border-border bg-background focus:border-primary focus:ring-1 focus:ring-ring outline-none transition-all text-sm font-medium text-text-main placeholder:text-text-muted/50"
                   />
                   <button
                       type="submit"
@@ -261,7 +261,7 @@ export default async function ProductsPage({ searchParams }: Props) {
 
               {/* İçerik: Boş Durum veya Izgara */}
               {products.length === 0 ? (
-                  <div className="bg-surface p-16 rounded-[2rem] border border-border shadow-sm text-center flex flex-col items-center justify-center min-h-[400px]">
+                  <div className="bg-surface p-16 rounded-[var(--radius-2xl)] border border-border shadow-sm text-center flex flex-col items-center justify-center min-h-[400px]">
                     <div className="w-20 h-20 bg-surface-muted text-text-muted rounded-full flex items-center justify-center mb-6">
                       <PackageX className="w-10 h-10" />
                     </div>
@@ -289,7 +289,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                         return (
                             <Card
                                 key={product.id}
-                                className="group overflow-hidden rounded-[2rem] border-border shadow-sm hover:shadow-xl hover:border-primary/40 transition-all duration-300 flex flex-col bg-surface"
+                                className="group overflow-hidden rounded-[var(--radius-2xl)] border-border shadow-sm hover:shadow-xl hover:border-primary/40 transition-all duration-300 flex flex-col bg-surface"
                             >
                               <Link
                                   href={`/urunler/${product.slug}`}
@@ -333,7 +333,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                               </CardContent>
                               <CardFooter className="pt-0 pb-6 px-6">
                                 <Button
-                                    className="w-full rounded-xl font-bold bg-foreground text-primary-foreground hover:bg-primary transition-colors"
+                                    className="w-full rounded-xl font-bold bg-surface-inverse text-surface-inverse-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
                                     asChild
                                 >
                                   <Link href={`/urunler/${product.slug}`}>

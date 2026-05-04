@@ -35,12 +35,12 @@ export function GalleryBlock({ title, images }: any) {
             return (
               <div
                 key={index}
-                className="relative break-inside-avoid rounded-2xl overflow-hidden group bg-white shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer"
+                className="relative break-inside-avoid rounded-2xl overflow-hidden group bg-surface shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer"
                 onClick={() => setSelectedImage(imgUrl)} // Tıklanınca resmi state'e at
               >
                 {/* Resim Overlay (Hover Efekti) */}
                 <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 flex items-center justify-center">
-                  <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-primary transform scale-50 group-hover:scale-100 transition-transform duration-500 shadow-xl">
+                  <div className="w-12 h-12 rounded-full bg-surface flex items-center justify-center text-primary transform scale-50 group-hover:scale-100 transition-transform duration-500 shadow-xl">
                     <Maximize2 className="w-6 h-6" />
                   </div>
                 </div>
@@ -67,7 +67,7 @@ export function GalleryBlock({ title, images }: any) {
         >
           {/* Kapatma Butonu */}
           <button
-            className="absolute top-6 right-6 md:top-10 md:right-10 text-white/60 hover:text-white transition-colors z-[101]"
+            className="absolute top-6 right-6 md:top-10 md:right-10 text-surface-inverse-foreground/60 hover:text-surface-inverse-foreground transition-colors z-[101]"
             onClick={() => setSelectedImage(null)}
           >
             <X className="w-10 h-10 md:w-12 md:h-12" />

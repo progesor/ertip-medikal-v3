@@ -31,7 +31,7 @@ export function HeaderActions() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Ürün veya SKU Ara..."
-          className="w-full bg-surface-muted border border-border text-sm rounded-full pl-4 pr-10 py-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+          className="w-full bg-surface-muted border border-border text-sm rounded-[var(--radius-2xl)] pl-4 pr-10 py-2 text-text-main placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring outline-none transition-all"
         />
         <button
           type="submit"
@@ -48,7 +48,7 @@ export function HeaderActions() {
       >
         <ShoppingCart className="w-6 h-6" />
         {cartItems.length > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white shadow-sm">
+          <span className="absolute -top-1 -right-1 bg-error text-error-foreground text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-background shadow-sm">
             {cartItems.length}
           </span>
         )}
@@ -56,7 +56,7 @@ export function HeaderActions() {
 
       {/* ORJİNAL TEKLİF AL BUTONU */}
       <Link href="/iletisim" className="hidden sm:block">
-        <Button variant="default" size="sm" className="rounded-full px-6">
+        <Button variant="default" size="sm" className="rounded-[var(--radius-2xl)] px-6">
           Bize Ulaşın
         </Button>
       </Link>

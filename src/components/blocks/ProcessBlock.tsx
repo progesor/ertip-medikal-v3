@@ -3,7 +3,7 @@ import React from "react";
 
 export function ProcessBlock({ title, steps, showArrows }: any) {
   return (
-    <section className="py-24 bg-white overflow-hidden">
+    <section className="py-24 bg-background overflow-hidden">
       <div className="container mx-auto px-4 max-w-7xl">
         <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-20 text-text-main">
           {title}
@@ -13,7 +13,7 @@ export function ProcessBlock({ title, steps, showArrows }: any) {
           {steps?.map((step: any, i: number) => (
             <React.Fragment key={i}>
               <div className="flex-1 text-center group relative z-10 w-full max-w-xs">
-                <div className="w-20 h-20 rounded-3xl bg-primary text-white flex items-center justify-center text-2xl font-black mx-auto mb-6 shadow-xl shadow-primary/20 group-hover:scale-110 transition-transform duration-300 border-4 border-white">
+                <div className="w-20 h-20 rounded-3xl bg-primary text-primary-foreground flex items-center justify-center text-2xl font-black mx-auto mb-6 shadow-xl shadow-primary/20 group-hover:scale-110 transition-transform duration-300 border-4 border-background">
                   {step.stepNumber}
                 </div>
                 <h4 className="text-xl font-bold text-text-main mb-4">

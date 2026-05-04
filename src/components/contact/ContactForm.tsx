@@ -57,8 +57,8 @@ export function ContactForm({ departments }: { departments?: any[] }) {
     // Başarılı gönderim ekranı
     if (isSuccess) {
         return (
-            <div className="flex flex-col items-center justify-center text-center p-8 bg-green-50 rounded-2xl border border-green-100">
-                <CheckCircle2 className="w-16 h-16 text-green-600 mb-4" />
+            <div className="flex flex-col items-center justify-center text-center p-8 bg-success/10 rounded-2xl border border-success/25">
+                <CheckCircle2 className="w-16 h-16 text-success mb-4" />
                 <h3 className="text-2xl font-bold text-text-main mb-2">Mesajınız Alındı!</h3>
                 <p className="text-text-muted mb-6">
                     Talebiniz ilgili departmanımıza başarıyla iletildi. En kısa sürede sizinle iletişime geçeceğiz.
@@ -77,7 +77,7 @@ export function ContactForm({ departments }: { departments?: any[] }) {
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-                <div className="p-4 bg-red-50 text-red-600 text-sm font-semibold rounded-xl border border-red-100">
+                <div className="p-4 bg-error/10 text-error text-sm font-semibold rounded-xl border border-error/25">
                     {error}
                 </div>
             )}
@@ -89,7 +89,7 @@ export function ContactForm({ departments }: { departments?: any[] }) {
                         required
                         name="name"
                         type="text"
-                        className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                        className="w-full px-4 py-3 rounded-xl border border-border bg-background text-text-main placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring outline-none transition-all"
                         placeholder="Örn: Dr. Ahmet Yılmaz"
                     />
                 </div>
@@ -99,7 +99,7 @@ export function ContactForm({ departments }: { departments?: any[] }) {
                         required
                         name="email"
                         type="email"
-                        className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                        className="w-full px-4 py-3 rounded-xl border border-border bg-background text-text-main placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring outline-none transition-all"
                         placeholder="ornek@klinik.com"
                     />
                 </div>
@@ -111,7 +111,7 @@ export function ContactForm({ departments }: { departments?: any[] }) {
                     <input
                         name="phone"
                         type="tel"
-                        className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                        className="w-full px-4 py-3 rounded-xl border border-border bg-background text-text-main placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring outline-none transition-all"
                         placeholder="+90 5XX XXX XX XX"
                     />
                 </div>
@@ -122,7 +122,7 @@ export function ContactForm({ departments }: { departments?: any[] }) {
                         <label className="text-sm font-bold text-text-main">İlgili Departman</label>
                         <select
                             name="department"
-                            className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all bg-white"
+                            className="w-full px-4 py-3 rounded-xl border border-border bg-background text-text-main focus:border-primary focus:ring-1 focus:ring-ring outline-none transition-all"
                         >
                             <option value="">Genel / Diğer</option>
                             {departments.map((dep: any, index: number) => (
@@ -141,7 +141,7 @@ export function ContactForm({ departments }: { departments?: any[] }) {
                     required
                     name="message"
                     rows={4}
-                    className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
+                    className="w-full px-4 py-3 rounded-xl border border-border bg-background text-text-main placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring outline-none transition-all resize-none"
                     placeholder="Talebinizi detaylıca buraya yazabilirsiniz..."
                 />
             </div>

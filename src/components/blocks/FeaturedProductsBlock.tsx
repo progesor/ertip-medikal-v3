@@ -71,7 +71,7 @@ export async function FeaturedProductsBlock({
           </div>
           <Button
             variant="outline"
-            className="rounded-xl font-bold bg-white"
+            className="rounded-xl font-bold bg-background"
             asChild
           >
             <Link href="/urunler">
@@ -91,7 +91,7 @@ export async function FeaturedProductsBlock({
             return (
               <Card
                 key={product.id}
-                className="group overflow-hidden rounded-2xl border-border shadow-sm hover:shadow-xl hover:border-primary/20 transition-all duration-300 flex flex-col bg-white"
+                className="group overflow-hidden rounded-2xl border-border shadow-sm hover:shadow-xl hover:border-primary/20 transition-all duration-300 flex flex-col bg-surface"
               >
                 <Link
                   href={`/urunler/${product.slug}`}
@@ -107,7 +107,7 @@ export async function FeaturedProductsBlock({
                   />
                   {/* SKU Rozeti */}
                   {product.sku && (
-                    <div className="absolute top-4 right-4 bg-white text-text-muted text-[10px] px-2.5 py-1 rounded-md font-mono font-bold shadow-sm border border-border">
+                    <div className="absolute top-4 right-4 bg-surface text-text-muted text-[10px] px-2.5 py-1 rounded-md font-mono font-bold shadow-sm border border-border">
                       {product.sku}
                     </div>
                   )}

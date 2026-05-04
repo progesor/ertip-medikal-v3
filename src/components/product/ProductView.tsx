@@ -165,7 +165,7 @@ export function ProductView({ product }: any) {
               item.value && (
                 <div
                   key={idx}
-                  className="bg-white border border-border p-5 rounded-2xl shadow-sm"
+                  className="bg-surface border border-border p-5 rounded-2xl shadow-sm"
                 >
                   <p className="text-xs text-text-muted font-bold uppercase tracking-wider mb-1">
                     {item.label}
@@ -241,7 +241,7 @@ export function ProductView({ product }: any) {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50">
+            <tbody className="divide-y divide-border">
               {product.packaging.map((p: any, i: number) => (
                 <tr key={i} className="hover:bg-surface-muted/50 transition-colors">
                   <td className="px-6 py-4 font-bold text-text-muted">
@@ -269,8 +269,8 @@ export function ProductView({ product }: any) {
     <div className="container mx-auto px-4 max-w-7xl pt-12 relative">
       {/* GÖRÜNTÜLEYİCİ MODAL */}
       {verifiedDoc && (
-        <div className="fixed inset-0 z-[100] flex flex-col bg-primary/95 backdrop-blur-md p-2 sm:p-8">
-          <div className="bg-white flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-t-3xl max-w-6xl w-full mx-auto shadow-2xl gap-4">
+        <div className="fixed inset-0 z-[100] flex flex-col bg-surface-inverse/95 backdrop-blur-md p-2 sm:p-8">
+          <div className="bg-surface flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-t-3xl max-w-6xl w-full mx-auto shadow-2xl gap-4">
             <div className="flex flex-col gap-1">
               <h3 className="font-bold text-text-main flex items-center gap-2 line-clamp-1">
                 <FileText className="w-5 h-5 text-primary shrink-0" />{" "}
@@ -290,14 +290,14 @@ export function ProductView({ product }: any) {
                 href={verifiedDoc.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-primary/10 text-primary hover:bg-primary hover:text-white px-5 py-2.5 rounded-2xl text-sm font-bold transition-all shadow-sm"
+                className="flex items-center gap-2 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground px-5 py-2.5 rounded-2xl text-sm font-bold transition-all shadow-sm"
               >
                 <Download className="w-4 h-4" /> İndir / Yeni Sekmede Aç
               </a>
 
               <button
                 onClick={() => setVerifiedDoc(null)}
-                className="p-2.5 bg-red-50 text-red-600 hover:bg-red-500 hover:text-white rounded-2xl transition-all"
+                className="p-2.5 bg-error/10 text-error hover:bg-error hover:text-error-foreground rounded-2xl transition-all"
                 title="Kapat"
               >
                 <X className="w-6 h-6" />
@@ -306,7 +306,7 @@ export function ProductView({ product }: any) {
           </div>
 
           {/* Tarayıcı içi Görüntüleyici (iframe) */}
-          <div className="bg-slate-200 flex-1 max-w-6xl w-full mx-auto rounded-b-3xl overflow-hidden shadow-2xl relative">
+          <div className="bg-surface-muted flex-1 max-w-6xl w-full mx-auto rounded-b-3xl overflow-hidden shadow-2xl relative">
             <iframe
               src={`${verifiedDoc.url}#toolbar=0`}
               className="w-full h-full border-none"
@@ -323,9 +323,9 @@ export function ProductView({ product }: any) {
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            className="fixed bottom-8 right-8 z-[110] bg-white p-4 rounded-2xl shadow-2xl border-l-4 border-l-red-500 flex items-center gap-3 min-w-[300px]"
+            className="fixed bottom-8 right-8 z-[110] bg-surface p-4 rounded-2xl shadow-2xl border-l-4 border-l-error flex items-center gap-3 min-w-[300px]"
           >
-            <div className="w-10 h-10 bg-red-50 text-red-500 rounded-full flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 bg-error/10 text-error rounded-full flex items-center justify-center shrink-0">
               <AlertCircle className="w-5 h-5" />
             </div>
             <div className="flex-1">
@@ -418,8 +418,8 @@ export function ProductView({ product }: any) {
                             }))
                           }
                           className={`px-5 py-2.5 rounded-xl text-sm font-bold border transition-all ${selectedAttrs[attr.name] === val
-                            ? "bg-primary border-primary text-white shadow-lg shadow-primary/20"
-                            : "bg-white border-border text-text-muted hover:border-primary hover:text-primary"
+                            ? "bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/20"
+                            : "bg-surface border-border text-text-muted hover:border-primary hover:text-primary"
                             }`}
                         >
                           {val}
@@ -509,7 +509,7 @@ export function ProductView({ product }: any) {
                       {product.description}
                     </ReactMarkdown>
                   ) : (
-                    <div className="p-4 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl">
+                    <div className="p-4 bg-warning/10 text-warning border border-warning/25 rounded-xl">
                       ⚠️ Bu ürünün açıklaması eski formatta (Lexical) kayıtlı
                       kalmış. Lütfen Admin panelinden bu ürünü düzenleyip
                       açıklamasını HTML/Markdown olarak yeniden yapıştırıp
@@ -580,7 +580,7 @@ export function ProductView({ product }: any) {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-50">
+                <tbody className="divide-y divide-border">
                   {product.variants.map((v: any, i: number) => (
                     <tr
                       key={i}
@@ -593,7 +593,7 @@ export function ProductView({ product }: any) {
                         {v.sku}
                       </td>
                       <td className="px-6 py-4 text-sm">
-                        <span className="flex items-center gap-1 text-green-600 font-bold">
+                        <span className="flex items-center gap-1 text-success font-bold">
                           <Check className="w-4 h-4" /> Stokta Var
                         </span>
                       </td>
@@ -608,7 +608,7 @@ export function ProductView({ product }: any) {
         {videoId && (
           <TabsContent value="video" className="pt-4">
             <div className="max-w-4xl mx-auto">
-              <div className="aspect-video w-full rounded-2xl overflow-hidden shadow-xl border border-border bg-black">
+              <div className="aspect-video w-full rounded-2xl overflow-hidden shadow-xl border border-border bg-surface-inverse">
                 <iframe
                   width="100%"
                   height="100%"
@@ -659,14 +659,14 @@ export function ProductView({ product }: any) {
               {product.protectedDocs?.map((doc: any, i: number) => (
                 <div
                   key={i}
-                  className="p-4 bg-white rounded-2xl border-2 border-dashed border-border"
+                  className="p-4 bg-surface rounded-2xl border-2 border-dashed border-border"
                 >
                   <p className="font-bold text-text-main mb-3">{doc.label}</p>
                   <div className="flex gap-2 relative">
                     <input
                       type="text"
                       placeholder="Erişim Kodu / Seri No"
-                      className="flex-1 px-3 py-2 rounded-xl border border-border text-sm outline-none focus:border-primary"
+                      className="flex-1 px-3 py-2 rounded-xl border border-border bg-background text-text-main placeholder:text-text-muted/50 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-ring"
                       onChange={(e) => setManualCode(e.target.value)}
                     />
                     <Button

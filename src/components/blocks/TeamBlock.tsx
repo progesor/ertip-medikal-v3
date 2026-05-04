@@ -8,7 +8,7 @@ export function TeamBlock({ title, members }: any) {
   if (!members || members.length === 0) return null;
 
   return (
-    <section className="py-24 bg-white">
+    <section className="py-24 bg-background">
       <div className="container mx-auto px-4 max-w-7xl">
         {title && (
           <div className="text-center mb-16">
@@ -40,7 +40,7 @@ export function TeamBlock({ title, members }: any) {
                     unoptimized
                   />
                 </div>
-                <CardContent className="p-6 text-center bg-white relative">
+                <CardContent className="p-6 text-center bg-surface relative">
                   <h3 className="text-xl font-bold text-text-main mb-1">
                     {member.name}
                   </h3>
@@ -52,7 +52,7 @@ export function TeamBlock({ title, members }: any) {
                     <Link
                       href={member.linkedin}
                       target="_blank"
-                      className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-surface-muted text-text-muted hover:bg-[#0A66C2] hover:text-white transition-colors duration-300 shadow-sm"
+                      className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-surface-muted text-text-muted hover:bg-info hover:text-info-foreground transition-colors duration-300 shadow-sm"
                     >
                       <Linkedin className="w-5 h-5" />
                     </Link>

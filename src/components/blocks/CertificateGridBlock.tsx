@@ -43,14 +43,14 @@ export function CertificateGridBlock({ title, certificates }: { title?: string; 
                         <div
                             key={cert.id || i}
                             onClick={() => setSelectedCertIndex(i)}
-                            className="group bg-white rounded-2xl border border-border/60 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 cursor-pointer flex flex-col overflow-hidden"
+                            className="group bg-surface rounded-2xl border border-border/60 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 cursor-pointer flex flex-col overflow-hidden"
                         >
                             {/* A4 Oranında (Dikey) Medya Alanı */}
                             <div className="relative w-full aspect-[1/1.414] bg-border/50 p-6 flex items-center justify-center overflow-hidden border-b border-border">
 
                                 {/* Hover Büyüteç Efekti */}
                                 <div className="absolute inset-0 bg-text-main/5 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-500 z-10 flex items-center justify-center">
-                                    <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-2xl transform scale-50 group-hover:scale-100 transition-transform duration-300">
+                                    <div className="w-14 h-14 bg-surface rounded-full flex items-center justify-center shadow-2xl transform scale-50 group-hover:scale-100 transition-transform duration-300">
                                         <Search className="w-6 h-6 text-primary" />
                                     </div>
                                 </div>
@@ -60,13 +60,13 @@ export function CertificateGridBlock({ title, certificates }: { title?: string; 
                                     src={cert.image?.url || "/placeholder.jpg"}
                                     alt={cert.name}
                                     fill
-                                    className="object-contain p-4 drop-shadow-[0_10px_15px_rgba(0,0,0,0.15)] group-hover:scale-105 transition-transform duration-700 bg-transparent"
+                                    className="object-contain p-4 drop-shadow-[0_10px_15px_hsl(var(--surface-inverse)/0.15)] group-hover:scale-105 transition-transform duration-700 bg-transparent"
                                     unoptimized
                                 />
                             </div>
 
                             {/* Alt Metin Alanı */}
-                            <div className="p-6 text-center flex flex-col flex-grow justify-center bg-white relative z-20">
+                            <div className="p-6 text-center flex flex-col flex-grow justify-center bg-surface relative z-20">
                                 <h3 className="text-base font-bold text-text-main mb-3 line-clamp-2 leading-snug group-hover:text-primary transition-colors">
                                     {cert.name}
                                 </h3>
@@ -88,14 +88,14 @@ export function CertificateGridBlock({ title, certificates }: { title?: string; 
                     onClick={() => setSelectedCertIndex(null)}
                 >
                     <div
-                        className="bg-white w-full max-w-[90rem] h-full max-h-[90vh] rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl flex flex-col lg:flex-row relative"
+                        className="bg-surface w-full max-w-[90rem] h-full max-h-[90vh] rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl flex flex-col lg:flex-row relative"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Üst Navigasyon & Kapatma */}
                         <div className="absolute top-4 right-4 md:top-6 md:right-6 z-50 flex gap-2 md:gap-3">
-                            <button onClick={showPrev} className="p-3 md:p-4 bg-white/90 hover:bg-primary hover:text-white rounded-2xl shadow-xl transition-all text-text-main"><ChevronLeft className="w-5 h-5 md:w-6 md:h-6"/></button>
-                            <button onClick={showNext} className="p-3 md:p-4 bg-white/90 hover:bg-primary hover:text-white rounded-2xl shadow-xl transition-all text-text-main"><ChevronRight className="w-5 h-5 md:w-6 md:h-6"/></button>
-                            <button onClick={() => setSelectedCertIndex(null)} className="p-3 md:p-4 bg-red-50 text-red-600 hover:bg-red-500 hover:text-white rounded-2xl shadow-xl transition-all"><X className="w-5 h-5 md:w-6 md:h-6"/></button>
+                            <button onClick={showPrev} className="p-3 md:p-4 bg-surface/90 hover:bg-primary hover:text-primary-foreground rounded-2xl shadow-xl transition-all text-text-main"><ChevronLeft className="w-5 h-5 md:w-6 md:h-6"/></button>
+                            <button onClick={showNext} className="p-3 md:p-4 bg-surface/90 hover:bg-primary hover:text-primary-foreground rounded-2xl shadow-xl transition-all text-text-main"><ChevronRight className="w-5 h-5 md:w-6 md:h-6"/></button>
+                            <button onClick={() => setSelectedCertIndex(null)} className="p-3 md:p-4 bg-error/10 text-error hover:bg-error hover:text-error-foreground rounded-2xl shadow-xl transition-all"><X className="w-5 h-5 md:w-6 md:h-6"/></button>
                         </div>
 
                         {/* SOL KOLON: DEV EKRAN GÖRÜNTÜLEYİCİ */}
@@ -103,7 +103,7 @@ export function CertificateGridBlock({ title, certificates }: { title?: string; 
                             {currentCert.document?.url ? (
                                 <iframe
                                     src={`${currentCert.document.url}#toolbar=0&view=Fit`}
-                                    className="w-full h-full border-none bg-white"
+                                    className="w-full h-full border-none bg-surface"
                                     title={currentCert.name}
                                 />
                             ) : (
@@ -120,7 +120,7 @@ export function CertificateGridBlock({ title, certificates }: { title?: string; 
                         </div>
 
                         {/* SAĞ KOLON: BİLGİ VE İNDİRME PANELİ */}
-                        <div className="w-full lg:w-1/3 p-8 md:p-14 flex flex-col bg-white overflow-y-auto">
+                        <div className="w-full lg:w-1/3 p-8 md:p-14 flex flex-col bg-surface overflow-y-auto">
                             <div className="mb-auto">
                                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface-muted border border-border text-text-muted font-bold text-xs mb-8 uppercase tracking-widest">
                                     <FileText className="w-4 h-4 text-primary" /> Resmi Belge
@@ -150,7 +150,7 @@ export function CertificateGridBlock({ title, certificates }: { title?: string; 
                             <div className="pt-10 mt-10 border-t border-border">
                                 {currentCert.document?.url ? (
                                     <div className="space-y-4">
-                                        <Button className="w-full h-16 rounded-2xl text-lg font-bold bg-text-main text-white hover:bg-primary transition-all shadow-xl hover:shadow-primary/20" asChild>
+                                        <Button className="w-full h-16 rounded-2xl text-lg font-bold bg-surface-inverse text-surface-inverse-foreground hover:bg-primary hover:text-primary-foreground transition-all shadow-xl hover:shadow-primary/20" asChild>
                                             <a href={currentCert.document.url} target="_blank" rel="noopener noreferrer">
                                                 <Download className="w-6 h-6 mr-3" /> PDF Olarak Görüntüle
                                             </a>

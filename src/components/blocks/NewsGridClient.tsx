@@ -30,8 +30,8 @@ export function NewsGridClient({ initialNews, categories, showFilters }: any) {
                         onClick={() => setActiveCategory(null)}
                         className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
                             activeCategory === null
-                                ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105"
-                                : "bg-white text-text-muted hover:bg-slate-200 border border-border"
+                                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-105"
+                                : "bg-surface text-text-muted hover:bg-surface-muted border border-border"
                         }`}
                     >
                         Tümü
@@ -42,8 +42,8 @@ export function NewsGridClient({ initialNews, categories, showFilters }: any) {
                             onClick={() => setActiveCategory(cat.id)}
                             className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
                                 activeCategory === cat.id
-                                    ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105"
-                                    : "bg-white text-text-muted hover:bg-slate-200 border border-border"
+                                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-105"
+                                    : "bg-surface text-text-muted hover:bg-surface-muted border border-border"
                             }`}
                         >
                             {cat.title}
@@ -73,7 +73,7 @@ export function NewsGridClient({ initialNews, categories, showFilters }: any) {
                         const categoryTitle = typeof item.category === "object" ? item.category?.title : null;
 
                         return (
-                            <Card key={item.id} className="group overflow-hidden rounded-2xl border-0 bg-white shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 flex flex-col">
+                            <Card key={item.id} className="group overflow-hidden rounded-2xl border-0 bg-surface shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 flex flex-col">
                                 <Link href={`/haberler/${item.slug || item.id}`} className="relative block aspect-[16/9] overflow-hidden">
                                     <Image
                                         src={imageUrl}
@@ -85,12 +85,12 @@ export function NewsGridClient({ initialNews, categories, showFilters }: any) {
                                     />
                                     {categoryTitle && (
                                         <div className="absolute top-4 left-4 z-10">
-                                            <Badge className="bg-white/90 text-primary hover:bg-white backdrop-blur-sm shadow-sm font-bold px-3 py-1.5">
+                                            <Badge className="bg-surface/90 text-primary hover:bg-surface backdrop-blur-sm shadow-sm font-bold px-3 py-1.5">
                                                 {categoryTitle}
                                             </Badge>
                                         </div>
                                     )}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-surface-inverse/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                 </Link>
 
                                 <CardContent className="p-8 flex flex-col flex-grow">

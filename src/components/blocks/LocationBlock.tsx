@@ -17,10 +17,10 @@ export function LocationBlock({ title, locations }: any) {
                 {/* Çoklu Lokasyon Izgarası (Grid) */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {locations.map((loc: any, i: number) => (
-                        <div key={i} className="flex flex-col bg-white rounded-3xl shadow-sm hover:shadow-xl transition-shadow border border-border overflow-hidden">
+                        <div key={i} className="flex flex-col bg-surface rounded-3xl shadow-sm hover:shadow-xl transition-shadow border border-border overflow-hidden">
 
                             {/* Harita Alanı (Üstte) */}
-                            <div className="h-64 w-full bg-slate-200 relative border-b border-border">
+                            <div className="h-64 w-full bg-surface-muted relative border-b border-border">
                                 {loc.mapUrl ? (
                                     <iframe src={loc.mapUrl} className="w-full h-full border-none" allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
                                 ) : (

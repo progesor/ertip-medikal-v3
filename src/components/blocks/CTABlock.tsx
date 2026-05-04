@@ -15,14 +15,14 @@ export function CTABlock({
   return (
     <section className="py-12 container mx-auto px-4">
       <div
-        className={`rounded-3xl p-12 md:p-20 text-center space-y-8 shadow-2xl relative overflow-hidden ${isDark ? "bg-text-main text-white" : "bg-primary text-white"}`}
+        className={`rounded-3xl p-12 md:p-20 text-center space-y-8 shadow-2xl relative overflow-hidden ${isDark ? "bg-surface-inverse text-surface-inverse-foreground" : "bg-primary text-primary-foreground"}`}
       >
         <div className="relative z-10 space-y-6">
           <h2 className="text-3xl md:text-5xl font-black tracking-tight max-w-4xl mx-auto">
             {title}
           </h2>
           {description && (
-            <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto">
+            <p className={`text-lg md:text-xl max-w-2xl mx-auto ${isDark ? "text-surface-inverse-foreground/80" : "text-primary-foreground/80"}`}>
               {description}
             </p>
           )}
@@ -30,7 +30,7 @@ export function CTABlock({
             <Button
               size="lg"
               variant="secondary"
-              className="rounded-full px-10 h-14 text-lg font-bold bg-white text-primary hover:bg-surface-muted"
+              className="rounded-full px-10 h-14 text-lg font-bold bg-background text-primary hover:bg-surface-muted"
               asChild
             >
               <Link href={buttonLink}>
@@ -40,7 +40,7 @@ export function CTABlock({
           </div>
         </div>
         {/* Dekoratif Işık */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 blur-[100px] rounded-full -mr-20 -mt-20" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-background/10 blur-[100px] rounded-full -mr-20 -mt-20" />
       </div>
     </section>
   );

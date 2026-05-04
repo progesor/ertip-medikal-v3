@@ -7,7 +7,7 @@ export function TestimonialBlock({ title, testimonials }: any) {
   if (!testimonials || testimonials.length === 0) return null;
 
   return (
-    <section className="py-24 bg-white">
+    <section className="py-24 bg-background">
       <div className="container mx-auto px-4 max-w-7xl">
         {title && (
           <div className="text-center mb-16">

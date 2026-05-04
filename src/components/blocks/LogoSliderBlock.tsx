@@ -5,7 +5,7 @@ export function LogoSliderBlock({ title, logos }: any) {
   if (!logos || logos.length === 0) return null;
 
   return (
-    <section className="py-16 bg-white overflow-hidden border-y border-border">
+    <section className="py-16 bg-background overflow-hidden border-y border-border">
       <div className="container mx-auto px-4 mb-8 text-center">
         {title && (
           <h3 className="text-xl font-bold text-text-muted uppercase tracking-widest">

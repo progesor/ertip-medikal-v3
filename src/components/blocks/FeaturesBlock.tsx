@@ -39,10 +39,10 @@ export function FeaturesBlock({ title, subtitle, features }: any) {
             return (
               <Card
                 key={index}
-                className="border-0 shadow-sm hover:shadow-xl transition-all duration-300 group bg-white rounded-3xl"
+                className="border-0 shadow-sm hover:shadow-xl transition-all duration-300 group bg-surface rounded-3xl"
               >
                 <CardHeader>
-                  <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors duration-300 text-primary">
+                  <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300 text-primary">
                     <IconComponent className="w-7 h-7" />
                   </div>
                   <CardTitle className="text-xl font-bold text-text-main">

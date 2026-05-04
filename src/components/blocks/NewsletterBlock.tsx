@@ -70,10 +70,10 @@ export function NewsletterBlock({ title, description, buttonText }: any) {
                     required
                     disabled={status === "loading" || status === "success"}
                     // Input placeholder'ı ve metni primary-foreground oldu
-                    className="h-14 rounded-full bg-background/10 border-background/20 text-primary-foreground placeholder:text-primary-foreground/50 px-6 focus-visible:ring-background text-lg w-full"
+                    className="h-14 rounded-full bg-background/10 border-background/20 text-primary-foreground placeholder:text-primary-foreground/50 px-6 focus-visible:ring-ring text-lg w-full"
                 />
                 {status === "error" && (
-                    <p className="absolute -bottom-6 left-4 text-sm text-red-200 flex items-center">
+                    <p className="absolute -bottom-6 left-4 text-sm text-error-foreground flex items-center">
                       <AlertCircle className="w-3 h-3 mr-1" /> {errorMessage}
                     </p>
                 )}
@@ -90,7 +90,7 @@ export function NewsletterBlock({ title, description, buttonText }: any) {
                     "Kayıt..."
                 ) : status === "success" ? (
                     <>
-                      <CheckCircle2 className="w-5 h-5 mr-2 text-green-500" /> Başarılı
+                      <CheckCircle2 className="w-5 h-5 mr-2 text-success" /> Başarılı
                     </>
                 ) : (
                     <>

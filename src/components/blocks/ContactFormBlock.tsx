@@ -21,7 +21,7 @@ export function ContactFormBlock({ title, formTitle, description, departments, q
 
                         <div className="space-y-6">
                             {quickContact?.phone && (
-                                // bg-white yerine bg-surface kullanıldı
+                                // Kart yüzeyi tema kontrollü surface token'ını kullanır.
                                 <div className="flex items-center gap-6 p-6 bg-surface rounded-3xl shadow-sm border border-border">
                                     <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
                                         <PhoneCall className="w-6 h-6" />
@@ -60,8 +60,8 @@ export function ContactFormBlock({ title, formTitle, description, departments, q
 
                     {/* SAĞ BÖLÜM: Dinamik Form */}
                     <div className="lg:col-span-7">
-                        {/* Statik slate gölgesi kaldırılıp, evrensel black/5 gölgesi eklendi */}
-                        <div className="bg-surface p-8 md:p-14 rounded-3xl shadow-2xl shadow-black/5 border border-border">
+                        {/* Form kartı tema kontrollü yüzey ve gölge token'larını kullanır. */}
+                        <div className="bg-surface p-8 md:p-14 rounded-3xl shadow-2xl shadow-surface-inverse/5 border border-border">
                             <div className="mb-10">
                                 <h3 className="text-3xl font-black text-text-main mb-3">{formTitle || "Talep Formu"}</h3>
                                 <div className="w-12 h-1.5 bg-primary rounded-full" />
