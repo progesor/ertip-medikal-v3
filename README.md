@@ -1,80 +1,363 @@
-# Ertip Medikal v3.0 - Kurumsal Web Sitesi ve B2B Medikal Portal
+# Ertip Medikal v3
 
-Bu proje, Ertip Medikal'in kurumsal web yüzünü, ürün bilgi yönetimini (PIM) ve B2B Teklif Toplama (RFQ) sistemini modernize etmek amacıyla geliştirilmiş tam yığın (full-stack) bir monorepo uygulamasıdır. Standart bir web sitesinden ziyade, Tıbbi Cihaz Tüzüğü (MDR) standartlarına uyumlu çalışan, yüksek performanslı bir medikal portaldır.
+Ertip Medikal v3, medikal cihaz ve saç ekimi enstrümanları üreticisi için geliştirilen kurumsal web sitesi, ürün bilgi yönetimi (PIM), B2B teklif toplama (RFQ) ve Payload CMS tabanlı içerik yönetim platformudur.
 
-## 🏗 Mimari ve Teknoloji Yığını
+Proje yalnızca tanıtım sitesi değildir. Ürün katalog yönetimi, varyant/SKU üretimi, korumalı doküman erişimi, teklif sepeti, dinamik tema sistemi, CMS sayfa blokları, haberler, sertifikalar, iletişim talepleri ve hızlı iletişim aksiyonlarını tek Next.js uygulaması içinde toplar.
 
-Sistem, geleneksel "Headless CMS" mantığını bir adım öteye taşıyıp Frontend ve Backend'i aynı çatı altında birleştiren yeni nesil Next.js + Payload 3.0 mimarisi üzerine kurulmuştur.
+## İş Amacı
 
-- **Framework:** Next.js 15 (App Router, Server Components, Bölünmüş İstemci/Sunucu Mimarisi)
-- **İçerik Yönetim Sistemi (CMS):** Payload CMS v3.0 (Next.js Plugin)
-- **Veritabanı:** PostgreSQL 16 (Yerel geliştirme için Docker Compose)
-- **ORM:** Drizzle ORM
-- **Stil ve Arayüz:** Tailwind CSS, Shadcn/UI, Lucide Icons, Framer Motion
-- **Zengin Metin & Tipografi:** md-editor-rt (Admin tarafı Markdown), react-markdown, @tailwindcss/typography (Frontend)
-- **Global State:** Context API (CartProvider)
+- Ertip Medikal markasını uluslararası, güvenilir ve premium bir medikal üretici kimliğiyle sunmak.
+- Ürünleri kategori, varyant, teknik özellik, galeri ve dokümanlarıyla yönetilebilir hale getirmek.
+- B2B müşterilerin ürün varyantlarını sepete ekleyip teklif talebi göndermesini sağlamak.
+- Halka açık kataloglar ile erişim kodu gerektiren teknik/kullanım dokümanlarını ayırmak.
+- İçerik ekiplerine Payload CMS üzerinden tema, header, footer, sayfa blokları ve iletişim alanlarını yönetme imkanı vermek.
 
-## 🗂 Klasör ve Rota Mimarisi (Hybrid Routing)
+## Teknoloji Yığını
 
-Proje, stil çakışmalarını önlemek ve performansı artırmak için izole alanlara bölünmüş; "İçerik" ve "Uygulama" ayrımını yapacak stratejik bir hibrit mimari ile tasarlanmıştır:
+| Katman | Teknoloji |
+| --- | --- |
+| Framework | Next.js 16.2.3, App Router |
+| CMS | Payload CMS 3.79.1 |
+| Veritabanı | PostgreSQL, `@payloadcms/db-postgres` |
+| UI | React 19 RC, Tailwind CSS, Shadcn tarzı UI primitives |
+| İkonlar | Lucide React |
+| Animasyon | Framer Motion |
+| Zengin metin | Payload Lexical, `react-markdown`, `md-editor-rt` |
+| Stil altyapısı | CSS değişkenleri, Tailwind theme tokenları, `@tailwindcss/typography` |
+| E-posta | Payload Nodemailer adapter |
+| Yardımcı araçlar | Drizzle Kit, Sharp, ESLint, TypeScript |
 
-- `src/app/(payload)`: Yöneticilerin kullanacağı Payload CMS admin paneli. Akıllı URL'ler ve Merkezi SEO blokları ile özelleştirilmiştir.
-- **Dinamik İçerik Rotaları (`src/app/(website)/[slug]/page.tsx`):** Anasayfa, İletişim, Haberler ve Sertifikalar gibi içerik odaklı sayfalar Payload "Page Builder" üzerinden yönetilir. Sayfalar tamamen CMS üzerinden sürükle-bırak bloklarla inşa edilir.
-- **Statik Uygulama Rotaları (`/urunler` & `/teklif-sepeti`):** Derin arama (Deep Search), URL parametreli sayfalama ve Global State (Sepet) gerektiren kritik B2B modülleri; güvenlik ve sistem stabilitesi amacıyla (adminlerin yanlışlıkla silmesini önlemek için) koda gömülü statik rotalar olarak korunmuştur.
+## Mimari
 
----
+Proje hibrit bir Next.js + Payload mimarisi kullanır.
 
-## ✅ Tamamlanan Aşamalar ve Geliştirme Fazları
+- `src/app/(payload)`: Payload admin, REST API ve GraphQL route grubu.
+- `src/app/(website)`: Kamuya açık web sitesi.
+- `src/app/(website)/[slug]/page.tsx`: Payload `pages` koleksiyonundaki CMS sayfalarını Page Builder bloklarıyla render eder.
+- `src/app/(website)/urunler`: Ürün katalog rotası. CMS bloklarına dönüştürülmemelidir.
+- `src/app/(website)/urunler/[slug]`: Ürün detay rotası.
+- `src/app/(website)/teklif-sepeti`: B2B teklif sepeti ve RFQ formu. CMS bloklarına dönüştürülmemelidir.
+- `src/app/api/verify-manual/route.ts`: Korumalı ürün dokümanı erişim kodu doğrulama API’si.
 
-### Faz 0: Proje İskeleti ve Veritabanı Hazırlığı
-- [x] Next.js 15 ve Payload 3.0 monorepo iskeletinin kurulması ve versiyon sabitlemesi.
-- [x] Docker Compose ile PostgreSQL 16 veritabanı entegrasyonu ve Drizzle ORM bağlantıları.
-- [x] Turbopack ve React Context çakışmalarının giderilerek stabil geliştirme ortamının sağlanması.
+## Temel Klasörler
 
-### Faz 1: CMS ve Zeki Veri Mimarisi (Backend)
-- [x] **Akıllı Alanlar & Bloklar:** Otomatik URL üreten `slugField`, merkezi `metaFields` (SEO) altyapısı ve 15+ dinamik blok barındıran gelişmiş Page Builder mimarisi.
-- [x] **Gelişmiş PIM (Products):** Medikal cihazlara özel dinamik teknik özellikler (Specs), Lojistik boyutları (G-Y-D, Ağırlık), çoklu ambalajlama (Packaging) seçenekleri ve esnek yerleşim modülleri (Sidebar/Wide).
-- [x] **Akıllı SKU Motoru:** Varyant (Çap/Uzunluk vb.) kombinasyonlarını (Kartezyen çarpım) otomatik hesaplayıp medikal SKU barkodları üreten hook mimarisi.
-- [x] **Dinamik Vitrin Motoru:** Admin panelindeki `isFeatured` (Öne Çıkar) işaretine göre anasayfada ürünleri otomatik derleyen ve listeleyen akıllı blok yapısı (`FeaturedProductsBlock`).
-- [x] **Karanlık Mod Destekli Editör:** Payload'un standart Lexical editörü yerine, anlık önizlemeli (Split-View) özel Markdown Editör (`md-editor-rt`) entegrasyonu.
+| Yol | Açıklama |
+| --- | --- |
+| `src/collections` | Payload koleksiyonları |
+| `src/globals` | Payload global ayarları |
+| `src/blocks` | Payload Page Builder blok şemaları |
+| `src/components/blocks` | CMS bloklarının frontend render bileşenleri |
+| `src/components/layout` | Header, Footer, FloatingActionButton, HeaderActions |
+| `src/components/product` | Ürün detay ve galeri bileşenleri |
+| `src/components/admin` | Payload admin özel bileşenleri |
+| `src/providers` | React context provider’ları, özellikle `CartProvider` |
+| `src/lib/themeConfig.ts` | Tema paletleri ve radius presetleri |
+| `src/styles/globals.css` | Tailwind ve varsayılan CSS değişkenleri |
+| `src/payload.config.ts` | Payload ana konfigürasyonu |
 
-### Faz 2: Müşteri Arayüzü ve Akıllı Katalog (Frontend)
-- [x] **Merkezi & Derin Arama (Deep Search):** Sadece ana ürün başlıklarında değil, iç içe geçmiş dizilerdeki (array) varyant SKU'larında da arama yapabilen aktif arama motoru.
-- [x] **Sayfalama (Pagination):** Performansı koruyan, URL arama parametreleri ile senkronize Next.js 15 Server-Side sayfalama sistemi.
-- [x] **Bağlamsal Navigasyon:** Ürün detay sayfalarında Google SEO dostu "Breadcrumb" yapısı ve CMS'ten otomatik/manuel çekilen "İlişkili Ürünler" vitrini.
-- [x] **Tasarım & Tipografi:** Shadcn UI ve Tailwind Typography eklentisi ile kusursuz Markdown render, teknik dokümantasyon görünümü (Pill etiketleri, detaylı tablolar).
+## Payload Koleksiyonları
 
-### Faz 3: B2B E-Ticaret ve Teklif Sistemi (RFQ)
-- [x] **Global Sepet Yönetimi:** Context API tabanlı, `localStorage` senkronizasyonlu, miktar güncellemelerini (+/-) ve mükerrer SKU çakışmalarını hatasız yöneten `CartProvider`.
-- [x] **Mikro Etkileşimler:** Framer Motion ile tasarlanmış, sepet bildirimlerini ekrana pürüzsüz kaydırarak getiren Toast sistemi ve anlık güncellenen Header sepet rozeti.
-- [x] **B2B Teklif İsteme Formu:** Seçilen varyantların ve miktarların tek ekranda toplanıp, form verileriyle birlikte doğrudan CMS'teki "Teklif Talepleri" (QuoteRequests) havuzuna aktarıldığı B2B RFQ altyapısı.
+| Koleksiyon | Amaç |
+| --- | --- |
+| `users` | Payload admin kullanıcıları |
+| `media` | Görsel, PDF ve medya yüklemeleri |
+| `products` | Ürün/PIM sistemi |
+| `categories` | Ürün kategorileri ve üst kategori ilişkisi |
+| `pages` | CMS Page Builder sayfaları |
+| `news` | Haber/duyuru içerikleri |
+| `news-categories` | Haber kategorileri |
+| `inquiries` | İletişim formu talepleri |
+| `quote-requests` | B2B teklif talepleri |
+| `download-logs` | Korumalı doküman erişim kayıtları |
+| `subscribers` | E-bülten aboneleri |
 
-### Faz 4: MDR Uyumlu Dokümantasyon ve Güvenlik (Medikal Portal)
-- [x] **Güvenli Doküman Yönetimi:** Ürün sayfalarında halka açık broşürler ile yalnızca seri numarası/kod ile erişilebilen şifreli teknik kılavuzların ayrıştırılması.
-- [x] **Kayıt ve İzlenebilirlik (Loglama):** Tıbbi Cihaz Tüzüğü (MDR) standartlarına uygun olarak; kilitli belgelere erişen kullanıcıların IP, Lokasyon ve User-Agent verilerinin Payload üzerindeki `DownloadLogs` tablosunda tutulması.
-- [x] **Uygulama İçi (In-App) PDF Görüntüleyici:** Tarayıcıların popup engelleyicilerine (ad-blocker) takılmayan, indirme ipucu (Hint) barındıran şık ve güvenli doküman görüntüleme modalı.
-- [x] **Otomatik QR Doğrulama:** Ürün etiketlerindeki QR kod okutulduğunda (`?tab=docs&code=...`), kullanıcının şifre girmesine gerek kalmadan arkaplanda (`/api/verify-manual`) doğrulama yapıp doğrudan kılavuzu açan otonom yapı.
+## Payload Global Ayarları
 
-### Faz 5: Dinamik Kurumsal Ağ (Headless Page Builder)
-- [x] **Güven Merkezi (Sertifikalar):** ISO ve CE belgeleri için özel PDF okuyucu (iframe) entegreli, gerçek A4 formatında (Drop Shadow) tasarlanmış `CertificateGridBlock` modülü.
-- [x] **İletişim Hub'ı:** Çoklu üretim tesislerini (Şişli, Bozkurt vb.) Google Maps iframe entegrasyonu ile sunan `LocationBlock` ve dinamik departman seçimine (Teknik Destek, İhracat vb.) sahip `ContactFormBlock` modülleri.
-- [x] **Haber & Etkinlik Akışı:** Sayfa yenilenmeden istemci tarafında (Client-Side) anında kategori filtrelemesi yapabilen akıllı `NewsFeedBlock` mimarisi.
+| Global | İçerik |
+| --- | --- |
+| `site-settings` | Logo, header, iletişim, hızlı iletişim butonu, sosyal medya, footer |
+| `main-menu` | Header ana navigasyon linkleri |
+| `emailSettings` | İletişim ve teklif bildirim alıcıları |
+| `themeSettings` | Renk paleti, radius ayarı ve canlı tema önizlemesi |
 
----
+## Site Settings Sistemi
 
-## 🚀 Yapılacaklar Listesi (Next Steps)
+`src/globals/SiteSettings.ts` site genelini yöneten ana globaldir.
 
-Projenin bir sonraki aşamasında eklenecek özellikler şunlardır:
+### Genel Logo Alanları
 
-1. **Talep Bildirim API'si (Nodemailer/Resend):** Yeni bir teklif veya iletişim formu talebi geldiğinde yöneticilere ve müşteriye otomatik konfirmasyon maili gönderen SMTP altyapısının kurulması.
-2. **Çoklu Dil (i18n) Desteği:** Özellikle hedef pazarlar olan Avrupa ve Asya için İngilizce ve diğer dil seçeneklerinin (Payload Localized Fields ile) entegre edilmesi.
-3. **DevOps (Canlıya Alma):** VPS (DigitalOcean vb.) üzerinden CI/CD pipeline kurulumu ve production ortamına deploy süreçlerinin başlatılması.
+- `siteLogo`: Renkli ana logo.
+- `whiteLogo`: Footer veya koyu zeminler için beyaz logo.
+- `symbolLogo`: Yazısız/sembol logo. Header, kompakt alanlar veya mobil görünümler için kullanılabilir.
 
-## 🛠 Geliştirici Ortamını Başlatma
+### Dinamik Header Ayarları
 
-Yerel geliştirme ortamını kurmak için aşağıdaki adımları izleyin:
+Header artık CMS üzerinden yönetilir:
+
+- `showLogoInHeader`
+- `headerLogoVariant`: `auto`, `default`, `white`, `symbol`
+- `showCompanyNameInHeader`
+- `showTaglineInHeader`
+- `headerCompanyName`
+- `headerTagline`
+- `headerLayout`: `default`, `compact`, `brand`
+- `headerCtaLabel`
+- `headerCtaHref`
+
+Header boş kalmayacak şekilde güvenli fallback içerir. Logo ve metin kapatılsa bile firma adıyla güvenli marka görünümü korunur.
+
+### Footer Ayarları
+
+Footer kolonları blok tabanlıdır:
+
+- `textColumn`
+- `menuColumn`
+- `contactColumn`
+
+Footer koyu/inverse tema tokenlarıyla çalışır ve `whiteLogo` varsa onu, yoksa ana logoyu kullanır.
+
+### Hızlı İletişim Butonu
+
+`floatingAction` grubu sabit hızlı iletişim butonunu yönetir:
+
+- Tür: WhatsApp, telefon, e-posta, özel link.
+- Konum: sağ alt veya sol alt.
+- Görünüm: kapsül, mesaj balonu, sadece ikon.
+- Renk stili: tema rengi veya WhatsApp yeşili.
+- Metin, yardımcı metin, ikon görünürlüğü, yeni sekmede açma ve hafif hareket efekti.
+
+Frontend bileşeni: `src/components/layout/FloatingActionButton.tsx`.
+
+## Tema Sistemi
+
+Tema altyapısı CSS değişkenleri, Tailwind tokenları, `ThemeSettings` globali ve `themeConfig.ts` üzerinden çalışır.
+
+### Paletler
+
+Mevcut paletler:
+
+- `dark-luxury`
+- `medical-blue`
+- `medical-aqua`
+- `ocean`
+- `emerald`
+- `clinical-mint`
+- `premium-navy`
+- `surgical-teal`
+- `ruby`
+
+### Önemli Tokenlar
+
+- Ana: `primary`, `background`, `foreground`, `card`, `muted`, `accent`, `border`, `input`, `ring`
+- Yüzey: `surface`, `surface-muted`, `surface-inverse`, `surface-inverse-foreground`
+- Metin: `text-main`, `text-muted`
+- Durum: `success`, `error`, `warning`, `info`, `destructive`
+- Radius: `--radius`, `--radius-xl`, `--radius-2xl`, `--radius-3xl`
+
+`src/app/(website)/layout.tsx`, `themeSettings` globalinden seçilen palet ve radius değerlerini runtime’da `:root` değişkenleri olarak basar.
+
+### Admin Önizleme
+
+`src/components/admin/ThemePreview.tsx`, Payload admin içinde tema paletini ve radius ayarını canlı önizler. Butonlar, kartlar, ürün kartı benzeri yüzeyler, formlar, durum renkleri, inverse/footer alanı, rich text örneği ve token swatch’ları içerir.
+
+## CMS Page Builder Blokları
+
+`pages` koleksiyonu aşağıdaki blokları destekler:
+
+- `HeroBlock`
+- `HeroSliderBlock`
+- `ContentBlock`
+- `FeaturesBlock`
+- `FeaturedProductsBlock`
+- `FAQBlock`
+- `TestimonialBlock`
+- `StatsBlock`
+- `GalleryBlock`
+- `LogoSliderBlock`
+- `LocationBlock`
+- `TeamBlock`
+- `NewsletterBlock`
+- `CertificateGridBlock`
+- `ProcessBlock`
+- `CTABlock`
+- `ContactFormBlock`
+- `NewsFeedBlock`
+
+### Esnek Yerleşim İyileştirmeleri
+
+Son geliştirmelerde önemli bloklar içerik sayısına göre daha akıllı render edilmeye başladı:
+
+- `FeaturesBlock`: `layoutMode` (`auto`, `grid`, `featured`, `compact`) ve `alignment`.
+- `TestimonialBlock`: `layoutMode` (`auto`, `featured`, `grid`).
+- `TeamBlock`: `layoutMode` (`auto`, `featured`, `grid`).
+- `GalleryBlock`: `galleryLayout` (`mosaic`, `grid`, `masonry`, `featured`).
+- `LocationBlock`: `layoutMode` (`auto`, `single-column`, `two-column`, `grid`).
+- `StatsBlock`: schema değişmeden item sayısına göre 1, 2, 3, 4 ve 5+ istatistikleri dengeli gridlerde render eder.
+
+## Ürün/PIM Sistemi
+
+`products` koleksiyonu medikal ürün katalog yönetimini sağlar.
+
+Başlıca özellikler:
+
+- Ürün başlığı, kısa açıklama, Markdown/HTML destekli detay açıklaması.
+- Teknik özellikler (`specs`).
+- Ana görsel, ürün galerisi, tanıtım videosu.
+- Kategori ilişkisi ve ilgili ürünler.
+- Varyant/SKU sistemi.
+- Otomatik varyant üretimi için attribute tabanlı kombinasyon hook’u.
+- Lojistik ölçüler ve paketleme bilgileri.
+- Public dokümanlar ve korumalı dokümanlar.
+- `isFeatured` ile vitrinde öne çıkarma.
+- `isOriginalErtipProduct` ile ürün detayında “Orijinal Ertip Ürünü” etiketi.
+- SEO meta alanları.
+
+## Ürün Galerisi
+
+`src/components/product/ProductGallery.tsx` ürün detayında kullanılır.
+
+Mevcut özellikler:
+
+- Ana görsel alanı.
+- Thumbnail grid.
+- Önceki/sonraki navigasyon.
+- Fullscreen modal viewer.
+- Klavye desteği: `Escape`, `ArrowLeft`, `ArrowRight`.
+- Tema tokenlarına uyumlu yüzey, border ve inverse modal.
+
+## Doküman ve Erişim Kodu Sistemi
+
+Ürünlerde iki doküman tipi vardır:
+
+- `publicDocs`: katalog, broşür gibi herkese açık belgeler.
+- `protectedDocs`: erişim kodu/seri numarası gerektiren belgeler.
+
+Korumalı doküman akışı:
+
+1. Kullanıcı ürün detayında erişim kodu girer veya URL parametresiyle otomatik doğrulama tetiklenir.
+2. `/api/verify-manual` kodu kontrol eder.
+3. Kod geçerliyse doküman URL’i döner.
+4. Erişim `download-logs` koleksiyonuna IP, ülke tahmini ve cihaz bilgisiyle kaydedilir.
+
+Bu sistem ürün doküman erişim mantığına bağlıdır; değiştirirken dikkatli olunmalıdır.
+
+## Quote Cart / RFQ Sistemi
+
+Teklif sistemi e-ticaret ödeme akışı değildir; B2B teklif talebi toplama akışıdır.
+
+Temel parçalar:
+
+- `CartProvider`: `localStorage` destekli global teklif sepeti.
+- `HeaderActions`: arama, sepet rozeti ve header CTA.
+- `/teklif-sepeti`: müşteri bilgileri ve sepetteki ürünlerle teklif talebi oluşturur.
+- `quote-requests`: admin panelinde teklif taleplerini saklar.
+- `QuoteRequests` hook’u, `emailSettings.quoteReceivers` varsa e-posta bildirimi gönderir.
+
+## İletişim, Bülten ve Bildirimler
+
+- `ContactForm` ve `ContactFormBlock`, `inquiries` koleksiyonuna kayıt oluşturur.
+- `Inquiries` hook’u, `emailSettings.contactReceivers` üzerinden bildirim e-postası gönderebilir.
+- `NewsletterBlock`, `subscribers` koleksiyonuna kayıt oluşturur.
+- `/abonelikten-ayril`, e-bülten abonelikten çıkma akışı için statik route olarak bulunur.
+
+## Haber ve İçerik Sistemi
+
+- `news` koleksiyonu başlık, özet, rich text içerik, kapak görseli, galeri, kategori ve SEO alanlarını içerir.
+- `/haberler/[slug]` haber detay sayfasıdır.
+- `NewsFeedBlock`, haberleri kategori filtrelemeli şekilde CMS sayfalarında gösterebilir.
+- `news-categories`, haber kategori yönetimini sağlar.
+
+## Admin ve Editör Araçları
+
+- `MarkdownEditor`: Ürün açıklamaları için `md-editor-rt` tabanlı özel Markdown editörü.
+- `ThemePreview`: Tema ve radius ayarlarını admin içinde canlı gösterir.
+- Payload admin import map `src/app/(payload)/admin/importMap.js` tarafından yönetilir.
+
+## Frontend Rotaları
+
+| Route | Açıklama |
+| --- | --- |
+| `/` | Ana sayfa, Payload `pages` içeriğinden render edilir |
+| `/[slug]` | Dinamik CMS sayfaları |
+| `/urunler` | Ürün katalog/listing sayfası |
+| `/urunler/[slug]` | Ürün detay sayfası |
+| `/teklif-sepeti` | B2B teklif sepeti ve RFQ formu |
+| `/haberler/[slug]` | Haber/duyuru detay sayfası |
+| `/abonelikten-ayril` | E-bülten abonelikten çıkma sayfası |
+| `/admin/[[...segments]]` | Payload admin |
+| `/api/[...slug]` | Payload REST API |
+| `/graphql` | Payload GraphQL |
+| `/api/verify-manual` | Korumalı doküman erişim doğrulama API’si |
+| `/sitemap.xml` | Next sitemap çıktısı |
+
+## Geliştirme Komutları
+
+Paket yöneticisi olarak `pnpm` kullanılır.
 
 ```bash
-docker-compose up -d
+pnpm dev
+pnpm build
+pnpm start
+pnpm lint
+pnpm lint:fix
+pnpm typecheck
+pnpm format
+pnpm clean
+pnpm payload:types
+pnpm payload:graphql
+pnpm db:generate
+pnpm db:migrate
+pnpm db:push
+pnpm db:studio
+```
+
+Temel yerel çalışma akışı:
+
+```bash
 pnpm install
 pnpm dev
+```
+
+Veritabanı için `DATABASE_URI` gereklidir. SMTP bildirimleri için `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM_NAME`, `SMTP_FROM_ADDRESS` gibi değişkenler kullanılır.
+
+## Mevcut Tamamlanan Özellikler
+
+- Next.js + Payload CMS monorepo yapısı.
+- CMS Page Builder ve çok sayıda üretim odaklı blok.
+- Gelişmiş ürün/PIM modeli.
+- Varyant/SKU üretim hook’u.
+- Ürün katalog, ürün detay, galeri ve ilgili ürün yapısı.
+- RFQ teklif sepeti.
+- Korumalı doküman doğrulama ve download loglama.
+- Tema paleti ve radius ayarları.
+- Admin canlı tema önizlemesi.
+- Header/footer/site settings yönetimi.
+- Yazısız/sembol logo desteği.
+- Hızlı iletişim butonu.
+- Haber, kategori, bülten ve iletişim formları.
+- Esnek CMS blok layout modları.
+
+## Bilinen Uyarılar ve Limitasyonlar
+
+- `next.config.mjs` içinde `experimental.reactCompiler` kullanılıyor. Next.js 16 build çıktısı bu ayarın top-level `reactCompiler` alanına taşınmasını öneriyor.
+- Header’da gerçek mobil hamburger menü yapısı kontrol edilmeli; mevcut HeaderActions arama/sepet/CTA üzerine kuruludur.
+- `GalleryBlock` layout modları frontend’de çalışır, ancak tüm içerik kombinasyonları için manuel görsel QA önerilir.
+- Bazı yorum ve ekip alanlarında rol/firma/bio gibi genişletilmiş içerikler planlanabilir; mevcut schema sınırlı alan içerir.
+- Çoklu dil/i18n henüz bu README kapsamında tamamlanmış özellik olarak doğrulanmadı.
+
+## Önerilen Sonraki Adımlar
+
+1. `next.config.mjs` içindeki `experimental.reactCompiler` uyarısını düzeltmek.
+2. Header için mobil menü/hamburger deneyimini güçlendirmek.
+3. `FeaturedProductsBlock`, `ProcessBlock`, `LogoSliderBlock`, `CertificateGridBlock`, `NewsGridClient` için ek layout seçenekleri.
+4. Site Settings içindeki hızlı iletişim butonunu farklı cihazlarda görsel QA’dan geçirmek.
+5. Ürün detay, korumalı doküman ve RFQ akışları için uçtan uca test senaryoları yazmak.
+6. Çoklu dil stratejisini Payload localized fields veya route bazlı i18n ile planlamak.
+
+## Güvenli Geliştirme Notları
+
+- `/urunler` ve `/teklif-sepeti` statik uygulama rotalarıdır; CMS blok rotalarına dönüştürülmemelidir.
+- `QuoteRequests`, `DownloadLogs`, korumalı doküman doğrulama ve `CartProvider` davranışı dikkatle korunmalıdır.
+- Tema sistemi üzerinde çalışırken `themeConfig.ts`, `globals.css`, Tailwind tokenları ve `ThemeSettings` birlikte düşünülmelidir.
+- Hardcoded renk/radius eklemek yerine semantik tokenlar kullanılmalıdır.
+- Payload schema değişikliklerinden sonra `pnpm payload:types` veya build/typecheck çıktısıyla `src/payload-types.ts` güncel tutulmalıdır.
