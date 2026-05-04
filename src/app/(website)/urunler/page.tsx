@@ -120,8 +120,11 @@ export default async function ProductsPage({ searchParams }: Props) {
   return (
       <div className="bg-background min-h-screen pt-12 pb-24">
         {/* Üst Başlık (Her temada koyu ve şık durur) */}
-        <div className="bg-surface-inverse py-16 mb-12 border-b-4 border-primary">
+        <div className="bg-primary py-[4.5rem] mb-12 border-b-4 border-primary">
           <div className="container mx-auto px-4 max-w-7xl text-center">
+            <div className="mx-auto mb-5 inline-flex items-center rounded-full border border-surface-inverse-foreground/10 bg-surface-inverse-foreground/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-surface-inverse-foreground/75">
+              Medical Product Catalogue
+            </div>
             <h1 className="text-4xl md:text-5xl font-extrabold text-surface-inverse-foreground mb-6 tracking-tight">
               Ürün Kataloğu
             </h1>
@@ -137,7 +140,7 @@ export default async function ProductsPage({ searchParams }: Props) {
             {/* SOL KENAR: SİDEBAR FİLTRELERİ */}
             <aside className="w-full lg:w-1/4 space-y-8">
               {/* Arama Kutusu */}
-              <div className="bg-surface p-6 rounded-3xl shadow-sm border border-border">
+              <div className="bg-surface p-6 rounded-[var(--radius-2xl)] shadow-sm shadow-surface-inverse/5 border border-border/80">
                 <h3 className="font-bold text-text-main mb-4 flex items-center gap-2">
                   <Search className="w-5 h-5 text-primary" /> Ürün / SKU Ara
                 </h3>
@@ -150,7 +153,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                       name="q"
                       defaultValue={q}
                       placeholder="Örn: 110-0625 veya FUE..."
-                      className="w-full pl-4 pr-12 py-3 rounded-xl border border-border bg-background focus:border-primary focus:ring-1 focus:ring-ring outline-none transition-all text-sm font-medium text-text-main placeholder:text-text-muted/50"
+                      className="w-full pl-4 pr-12 py-3 rounded-[var(--radius)] border border-input bg-background focus:border-primary focus:ring-2 focus:ring-ring/30 outline-none transition-all text-sm font-medium text-text-main placeholder:text-text-muted/50"
                   />
                   <button
                       type="submit"
@@ -162,7 +165,7 @@ export default async function ProductsPage({ searchParams }: Props) {
               </div>
 
               {/* Kategoriler Ağacı */}
-              <div className="bg-surface p-6 rounded-3xl shadow-sm border border-border sticky top-24">
+              <div className="bg-surface p-6 rounded-[var(--radius-2xl)] shadow-sm shadow-surface-inverse/5 border border-border/80 sticky top-24">
                 <h3 className="font-bold text-text-main mb-4 flex items-center gap-2">
                   <LayoutGrid className="w-5 h-5 text-primary" /> Kategoriler
                 </h3>
@@ -220,7 +223,7 @@ export default async function ProductsPage({ searchParams }: Props) {
             {/* SAĞ KENAR: ÜRÜN LİSTESİ VE ÇİPLER */}
             <main className="w-full lg:w-3/4">
               {/* Üst Bilgi Barı */}
-              <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface p-4 rounded-2xl border border-border shadow-sm">
+              <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface p-4 rounded-[var(--radius-xl)] border border-border/80 shadow-sm shadow-surface-inverse/5">
                 <p className="text-sm text-text-muted font-medium">
                   Toplam{" "}
                   <strong className="text-text-main text-base">
@@ -289,11 +292,11 @@ export default async function ProductsPage({ searchParams }: Props) {
                         return (
                             <Card
                                 key={product.id}
-                                className="group overflow-hidden rounded-[var(--radius-2xl)] border-border shadow-sm hover:shadow-xl hover:border-primary/40 transition-all duration-300 flex flex-col bg-surface"
+                                className="group overflow-hidden rounded-[var(--radius-2xl)] border-border/80 shadow-sm shadow-surface-inverse/5 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/40 transition-all duration-300 flex flex-col bg-surface"
                             >
                               <Link
                                   href={`/urunler/${product.slug}`}
-                                  className="relative aspect-square bg-surface-muted/50 p-6 flex items-center justify-center overflow-hidden"
+                                  className="relative aspect-square bg-surface-muted/70 p-6 flex items-center justify-center overflow-hidden"
                               >
                                 <Image
                                     src={imageUrl}

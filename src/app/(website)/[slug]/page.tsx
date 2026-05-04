@@ -135,7 +135,7 @@ export default async function DynamicPage({ params }: Args) {
             return <NewsFeedBlock key={index} {...block} />;
           default:
             return (
-              <div key={index} className="p-4 text-center text-red-500">
+              <div key={index} className="rounded-[var(--radius)] border border-error/25 bg-error/10 p-4 text-center text-error">
                 Tanımsız Blok: {block.blockType}
               </div>
             );

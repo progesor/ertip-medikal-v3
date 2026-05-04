@@ -17,9 +17,9 @@ export default async function UnsubscribePage({ searchParams }: Props) {
     if (!email) {
         return (
             <div className="min-h-[70vh] flex flex-col items-center justify-center bg-surface-muted/30 px-4 py-20">
-                <div className="max-w-md w-full bg-white p-8 md:p-12 rounded-[2.5rem] shadow-2xl border border-border text-center">
-                    <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <MailX className="w-10 h-10 text-slate-600" />
+                <div className="max-w-md w-full bg-surface p-8 md:p-12 rounded-[var(--radius-3xl)] shadow-2xl shadow-surface-inverse/5 border border-border/80 text-center">
+                    <div className="w-20 h-20 bg-surface-muted rounded-full flex items-center justify-center mx-auto mb-6">
+                        <MailX className="w-10 h-10 text-text-muted" />
                     </div>
                     <h1 className="text-2xl md:text-3xl font-black text-text-main mb-4">
                         Abonelikten Ayrıl
@@ -35,11 +35,11 @@ export default async function UnsubscribePage({ searchParams }: Props) {
                             name="email"
                             required
                             placeholder="E-posta adresiniz..."
-                            className="w-full px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-text-main"
+                            className="w-full px-4 py-3 rounded-[var(--radius)] border border-input bg-background focus:border-primary focus:ring-2 focus:ring-ring/30 outline-none transition-all text-text-main placeholder:text-text-muted/50"
                         />
                         <button
                             type="submit"
-                            className="w-full h-14 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold transition-all shadow-lg shadow-red-600/20"
+                            className="w-full h-14 rounded-[var(--radius-xl)] bg-error hover:bg-error/90 text-error-foreground font-bold transition-all shadow-lg shadow-error/20"
                         >
                             Aboneliğimi İptal Et
                         </button>
@@ -90,11 +90,11 @@ export default async function UnsubscribePage({ searchParams }: Props) {
 
     return (
         <div className="min-h-[70vh] flex flex-col items-center justify-center bg-surface-muted/30 px-4 py-20">
-            <div className="max-w-md w-full bg-white p-8 md:p-12 rounded-[2.5rem] shadow-2xl border border-border text-center">
+            <div className="max-w-md w-full bg-surface p-8 md:p-12 rounded-[var(--radius-3xl)] shadow-2xl shadow-surface-inverse/5 border border-border/80 text-center">
                 {isSuccess ? (
                     <>
-                        <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <CheckCircle2 className="w-10 h-10 text-green-600" />
+                        <div className="w-20 h-20 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <CheckCircle2 className="w-10 h-10 text-success" />
                         </div>
                         <h1 className="text-2xl md:text-3xl font-black text-text-main mb-4">
                             Abonelik İptal Edildi
@@ -105,8 +105,8 @@ export default async function UnsubscribePage({ searchParams }: Props) {
                     </>
                 ) : (
                     <>
-                        <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <AlertCircle className="w-10 h-10 text-red-600" />
+                        <div className="w-20 h-20 bg-error/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <AlertCircle className="w-10 h-10 text-error" />
                         </div>
                         <h1 className="text-2xl md:text-3xl font-black text-text-main mb-4">
                             İşlem Başarısız
@@ -119,7 +119,7 @@ export default async function UnsubscribePage({ searchParams }: Props) {
 
                 <Link
                     href="/"
-                    className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-primary text-white font-bold hover:bg-primary/90 transition-all w-full"
+                    className="inline-flex items-center justify-center px-6 py-3 rounded-[var(--radius-xl)] bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-all w-full"
                 >
                     <ArrowLeft className="w-5 h-5 mr-2" /> Anasayfaya Dön
                 </Link>

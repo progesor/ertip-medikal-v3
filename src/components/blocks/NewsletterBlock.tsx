@@ -38,7 +38,7 @@ export function NewsletterBlock({ title, description, buttonText }: any) {
           setErrorMessage("Bir hata oluştu. Lütfen tekrar deneyin.");
         }
       }
-    } catch (err) {
+    } catch {
       setStatus("error");
       setErrorMessage("Bağlantı hatası yaşandı.");
     }

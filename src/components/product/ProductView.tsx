@@ -346,7 +346,7 @@ export function ProductView({ product }: any) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-20">
         <div className="space-y-4">
-          <div className="relative aspect-square rounded-3xl overflow-hidden bg-surface-muted border border-border p-12">
+          <div className="relative aspect-square rounded-[var(--radius-2xl)] overflow-hidden bg-surface-muted/80 border border-border/80 p-12 shadow-sm shadow-surface-inverse/5">
             <Image
               src={product.mainImage?.url || "/placeholder.jpg"}
               alt={product.title}
@@ -360,7 +360,7 @@ export function ProductView({ product }: any) {
               {product.gallery.map((item: any, i: number) => (
                 <div
                   key={i}
-                  className="relative aspect-square rounded-2xl overflow-hidden bg-surface-muted border border-border cursor-pointer hover:border-primary transition-colors"
+                  className="relative aspect-square rounded-[var(--radius-xl)] overflow-hidden bg-surface-muted border border-border/80 cursor-pointer hover:border-primary hover:shadow-md hover:shadow-primary/10 transition-all"
                 >
                   <Image
                     src={item.image?.url}
@@ -381,10 +381,10 @@ export function ProductView({ product }: any) {
               {product.title}
             </h1>
             <div className="flex items-center gap-4">
-              <span className="bg-surface-muted text-text-muted px-3 py-1 rounded-full text-xs font-mono font-bold">
+              <span className="bg-surface-muted text-text-muted px-3 py-1 rounded-full border border-border/70 text-xs font-mono font-bold">
                 SKU: {currentVariant?.sku || product.sku || "Belirtilmedi"}
               </span>
-              <span className="text-primary text-sm font-bold flex items-center gap-1">
+              <span className="text-primary text-sm font-bold flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1">
                 <Award className="w-4 h-4" /> Orijinal Ertip Ürünü
               </span>
             </div>
@@ -417,9 +417,9 @@ export function ProductView({ product }: any) {
                               [attr.name]: val,
                             }))
                           }
-                          className={`px-5 py-2.5 rounded-xl text-sm font-bold border transition-all ${selectedAttrs[attr.name] === val
+                          className={`px-5 py-2.5 rounded-[var(--radius)] text-sm font-bold border transition-all ${selectedAttrs[attr.name] === val
                             ? "bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/20"
-                            : "bg-surface border-border text-text-muted hover:border-primary hover:text-primary"
+                            : "bg-surface border-border text-text-muted hover:border-primary hover:bg-primary/5 hover:text-primary"
                             }`}
                         >
                           {val}
@@ -435,7 +435,7 @@ export function ProductView({ product }: any) {
           <div className="pt-8 flex flex-col sm:flex-row gap-4">
             <Button
               size="lg"
-              className="h-16 px-10 rounded-2xl text-lg font-bold flex-1"
+              className="h-16 px-10 rounded-[var(--radius-xl)] text-lg font-bold flex-1"
               onClick={handleAddToCart}
             >
               <ShoppingCart className="mr-2 w-6 h-6" /> Teklif Sepetine Ekle
@@ -445,7 +445,7 @@ export function ProductView({ product }: any) {
       </div>
 
       <Tabs defaultValue={activeTab} className="w-full">
-        <TabsList className="w-full justify-start border-b rounded-none bg-transparent h-auto p-0 mb-12 flex-wrap gap-y-4">
+        <TabsList className="w-full justify-start border-b border-border rounded-none bg-transparent h-auto p-0 mb-12 flex-wrap gap-y-4">
           <TabsTrigger
             value="description"
             className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 md:px-8 py-4 font-bold text-base md:text-lg"
@@ -487,13 +487,16 @@ export function ProductView({ product }: any) {
             <div className="lg:col-span-2 text-text-muted leading-relaxed space-y-8">
               {product.description ? (
                 <div
-                  className="prose prose-slate prose-lg max-w-none
+                  className="prose prose-lg max-w-none
+                                    prose-p:text-text-muted prose-li:text-text-muted
                                     prose-headings:text-text-main
+                                    prose-strong:text-text-main
                                     prose-a:text-primary hover:prose-a:text-primary/80
+                                    prose-blockquote:border-primary prose-blockquote:text-text-main
                                     prose-img:rounded-2xl prose-img:border prose-img:border-border
                                     prose-table:border-collapse prose-table:w-full
-                                    prose-th:bg-surface-muted prose-th:p-4
-                                    prose-td:p-4 prose-td:border-b prose-td:border-border
+                                    prose-th:bg-surface-muted prose-th:p-4 prose-th:text-text-main
+                                    prose-td:p-4 prose-td:border-b prose-td:border-border prose-td:text-text-muted
 
                                     prose-code:bg-surface-muted prose-code:text-text-muted
                                     prose-code:px-2.5 prose-code:py-1 prose-code:rounded-lg

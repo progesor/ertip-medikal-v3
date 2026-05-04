@@ -71,6 +71,28 @@ const tokenGroups = [
         ],
     },
     {
+        title: "Durum Renkleri",
+        tokens: [
+            "--success",
+            "--success-foreground",
+            "--error",
+            "--error-foreground",
+            "--warning",
+            "--warning-foreground",
+            "--info",
+            "--info-foreground",
+            "--destructive",
+            "--destructive-foreground",
+        ],
+    },
+    {
+        title: "Ters Yüzey",
+        tokens: [
+            "--surface-inverse",
+            "--surface-inverse-foreground",
+        ],
+    },
+    {
         title: "Metin",
         tokens: [
             "--text-main",
@@ -140,7 +162,7 @@ export default function ThemePreview() {
             color: hsl(currentTheme["--foreground"]),
             borderRadius: radius2xl,
             border: `1px solid ${hsl(currentTheme["--border"])}`,
-            boxShadow: "0 20px 45px -20px rgba(0, 0, 0, 0.25)",
+            boxShadow: `0 20px 45px -20px ${hslAlpha(currentTheme["--surface-inverse"], 0.25)}`,
             transition: "all 0.35s ease",
         } as React.CSSProperties,
 
@@ -241,7 +263,7 @@ export default function ThemePreview() {
             margin: "1rem 0 0",
             fontSize: "2rem",
             lineHeight: 1.08,
-            letterSpacing: "-0.04em",
+            letterSpacing: 0,
             color: hsl(currentTheme["--text-main"], currentTheme["--foreground"]),
             fontWeight: 850,
         } as React.CSSProperties,
@@ -398,6 +420,36 @@ export default function ThemePreview() {
             textAlign: "center",
         } as React.CSSProperties,
 
+        statusAlert: {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "0.75rem",
+            padding: "0.7rem 0.75rem",
+            borderRadius: radius,
+            fontSize: "0.76rem",
+            fontWeight: 800,
+        } as React.CSSProperties,
+
+        richPreview: {
+            marginTop: "1rem",
+            padding: "1rem",
+            borderRadius: radius,
+            backgroundColor: hsl(currentTheme["--background"]),
+            border: `1px solid ${hsl(currentTheme["--border"])}`,
+            color: hsl(currentTheme["--text-muted"], currentTheme["--muted-foreground"]),
+            fontSize: "0.82rem",
+            lineHeight: 1.65,
+        } as React.CSSProperties,
+
+        inversePanel: {
+            marginTop: "1rem",
+            padding: "1rem",
+            borderRadius: radiusXl,
+            backgroundColor: hsl(currentTheme["--surface-inverse"]),
+            color: hsl(currentTheme["--surface-inverse-foreground"]),
+        } as React.CSSProperties,
+
         statusBadgeSecondary: {
             padding: "0.6rem",
             borderRadius: radius,
@@ -495,6 +547,13 @@ export default function ThemePreview() {
             textOverflow: "ellipsis",
         } as React.CSSProperties,
     };
+
+    const statusItems = [
+        { label: "Başarılı", token: "--success" },
+        { label: "Hata", token: "--error" },
+        { label: "Uyarı", token: "--warning" },
+        { label: "Bilgi", token: "--info" },
+    ] as const;
 
     return (
         <div style={styles.wrapper}>
@@ -604,6 +663,30 @@ export default function ThemePreview() {
                                 <div style={styles.statusBadgePrimary}>Primary Badge</div>
                                 <div style={styles.statusBadgeSecondary}>Secondary Badge</div>
                             </div>
+
+                            <div style={{ display: "grid", gap: "0.5rem", marginTop: "0.85rem" }}>
+                                {statusItems.map((item) => (
+                                    <div
+                                        key={item.token}
+                                        style={{
+                                            ...styles.statusAlert,
+                                            backgroundColor: hslAlpha(currentTheme[item.token], 0.1),
+                                            color: hsl(currentTheme[item.token]),
+                                            border: `1px solid ${hslAlpha(currentTheme[item.token], 0.22)}`,
+                                        }}
+                                    >
+                                        <span>{item.label}</span>
+                                        <span
+                                            style={{
+                                                width: "0.65rem",
+                                                height: "0.65rem",
+                                                borderRadius: "999px",
+                                                backgroundColor: hsl(currentTheme[item.token]),
+                                            }}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </aside>
                 </div>
@@ -677,6 +760,28 @@ export default function ThemePreview() {
                                     Background:
                                 </strong>{" "}
                                 {currentTheme["--background"]}
+                            </div>
+                        </div>
+
+                        <div style={styles.richPreview}>
+                            <strong style={{ color: hsl(currentTheme["--text-main"], currentTheme["--foreground"]) }}>
+                                Rich text:
+                            </strong>{" "}
+                            Başlıklar, paragraflar, bağlantılar ve listeler muted/text-main
+                            tokenlarıyla okunabilir kalmalıdır.{" "}
+                            <span style={{ color: hsl(currentTheme["--primary"]), fontWeight: 800 }}>
+                                Link rengi
+                            </span>{" "}
+                            primary tokenını takip eder.
+                        </div>
+
+                        <div style={styles.inversePanel}>
+                            <div style={{ fontSize: "0.78rem", fontWeight: 850, marginBottom: "0.35rem" }}>
+                                Footer / Inverse Section
+                            </div>
+                            <div style={{ fontSize: "0.78rem", lineHeight: 1.5, opacity: 0.78 }}>
+                                surface-inverse ve surface-inverse-foreground tokenları koyu
+                                bantlar, footer ve modal overlay algısını test eder.
                             </div>
                         </div>
                     </section>

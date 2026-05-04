@@ -51,7 +51,7 @@ export default async function RootLayout({
     let themeSettings;
     try {
         themeSettings = await payload.findGlobal({ slug: "themeSettings" });
-    } catch (error) {
+    } catch {
         themeSettings = { colorPalette: "dark-luxury", borderRadius: "modern" };
     }
 

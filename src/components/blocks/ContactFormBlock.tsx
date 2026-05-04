@@ -46,13 +46,12 @@ export function ContactFormBlock({ title, formTitle, description, departments, q
                             )}
                         </div>
 
-                        {/* bg-text-main yerine temanın en derin rengi olan bg-foreground kullanıldı */}
-                        <div className="p-8 bg-foreground rounded-3xl text-background">
+                        <div className="p-8 bg-primary rounded-3xl text-primary-foreground">
                             <div className="flex items-center gap-3 mb-3">
-                                <ShieldCheck className="w-6 h-6 text-primary" />
-                                <span className="font-bold text-primary">MDR & ISO Kalitesi</span>
+                                <ShieldCheck className="w-6 h-6 text-primary-foreground" />
+                                <span className="font-bold text-primary-foreground">MDR & ISO Kalitesi</span>
                             </div>
-                            <p className="text-sm text-background/80 leading-relaxed italic">
+                            <p className="text-sm text-primary-foreground/80 leading-relaxed italic">
                                 {quickContact?.descriptionText || "Tüm talepleriniz uluslararası kalite standartları çerçevesinde kayıt altına alınarak en kısa sürede yanıtlanmaktadır."}
                             </p>
                         </div>

@@ -63,7 +63,7 @@ export default function QuoteCartPage() {
   if (isSuccess) {
     return (
         <div className="min-h-screen bg-background py-24 flex items-center justify-center">
-          <div className="bg-surface p-12 rounded-[var(--radius-3xl)] shadow-sm border border-border text-center max-w-lg">
+          <div className="bg-surface p-12 rounded-[var(--radius-3xl)] shadow-lg shadow-surface-inverse/5 border border-border/80 text-center max-w-lg">
             <div className="w-24 h-24 bg-success/10 text-success rounded-full flex items-center justify-center mx-auto mb-6">
               <Send className="w-10 h-10" />
             </div>
@@ -85,8 +85,11 @@ export default function QuoteCartPage() {
   return (
       <div className="bg-background min-h-screen pt-12 pb-24">
         {/* Üst Kısım: Her temada şık duran koyu zemin */}
-        <div className="bg-surface-inverse py-16 mb-12">
+        <div className="bg-primary py-[4.5rem] mb-12">
           <div className="container mx-auto px-4 max-w-7xl">
+            <div className="mb-5 inline-flex items-center rounded-full border border-surface-inverse-foreground/10 bg-surface-inverse-foreground/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-surface-inverse-foreground/75">
+              B2B Quote Request
+            </div>
             <h1 className="text-4xl md:text-5xl font-extrabold text-surface-inverse-foreground mb-4 tracking-tight">
               Teklif Sepeti
             </h1>
@@ -98,7 +101,7 @@ export default function QuoteCartPage() {
 
         <div className="container mx-auto px-4 max-w-7xl">
           {cartItems.length === 0 ? (
-              <div className="bg-surface p-16 rounded-[var(--radius-3xl)] shadow-sm border border-border text-center flex flex-col items-center">
+              <div className="bg-surface p-16 rounded-[var(--radius-3xl)] shadow-sm shadow-surface-inverse/5 border border-border/80 text-center flex flex-col items-center">
                 <ShoppingCart className="w-20 h-20 text-text-muted/30 mb-6" />
                 <h3 className="text-2xl font-bold text-text-main mb-2">
                   Listeniz Şimdilik Boş
@@ -128,7 +131,7 @@ export default function QuoteCartPage() {
                     Seçilen Ürünler
                   </h2>
 
-                  <div className="bg-surface rounded-3xl border border-border shadow-sm overflow-hidden divide-y divide-border">
+                  <div className="bg-surface rounded-[var(--radius-2xl)] border border-border/80 shadow-sm shadow-surface-inverse/5 overflow-hidden divide-y divide-border">
                     {cartItems.map((item, index) => (
                         <div
                             key={index}
@@ -136,7 +139,7 @@ export default function QuoteCartPage() {
                         >
                           <Link
                               href={`/urunler/${item.slug}`}
-                              className="w-24 h-24 relative bg-surface-muted/50 rounded-2xl p-2 shrink-0 hover:opacity-80 transition-opacity"
+                              className="w-24 h-24 relative bg-surface-muted/70 rounded-[var(--radius-xl)] p-2 shrink-0 hover:opacity-80 transition-opacity"
                           >
                             <Image
                                 src={item.image || "/placeholder.jpg"}
@@ -165,7 +168,7 @@ export default function QuoteCartPage() {
                           </div>
 
                           {/* ADET SEÇİCİ */}
-                          <div className="flex items-center gap-3 bg-surface-muted p-1.5 rounded-xl border border-border">
+                          <div className="flex items-center gap-3 bg-surface-muted p-1.5 rounded-[var(--radius)] border border-border">
                             <button
                                 type="button"
                                 onClick={() =>
@@ -204,7 +207,7 @@ export default function QuoteCartPage() {
 
                 {/* SAĞ BÖLÜM: İletişim Formu */}
                 <div className="lg:col-span-2">
-                  <div className="bg-surface p-8 rounded-3xl border border-border shadow-xl shadow-surface-inverse/5 sticky top-24">
+                  <div className="bg-surface p-8 rounded-[var(--radius-2xl)] border border-border/80 shadow-xl shadow-surface-inverse/5 sticky top-24">
                     <h3 className="text-2xl font-bold text-text-main mb-6">
                       İletişim Bilgileriniz
                     </h3>

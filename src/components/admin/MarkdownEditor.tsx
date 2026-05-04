@@ -26,10 +26,9 @@ export const MarkdownEditor: React.FC<{ path: string; label: string }> = ({
       <div
         style={{
           marginTop: "10px",
-          borderRadius: "12px",
+          borderRadius: "var(--radius, 12px)",
           overflow: "hidden",
-          // Dış çerçevenin rengini de temaya göre ayarlıyoruz
-          border: `1px solid ${theme === "dark" ? "#333" : "#e2e8f0"}`,
+          border: "1px solid var(--theme-elevation-150)",
         }}
       >
         <MdEditor

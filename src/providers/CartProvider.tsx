@@ -106,9 +106,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            className="fixed bottom-8 right-8 z-50 bg-white p-4 rounded-3xl shadow-2xl border border-slate-100 flex items-center gap-4 min-w-[320px] max-w-[400px]"
+            className="fixed bottom-8 right-8 z-50 flex min-w-[320px] max-w-[400px] items-center gap-4 rounded-[var(--radius-2xl)] border border-border bg-card p-4 text-card-foreground shadow-2xl"
           >
-            <div className="w-16 h-16 relative bg-slate-50 rounded-2xl p-1 shrink-0 border border-slate-100">
+            <div className="relative h-16 w-16 shrink-0 rounded-[var(--radius-xl)] border border-border bg-surface-muted p-1">
               <Image
                 src={toast.item.image || "/placeholder.jpg"}
                 alt="Ürün"
@@ -118,26 +118,28 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
               />
             </div>
             <div className="flex-1">
-              <p className="text-xs font-bold text-green-600 flex items-center gap-1 mb-1">
+              <p className="mb-1 flex items-center gap-1 text-xs font-bold text-success">
                 <CheckCircle2 className="w-4 h-4" /> Teklif Listesine Eklendi
               </p>
-              <p className="text-sm font-bold text-slate-900 line-clamp-1">
+              <p className="line-clamp-1 text-sm font-bold text-card-foreground">
                 {toast.item.title}
               </p>
-              <p className="text-xs text-slate-500 font-mono mt-0.5">
+              <p className="mt-0.5 font-mono text-xs text-muted-foreground">
                 {toast.item.sku}
               </p>
             </div>
             <Link
               href="/teklif-sepeti"
               onClick={() => setToast({ show: false, item: null })}
-              className="bg-primary/10 text-primary p-3 rounded-xl hover:bg-primary hover:text-white transition-colors"
+              className="rounded-[var(--radius)] bg-primary/10 p-3 text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+              aria-label="Teklif sepetine git"
             >
               <ShoppingBag className="w-5 h-5" />
             </Link>
             <button
               onClick={() => setToast({ show: false, item: null })}
-              className="absolute -top-2 -right-2 bg-white text-slate-400 hover:text-slate-900 border border-slate-100 rounded-full p-1 shadow-sm"
+              className="absolute -right-2 -top-2 rounded-full border border-border bg-card p-1 text-muted-foreground shadow-sm transition-colors hover:text-foreground"
+              aria-label="Bildirimi kapat"
             >
               <X className="w-3 h-3" />
             </button>

@@ -108,7 +108,7 @@ export default async function NewsDetailPage({ params }: Args) {
     }
 
     return (
-        <article className="pb-24 bg-white min-h-screen">
+        <article className="pb-24 bg-background min-h-screen">
             {/* Üst Menü / Geri Dönüş */}
             <div className="container mx-auto px-4 py-8 max-w-5xl">
                 <Link
@@ -121,7 +121,7 @@ export default async function NewsDetailPage({ params }: Args) {
 
             {/* Sinematik Başlık (Hero) Alanı */}
             <div className="container mx-auto px-4 mb-16">
-                <div className="relative w-full max-w-5xl mx-auto rounded-[2.5rem] overflow-hidden shadow-2xl bg-slate-900">
+                <div className="relative w-full max-w-5xl mx-auto rounded-[var(--radius-3xl)] overflow-hidden shadow-2xl bg-surface-inverse">
                     <div className="aspect-[16/9] md:aspect-[21/9] relative">
                         {imageUrl && (
                             <>
@@ -133,18 +133,18 @@ export default async function NewsDetailPage({ params }: Args) {
                                     priority
                                     sizes="(max-width: 1024px) 100vw, 1024px"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-surface-inverse via-surface-inverse/40 to-transparent" />
                             </>
                         )}
 
-                        <div className="absolute bottom-0 left-0 w-full p-8 md:p-16 text-white z-10">
+                        <div className="absolute bottom-0 left-0 w-full p-8 md:p-16 text-surface-inverse-foreground z-10">
                             <div className="flex flex-wrap items-center gap-4 mb-6">
                                 {categoryTitle && (
-                                    <Badge className="bg-primary hover:bg-primary/90 text-white px-4 py-1.5 text-sm border-0">
+                                    <Badge className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-1.5 text-sm border-0">
                                         {categoryTitle}
                                     </Badge>
                                 )}
-                                <div className="flex items-center text-slate-200 font-medium">
+                                <div className="flex items-center text-surface-inverse-foreground/75 font-medium">
                                     <CalendarDays className="w-5 h-5 mr-2 text-primary" />
                                     {formattedDate}
                                 </div>
@@ -160,7 +160,7 @@ export default async function NewsDetailPage({ params }: Args) {
             {/* İçerik Metni */}
             <div className="container mx-auto px-4">
                 <div className="max-w-3xl mx-auto">
-                    <div className="prose prose-lg md:prose-xl prose-slate max-w-none mb-16">
+                    <div className="prose prose-lg md:prose-xl max-w-none mb-16 text-foreground prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-a:text-primary prose-a:no-underline hover:prose-a:text-primary/80 prose-li:text-muted-foreground prose-blockquote:border-primary prose-blockquote:bg-muted prose-blockquote:text-foreground prose-code:text-primary prose-pre:bg-surface-inverse prose-pre:text-surface-inverse-foreground">
                         <RichText data={newsItem.content} />
                     </div>
 
@@ -175,7 +175,7 @@ export default async function NewsDetailPage({ params }: Args) {
                                     Etkinliğimize ait tüm görselleri detaylıca inceleyebilirsiniz.
                                 </p>
                             </div>
-                            <div className="bg-surface-muted p-6 md:p-10 rounded-[2.5rem] shadow-inner">
+                            <div className="bg-surface-muted p-6 md:p-10 rounded-[var(--radius-3xl)] shadow-inner">
                                 <ProductGallery images={galleryImages as any} />
                             </div>
                         </div>
