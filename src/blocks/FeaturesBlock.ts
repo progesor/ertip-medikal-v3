@@ -19,6 +19,28 @@ export const FeaturesBlock: Block = {
       label: "Alt Başlık",
     },
     {
+      name: "layoutMode",
+      type: "select",
+      label: "Yerleşim Modu",
+      defaultValue: "auto",
+      options: [
+        { label: "Otomatik", value: "auto" },
+        { label: "Grid", value: "grid" },
+        { label: "Öne Çıkan", value: "featured" },
+        { label: "Kompakt", value: "compact" },
+      ],
+    },
+    {
+      name: "alignment",
+      type: "select",
+      label: "Başlık Hizalama",
+      defaultValue: "center",
+      options: [
+        { label: "Orta", value: "center" },
+        { label: "Sol", value: "left" },
+      ],
+    },
+    {
       name: "features",
       type: "array",
       label: "Özellikler",

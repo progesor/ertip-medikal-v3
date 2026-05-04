@@ -346,6 +346,10 @@ export interface Product {
   relatedProducts?: (number | Product)[] | null;
   isFeatured?: boolean | null;
   /**
+   * Ürün sayfasında 'Orijinal Ertip Ürünü' etiketinin gösterilip gösterilmeyeceğini belirler.
+   */
+  isOriginalErtipProduct?: boolean | null;
+  /**
    * Otomatik oluşturulur. Gerekirse manuel olarak düzenleyebilirsiniz.
    */
   slug?: string | null;
@@ -500,6 +504,8 @@ export interface Page {
         | {
             title?: string | null;
             subtitle?: string | null;
+            layoutMode?: ('auto' | 'grid' | 'featured' | 'compact') | null;
+            alignment?: ('center' | 'left') | null;
             features?:
               | {
                   icon?: ('star' | 'shield' | 'cpu' | 'globe' | 'heart' | 'settings') | null;
@@ -535,6 +541,7 @@ export interface Page {
           }
         | {
             title?: string | null;
+            layoutMode?: ('auto' | 'featured' | 'grid') | null;
             testimonials?:
               | {
                   name: string;
@@ -561,6 +568,7 @@ export interface Page {
           }
         | {
             title?: string | null;
+            galleryLayout?: ('mosaic' | 'grid' | 'masonry' | 'featured') | null;
             images?:
               | {
                   image: number | Media;
@@ -585,6 +593,10 @@ export interface Page {
           }
         | {
             title?: string | null;
+            /**
+             * Otomatik mod, lokasyon sayısına göre en uygun düzeni seçer.
+             */
+            layoutMode?: ('auto' | 'single-column' | 'two-column' | 'grid') | null;
             locations?:
               | {
                   title: string;
@@ -605,6 +617,7 @@ export interface Page {
           }
         | {
             title?: string | null;
+            layoutMode?: ('auto' | 'featured' | 'grid') | null;
             members?:
               | {
                   name: string;
@@ -1078,6 +1091,7 @@ export interface ProductsSelect<T extends boolean = true> {
   category?: T;
   relatedProducts?: T;
   isFeatured?: T;
+  isOriginalErtipProduct?: T;
   slug?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1176,6 +1190,8 @@ export interface PagesSelect<T extends boolean = true> {
           | {
               title?: T;
               subtitle?: T;
+              layoutMode?: T;
+              alignment?: T;
               features?:
                 | T
                 | {
@@ -1214,6 +1230,7 @@ export interface PagesSelect<T extends boolean = true> {
           | T
           | {
               title?: T;
+              layoutMode?: T;
               testimonials?:
                 | T
                 | {
@@ -1242,6 +1259,7 @@ export interface PagesSelect<T extends boolean = true> {
           | T
           | {
               title?: T;
+              galleryLayout?: T;
               images?:
                 | T
                 | {
@@ -1268,6 +1286,7 @@ export interface PagesSelect<T extends boolean = true> {
           | T
           | {
               title?: T;
+              layoutMode?: T;
               locations?:
                 | T
                 | {
@@ -1286,6 +1305,7 @@ export interface PagesSelect<T extends boolean = true> {
           | T
           | {
               title?: T;
+              layoutMode?: T;
               members?:
                 | T
                 | {
@@ -1521,6 +1541,21 @@ export interface SiteSetting {
   general: {
     siteLogo: number | Media;
     whiteLogo?: (number | null) | Media;
+    /**
+     * Header, mobil menü veya kompakt alanlarda kullanılabilecek sadece sembolden oluşan logo.
+     */
+    symbolLogo?: (number | null) | Media;
+  };
+  header?: {
+    showLogoInHeader?: boolean | null;
+    headerLogoVariant?: ('auto' | 'default' | 'white' | 'symbol') | null;
+    showCompanyNameInHeader?: boolean | null;
+    showTaglineInHeader?: boolean | null;
+    headerCompanyName?: string | null;
+    headerTagline?: string | null;
+    headerLayout?: ('default' | 'compact' | 'brand') | null;
+    headerCtaLabel?: string | null;
+    headerCtaHref?: string | null;
   };
   contact?: {
     email?: string | null;
@@ -1655,6 +1690,20 @@ export interface SiteSettingsSelect<T extends boolean = true> {
     | {
         siteLogo?: T;
         whiteLogo?: T;
+        symbolLogo?: T;
+      };
+  header?:
+    | T
+    | {
+        showLogoInHeader?: T;
+        headerLogoVariant?: T;
+        showCompanyNameInHeader?: T;
+        showTaglineInHeader?: T;
+        headerCompanyName?: T;
+        headerTagline?: T;
+        headerLayout?: T;
+        headerCtaLabel?: T;
+        headerCtaHref?: T;
       };
   contact?:
     | T

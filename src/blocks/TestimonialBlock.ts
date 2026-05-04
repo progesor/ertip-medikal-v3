@@ -6,6 +6,17 @@ export const TestimonialBlock: Block = {
   fields: [
     { name: "title", type: "text", label: "Bölüm Başlığı" },
     {
+      name: "layoutMode",
+      type: "select",
+      label: "Yerleşim Modu",
+      defaultValue: "auto",
+      options: [
+        { label: "Otomatik", value: "auto" },
+        { label: "Öne Çıkan", value: "featured" },
+        { label: "Grid", value: "grid" },
+      ],
+    },
+    {
       name: "testimonials",
       type: "array",
       label: "Yorumlar",

@@ -7,7 +7,13 @@ import { ShoppingCart, Search } from "lucide-react";
 import { useCart } from "@/providers/CartProvider";
 import { Button } from "@/components/ui/button";
 
-export function HeaderActions() {
+export function HeaderActions({
+  ctaLabel = "Bize Ulaşın",
+  ctaHref = "/iletisim",
+}: {
+  ctaLabel?: string;
+  ctaHref?: string;
+}) {
   const { cartItems } = useCart();
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
@@ -55,11 +61,13 @@ export function HeaderActions() {
       </Link>
 
       {/* ORJİNAL TEKLİF AL BUTONU */}
-      <Link href="/iletisim" className="hidden sm:block">
+      {ctaLabel && ctaHref && (
+      <Link href={ctaHref} className="hidden sm:block">
         <Button variant="default" size="sm" className="rounded-[var(--radius-2xl)] px-6">
-          Bize Ulaşın
+          {ctaLabel}
         </Button>
       </Link>
+      )}
     </div>
   );
 }

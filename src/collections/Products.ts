@@ -494,6 +494,17 @@ export const Products: CollectionConfig = {
       defaultValue: false,
       admin: { position: "sidebar" },
     },
+    {
+      name: "isOriginalErtipProduct",
+      type: "checkbox",
+      label: "Orijinal Ertip Ürünü",
+      defaultValue: true,
+      admin: {
+        position: "sidebar",
+        description:
+            "Ürün sayfasında 'Orijinal Ertip Ürünü' etiketinin gösterilip gösterilmeyeceğini belirler.",
+      },
+    },
     slugField("title"), // Akıllı URL üretici
   ],
 };

@@ -1,36 +1,102 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getPayload } from "payload";
 import configPromise from "@payload-config";
 import { HeaderActions } from "@/components/layout/HeaderActions"; // YENİ EKLENDİ
+
+type HeaderLogoVariant = "auto" | "default" | "white" | "symbol";
+type HeaderLayout = "default" | "compact" | "brand";
+
+function getMediaUrl(media: unknown) {
+  return typeof media === "object" && media !== null && "url" in media
+    ? String((media as { url?: string }).url || "")
+    : "";
+}
+
+function getHeaderLogoUrl(general: any, variant: HeaderLogoVariant) {
+  const defaultLogo = getMediaUrl(general?.siteLogo);
+  const whiteLogo = getMediaUrl(general?.whiteLogo);
+  const symbolLogo = getMediaUrl(general?.symbolLogo);
+
+  if (variant === "symbol") return symbolLogo || defaultLogo || whiteLogo;
+  if (variant === "white") return whiteLogo || defaultLogo || symbolLogo;
+  if (variant === "default") return defaultLogo || symbolLogo || whiteLogo;
+
+  return defaultLogo || symbolLogo || whiteLogo;
+}
 
 // Artık asenkron bir Server Component olarak kalmaya devam ediyor
 export async function Header() {
   const payload = await getPayload({ config: configPromise });
 
-  const mainMenu = await payload.findGlobal({
-    slug: "main-menu",
-    depth: 1,
-  });
+  const [mainMenu, siteSettings] = await Promise.all([
+    payload.findGlobal({
+      slug: "main-menu",
+      depth: 1,
+    }),
+    payload.findGlobal({
+      slug: "site-settings",
+      depth: 2,
+    }),
+  ]);
 
   const navItems = mainMenu?.items || [];
+  const headerSettings = (siteSettings as any)?.header || {};
+  const generalSettings = (siteSettings as any)?.general || {};
+
+  const showLogo = headerSettings.showLogoInHeader === true;
+  const showCompanyName = headerSettings.showCompanyNameInHeader !== false;
+  const showTagline = headerSettings.showTaglineInHeader !== false;
+  const companyName = headerSettings.headerCompanyName || "Ertip Medikal";
+  const tagline = headerSettings.headerTagline || "Medical Instruments";
+  const logoVariant = (headerSettings.headerLogoVariant || "auto") as HeaderLogoVariant;
+  const headerLayout = (headerSettings.headerLayout || "default") as HeaderLayout;
+  const ctaLabel = headerSettings.headerCtaLabel || "Bize Ulaşın";
+  const ctaHref = headerSettings.headerCtaHref || "/iletisim";
+  const logoUrl = showLogo ? getHeaderLogoUrl(generalSettings, logoVariant) : "";
+  const shouldFallbackToCompanyName = !logoUrl && !showCompanyName && !showTagline;
+  const shouldShowText = showCompanyName || showTagline || shouldFallbackToCompanyName;
+  const shouldUseCompact = headerLayout === "compact";
+  const shouldEmphasizeBrand = headerLayout === "brand";
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/80 bg-background/95 shadow-sm shadow-surface-inverse/5 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80">
-      <div className="container mx-auto px-4 flex min-h-[4.5rem] items-center justify-between gap-4 py-3">
+      <div className={`container mx-auto flex items-center justify-between gap-4 px-4 ${shouldUseCompact ? "min-h-16 py-2" : "min-h-[4.5rem] py-3"}`}>
         {/* Logo Alanı */}
-        <div className="flex items-center gap-2 shrink-0">
-          <Link href="/" className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-[var(--radius)] border border-primary/15 bg-primary/10 shadow-sm shadow-primary/10">
-              <span className="h-4 w-4 rounded-full bg-primary shadow-[0_0_0_6px_hsl(var(--primary)/0.12)]" />
-            </span>
-            <span className="leading-tight">
-              <span className="block text-xl font-black tracking-tight text-text-main">
-                Ertip Medikal
+        <div className="flex shrink-0 items-center gap-2">
+          <Link href="/" className="flex min-w-0 items-center gap-3">
+            {logoUrl ? (
+              <span className="relative block h-10 w-auto min-w-28 overflow-hidden">
+                <Image
+                  src={logoUrl}
+                  alt={companyName}
+                  width={180}
+                  height={48}
+                  className="h-10 w-auto object-contain"
+                  priority
+                  unoptimized
+                />
               </span>
-              <span className="hidden text-[11px] font-bold uppercase tracking-[0.16em] text-text-muted sm:block">
-                Medical Instruments
+            ) : (
+              <span className="flex h-10 w-10 items-center justify-center rounded-[var(--radius)] border border-primary/15 bg-primary/10 shadow-sm shadow-primary/10">
+                <span className="h-4 w-4 rounded-full bg-primary shadow-[0_0_0_6px_hsl(var(--primary)/0.12)]" />
               </span>
+            )}
+
+            {shouldShowText && (
+            <span className={`min-w-0 leading-tight ${logoUrl && shouldEmphasizeBrand ? "hidden lg:block" : ""}`}>
+              {(showCompanyName || shouldFallbackToCompanyName) && (
+                <span className="block truncate text-xl font-black tracking-tight text-text-main">
+                  {companyName}
+                </span>
+              )}
+              {showTagline && (
+                <span className="hidden truncate text-[11px] font-bold uppercase tracking-[0.16em] text-text-muted sm:block">
+                  {tagline}
+                </span>
+              )}
             </span>
+            )}
           </Link>
         </div>
 
@@ -61,7 +127,7 @@ export async function Header() {
         </nav>
 
         {/* Etkileşimli Sağ Kısım (Arama, Sepet ve Buton) */}
-        <HeaderActions />
+        <HeaderActions ctaLabel={ctaLabel} ctaHref={ctaHref} />
       </div>
     </header>
   );

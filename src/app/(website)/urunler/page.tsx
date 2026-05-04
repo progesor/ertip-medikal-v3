@@ -120,20 +120,20 @@ export default async function ProductsPage({ searchParams }: Props) {
   return (
       <div className="bg-background min-h-screen pt-12 pb-24">
         {/* Üst Başlık (Her temada koyu ve şık durur) */}
-        <div className="bg-primary py-[4.5rem] mb-12 border-b-4 border-primary">
-          <div className="container mx-auto px-4 max-w-7xl text-center">
-            <div className="mx-auto mb-5 inline-flex items-center rounded-full border border-surface-inverse-foreground/10 bg-surface-inverse-foreground/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-surface-inverse-foreground/75">
-              Medical Product Catalogue
-            </div>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-surface-inverse-foreground mb-6 tracking-tight">
-              Ürün Kataloğu
-            </h1>
-            <p className="text-lg text-surface-inverse-foreground/70 max-w-2xl mx-auto">
-              İhtiyacınız olan medikal cihazı, modeli veya SKU kodunu hızlıca
-              bulun.
-            </p>
-          </div>
-        </div>
+        {/*<div className="bg-primary py-[4.5rem] mb-12 border-b-4 border-primary">*/}
+        {/*  <div className="container mx-auto px-4 max-w-7xl text-center">*/}
+        {/*    <div className="mx-auto mb-5 inline-flex items-center rounded-full border border-surface-inverse-foreground/10 bg-surface-inverse-foreground/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-surface-inverse-foreground/75">*/}
+        {/*      Medical Product Catalogue*/}
+        {/*    </div>*/}
+        {/*    <h1 className="text-4xl md:text-5xl font-extrabold text-surface-inverse-foreground mb-6 tracking-tight">*/}
+        {/*      Ürün Kataloğu*/}
+        {/*    </h1>*/}
+        {/*    <p className="text-lg text-surface-inverse-foreground/70 max-w-2xl mx-auto">*/}
+        {/*      İhtiyacınız olan medikal cihazı, modeli veya SKU kodunu hızlıca*/}
+        {/*      bulun.*/}
+        {/*    </p>*/}
+        {/*  </div>*/}
+        {/*</div>*/}
 
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex flex-col lg:flex-row gap-10">

@@ -11,6 +11,22 @@ export const LocationBlock: Block = {
       defaultValue: "Tesislerimiz ve İletişim Bilgileri",
     },
     {
+      name: "layoutMode",
+      type: "select",
+      label: "Yerleşim Modu",
+      defaultValue: "auto",
+      options: [
+        { label: "Otomatik", value: "auto" },
+        { label: "Tek Sütun", value: "single-column" },
+        { label: "İki Sütun", value: "two-column" },
+        { label: "Grid", value: "grid" },
+      ],
+      admin: {
+        description:
+          "Otomatik mod, lokasyon sayısına göre en uygun düzeni seçer.",
+      },
+    },
+    {
       name: "locations",
       type: "array",
       label: "Lokasyonlar / Ofisler",

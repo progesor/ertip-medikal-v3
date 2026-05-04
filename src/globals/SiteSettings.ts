@@ -25,6 +25,117 @@ export const SiteSettings: GlobalConfig = {
           relationTo: "media",
           label: "Site Logosu (Beyaz Versiyon - Footer İçin)",
         },
+        {
+          name: "symbolLogo",
+          type: "upload",
+          relationTo: "media",
+          label: "Sembol Logo (Yazısız)",
+          admin: {
+            description:
+                "Header, mobil menü veya kompakt alanlarda kullanılabilecek sadece sembolden oluşan logo.",
+          },
+        },
+      ],
+    },
+    {
+      name: "header",
+      label: "Header Ayarları",
+      type: "group",
+      fields: [
+        {
+          type: "row",
+          fields: [
+            {
+              name: "showLogoInHeader",
+              type: "checkbox",
+              label: "Header'da logoyu göster",
+              defaultValue: false,
+              admin: { width: "50%" },
+            },
+            {
+              name: "headerLogoVariant",
+              type: "select",
+              label: "Logo Versiyonu",
+              defaultValue: "auto",
+              options: [
+                { label: "Otomatik", value: "auto" },
+                { label: "Renkli Logo", value: "default" },
+                { label: "Beyaz Logo", value: "white" },
+                { label: "Sembol Logo", value: "symbol" },
+              ],
+              admin: { width: "50%" },
+            },
+          ],
+        },
+        {
+          type: "row",
+          fields: [
+            {
+              name: "showCompanyNameInHeader",
+              type: "checkbox",
+              label: "Firma adını göster",
+              defaultValue: true,
+              admin: { width: "50%" },
+            },
+            {
+              name: "showTaglineInHeader",
+              type: "checkbox",
+              label: "Sloganı göster",
+              defaultValue: true,
+              admin: { width: "50%" },
+            },
+          ],
+        },
+        {
+          type: "row",
+          fields: [
+            {
+              name: "headerCompanyName",
+              type: "text",
+              label: "Header Firma Adı",
+              defaultValue: "Ertip Medikal",
+              admin: { width: "50%" },
+            },
+            {
+              name: "headerTagline",
+              type: "text",
+              label: "Header Sloganı",
+              defaultValue: "Medical Instruments",
+              admin: { width: "50%" },
+            },
+          ],
+        },
+        {
+          type: "row",
+          fields: [
+            {
+              name: "headerLayout",
+              type: "select",
+              label: "Header Yerleşimi",
+              defaultValue: "default",
+              options: [
+                { label: "Varsayılan", value: "default" },
+                { label: "Kompakt", value: "compact" },
+                { label: "Marka Odaklı", value: "brand" },
+              ],
+              admin: { width: "33%" },
+            },
+            {
+              name: "headerCtaLabel",
+              type: "text",
+              label: "Header CTA Metni",
+              defaultValue: "Bize Ulaşın",
+              admin: { width: "34%" },
+            },
+            {
+              name: "headerCtaHref",
+              type: "text",
+              label: "Header CTA Linki",
+              defaultValue: "/iletisim",
+              admin: { width: "33%" },
+            },
+          ],
+        },
       ],
     },
     {

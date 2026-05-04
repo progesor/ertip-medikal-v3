@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
-import Image from "next/image";
 import { useSearchParams, ReadonlyURLSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -23,6 +22,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { useCart } from "@/providers/CartProvider";
+import { ProductGallery } from "@/components/product/ProductGallery";
 
 function getYouTubeId(url: string) {
   if (!url) return null;
@@ -116,6 +116,32 @@ export function ProductView({ product }: any) {
 
   const videoId = getYouTubeId(product.videoUrl || "");
   const pos = product.logisticDisplayPosition || "below";
+
+  const productImages = useMemo(() => {
+    const images: { url: string; alt?: string }[] = [];
+
+    if (typeof product.mainImage === "object" && product.mainImage?.url) {
+      images.push({
+        url: product.mainImage.url,
+        alt: product.mainImage.alt || product.title,
+      });
+    }
+
+    if (Array.isArray(product.gallery)) {
+      product.gallery.forEach((item: any) => {
+        const image = item?.image;
+
+        if (typeof image === "object" && image?.url) {
+          images.push({
+            url: image.url,
+            alt: image.alt || product.title,
+          });
+        }
+      });
+    }
+
+    return images;
+  }, [product.mainImage, product.gallery, product.title]);
 
   const NetDimensions = ({ mode }: { mode: "sidebar" | "wide" }) => {
     if (!product.width && !product.height && !product.depth && !product.weight)
@@ -345,35 +371,7 @@ export function ProductView({ product }: any) {
       </AnimatePresence>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-20">
-        <div className="space-y-4">
-          <div className="relative aspect-square rounded-[var(--radius-2xl)] overflow-hidden bg-surface-muted/80 border border-border/80 p-12 shadow-sm shadow-surface-inverse/5">
-            <Image
-              src={product.mainImage?.url || "/placeholder.jpg"}
-              alt={product.title}
-              fill
-              className="object-contain p-8"
-              unoptimized
-            />
-          </div>
-          {product.gallery && product.gallery.length > 0 && (
-            <div className="grid grid-cols-4 gap-4">
-              {product.gallery.map((item: any, i: number) => (
-                <div
-                  key={i}
-                  className="relative aspect-square rounded-[var(--radius-xl)] overflow-hidden bg-surface-muted border border-border/80 cursor-pointer hover:border-primary hover:shadow-md hover:shadow-primary/10 transition-all"
-                >
-                  <Image
-                    src={item.image?.url}
-                    alt={product.title}
-                    fill
-                    className="object-contain p-2"
-                    unoptimized
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <ProductGallery images={productImages} productTitle={product.title} />
 
         <div className="flex flex-col space-y-8">
           <div>
@@ -384,9 +382,11 @@ export function ProductView({ product }: any) {
               <span className="bg-surface-muted text-text-muted px-3 py-1 rounded-full border border-border/70 text-xs font-mono font-bold">
                 SKU: {currentVariant?.sku || product.sku || "Belirtilmedi"}
               </span>
-              <span className="text-primary text-sm font-bold flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1">
-                <Award className="w-4 h-4" /> Orijinal Ertip Ürünü
-              </span>
+              {product.isOriginalErtipProduct !== false && (
+                  <span className="text-primary text-sm font-bold flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1">
+    <Award className="w-4 h-4" /> Orijinal Ertip Ürünü
+  </span>
+              )}
             </div>
           </div>
 
