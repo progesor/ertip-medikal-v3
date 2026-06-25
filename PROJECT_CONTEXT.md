@@ -210,6 +210,15 @@ Esnek layout eklenen bloklar:
 
 - `MarkdownEditor`: Ürün açıklamaları için özel Markdown editör.
 - `ThemePreview`: Tema/radius canlı önizleme.
+- `src/components/admin/AdminDashboard.tsx`: İçerik sayaçları, yeni müşteri
+  talepleri, son ürünler ve hızlı işlem bağlantıları.
+- `src/components/admin/ProductListCells.tsx`: Ürün görseli/SKU ve varyant
+  özetli liste hücreleri.
+- `src/components/admin/ArrayRowLabels.tsx`: Uzun ürün dizileri için açıklayıcı
+  admin satır başlıkları.
+- `src/app/(payload)/admin.css`: Payload çekirdeğini değiştirmeden admin
+  markalama, dashboard, liste ve form yüzeylerini düzenleyen stiller.
+- Koleksiyonlar admin menüsünde iş alanlarına göre gruplandırılmıştır.
 
 ## Bilinen Uyarılar
 

@@ -4,6 +4,10 @@ import path from "path";
 export const Media: CollectionConfig = {
   slug: "media",
   labels: { singular: "Medya", plural: "Medyalar" },
+  admin: {
+    group: "Ürün Yönetimi",
+    description: "Ürün görsellerini, belgeleri ve site medyalarını yönetin.",
+  },
   access: {
     read: () => true,
   },

@@ -8,6 +8,7 @@ export const Inquiries: CollectionConfig = {
   },
   admin: {
     useAsTitle: "name",
+    group: "Müşteri İletişimi",
     defaultColumns: ["name", "email", "status", "createdAt"],
   },
   access: {
@@ -39,8 +40,11 @@ export const Inquiries: CollectionConfig = {
       async ({ doc, operation, req }) => {
         if (operation === "create") {
           try {
-            const emailSettings = await req.payload.findGlobal({ slug: "emailSettings" });
-            const receivers = emailSettings.contactReceivers?.map((r: any) => r.email) || [];
+            const emailSettings = await req.payload.findGlobal({
+              slug: "emailSettings",
+            });
+            const receivers =
+              emailSettings.contactReceivers?.map((r: any) => r.email) || [];
 
             if (receivers.length > 0) {
               const htmlContent = `

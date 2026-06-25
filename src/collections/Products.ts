@@ -18,7 +18,22 @@ export const Products: CollectionConfig = {
   labels: { singular: "Ürün", plural: "Ürünler" },
   admin: {
     useAsTitle: "title",
-    defaultColumns: ["title", "sku", "_status"],
+    group: "Ürün Yönetimi",
+    description:
+      "Ürün kataloğunu, görselleri, teknik özellikleri ve varyantları yönetin.",
+    defaultColumns: [
+      "title",
+      "category",
+      "variants",
+      "isFeatured",
+      "_status",
+      "updatedAt",
+    ],
+    listSearchableFields: ["title", "sku", "shortDescription"],
+    pagination: {
+      defaultLimit: 20,
+      limits: [10, 20, 50, 100],
+    },
   },
   versions: { drafts: true },
   // --- AKILLI SKU VE VARYANT MOTORU (HOOK) ---
@@ -121,6 +136,11 @@ export const Products: CollectionConfig = {
               type: "text",
               required: true,
               label: "Ürün Adı (Örn: Dijital Trikoskop)",
+              admin: {
+                components: {
+                  Cell: "/components/admin/ProductListCells#ProductTitleCell",
+                },
+              },
             },
             {
               name: "shortDescription",
@@ -146,6 +166,12 @@ export const Products: CollectionConfig = {
               name: "specs",
               type: "array",
               label: "Temel/Teknik Özellikler",
+              admin: {
+                initCollapsed: true,
+                components: {
+                  RowLabel: "/components/admin/ArrayRowLabels#SpecRowLabel",
+                },
+              },
               fields: [
                 {
                   name: "key",
@@ -179,6 +205,12 @@ export const Products: CollectionConfig = {
               name: "gallery",
               type: "array",
               label: "Ürün Galerisi",
+              admin: {
+                initCollapsed: true,
+                components: {
+                  RowLabel: "/components/admin/ArrayRowLabels#GalleryRowLabel",
+                },
+              },
               fields: [
                 {
                   name: "image",
@@ -221,8 +253,13 @@ export const Products: CollectionConfig = {
               type: "array",
               label: "Ürün Özellikleri (Çap, Uzunluk vb.)",
               admin: {
+                initCollapsed: true,
                 description:
                   "Değerleri TİRE (-) ile ayırarak yazın. Örn: 0.6-0.65-0.7",
+                components: {
+                  RowLabel:
+                    "/components/admin/ArrayRowLabels#AttributeRowLabel",
+                },
               },
               fields: [
                 {
@@ -273,8 +310,13 @@ export const Products: CollectionConfig = {
               type: "array",
               label: "Üretilen Varyantlar",
               admin: {
+                initCollapsed: true,
                 description:
                   "Bu liste otomatik dolar ancak sonrasında manuel müdahale edebilirsiniz. Görsel mirası açıksa, yalnızca her yeni renk/görsel grubunun ilk varyantına görsel eklemeniz yeterlidir.",
+                components: {
+                  Cell: "/components/admin/ProductListCells#VariantSummaryCell",
+                  RowLabel: "/components/admin/ArrayRowLabels#VariantRowLabel",
+                },
               },
               fields: [
                 {
@@ -377,8 +419,13 @@ export const Products: CollectionConfig = {
               type: "array",
               label: "Ambalaj ve Paketleme Seçenekleri",
               admin: {
+                initCollapsed: true,
                 description:
                   "Ürünün farklı paketleme formlarını (Örn: Tekli Kutu, 50’li Ana Koli) buraya ekleyebilirsiniz.",
+                components: {
+                  RowLabel:
+                    "/components/admin/ArrayRowLabels#PackagingRowLabel",
+                },
               },
               fields: [
                 {
@@ -439,6 +486,12 @@ export const Products: CollectionConfig = {
               name: "publicDocs",
               type: "array",
               label: "Halka Açık Belgeler (Katalog, Broşür vb.)",
+              admin: {
+                initCollapsed: true,
+                components: {
+                  RowLabel: "/components/admin/ArrayRowLabels#DocumentRowLabel",
+                },
+              },
               fields: [
                 {
                   name: "label",
@@ -458,6 +511,12 @@ export const Products: CollectionConfig = {
               name: "protectedDocs",
               type: "array",
               label: "Korumalı Belgeler (Kullanma Kılavuzu)",
+              admin: {
+                initCollapsed: true,
+                components: {
+                  RowLabel: "/components/admin/ArrayRowLabels#DocumentRowLabel",
+                },
+              },
               fields: [
                 {
                   name: "label",
@@ -475,6 +534,13 @@ export const Products: CollectionConfig = {
                   name: "accessCodes",
                   type: "array",
                   label: "Yetkili Kodlar / Seri Numaraları",
+                  admin: {
+                    initCollapsed: true,
+                    components: {
+                      RowLabel:
+                        "/components/admin/ArrayRowLabels#AccessCodeRowLabel",
+                    },
+                  },
                   fields: [
                     {
                       type: "row",
@@ -548,7 +614,7 @@ export const Products: CollectionConfig = {
       admin: {
         position: "sidebar",
         description:
-            "Ürün sayfasında 'Orijinal Ertip Ürünü' etiketinin gösterilip gösterilmeyeceğini belirler.",
+          "Ürün sayfasında 'Orijinal Ertip Ürünü' etiketinin gösterilip gösterilmeyeceğini belirler.",
       },
     },
     slugField("title"), // Akıllı URL üretici

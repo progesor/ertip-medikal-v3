@@ -17,14 +17,15 @@ import { HeroSliderBlock } from "@/blocks/HeroSliderBlock";
 import { CertificateGridBlock } from "@/blocks/CertificateGridBlock";
 import { ProcessBlock } from "@/blocks/ProcessBlock";
 import { CTABlock } from "@/blocks/CTABlock";
-import {ContactFormBlock} from "@/blocks/ContactFormBlock";
-import {NewsFeedBlock} from "@/blocks/NewsFeedBlock";
+import { ContactFormBlock } from "@/blocks/ContactFormBlock";
+import { NewsFeedBlock } from "@/blocks/NewsFeedBlock";
 
 export const Pages: CollectionConfig = {
   slug: "pages",
   labels: { singular: "Sayfa", plural: "Sayfalar" },
   admin: {
     useAsTitle: "title",
+    group: "İçerik Yönetimi",
     defaultColumns: ["title", "slug", "updatedAt"],
   },
   versions: { drafts: true },

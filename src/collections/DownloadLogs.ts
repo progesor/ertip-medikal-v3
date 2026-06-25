@@ -5,6 +5,7 @@ export const DownloadLogs: CollectionConfig = {
   labels: { singular: "Kılavuz Logu", plural: "Kılavuz Logları" },
   admin: {
     useAsTitle: "accessCode",
+    group: "Uyumluluk ve Kayıtlar",
     defaultColumns: ["productTitle", "accessCode", "ipAddress", "createdAt"],
   },
   access: {

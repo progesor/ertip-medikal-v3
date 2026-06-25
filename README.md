@@ -291,6 +291,16 @@ Temel parçalar:
 
 - `MarkdownEditor`: Ürün açıklamaları için `md-editor-rt` tabanlı özel Markdown editörü.
 - `ThemePreview`: Tema ve radius ayarlarını admin içinde canlı gösterir.
+- `AdminDashboard`: Ürün, kategori, medya ve sayfa sayılarını; yeni teklif ve
+  iletişim taleplerini; son düzenlenen ürünleri ve sık kullanılan işlemleri
+  gösteren yönetim ana sayfası.
+- Ürün listesi görsel önizleme, SKU, kategori, varyant özeti, yayın ve öne
+  çıkarma durumlarıyla günlük katalog yönetimine göre düzenlenmiştir.
+- Teknik özellik, galeri, varyant, paketleme ve doküman dizileri açıklayıcı satır
+  başlıklarıyla kapalı başlayarak uzun ürün formlarını daha kolay taranabilir
+  hale getirir.
+- Admin navigasyonu ürün, içerik, müşteri iletişimi, uyumluluk, site
+  yapılandırması ve sistem gruplarına ayrılmıştır.
 - `PRODUCT_CONTENT_GUIDE.md`: Ham ürün bilgilerini ChatGPT ile Payload ürün giriş paketine dönüştürmek için prompt, alan eşleştirmesi ve kalite kontrol rehberi.
 - Payload admin import map `src/app/(payload)/admin/importMap.js` tarafından yönetilir.
 

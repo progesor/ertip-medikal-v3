@@ -7,6 +7,7 @@ export const News: CollectionConfig = {
   labels: { singular: "Haber / Duyuru", plural: "Haberler ve Duyurular" },
   admin: {
     useAsTitle: "title",
+    group: "İçerik Yönetimi",
     defaultColumns: ["title", "category", "publishedDate", "_status"],
   },
   versions: { drafts: true },

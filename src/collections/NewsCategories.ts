@@ -3,7 +3,7 @@ import type { CollectionConfig } from "payload";
 export const NewsCategories: CollectionConfig = {
   slug: "news-categories",
   labels: { singular: "Haber Kategorisi", plural: "Haber Kategorileri" },
-  admin: { useAsTitle: "title" },
+  admin: { useAsTitle: "title", group: "İçerik Yönetimi" },
   fields: [
     {
       name: "title",

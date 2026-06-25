@@ -174,6 +174,8 @@ export interface User {
   collection: 'users';
 }
 /**
+ * Ürün görsellerini, belgeleri ve site medyalarını yönetin.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
@@ -223,6 +225,8 @@ export interface Media {
   };
 }
 /**
+ * Ürün kataloğunu, görselleri, teknik özellikleri ve varyantları yönetin.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products".
  */
@@ -375,6 +379,8 @@ export interface Product {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Katalog kategorilerini ve kategori bazlı ürün sırasını yönetin.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories".
  */

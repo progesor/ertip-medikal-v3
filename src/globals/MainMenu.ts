@@ -3,6 +3,9 @@ import type { GlobalConfig } from "payload";
 export const MainMenu: GlobalConfig = {
   slug: "main-menu",
   label: "Ana Menü",
+  admin: {
+    group: "Site Yapılandırması",
+  },
   access: {
     read: () => true, // Frontend'in okuyabilmesi için herkese açık
   },

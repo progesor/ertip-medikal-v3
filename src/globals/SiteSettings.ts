@@ -3,6 +3,9 @@ import type { GlobalConfig } from "payload";
 export const SiteSettings: GlobalConfig = {
   slug: "site-settings",
   label: "Site Ayarları",
+  admin: {
+    group: "Site Yapılandırması",
+  },
   access: {
     read: () => true, // Frontend'den okunabilmesi için herkese açık
   },
@@ -32,7 +35,7 @@ export const SiteSettings: GlobalConfig = {
           label: "Sembol Logo (Yazısız)",
           admin: {
             description:
-                "Header, mobil menü veya kompakt alanlarda kullanılabilecek sadece sembolden oluşan logo.",
+              "Header, mobil menü veya kompakt alanlarda kullanılabilecek sadece sembolden oluşan logo.",
           },
         },
       ],
@@ -195,7 +198,7 @@ export const SiteSettings: GlobalConfig = {
           defaultValue: false,
           admin: {
             description:
-                "Sitenin sağ veya sol alt köşesinde sabit hızlı iletişim butonu gösterir.",
+              "Sitenin sağ veya sol alt köşesinde sabit hızlı iletişim butonu gösterir.",
           },
         },
         {
@@ -215,7 +218,7 @@ export const SiteSettings: GlobalConfig = {
               admin: {
                 width: "50%",
                 description:
-                    "WhatsApp seçildiğinde mesaj ve WhatsApp'a özel görünüm seçenekleri kullanılabilir.",
+                  "WhatsApp seçildiğinde mesaj ve WhatsApp'a özel görünüm seçenekleri kullanılabilir.",
               },
             },
             {
@@ -244,7 +247,7 @@ export const SiteSettings: GlobalConfig = {
               admin: {
                 width: "50%",
                 description:
-                    "Buton üzerinde görünecek metin. Sadece ikon görünümünde aria-label olarak kullanılır.",
+                  "Buton üzerinde görünecek metin. Sadece ikon görünümünde aria-label olarak kullanılır.",
               },
             },
             {
@@ -273,7 +276,7 @@ export const SiteSettings: GlobalConfig = {
               admin: {
                 width: "50%",
                 description:
-                    "WhatsApp yeşili sadece WhatsApp türü için özel marka görünümü sağlar.",
+                  "WhatsApp yeşili sadece WhatsApp türü için özel marka görünümü sağlar.",
               },
             },
             {
@@ -312,7 +315,7 @@ export const SiteSettings: GlobalConfig = {
               admin: {
                 width: "50%",
                 description:
-                    "Butona belirli aralıklarla çok hafif bir dikkat çekme hareketi verir.",
+                  "Butona belirli aralıklarla çok hafif bir dikkat çekme hareketi verir.",
               },
             },
           ],
@@ -328,7 +331,7 @@ export const SiteSettings: GlobalConfig = {
               admin: {
                 width: "50%",
                 description:
-                    "Butonun üstünde küçük bir açıklama balonu gösterir.",
+                  "Butonun üstünde küçük bir açıklama balonu gösterir.",
               },
             },
             {
@@ -348,18 +351,17 @@ export const SiteSettings: GlobalConfig = {
           label: "Telefon / WhatsApp Numarası",
           admin: {
             description:
-                "WhatsApp ve telefon için ülke kodu ile boşluksuz girin. Örn: 905315149711",
+              "WhatsApp ve telefon için ülke kodu ile boşluksuz girin. Örn: 905315149711",
           },
         },
         {
           name: "message",
           type: "textarea",
           label: "Varsayılan WhatsApp Mesajı",
-          defaultValue:
-              "Merhaba, ürünleriniz hakkında bilgi almak istiyorum.",
+          defaultValue: "Merhaba, ürünleriniz hakkında bilgi almak istiyorum.",
           admin: {
             description:
-                "Sadece WhatsApp türünde kullanılır. Link içinde otomatik encode edilir.",
+              "Sadece WhatsApp türünde kullanılır. Link içinde otomatik encode edilir.",
           },
         },
         {
@@ -376,7 +378,7 @@ export const SiteSettings: GlobalConfig = {
           label: "Özel Link",
           admin: {
             description:
-                "Buton türü Özel Link ise kullanılır. Örn: /iletisim veya https://...",
+              "Buton türü Özel Link ise kullanılır. Örn: /iletisim veya https://...",
           },
         },
       ],
