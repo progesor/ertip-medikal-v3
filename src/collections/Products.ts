@@ -50,6 +50,9 @@ export const Products: CollectionConfig = {
             (attr: any) => attr.values,
           );
           const combinations = getCombinations(arraysToCombine);
+          const existingVariants = Array.isArray(data.variants)
+            ? data.variants
+            : [];
 
           const generatedVariants = combinations.map((combo) => {
             let dia = "";
@@ -86,11 +89,16 @@ export const Products: CollectionConfig = {
             const finalSuffix = data.skuSuffix
               ? ` ${data.skuSuffix.trim()}`
               : "";
+            const generatedSku = `${finalPrefix}${skuCode}${finalSuffix}`;
+            const existingVariant = existingVariants.find(
+              (variant: any) => variant?.sku === generatedSku,
+            );
 
             return {
+              ...existingVariant,
               title: titleParts.join(" - "),
-              sku: `${finalPrefix}${skuCode}${finalSuffix}`,
-              isActive: true,
+              sku: generatedSku,
+              isActive: existingVariant?.isActive ?? true,
             };
           });
 
@@ -241,12 +249,32 @@ export const Products: CollectionConfig = {
               },
             },
             {
+              name: "inheritVariantImagesFromPrevious",
+              type: "checkbox",
+              label: "Görselsiz Varyantlar Üstteki Görselleri Kullansın",
+              defaultValue: true,
+              admin: {
+                description:
+                  "Açık olduğunda görsel eklenmeyen bir varyant, listede kendisinden önce bulunan en yakın görselli varyantın görsellerini kullanır. Yeni bir varyanta görsel eklemek yeni görsel grubunu başlatır.",
+              },
+            },
+            {
+              name: "hideMainImageWhenVariantSelected",
+              type: "checkbox",
+              label: "Varyant Görseli Varken Ana Ürün Görselini Gizle",
+              defaultValue: true,
+              admin: {
+                description:
+                  "Açık olduğunda seçili varyantın kendine ait veya miras aldığı görseller varsa ana ürün görseli galeriden çıkarılır. Ürünün ortak galeri görselleri gösterilmeye devam eder.",
+              },
+            },
+            {
               name: "variants",
               type: "array",
               label: "Üretilen Varyantlar",
               admin: {
                 description:
-                  "Bu liste otomatik dolar ancak sonrasında manuel müdahale edip istisnai durumları düzeltebilirsiniz.",
+                  "Bu liste otomatik dolar ancak sonrasında manuel müdahale edebilirsiniz. Görsel mirası açıksa, yalnızca her yeni renk/görsel grubunun ilk varyantına görsel eklemeniz yeterlidir.",
               },
               fields: [
                 {
@@ -265,6 +293,24 @@ export const Products: CollectionConfig = {
                   name: "price",
                   type: "text",
                   label: "Liste Fiyatı (Opsiyonel)",
+                },
+                {
+                  name: "variantImages",
+                  type: "array",
+                  label: "Varyanta Özel Görseller",
+                  admin: {
+                    description:
+                      "Bu varyant seçildiğinde ürün galerisinde gösterilecek görseller. Boş bırakılırsa ürünün ana görselleri kullanılır.",
+                  },
+                  fields: [
+                    {
+                      name: "image",
+                      type: "upload",
+                      relationTo: "media",
+                      required: true,
+                      label: "Görsel",
+                    },
+                  ],
                 },
                 {
                   name: "isActive",

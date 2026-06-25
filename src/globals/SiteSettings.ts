@@ -149,6 +149,41 @@ export const SiteSettings: GlobalConfig = {
       ],
     },
     {
+      name: "productCatalog",
+      label: "Ürün Kataloğu Ayarları",
+      type: "group",
+      fields: [
+        {
+          name: "defaultSortMode",
+          type: "select",
+          label: "Varsayılan Ürün Sıralaması",
+          defaultValue: "newest",
+          options: [
+            { label: "Son Eklenen Önce", value: "newest" },
+            { label: "İlk Eklenen Önce", value: "oldest" },
+            { label: "Manuel Sıralama", value: "manual" },
+          ],
+          admin: {
+            description:
+              "Kategoriye özel bir sıralama seçilmediyse ürün kataloğunda bu ayar kullanılır.",
+          },
+        },
+        {
+          name: "manualProductOrder",
+          type: "relationship",
+          relationTo: "products",
+          hasMany: true,
+          label: "Genel Manuel Ürün Sırası",
+          admin: {
+            condition: (_, siblingData) =>
+              siblingData?.defaultSortMode === "manual",
+            description:
+              "Ürünleri görünmesini istediğiniz sırayla seçin. Listede olmayan ürünler seçilen ürünlerin ardından en yeni ürün önce olacak şekilde gösterilir.",
+          },
+        },
+      ],
+    },
+    {
       name: "floatingAction",
       label: "Hızlı İletişim Butonu",
       type: "group",

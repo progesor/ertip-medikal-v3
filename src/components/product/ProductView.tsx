@@ -31,10 +31,44 @@ function getYouTubeId(url: string) {
   return match && match[2].length === 11 ? match[2] : null;
 }
 
+function getInitialSelectedAttributes(product: any) {
+  if (!Array.isArray(product.attributes)) return {};
+
+  const firstVariantTitle = String(product.variants?.[0]?.title || "");
+
+  return product.attributes.reduce(
+    (selected: Record<string, string>, attribute: any) => {
+      if (!attribute?.name || typeof attribute.values !== "string") {
+        return selected;
+      }
+
+      const values = attribute.values
+        .split("-")
+        .map((value: string) => value.trim())
+        .filter(Boolean);
+
+      const matchingValue = [...values]
+        .sort((a, b) => b.length - a.length)
+        .find(
+          (value) =>
+            firstVariantTitle.includes(`${value} mm ${attribute.name}`) ||
+            firstVariantTitle.includes(value),
+        );
+
+      if (matchingValue || values[0]) {
+        selected[attribute.name] = matchingValue || values[0];
+      }
+
+      return selected;
+    },
+    {},
+  );
+}
+
 export function ProductView({ product }: any) {
   const { addToCart } = useCart();
   const [selectedAttrs, setSelectedAttrs] = useState<Record<string, string>>(
-    {},
+    () => getInitialSelectedAttributes(product),
   );
   const [manualCode, setManualCode] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
@@ -58,6 +92,55 @@ export function ProductView({ product }: any) {
     });
   }, [selectedAttrs, product.variants]);
 
+  const hasCompleteVariantSelection = useMemo(() => {
+    if (!Array.isArray(product.attributes) || product.attributes.length === 0) {
+      return Boolean(currentVariant);
+    }
+
+    return product.attributes.every(
+      (attribute: any) =>
+        attribute?.name && Boolean(selectedAttrs[attribute.name]),
+    );
+  }, [currentVariant, product.attributes, selectedAttrs]);
+
+  const mediaVariant = useMemo(() => {
+    if (!hasCompleteVariantSelection || !currentVariant) return null;
+
+    if (
+      Array.isArray(currentVariant.variantImages) &&
+      currentVariant.variantImages.length > 0
+    ) {
+      return currentVariant;
+    }
+
+    if (product.inheritVariantImagesFromPrevious === false) return null;
+
+    const currentIndex = product.variants?.findIndex(
+      (variant: any) =>
+        variant.id === currentVariant.id || variant.sku === currentVariant.sku,
+    );
+
+    if (currentIndex === undefined || currentIndex <= 0) return null;
+
+    for (let index = currentIndex - 1; index >= 0; index -= 1) {
+      const previousVariant = product.variants[index];
+
+      if (
+        Array.isArray(previousVariant?.variantImages) &&
+        previousVariant.variantImages.length > 0
+      ) {
+        return previousVariant;
+      }
+    }
+
+    return null;
+  }, [
+    currentVariant,
+    hasCompleteVariantSelection,
+    product.inheritVariantImagesFromPrevious,
+    product.variants,
+  ]);
+
   useEffect(() => {
     if (activeTab === "docs" && autoCode) {
       if (product.protectedDocs && product.protectedDocs.length > 0) {
@@ -75,7 +158,11 @@ export function ProductView({ product }: any) {
       variant: currentVariant?.title || "Standart",
       sku: currentVariant?.sku || product.sku,
       image:
-        typeof product.mainImage === "object" ? product.mainImage?.url : "",
+        typeof mediaVariant?.variantImages?.[0]?.image === "object"
+          ? mediaVariant.variantImages[0].image?.url
+          : typeof product.mainImage === "object"
+            ? product.mainImage?.url
+            : "",
     };
     addToCart(itemToAdd);
   };
@@ -117,15 +204,19 @@ export function ProductView({ product }: any) {
   const videoId = getYouTubeId(product.videoUrl || "");
   const pos = product.logisticDisplayPosition || "below";
 
-  const productImages = useMemo(() => {
-    const images: { url: string; alt?: string }[] = [];
-
+  const mainProductImages = useMemo(() => {
     if (typeof product.mainImage === "object" && product.mainImage?.url) {
-      images.push({
+      return [{
         url: product.mainImage.url,
         alt: product.mainImage.alt || product.title,
-      });
+      }];
     }
+
+    return [];
+  }, [product.mainImage, product.title]);
+
+  const sharedProductImages = useMemo(() => {
+    const images: { url: string; alt?: string }[] = [];
 
     if (Array.isArray(product.gallery)) {
       product.gallery.forEach((item: any) => {
@@ -141,7 +232,53 @@ export function ProductView({ product }: any) {
     }
 
     return images;
-  }, [product.mainImage, product.gallery, product.title]);
+  }, [product.gallery, product.title]);
+
+  const variantImages = useMemo(() => {
+    if (!Array.isArray(mediaVariant?.variantImages)) return [];
+
+    return mediaVariant.variantImages.reduce(
+      (images: { url: string; alt?: string }[], item: any) => {
+        const image = item?.image;
+
+        if (typeof image === "object" && image?.url) {
+          images.push({
+            url: image.url,
+            alt:
+              image.alt ||
+              `${product.title} - ${currentVariant?.title || mediaVariant.title}`,
+          });
+        }
+
+        return images;
+      },
+      [],
+    );
+  }, [currentVariant?.title, mediaVariant, product.title]);
+
+  const displayedProductImages = useMemo(() => {
+    const seenUrls = new Set<string>();
+    const hasVariantMedia = variantImages.length > 0;
+    const includeMainImage =
+      !hasVariantMedia || product.hideMainImageWhenVariantSelected === false;
+    const images = [
+      ...variantImages,
+      ...(includeMainImage ? mainProductImages : []),
+      ...sharedProductImages,
+    ];
+
+    return images.filter((image) => {
+      if (seenUrls.has(image.url)) return false;
+
+      seenUrls.add(image.url);
+      return true;
+    });
+  }, [
+    mainProductImages,
+    product.hideMainImageWhenVariantSelected,
+    sharedProductImages,
+    variantImages,
+  ]);
 
   const NetDimensions = ({ mode }: { mode: "sidebar" | "wide" }) => {
     if (!product.width && !product.height && !product.depth && !product.weight)
@@ -371,7 +508,19 @@ export function ProductView({ product }: any) {
       </AnimatePresence>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-20">
-        <ProductGallery images={productImages} productTitle={product.title} />
+        <ProductGallery
+          key={
+            hasCompleteVariantSelection && currentVariant
+              ? currentVariant.sku
+              : "default"
+          }
+          images={displayedProductImages}
+          productTitle={
+            variantImages.length > 0
+              ? `${product.title} - ${currentVariant?.title}`
+              : product.title
+          }
+        />
 
         <div className="flex flex-col space-y-8">
           <div>

@@ -266,13 +266,30 @@ export interface Product {
    */
   triggerVariantGeneration?: boolean | null;
   /**
-   * Bu liste otomatik dolar ancak sonrasında manuel müdahale edip istisnai durumları düzeltebilirsiniz.
+   * Açık olduğunda görsel eklenmeyen bir varyant, listede kendisinden önce bulunan en yakın görselli varyantın görsellerini kullanır. Yeni bir varyanta görsel eklemek yeni görsel grubunu başlatır.
+   */
+  inheritVariantImagesFromPrevious?: boolean | null;
+  /**
+   * Açık olduğunda seçili varyantın kendine ait veya miras aldığı görseller varsa ana ürün görseli galeriden çıkarılır. Ürünün ortak galeri görselleri gösterilmeye devam eder.
+   */
+  hideMainImageWhenVariantSelected?: boolean | null;
+  /**
+   * Bu liste otomatik dolar ancak sonrasında manuel müdahale edebilirsiniz. Görsel mirası açıksa, yalnızca her yeni renk/görsel grubunun ilk varyantına görsel eklemeniz yeterlidir.
    */
   variants?:
     | {
         title: string;
         sku: string;
         price?: string | null;
+        /**
+         * Bu varyant seçildiğinde ürün galerisinde gösterilecek görseller. Boş bırakılırsa ürünün ana görselleri kullanılır.
+         */
+        variantImages?:
+          | {
+              image: number | Media;
+              id?: string | null;
+            }[]
+          | null;
         isActive?: boolean | null;
         id?: string | null;
       }[]
@@ -368,6 +385,14 @@ export interface Category {
   parent?: (number | null) | Category;
   description?: string | null;
   image?: (number | null) | Media;
+  /**
+   * Bu kategori açıldığında ürünlerin hangi sırayla gösterileceğini belirler.
+   */
+  productSortMode?: ('inherit' | 'newest' | 'oldest' | 'manual') | null;
+  /**
+   * Ürünleri görünmesini istediğiniz sırayla seçin. Listede olmayan kategori ürünleri bu listenin ardından en yeni ürün önce olacak şekilde gösterilir.
+   */
+  manualProductOrder?: (number | Product)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1033,12 +1058,20 @@ export interface ProductsSelect<T extends boolean = true> {
         id?: T;
       };
   triggerVariantGeneration?: T;
+  inheritVariantImagesFromPrevious?: T;
+  hideMainImageWhenVariantSelected?: T;
   variants?:
     | T
     | {
         title?: T;
         sku?: T;
         price?: T;
+        variantImages?:
+          | T
+          | {
+              image?: T;
+              id?: T;
+            };
         isActive?: T;
         id?: T;
       };
@@ -1107,6 +1140,8 @@ export interface CategoriesSelect<T extends boolean = true> {
   parent?: T;
   description?: T;
   image?: T;
+  productSortMode?: T;
+  manualProductOrder?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1562,6 +1597,16 @@ export interface SiteSetting {
     phone?: string | null;
     address?: string | null;
   };
+  productCatalog?: {
+    /**
+     * Kategoriye özel bir sıralama seçilmediyse ürün kataloğunda bu ayar kullanılır.
+     */
+    defaultSortMode?: ('newest' | 'oldest' | 'manual') | null;
+    /**
+     * Ürünleri görünmesini istediğiniz sırayla seçin. Listede olmayan ürünler seçilen ürünlerin ardından en yeni ürün önce olacak şekilde gösterilir.
+     */
+    manualProductOrder?: (number | Product)[] | null;
+  };
   floatingAction?: {
     /**
      * Sitenin sağ veya sol alt köşesinde sabit hızlı iletişim butonu gösterir.
@@ -1768,6 +1813,12 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         email?: T;
         phone?: T;
         address?: T;
+      };
+  productCatalog?:
+    | T
+    | {
+        defaultSortMode?: T;
+        manualProductOrder?: T;
       };
   floatingAction?:
     | T

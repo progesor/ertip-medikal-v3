@@ -34,6 +34,45 @@ type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
+type ProductSortMode = "newest" | "oldest" | "manual";
+
+function getRelationshipId(value: unknown) {
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    "id" in value
+  ) {
+    return String((value as { id: string | number }).id);
+  }
+
+  if (typeof value === "string" || typeof value === "number") {
+    return String(value);
+  }
+
+  return "";
+}
+
+function sortProductsManually(products: any[], manualOrder: unknown[]) {
+  const manualRanks = new Map(
+    manualOrder
+      .map((item, index) => [getRelationshipId(item), index] as const)
+      .filter(([id]) => Boolean(id)),
+  );
+
+  return [...products].sort((a, b) => {
+    const aRank = manualRanks.get(String(a.id));
+    const bRank = manualRanks.get(String(b.id));
+
+    if (aRank !== undefined && bRank !== undefined) return aRank - bRank;
+    if (aRank !== undefined) return -1;
+    if (bRank !== undefined) return 1;
+
+    return (
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  });
+}
+
 export default async function ProductsPage({ searchParams }: Props) {
   const payload = await getPayload({ config: configPromise });
 
@@ -48,12 +87,18 @@ export default async function ProductsPage({ searchParams }: Props) {
   const currentPage = isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
   const LIMIT = 12;
 
-  // 2. Kategorileri Çek
-  const { docs: categories } = await payload.find({
-    collection: "categories",
-    limit: 100,
-    depth: 1,
-  });
+  // 2. Kategorileri ve genel katalog ayarlarını çek
+  const [{ docs: categories }, siteSettings] = await Promise.all([
+    payload.find({
+      collection: "categories",
+      limit: 100,
+      depth: 0,
+    }),
+    payload.findGlobal({
+      slug: "site-settings",
+      depth: 0,
+    }),
+  ]);
 
   const parentCategories = categories.filter((c: any) => !c.parent);
 
@@ -90,23 +135,70 @@ export default async function ProductsPage({ searchParams }: Props) {
     whereClause.category = { in: categoryIds };
   }
 
-  // --- 4. ÜRÜNLERİ ÇEK VE SAYFALAMA VERİSİNİ AL ---
-  const {
-    docs: products,
-    totalPages,
-    hasPrevPage,
-    hasNextPage,
-    prevPage,
-    nextPage,
-    totalDocs,
-  } = await payload.find({
-    collection: "products",
-    where: whereClause,
-    sort: "-createdAt",
-    limit: LIMIT,
-    page: currentPage,
-    depth: 1,
-  });
+  const catalogSettings = siteSettings.productCatalog;
+  const globalSortMode = (catalogSettings?.defaultSortMode ||
+    "newest") as ProductSortMode;
+  const categorySortMode = activeCategory?.productSortMode;
+
+  const effectiveSortMode = (
+    categorySortMode && categorySortMode !== "inherit"
+      ? categorySortMode
+      : globalSortMode
+  ) as ProductSortMode;
+
+  const manualOrder =
+    effectiveSortMode === "manual"
+      ? categorySortMode === "manual"
+        ? activeCategory?.manualProductOrder || []
+        : catalogSettings?.manualProductOrder || []
+      : [];
+
+  // --- 4. ÜRÜNLERİ SEÇİLEN SIRALAMAYLA ÇEK VE SAYFALA ---
+  let products: any[] = [];
+  let totalPages = 0;
+  let hasPrevPage = false;
+  let hasNextPage = false;
+  let prevPage: number | null = null;
+  let nextPage: number | null = null;
+  let totalDocs = 0;
+
+  if (effectiveSortMode === "manual") {
+    const result = await payload.find({
+      collection: "products",
+      where: whereClause,
+      sort: "-createdAt",
+      pagination: false,
+      depth: 1,
+    });
+
+    const orderedProducts = sortProductsManually(result.docs, manualOrder);
+    totalDocs = orderedProducts.length;
+    totalPages = Math.ceil(totalDocs / LIMIT);
+
+    const startIndex = (currentPage - 1) * LIMIT;
+    products = orderedProducts.slice(startIndex, startIndex + LIMIT);
+    hasPrevPage = currentPage > 1;
+    hasNextPage = currentPage < totalPages;
+    prevPage = hasPrevPage ? currentPage - 1 : null;
+    nextPage = hasNextPage ? currentPage + 1 : null;
+  } else {
+    const result = await payload.find({
+      collection: "products",
+      where: whereClause,
+      sort: effectiveSortMode === "oldest" ? "createdAt" : "-createdAt",
+      limit: LIMIT,
+      page: currentPage,
+      depth: 1,
+    });
+
+    products = result.docs;
+    totalPages = result.totalPages;
+    hasPrevPage = result.hasPrevPage;
+    hasNextPage = result.hasNextPage;
+    prevPage = result.prevPage ?? null;
+    nextPage = result.nextPage ?? null;
+    totalDocs = result.totalDocs;
+  }
 
   // URL Üretici
   const buildPageUrl = (pageNumber: number) => {

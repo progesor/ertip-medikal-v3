@@ -127,6 +127,16 @@ Floating action:
 - `helperText`
 - `phoneNumber`, `message`, `email`, `customUrl`
 
+Ürün kataloğu:
+
+- `SiteSettings.productCatalog.defaultSortMode`: `newest | oldest | manual`
+- `SiteSettings.productCatalog.manualProductOrder`
+- Kategori override alanları:
+  - `Category.productSortMode`: `inherit | newest | oldest | manual`
+  - `Category.manualProductOrder`
+- Manuel listede olmayan ürünler, manuel ürünlerin ardından yeni ürün önce
+  sırasıyla gösterilir.
+
 ## CMS Blokları
 
 Page Builder blokları:
@@ -167,6 +177,14 @@ Esnek layout eklenen bloklar:
 - Teknik özellikler.
 - Ana görsel, galeri, video URL.
 - Attribute bazlı varyant/SKU üretimi.
+- Her varyant için opsiyonel `variantImages`.
+- `inheritVariantImagesFromPrevious` açıkken görselsiz varyant, listede en yakın
+  önceki görselli varyantın görsellerini devralır. Yeni görselli varyant yeni
+  grubu başlatır.
+- İlk varyant ürün sayfası açıldığında otomatik seçilir.
+- Varyant görselleri galeride önce, ortak `gallery` görselleri ardından gösterilir.
+- `hideMainImageWhenVariantSelected` varsayılan açıkken varyant görseli mevcutsa
+  `mainImage` gizlenir; ürün bazında kapatılabilir.
 - Lojistik ölçüler ve paketleme.
 - Public/protected dokümanlar.
 - `accessCodes` ile korumalı doküman erişimi.

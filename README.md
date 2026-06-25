@@ -128,6 +128,18 @@ Footer koyu/inverse tema tokenlarıyla çalışır ve `whiteLogo` varsa onu, yok
 
 Frontend bileşeni: `src/components/layout/FloatingActionButton.tsx`.
 
+### Ürün Kataloğu Sıralaması
+
+`productCatalog` grubu, ürün listeleme sırasını yönetir:
+
+- `defaultSortMode`: `newest`, `oldest`, `manual`.
+- `manualProductOrder`: Genel katalog için öncelikli manuel ürün sırası.
+
+Her ürün kategorisi bu genel ayarı kullanabilir veya kendi `productSortMode`
+ve `manualProductOrder` alanlarıyla kategoriye özel sıralama tanımlayabilir.
+Manuel listede olmayan ürünler kaybolmaz; seçilen ürünlerin ardından en yeni
+ürün önce olacak şekilde gösterilir.
+
 ## Tema Sistemi
 
 Tema altyapısı CSS değişkenleri, Tailwind tokenları, `ThemeSettings` globali ve `themeConfig.ts` üzerinden çalışır.
@@ -203,6 +215,7 @@ Başlıca özellikler:
 - Ürün başlığı, kısa açıklama, Markdown/HTML destekli detay açıklaması.
 - Teknik özellikler (`specs`).
 - Ana görsel, ürün galerisi, tanıtım videosu.
+- Varyanta özel görsel galerileri ve önceki varyanttan görsel mirası.
 - Kategori ilişkisi ve ilgili ürünler.
 - Varyant/SKU sistemi.
 - Otomatik varyant üretimi için attribute tabanlı kombinasyon hook’u.
@@ -223,6 +236,13 @@ Mevcut özellikler:
 - Önceki/sonraki navigasyon.
 - Fullscreen modal viewer.
 - Klavye desteği: `Escape`, `ArrowLeft`, `ArrowRight`.
+- Seçili varyant görselleri galerinin başında gösterilir; ortak ana ürün
+  görselleri arkalarına eklenir.
+- Görselsiz varyantlar opsiyonel olarak listedeki en yakın önceki görselli
+  varyantın galerisini devralır.
+- Ürün sayfası ilk varyant seçili olarak açılır.
+- `hideMainImageWhenVariantSelected` ayarıyla varyant görseli aktifken ana ürün
+  görseli gizlenebilir; ortak galeri görselleri görünmeye devam eder.
 - Tema tokenlarına uyumlu yüzey, border ve inverse modal.
 
 ## Doküman ve Erişim Kodu Sistemi
@@ -271,6 +291,7 @@ Temel parçalar:
 
 - `MarkdownEditor`: Ürün açıklamaları için `md-editor-rt` tabanlı özel Markdown editörü.
 - `ThemePreview`: Tema ve radius ayarlarını admin içinde canlı gösterir.
+- `PRODUCT_CONTENT_GUIDE.md`: Ham ürün bilgilerini ChatGPT ile Payload ürün giriş paketine dönüştürmek için prompt, alan eşleştirmesi ve kalite kontrol rehberi.
 - Payload admin import map `src/app/(payload)/admin/importMap.js` tarafından yönetilir.
 
 ## Frontend Rotaları
