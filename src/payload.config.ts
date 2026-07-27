@@ -22,6 +22,7 @@ import { SiteSettings } from "@/globals/SiteSettings";
 import { MainMenu } from "@/globals/MainMenu";
 import { EmailSettings } from "@/globals/EmailSettings";
 import { ThemeSettings } from "@/globals/ThemeSettings";
+import { invalidateProtectedMediaCache } from "@/lib/security/protectedMedia";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -33,6 +34,23 @@ const ProductsWithProtectedPublicApi: CollectionConfig = {
     // The website uses Payload's server-side Local API. Anonymous REST/GraphQL
     // reads stay closed until protected fields have dedicated field access.
     read: ({ req }) => Boolean(req.user),
+  },
+  hooks: {
+    ...Products.hooks,
+    afterChange: [
+      ...(Products.hooks?.afterChange ?? []),
+      ({ doc }) => {
+        invalidateProtectedMediaCache();
+        return doc;
+      },
+    ],
+    afterDelete: [
+      ...(Products.hooks?.afterDelete ?? []),
+      ({ doc }) => {
+        invalidateProtectedMediaCache();
+        return doc;
+      },
+    ],
   },
 };
 

@@ -1,5 +1,6 @@
 import type { CollectionConfig } from "payload";
 import path from "path";
+import { getAnonymousMediaReadAccess } from "@/lib/security/protectedMedia";
 
 export const Media: CollectionConfig = {
   slug: "media",
@@ -9,7 +10,11 @@ export const Media: CollectionConfig = {
     description: "Ürün görsellerini, belgeleri ve site medyalarını yönetin.",
   },
   access: {
-    read: () => true,
+    read: async ({ req, id }) => {
+      if (req.user) return true;
+
+      return getAnonymousMediaReadAccess(req.payload, id);
+    },
   },
   upload: {
     // Dosyaları projenin kök dizinindeki 'media' klasörüne kaydeder.
