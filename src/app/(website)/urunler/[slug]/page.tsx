@@ -156,32 +156,34 @@ export default async function ProductDetailPage({ params }: Args) {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {relatedProducts.map((rel: any) => {
-                const relImageUrl =
-                  typeof rel.mainImage === "object" && rel.mainImage?.url
-                    ? rel.mainImage.url
+              {relatedProducts.map((relatedProduct: any) => {
+                const relatedImageUrl =
+                  typeof relatedProduct.mainImage === "object" &&
+                  relatedProduct.mainImage?.url
+                    ? relatedProduct.mainImage.url
                     : "/placeholder.jpg";
 
                 return (
                   <Link
-                    key={rel.id}
-                    href={`/urunler/${rel.slug}`}
+                    key={relatedProduct.id}
+                    href={`/urunler/${relatedProduct.slug}`}
                     className="group bg-surface rounded-3xl p-6 border border-border shadow-sm hover:shadow-xl hover:border-primary/40 transition-all duration-300 flex flex-col"
                   >
                     <div className="relative aspect-square mb-6 bg-surface-muted/50 rounded-2xl p-4 flex items-center justify-center overflow-hidden">
                       <Image
-                        src={relImageUrl}
-                        alt={rel.title}
+                        src={relatedImageUrl}
+                        alt={relatedProduct.title}
                         fill
                         className="object-contain p-4 group-hover:scale-110 transition-transform duration-500 mix-blend-multiply"
-                        unoptimized
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                        quality={75}
                       />
                     </div>
                     <h4 className="font-bold text-text-main line-clamp-1 mb-2 group-hover:text-primary transition-colors">
-                      {rel.title}
+                      {relatedProduct.title}
                     </h4>
                     <p className="text-xs text-text-muted line-clamp-2 leading-relaxed mb-4 flex-1">
-                      {rel.shortDescription}
+                      {relatedProduct.shortDescription}
                     </p>
                     <div className="text-primary text-xs font-bold flex items-center gap-1 uppercase tracking-wider mt-auto">
                       Detaylı İncele{" "}
