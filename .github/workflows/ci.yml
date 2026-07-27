@@ -56,48 +56,49 @@ jobs:
   production-build:
     name: Production build
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: payload
+          POSTGRES_PASSWORD: payload
+          POSTGRES_DB: ertip_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U payload -d ertip_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     env:
-      CI_DATABASE_URI: ${{ secrets.CI_DATABASE_URI }}
-      CI_PAYLOAD_SECRET: ${{ secrets.CI_PAYLOAD_SECRET }}
+      DATABASE_URI: postgresql://payload:payload@127.0.0.1:5432/ertip_ci
+      PAYLOAD_SECRET: ci-only-secret-not-used-outside-github-actions
+      NEXT_PUBLIC_SERVER_URL: http://localhost:3000
+      SMTP_HOST: 127.0.0.1
+      SMTP_PORT: "1025"
+      SMTP_USER: ci
+      SMTP_PASS: ci
+      SMTP_FROM_NAME: Ertip Medikal CI
+      SMTP_FROM_ADDRESS: ci@example.invalid
     steps:
-      - name: Check build environment
-        id: build-env
-        shell: bash
-        run: |
-          if [[ -n "$CI_DATABASE_URI" && -n "$CI_PAYLOAD_SECRET" ]]; then
-            echo "configured=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "configured=false" >> "$GITHUB_OUTPUT"
-            echo "::notice title=Production build skipped::Set CI_DATABASE_URI and CI_PAYLOAD_SECRET repository secrets to enable database-backed Next.js build validation."
-          fi
-
       - name: Checkout
-        if: steps.build-env.outputs.configured == 'true'
         uses: actions/checkout@v4
 
       - name: Set up pnpm
-        if: steps.build-env.outputs.configured == 'true'
         uses: pnpm/action-setup@v4
         with:
           version: ${{ env.PNPM_VERSION }}
 
       - name: Set up Node.js
-        if: steps.build-env.outputs.configured == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
 
       - name: Install dependencies
-        if: steps.build-env.outputs.configured == 'true'
         run: pnpm install --frozen-lockfile
 
       - name: Build with diagnostic fallback
-        if: steps.build-env.outputs.configured == 'true'
-        env:
-          DATABASE_URI: ${{ env.CI_DATABASE_URI }}
-          PAYLOAD_SECRET: ${{ env.CI_PAYLOAD_SECRET }}
-          NEXT_PUBLIC_SERVER_URL: http://localhost:3000
         shell: bash
         run: |
           pnpm build || {
