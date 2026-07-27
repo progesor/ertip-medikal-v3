@@ -30,7 +30,7 @@ env:
 
 jobs:
   quality:
-    name: Types and lint
+    name: Types, import map and lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -62,6 +62,21 @@ jobs:
         with:
           name: generated-payload-types
           path: src/payload-types.ts
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Generate Payload import map
+        run: pnpm payload:importmap
+
+      - name: Verify generated import map is committed
+        run: git diff --exit-code -- 'src/app/(payload)/admin/importMap.js'
+
+      - name: Upload generated Payload import map on drift
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-payload-import-map
+          path: 'src/app/(payload)/admin/importMap.js'
           if-no-files-found: error
           retention-days: 7
 

@@ -9,8 +9,8 @@ export function HeroBlock({
   buttons,
 }: any) {
   const bgUrl =
-    typeof backgroundImage === "object" && backgroundImage?.url
-      ? backgroundImage.url
+    typeof backgroundImage === "object"
+      ? backgroundImage?.sizes?.hero?.url || backgroundImage?.url || null
       : null;
 
   return (
@@ -19,11 +19,12 @@ export function HeroBlock({
       {bgUrl && (
         <Image
           src={bgUrl}
-          alt={heading}
+          alt={backgroundImage?.alt || heading}
           fill
           className="object-cover opacity-40 mix-blend-overlay"
-          priority
-          unoptimized
+          sizes="100vw"
+          quality={75}
+          preload
         />
       )}
 

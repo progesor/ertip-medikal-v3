@@ -26,9 +26,17 @@ function getGridClass(count: number, layout: TeamLayoutMode) {
   return "mx-auto max-w-7xl grid-cols-1 sm:grid-cols-2 lg:grid-cols-4";
 }
 
-function TeamImage({ member, featured = false }: { member: TeamMember; featured?: boolean }) {
+function TeamImage({
+  member,
+  featured = false,
+}: {
+  member: TeamMember;
+  featured?: boolean;
+}) {
   const avatarUrl =
-    typeof member.image === "object" && member.image?.url ? member.image.url : null;
+    typeof member.image === "object" && member.image?.url
+      ? member.image.url
+      : null;
 
   if (!avatarUrl) {
     return (
@@ -44,12 +52,19 @@ function TeamImage({ member, featured = false }: { member: TeamMember; featured?
       alt={member.name || "Ekip üyesi"}
       fill
       className="object-cover grayscale transition-transform duration-500 group-hover:scale-105 group-hover:grayscale-0"
-      unoptimized
+      sizes={featured ? "(max-width: 768px) 100vw, 45vw" : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"}
+      quality={75}
     />
   );
 }
 
-function TeamCard({ member, featured = false }: { member: TeamMember; featured?: boolean }) {
+function TeamCard({
+  member,
+  featured = false,
+}: {
+  member: TeamMember;
+  featured?: boolean;
+}) {
   if (featured) {
     return (
       <Card className="group overflow-hidden rounded-[var(--radius-3xl)] border-border bg-surface shadow-sm transition-all duration-300 hover:shadow-xl hover:shadow-surface-inverse/5">

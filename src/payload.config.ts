@@ -26,7 +26,9 @@ import { SiteSettings } from "@/globals/SiteSettings";
 import { MainMenu } from "@/globals/MainMenu";
 import { EmailSettings } from "@/globals/EmailSettings";
 import { ThemeSettings } from "@/globals/ThemeSettings";
+import { ImageOptimizationSettings } from "@/globals/ImageOptimizationSettings";
 import { invalidateProtectedMediaCache } from "@/lib/security/protectedMedia";
+import { imageOptimizationEndpoints } from "@/lib/imageOptimization/endpoints";
 import { serverEnv } from "@/lib/config/env";
 import {
   adminsOnly,
@@ -157,6 +159,7 @@ export default buildConfig({
       },
     },
   },
+  endpoints: imageOptimizationEndpoints,
   collections: [
     Users,
     MediaWithRBAC,
@@ -175,6 +178,7 @@ export default buildConfig({
     MainMenuWithRBAC,
     EmailSettingsWithRBAC,
     ThemeSettingsWithRBAC,
+    ImageOptimizationSettings,
   ],
   editor: lexicalEditor({}),
   secret: serverEnv.payloadSecret,

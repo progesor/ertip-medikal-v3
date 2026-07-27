@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 type ProductGalleryImage = {
   url: string;
   alt?: string;
+  thumbnailUrl?: string;
 };
 
 type ProductGalleryProps = {
@@ -127,8 +128,8 @@ export function ProductGallery({ images, productTitle }: ProductGalleryProps) {
             fill
             className="object-contain p-4 transition duration-300 group-hover:scale-[1.02]"
             sizes="(max-width: 1024px) 100vw, 50vw"
-            priority
-            unoptimized
+            quality={85}
+            preload={normalizedIndex === 0}
           />
 
           {hasMultipleImages && (
@@ -154,11 +155,12 @@ export function ProductGallery({ images, productTitle }: ProductGalleryProps) {
                 aria-label={`${index + 1}. ürün görselini göster`}
               >
                 <Image
-                  src={image.url}
+                  src={image.thumbnailUrl || image.url}
                   alt={image.alt || productTitle || "Ürün küçük görseli"}
                   fill
                   className="object-contain p-2"
-                  unoptimized
+                  sizes="(max-width: 640px) 25vw, 160px"
+                  quality={70}
                 />
               </button>
             ))}
@@ -219,7 +221,7 @@ export function ProductGallery({ images, productTitle }: ProductGalleryProps) {
               fill
               className="object-contain p-4 md:p-8"
               sizes="100vw"
-              unoptimized
+              quality={85}
             />
           </div>
 
@@ -239,11 +241,12 @@ export function ProductGallery({ images, productTitle }: ProductGalleryProps) {
                   aria-label={`${index + 1}. görsele geç`}
                 >
                   <Image
-                    src={image.url}
+                    src={image.thumbnailUrl || image.url}
                     alt={image.alt || productTitle || "Ürün küçük görseli"}
                     fill
                     className="object-contain p-1"
-                    unoptimized
+                    sizes="64px"
+                    quality={70}
                   />
                 </button>
               ))}
