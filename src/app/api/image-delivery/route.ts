@@ -113,10 +113,18 @@ function getRequestedMediaPath(request: NextRequest) {
 }
 
 function redirectToOriginal(request: NextRequest, sourceUrl: string) {
-  const response = Response.redirect(new URL(sourceUrl, request.url), 307);
-  response.headers.set("Cache-Control", "private, no-store");
+  const location = new URL(sourceUrl, request.url).toString();
 
-  return response;
+  // Response.redirect() returns a response whose headers are immutable in the
+  // runtime used by Next.js. Build the redirect response explicitly so cache
+  // policy is defined at creation time instead of mutating headers afterward.
+  return new Response(null, {
+    status: 307,
+    headers: {
+      Location: location,
+      "Cache-Control": "private, no-store",
+    },
+  });
 }
 
 export async function GET(request: NextRequest) {
