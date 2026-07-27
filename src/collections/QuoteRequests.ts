@@ -17,7 +17,8 @@ export const QuoteRequests: CollectionConfig = {
     defaultColumns: ["customerName", "company", "createdAt", "status"],
   },
   access: {
-    create: () => true,
+    // Anonymous submissions go through /api/public/quote-request.
+    create: ({ req: { user } }) => Boolean(user),
     read: ({ req: { user } }) => Boolean(user),
     update: ({ req: { user } }) => Boolean(user),
     delete: ({ req: { user } }) => Boolean(user),
