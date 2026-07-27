@@ -1,0 +1,98 @@
+name: Align React and Admin Hydration
+
+on:
+  push:
+    branches:
+      - feature/m7-image-delivery-optimization
+    paths:
+      - .github/workflows/align-react-and-hydration.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "10"
+  DATABASE_URI: postgresql://payload:payload@127.0.0.1:5432/unused_hydration
+  PAYLOAD_SECRET: ci-only-secret-not-used-outside-github-actions
+  NEXT_PUBLIC_SITE_URL: http://localhost:3000
+  SMTP_HOST: 127.0.0.1
+  SMTP_PORT: "1025"
+  SMTP_USER: ci
+  SMTP_PASS: ci
+  SMTP_FROM_NAME: Ertip Medikal CI
+  SMTP_FROM_ADDRESS: ci@example.invalid
+
+jobs:
+  align:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/m7-image-delivery-optimization
+          fetch-depth: 0
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install current dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Align React runtime and type packages
+        run: |
+          pnpm add --save-exact react@19.2.8 react-dom@19.2.8
+          pnpm add --save-dev --save-exact @types/react@latest @types/react-dom@latest
+
+      - name: Make optimizer first render deterministic
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/components/admin/ImageOptimizationControl.tsx')
+          text = path.read_text(encoding='utf-8')
+          text = text.replace('  const [isLoading, setIsLoading] = useState(true);\n', '')
+          text = text.replace(
+              '''        })\n        .finally(() => {\n          if (!cancelled) setIsLoading(false);\n        });''',
+              '''        });''',
+          )
+          text = text.replace('disabled={isLoading || isRunning}', 'disabled={isRunning}')
+          text = text.replace(
+              'cursor: isLoading || isRunning ? "not-allowed" : "pointer",',
+              'cursor: isRunning ? "not-allowed" : "pointer",',
+          )
+          text = text.replace(
+              'opacity: isLoading || isRunning ? 0.6 : 1,',
+              'opacity: isRunning ? 0.6 : 1,',
+          )
+          path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Refresh generated Payload artifacts
+        run: |
+          pnpm payload:types
+          pnpm payload:importmap
+
+      - name: Validate updated dependency tree
+        run: |
+          pnpm typecheck
+          pnpm lint
+
+      - name: Commit updates and remove workflow
+        run: |
+          rm .github/workflows/align-react-and-hydration.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json pnpm-lock.yaml src/components/admin/ImageOptimizationControl.tsx src/payload-types.ts 'src/app/(payload)/admin/importMap.js' .github/workflows/align-react-and-hydration.yml
+          git diff --cached --quiet && exit 0
+          git commit -m "fix(admin): align React hydration runtime"
+          git push origin HEAD:feature/m7-image-delivery-optimization
