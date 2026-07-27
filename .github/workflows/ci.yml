@@ -72,7 +72,7 @@ jobs:
         run: pnpm lint
 
   production-build:
-    name: Production build
+    name: Migrations and production build
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -110,18 +110,75 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # CI starts from an empty, disposable database. Until the repository owns
-      # committed Payload migrations, generate an ephemeral baseline migration.
-      # Once committed migrations exist, the same job applies those instead.
-      - name: Prepare ephemeral Payload schema
+      - name: Verify committed migration baseline
+        run: |
+          test -f src/migrations/index.ts
+          test "$(find src/migrations -maxdepth 1 -type f -name '*.ts' ! -name 'index.ts' | wc -l)" -ge 1
+          test "$(find src/migrations -maxdepth 1 -type f -name '*.json' | wc -l)" -ge 1
+
+      - name: Apply committed migrations to disposable database
+        run: pnpm db:migrate
+
+      - name: Verify migration status
+        run: pnpm db:migrate:status
+
+      - name: Simulate existing production migration history
+        run: |
+          node --input-type=module <<'NODE'
+          import pg from "pg";
+          const client = new pg.Client({ connectionString: process.env.DATABASE_URI });
+          await client.connect();
+          try {
+            await client.query("DELETE FROM payload_migrations");
+            await client.query(
+              `INSERT INTO payload_migrations (name, batch, created_at, updated_at)
+               VALUES ('development-push-marker', -1, now(), now())`,
+            );
+          } finally {
+            await client.end();
+          }
+          NODE
+
+      - name: Verify baseline adoption preflight
+        run: pnpm db:baseline:check
+
+      - name: Exercise confirmed baseline adoption
+        env:
+          MIGRATION_BASELINE_ADOPT: 20260727_101107_production_baseline
+        run: pnpm db:baseline:adopt
+
+      - name: Verify adopted migration status
+        run: pnpm db:migrate:status
+
+      - name: Detect uncommitted schema migration drift
+        id: migration-drift
         shell: bash
         run: |
-          if compgen -G "src/migrations/*.ts" > /dev/null; then
-            pnpm exec payload migrate
-          else
-            pnpm exec payload migrate:create ci-initial --force-accept-warning
-            pnpm exec payload migrate
+          set +e
+          before_count=$(find src/migrations -maxdepth 1 -type f -name '*.ts' ! -name 'index.ts' | wc -l)
+          pnpm db:migrate:create ci-schema-drift --skip-empty
+          create_status=$?
+          after_count=$(find src/migrations -maxdepth 1 -type f -name '*.ts' ! -name 'index.ts' | wc -l)
+
+          if [[ $create_status -ne 0 ]]; then
+            echo "Migration drift command failed."
+            exit $create_status
           fi
+
+          if [[ $before_count -ne $after_count ]] || ! git diff --quiet -- src/migrations; then
+            echo "Payload config changed without a committed migration."
+            git status --short src/migrations
+            exit 1
+          fi
+
+      - name: Upload migration drift diagnostics
+        if: failure() && steps.migration-drift.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-migration-drift
+          path: src/migrations
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Build with diagnostic fallback
         id: production-build
