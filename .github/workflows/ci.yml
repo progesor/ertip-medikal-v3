@@ -122,6 +122,34 @@ jobs:
       - name: Verify migration status
         run: pnpm db:migrate:status
 
+      - name: Simulate existing production migration history
+        run: |
+          node --input-type=module <<'NODE'
+          import pg from "pg";
+          const client = new pg.Client({ connectionString: process.env.DATABASE_URI });
+          await client.connect();
+          try {
+            await client.query("DELETE FROM payload_migrations");
+            await client.query(
+              `INSERT INTO payload_migrations (name, batch, created_at, updated_at)
+               VALUES ('development-push-marker', -1, now(), now())`,
+            );
+          } finally {
+            await client.end();
+          }
+          NODE
+
+      - name: Verify baseline adoption preflight
+        run: pnpm db:baseline:check
+
+      - name: Exercise confirmed baseline adoption
+        env:
+          MIGRATION_BASELINE_ADOPT: 20260727_101107_production_baseline
+        run: pnpm db:baseline:adopt
+
+      - name: Verify adopted migration status
+        run: pnpm db:migrate:status
+
       - name: Detect uncommitted schema migration drift
         id: migration-drift
         shell: bash
