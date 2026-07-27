@@ -27,6 +27,9 @@
       ],
       "@payload-config": [
         "./src/payload.config.ts"
+      ],
+      "rehype-raw": [
+        "./src/lib/security/stripRawHtml.ts"
       ]
     },
     "target": "ES2017"
