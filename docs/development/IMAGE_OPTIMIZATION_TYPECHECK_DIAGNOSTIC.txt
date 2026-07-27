@@ -1,0 +1,11 @@
+
+> ertip-medikal-v3@0.1.0 typecheck /home/runner/work/ertip-medikal-v3/ertip-medikal-v3
+> tsc --noEmit
+
+src/components/admin/ImageOptimizationControl.tsx(185,6): error TS17008: JSX element 'div' has no corresponding closing tag.
+src/components/admin/ImageOptimizationControl.tsx(194,8): error TS17008: JSX element 'div' has no corresponding closing tag.
+src/components/admin/ImageOptimizationControl.tsx(203,10): error TS17008: JSX element 'div' has no corresponding closing tag.
+src/components/admin/ImageOptimizationControl.tsx(207,12): error TS17008: JSX element 'p' has no corresponding closing tag.
+src/components/admin/ImageOptimizationControl.tsx(214,75): error TS1002: Unterminated string literal.
+src/components/admin/ImageOptimizationControl.tsx(214,75): error TS1005: '</' expected.
+ ELIFECYCLE  Command failed with exit code 2.
