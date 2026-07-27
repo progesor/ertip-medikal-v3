@@ -18,13 +18,6 @@ function secureCodeEquals(storedCode: string, suppliedCode: string) {
   return timingSafeEqual(storedDigest, suppliedDigest);
 }
 
-function maskAccessCode(code: string) {
-  if (code.length <= 2) return "**";
-  if (code.length <= 4) return `${code.slice(0, 1)}***${code.slice(-1)}`;
-
-  return `${code.slice(0, 2)}***${code.slice(-2)}`;
-}
-
 function getClientIp(request: NextRequest) {
   const forwardedFor = request.headers.get("x-forwarded-for")?.split(",")[0];
 
@@ -115,7 +108,9 @@ export async function POST(request: NextRequest) {
       data: {
         productTitle: product.title,
         documentName: protectedDocument.label,
-        accessCode: maskAccessCode(code),
+        // The list view masks this value. Admins can inspect the full code in
+        // the record detail when investigating a leaked credential.
+        accessCode: code,
         ipAddress: getClientIp(request),
         deviceInfo: (request.headers.get("user-agent") || "Bilinmiyor").slice(
           0,
