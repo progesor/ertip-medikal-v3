@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: migration-baseline-${{ github.ref }}
@@ -26,7 +26,7 @@ env:
 
 jobs:
   generate-baseline:
-    name: Generate baseline migration
+    name: Generate and commit baseline migration
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -48,8 +48,10 @@ jobs:
           - 1025:1025
 
     steps:
-      - name: Checkout
+      - name: Checkout PR branch
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
@@ -62,18 +64,24 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
 
+      - name: Refuse to overwrite committed migrations
+        run: |
+          if test -f src/migrations/index.ts; then
+            echo "Committed migrations already exist; refusing to regenerate."
+            exit 1
+          fi
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Generate baseline migration
-        run: |
-          rm -rf src/migrations
-          pnpm exec payload migrate:create production-baseline --force-accept-warning
+        run: pnpm exec payload migrate:create production-baseline --force-accept-warning
 
       - name: Verify generated baseline
         run: |
           test -f src/migrations/index.ts
           test "$(find src/migrations -maxdepth 1 -type f -name '*.ts' ! -name 'index.ts' | wc -l)" -eq 1
+          test "$(find src/migrations -maxdepth 1 -type f -name '*.json' | wc -l)" -eq 1
 
       - name: Upload generated migration
         uses: actions/upload-artifact@v4
@@ -82,3 +90,14 @@ jobs:
           path: src/migrations
           if-no-files-found: error
           retention-days: 7
+
+      - name: Commit baseline and remove generator workflow
+        env:
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+        run: |
+          rm .github/workflows/generate-production-baseline.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/migrations .github/workflows/generate-production-baseline.yml
+          git commit -m "chore(database): commit Payload production baseline"
+          git push origin "HEAD:${BRANCH_NAME}"
