@@ -146,13 +146,15 @@ export async function GET(request: NextRequest) {
   }
 
   const { settings, currentFingerprint } = await getCachedSettings();
-  const hasCurrentOptimization =
+  const mayUseActiveOptimization =
     settings.enabled &&
     Boolean(settings.activeFingerprint) &&
     settings.activeFingerprint === currentFingerprint &&
-    (settings.status === "ready" || settings.status === "partial");
+    (settings.status === "ready" ||
+      settings.status === "partial" ||
+      settings.status === "stale");
 
-  if (!hasCurrentOptimization || !settings.activeFingerprint) {
+  if (!mayUseActiveOptimization || !settings.activeFingerprint) {
     return redirectToOriginal(request, originalUrl);
   }
 
