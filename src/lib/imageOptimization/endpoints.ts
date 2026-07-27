@@ -82,7 +82,11 @@ const runEndpoint: Endpoint = {
   handler: async (req) => {
     if (!isAdmin(req.user)) return unauthorizedResponse();
 
-    const body = (await req.json().catch(() => ({}))) as OptimizationRunBody;
+    const body = (
+      typeof req.json === "function"
+        ? await req.json().catch(() => ({}))
+        : {}
+    ) as OptimizationRunBody;
     const page = asBoundedInteger(body.page, 1, 1, 100_000);
     const batchSize = asBoundedInteger(body.batchSize, 5, 1, 20);
     const runId = String(body.runId || "").trim();
