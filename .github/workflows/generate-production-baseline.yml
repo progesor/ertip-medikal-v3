@@ -1,0 +1,84 @@
+name: Generate production migration baseline
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: migration-baseline-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "10"
+  NEXT_TELEMETRY_DISABLED: "1"
+  DATABASE_URI: postgresql://payload:payload@127.0.0.1:5432/ertip_migration_baseline
+  PAYLOAD_SECRET: ci-only-migration-baseline-secret-000000000000000000000000
+  NEXT_PUBLIC_SITE_URL: http://localhost:3000
+  SMTP_HOST: 127.0.0.1
+  SMTP_PORT: "1025"
+  SMTP_FROM_NAME: Ertip Medikal Migration CI
+  SMTP_FROM_ADDRESS: migrations@example.invalid
+
+jobs:
+  generate-baseline:
+    name: Generate baseline migration
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: payload
+          POSTGRES_PASSWORD: payload
+          POSTGRES_DB: ertip_migration_baseline
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U payload -d ertip_migration_baseline"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      mailpit:
+        image: axllent/mailpit:v1.27
+        ports:
+          - 1025:1025
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate baseline migration
+        run: |
+          rm -rf src/migrations
+          pnpm exec payload migrate:create production-baseline --force-accept-warning
+
+      - name: Verify generated baseline
+        run: |
+          test -f src/migrations/index.ts
+          test "$(find src/migrations -maxdepth 1 -type f -name '*.ts' ! -name 'index.ts' | wc -l)" -eq 1
+
+      - name: Upload generated migration
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-production-baseline
+          path: src/migrations
+          if-no-files-found: error
+          retention-days: 7
