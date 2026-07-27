@@ -24,7 +24,13 @@ function getGridClass(count: number, layout: TestimonialLayoutMode) {
   return "mx-auto max-w-7xl grid-cols-1 md:grid-cols-2 xl:grid-cols-4";
 }
 
-function TestimonialCard({ item, featured = false }: { item: TestimonialItem; featured?: boolean }) {
+function TestimonialCard({
+  item,
+  featured = false,
+}: {
+  item: TestimonialItem;
+  featured?: boolean;
+}) {
   const avatarUrl =
     typeof item.avatar === "object" && item.avatar?.url ? item.avatar.url : null;
   const initial = item.name?.charAt(0) || "R";
@@ -35,7 +41,9 @@ function TestimonialCard({ item, featured = false }: { item: TestimonialItem; fe
         featured ? "rounded-[var(--radius-3xl)] p-4 md:p-8" : "rounded-3xl p-4"
       }`}
     >
-      <CardContent className={featured ? "px-6 py-10 text-center md:px-12" : "px-8 pb-8 pt-10"}>
+      <CardContent
+        className={featured ? "px-6 py-10 text-center md:px-12" : "px-8 pb-8 pt-10"}
+      >
         <Quote
           className={`text-primary/10 transition-colors group-hover:text-primary/20 ${
             featured ? "mx-auto mb-6 h-12 w-12" : "absolute left-8 top-8 h-10 w-10"
@@ -51,19 +59,26 @@ function TestimonialCard({ item, featured = false }: { item: TestimonialItem; fe
             “{item.content}”
           </p>
 
-          <div className={`flex items-center gap-4 ${featured ? "justify-center" : ""}`}>
+          <div
+            className={`flex items-center gap-4 ${featured ? "justify-center" : ""}`}
+          >
             {avatarUrl ? (
-              <div className={`${featured ? "h-16 w-16" : "h-14 w-14"} relative overflow-hidden rounded-2xl shadow-md`}>
+              <div
+                className={`${featured ? "h-16 w-16" : "h-14 w-14"} relative overflow-hidden rounded-2xl shadow-md`}
+              >
                 <Image
                   src={avatarUrl}
                   alt={item.name || "Referans"}
                   fill
                   className="object-cover"
-                  unoptimized
+                  sizes={featured ? "64px" : "56px"}
+                  quality={70}
                 />
               </div>
             ) : (
-              <div className={`${featured ? "h-16 w-16" : "h-14 w-14"} flex items-center justify-center rounded-2xl bg-primary/10 text-xl font-bold text-primary shadow-sm`}>
+              <div
+                className={`${featured ? "h-16 w-16" : "h-14 w-14"} flex items-center justify-center rounded-2xl bg-primary/10 text-xl font-bold text-primary shadow-sm`}
+              >
                 {initial}
               </div>
             )}
@@ -107,7 +122,9 @@ export function TestimonialBlock({
           </div>
         )}
 
-        <div className={`grid gap-8 ${getGridClass(testimonials.length, resolvedLayout)}`}>
+        <div
+          className={`grid gap-8 ${getGridClass(testimonials.length, resolvedLayout)}`}
+        >
           {testimonials.map((item, index) => (
             <TestimonialCard
               key={index}
