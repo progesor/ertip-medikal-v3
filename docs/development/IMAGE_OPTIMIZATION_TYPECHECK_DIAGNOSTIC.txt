@@ -1,0 +1,8 @@
+
+> ertip-medikal-v3@0.1.0 typecheck /home/runner/work/ertip-medikal-v3/ertip-medikal-v3
+> tsc --noEmit
+
+src/lib/imageOptimization/endpoints.ts(85,25): error TS2722: Cannot invoke an object which is possibly 'undefined'.
+ ELIFECYCLE  Command failed with exit code 2.
+
+exit_status=2
