@@ -70,8 +70,9 @@ function GalleryItem({
         width={image.width}
         height={image.height}
         className={`w-full object-cover transition-transform duration-700 group-hover:scale-105 ${imageClassName}`}
-        priority={priority}
-        unoptimized
+        sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+        quality={75}
+        preload={priority}
       />
     </button>
   );
@@ -250,7 +251,8 @@ export function GalleryBlock({
               width={1920}
               height={1080}
               className="h-auto max-h-[85vh] w-full rounded-lg object-contain shadow-2xl"
-              unoptimized
+              sizes="100vw"
+              quality={85}
             />
           </div>
         </div>
