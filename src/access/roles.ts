@@ -10,7 +10,7 @@ type AccessArgs = {
   };
 };
 
-export function isAdmin(user: unknown): user is UserLike {
+export function isAdmin(user: unknown) {
   return Boolean(
     user &&
       typeof user === "object" &&
@@ -19,7 +19,7 @@ export function isAdmin(user: unknown): user is UserLike {
   );
 }
 
-export function isContentManager(user: unknown): user is UserLike {
+export function isContentManager(user: unknown) {
   if (!user || typeof user !== "object" || !("role" in user)) return false;
 
   const role = (user as UserLike).role;
