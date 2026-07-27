@@ -48,11 +48,12 @@ export function LogoSliderBlock({ title, logos }: any) {
             >
               <Image
                 src={logoUrl}
-                alt="Marka Logosu"
+                alt={item.logo?.alt || "Marka Logosu"}
                 width={150}
                 height={80}
                 className="object-contain h-16 w-auto"
-                unoptimized
+                sizes="150px"
+                quality={70}
               />
             </div>
           );
