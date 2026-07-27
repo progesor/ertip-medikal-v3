@@ -46,6 +46,8 @@ Changing format, width or quality marks the current configuration as stale. The 
 
 ## Manual run workflow
 
+The optimization control panel is rendered directly below the **Görsel Optimizasyonu** page title and above the editable settings, so the action button and run status remain visible without relying on a custom UI field inside the form.
+
 1. Open **Site Yapılandırması → Görsel Optimizasyonu**.
 2. Change format, width or quality values as needed.
 3. Save the Payload global.
@@ -138,5 +140,3 @@ After deploying privately:
 - The application must keep `/app/media` or the configured media directory on persistent storage.
 - The generated `media/optimized` directory must be included in media-volume backup policy, although it can be regenerated from originals.
 - A full run consumes CPU and disk I/O, so it should be started during a quiet period when the media library is large.
-- Do not run multiple optimization jobs at the same time.
-- Do not delete the original media files after optimization.
