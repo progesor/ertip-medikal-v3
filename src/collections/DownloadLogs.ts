@@ -36,7 +36,7 @@ export const DownloadLogs: CollectionConfig = {
     {
       name: "accessCode",
       type: "text",
-      label: "Kullanılan Kod",
+      label: "Kullanılan Kod (detayda açık)",
       admin: {
         readOnly: true,
         components: {
