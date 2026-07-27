@@ -20,6 +20,13 @@ env:
   NEXT_TELEMETRY_DISABLED: "1"
   DATABASE_URI: postgresql://payload:payload@127.0.0.1:5432/ertip_ci
   PAYLOAD_SECRET: ci-only-secret-not-used-outside-github-actions
+  NEXT_PUBLIC_SITE_URL: http://localhost:3000
+  SMTP_HOST: 127.0.0.1
+  SMTP_PORT: "1025"
+  SMTP_USER: ci
+  SMTP_PASS: ci
+  SMTP_FROM_NAME: Ertip Medikal CI
+  SMTP_FROM_ADDRESS: ci@example.invalid
 
 jobs:
   quality:
@@ -85,16 +92,6 @@ jobs:
         image: axllent/mailpit:v1.27
         ports:
           - 1025:1025
-    env:
-      DATABASE_URI: postgresql://payload:payload@127.0.0.1:5432/ertip_ci
-      PAYLOAD_SECRET: ci-only-secret-not-used-outside-github-actions
-      NEXT_PUBLIC_SERVER_URL: http://localhost:3000
-      SMTP_HOST: 127.0.0.1
-      SMTP_PORT: "1025"
-      SMTP_USER: ci
-      SMTP_PASS: ci
-      SMTP_FROM_NAME: Ertip Medikal CI
-      SMTP_FROM_ADDRESS: ci@example.invalid
     steps:
       - name: Checkout
         uses: actions/checkout@v4
