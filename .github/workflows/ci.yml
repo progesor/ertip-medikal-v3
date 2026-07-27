@@ -102,6 +102,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # CI starts from an empty, disposable database. Until the repository owns
+      # committed Payload migrations, generate an ephemeral baseline migration.
+      # Once committed migrations exist, the same job applies those instead.
       - name: Prepare ephemeral Payload schema
         shell: bash
         run: |
