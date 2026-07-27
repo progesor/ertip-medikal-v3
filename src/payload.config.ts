@@ -1,4 +1,4 @@
-import { buildConfig } from "payload";
+import { buildConfig, type CollectionConfig } from "payload";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import sharp from "sharp";
@@ -6,7 +6,6 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { nodemailerAdapter } from "@payloadcms/email-nodemailer";
 
-// Koleksiyon Importları
 import { Users } from "@/collections/Users";
 import { Media } from "@/collections/Media";
 import { Products } from "@/collections/Products";
@@ -19,7 +18,6 @@ import { QuoteRequests } from "@/collections/QuoteRequests";
 import { DownloadLogs } from "@/collections/DownloadLogs";
 import { Subscribers } from "@/collections/Subscribers";
 
-// Global Importları
 import { SiteSettings } from "@/globals/SiteSettings";
 import { MainMenu } from "@/globals/MainMenu";
 import { EmailSettings } from "@/globals/EmailSettings";
@@ -27,6 +25,17 @@ import { ThemeSettings } from "@/globals/ThemeSettings";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
+
+// Public pages use Payload's server-side Local API, which overrides access by
+// default. Anonymous REST/GraphQL product reads are disabled because product
+// documents currently contain protected manual metadata and access codes.
+const ProductsWithRestrictedPublicApi: CollectionConfig = {
+  ...Products,
+  access: {
+    ...Products.access,
+    read: ({ req }) => Boolean(req.user),
+  },
+};
 
 export default buildConfig({
   admin: {
@@ -44,11 +53,10 @@ export default buildConfig({
       },
     },
   },
-  // Yeni koleksiyonları buraya ekledik
   collections: [
     Users,
     Media,
-    Products,
+    ProductsWithRestrictedPublicApi,
     Categories,
     Inquiries,
     News,
@@ -58,7 +66,6 @@ export default buildConfig({
     DownloadLogs,
     Subscribers,
   ],
-  // Globals dizisini buraya ekledik
   globals: [SiteSettings, MainMenu, EmailSettings, ThemeSettings],
   editor: lexicalEditor({}),
   secret: process.env.PAYLOAD_SECRET || "SECRET_KEY_MISSING",
@@ -72,7 +79,7 @@ export default buildConfig({
   }),
   sharp,
   email: nodemailerAdapter({
-    defaultFromName: process.env.SMTP_FROM_NAME || "Ertıp Medikal",
+    defaultFromName: process.env.SMTP_FROM_NAME || "Ertip Medikal",
     defaultFromAddress:
       process.env.SMTP_FROM_ADDRESS || "iletisim@ertip.com.tr",
     transportOptions: {
