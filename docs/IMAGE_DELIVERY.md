@@ -44,6 +44,22 @@ The output format can be:
 
 Changing format, width or quality marks the current configuration as stale. The new settings do not become active until the administrator saves the global and runs the full optimization again.
 
+## Admin component import map
+
+Payload resolves custom admin components through the generated file:
+
+```text
+src/app/(payload)/admin/importMap.js
+```
+
+The optimizer control must be present under the key:
+
+```text
+/components/admin/ImageOptimizationControl#ImageOptimizationControl
+```
+
+The repository exposes `pnpm payload:importmap`, and both `pnpm dev` and `pnpm build` regenerate the map before starting. CI regenerates the map and fails if the committed file drifts. Do not edit `importMap.js` manually.
+
 ## Manual run workflow
 
 The optimization control panel is rendered directly below the **Görsel Optimizasyonu** page title and above the editable settings, so the action button and run status remain visible without relying on a custom UI field inside the form.
@@ -86,7 +102,7 @@ The route:
 3. reuses protected-media access checks;
 4. chooses the smallest configured profile that can satisfy the requested width;
 5. serves the generated WebP/AVIF file when available;
-6. redirects to the original upload when optimization is disabled, stale because settings changed, not yet run, unsupported or missing.
+6. redirects to the original upload when optimization is disabled, not yet run, unsupported or missing.
 
 When one media item changes after a successful run, existing generated files may continue to serve while that item falls back to its original. The admin panel reports that another manual run is required.
 
