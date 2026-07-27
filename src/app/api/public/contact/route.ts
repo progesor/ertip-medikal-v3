@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
       data: {
         name,
         email,
-        phone: phone || undefined,
+        phone: phone || null,
         message,
       },
     });
