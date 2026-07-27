@@ -31,11 +31,8 @@ export const DownloadLogs: CollectionConfig = {
     {
       name: "accessCode",
       type: "text",
-      label: "Kod Özeti",
-      admin: {
-        readOnly: true,
-        description: "Güvenlik nedeniyle erişim kodunun tamamı kaydedilmez.",
-      },
+      label: "Kod Özeti (Maskeli)",
+      admin: { readOnly: true },
     },
     {
       name: "ipAddress",
