@@ -2,12 +2,19 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+type OptimizationStatusValue =
+  | "idle"
+  | "stale"
+  | "running"
+  | "ready"
+  | "partial";
+
 type OptimizationStatus = {
   enabled: boolean;
   format: "webp" | "avif";
   currentFingerprint: string;
   activeFingerprint: string | null;
-  status: "idle" | "stale" | "running" | "ready" | "partial";
+  status: OptimizationStatusValue;
   processedCount: number;
   skippedCount: number;
   errorCount: number;
@@ -18,16 +25,25 @@ type OptimizationStatus = {
 
 type RunResponse = {
   success?: boolean;
-  currentFingerprint?: string;
   nextPage?: number | null;
   hasNextPage?: boolean;
   totalDocs?: number;
   processedCount?: number;
   skippedCount?: number;
   errorCount?: number;
-  finished?: boolean;
-  status?: OptimizationStatus["status"];
   message?: string | null;
+};
+
+type ErrorResponse = {
+  message?: string;
+};
+
+const statusLabels: Record<OptimizationStatusValue, string> = {
+  idle: "Henüz çalıştırılmadı",
+  stale: "Yeniden çalıştırılmalı",
+  running: "İşleniyor",
+  ready: "Hazır",
+  partial: "Kısmen tamamlandı",
 };
 
 function createRunId() {
@@ -47,13 +63,10 @@ function formatDate(value: string | null) {
   }).format(new Date(value));
 }
 
-const statusLabels: Record<OptimizationStatus["status"], string> = {
-  idle: "Hazır değil",
-  stale: "Ayarlar değişti — yeniden çalıştırılmalı",
-  running: "İşleniyor",
-  ready: "Hazır",
-  partial: "Kısmen tamamlandı",
-};
+async function readErrorMessage(response: Response, fallback: string) {
+  const data = (await response.json().catch(() => ({}))) as ErrorResponse;
+  return data.message || fallback;
+}
 
 export function ImageOptimizationControl() {
   const [status, setStatus] = useState<OptimizationStatus | null>(null);
@@ -67,15 +80,16 @@ export function ImageOptimizationControl() {
       credentials: "include",
       cache: "no-store",
     });
-    const data = (await response.json()) as OptimizationStatus & {
-      message?: string;
-    };
 
     if (!response.ok) {
-      throw new Error(data.message || "Optimizasyon durumu okunamadı.");
+      throw new Error(
+        await readErrorMessage(response, "Optimizasyon durumu okunamadı."),
+      );
     }
 
+    const data = (await response.json()) as OptimizationStatus;
     setStatus(data);
+    return data;
   }, []);
 
   useEffect(() => {
@@ -104,21 +118,7 @@ export function ImageOptimizationControl() {
     setProgressMessage("Kaydedilmiş ayarlar okunuyor...");
 
     try {
-      await loadStatus();
-      const freshResponse = await fetch("/api/media-optimization/status", {
-        credentials: "include",
-        cache: "no-store",
-      });
-      const freshStatus = (await freshResponse.json()) as OptimizationStatus & {
-        message?: string;
-      };
-
-      if (!freshResponse.ok) {
-        throw new Error(
-          freshStatus.message || "Kaydedilmiş ayarlar okunamadı.",
-        );
-      }
-
+      const savedStatus = await loadStatus();
       const runId = createRunId();
       let page = 1;
       let iteration = 0;
@@ -140,12 +140,19 @@ export function ImageOptimizationControl() {
             page,
             batchSize: 5,
             force: true,
-            expectedFingerprint: freshStatus.currentFingerprint,
+            expectedFingerprint: savedStatus.currentFingerprint,
           }),
         });
+
+        if (!response.ok) {
+          throw new Error(
+            await readErrorMessage(response, "Görseller optimize edilemedi."),
+          );
+        }
+
         const data = (await response.json()) as RunResponse;
 
-        if (!response.ok || !data.success) {
+        if (!data.success) {
           throw new Error(data.message || "Görseller optimize edilemedi.");
         }
 
@@ -153,9 +160,11 @@ export function ImageOptimizationControl() {
           (data.processedCount || 0) +
           (data.skippedCount || 0) +
           (data.errorCount || 0);
+
         setProgressMessage(
           `${checked} / ${data.totalDocs || 0} medya kontrol edildi.`,
         );
+
         hasNextPage = Boolean(data.hasNextPage);
         page = data.nextPage || page + 1;
       }
@@ -182,33 +191,158 @@ export function ImageOptimizationControl() {
       : 0;
 
   return (
-    <div
-      style={{
-        marginTop: "1.5rem",
-        padding: "1.25rem",
-        border: "1px solid var(--theme-elevation-150)",
-        borderRadius: "12px",
-        background: "var(--theme-elevation-50)",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          gap: "1rem",
-          flexWrap: "wrap",
-        }}
-      >
-        <div style={{ maxWidth: "720px" }}>
-          <h3 style={{ margin: 0, fontSize: "1rem" }}>
-            Toplu Görsel Optimizasyonu
-          </h3>
-          <p
-            style={{
-              margin: "0.5rem 0 0",
-              color: "var(--theme-elevation-600)",
-              lineHeight: 1.55,
-            }}
-          >
-            Önce yukarıdaki ayarları Payload’ın <strong>Kaydet</strong>{" 
+    <div style={styles.wrapper}>
+      <div style={styles.header}>
+        <div style={styles.descriptionColumn}>
+          <h3 style={styles.title}>Toplu Görsel Optimizasyonu</h3>
+          <p style={styles.description}>
+            Önce yukarıdaki ayarları Payload’ın Kaydet düğmesiyle kaydedin.
+            Ardından bu düğme tüm raster görseller için kırpmasız ve kalıcı
+            türevler üretir. PDF, SVG ve hareketli GIF dosyaları değiştirilmez.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => void runOptimization()}
+          disabled={isLoading || isRunning}
+          style={{
+            ...styles.actionButton,
+            cursor: isLoading || isRunning ? "not-allowed" : "pointer",
+            opacity: isLoading || isRunning ? 0.6 : 1,
+          }}
+        >
+          {isRunning ? "Görseller İşleniyor..." : "Tüm Görselleri Optimize Et"}
+        </button>
+      </div>
+
+      <div style={styles.statusGrid}>
+        <StatusItem
+          label="Durum"
+          value={status ? statusLabels[status.status] : "Yükleniyor..."}
+        />
+        <StatusItem
+          label="Son Çalışma"
+          value={status ? formatDate(status.lastOptimizedAt) : "—"}
+        />
+        <StatusItem
+          label="İşlenen"
+          value={status ? String(status.processedCount) : "—"}
+        />
+        <StatusItem
+          label="Atlanan"
+          value={status ? String(status.skippedCount) : "—"}
+        />
+        <StatusItem
+          label="Hata"
+          value={status ? String(status.errorCount) : "—"}
+        />
+      </div>
+
+      {(isRunning || status?.status === "running") && (
+        <div style={styles.progressTrack}>
+          <div style={{ ...styles.progressBar, width: `${progress}%` }} />
+        </div>
+      )}
+
+      {(progressMessage || status?.message) && !error && (
+        <p style={styles.message}>{progressMessage || status?.message}</p>
+      )}
+
+      {error && <p style={styles.error}>{error}</p>}
+    </div>
+  );
+}
+
+function StatusItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={styles.statusItem}>
+      <div style={styles.statusLabel}>{label}</div>
+      <div style={styles.statusValue}>{value}</div>
+    </div>
+  );
+}
+
+const styles: Record<string, React.CSSProperties> = {
+  wrapper: {
+    marginTop: "1.5rem",
+    padding: "1.25rem",
+    border: "1px solid var(--theme-elevation-150)",
+    borderRadius: "12px",
+    background: "var(--theme-elevation-50)",
+  },
+  header: {
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: "1rem",
+    flexWrap: "wrap",
+  },
+  descriptionColumn: {
+    maxWidth: "720px",
+  },
+  title: {
+    margin: 0,
+    fontSize: "1rem",
+  },
+  description: {
+    margin: "0.5rem 0 0",
+    color: "var(--theme-elevation-600)",
+    lineHeight: 1.55,
+  },
+  actionButton: {
+    border: 0,
+    borderRadius: "8px",
+    padding: "0.8rem 1.1rem",
+    background: "var(--theme-success-500, #15803d)",
+    color: "white",
+    fontWeight: 700,
+  },
+  statusGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(145px, 1fr))",
+    gap: "0.75rem",
+    marginTop: "1rem",
+  },
+  statusItem: {
+    padding: "0.75rem",
+    borderRadius: "8px",
+    background: "var(--theme-elevation-0)",
+    border: "1px solid var(--theme-elevation-100)",
+  },
+  statusLabel: {
+    fontSize: "0.72rem",
+    textTransform: "uppercase",
+    letterSpacing: "0.06em",
+    color: "var(--theme-elevation-500)",
+    fontWeight: 700,
+  },
+  statusValue: {
+    marginTop: "0.25rem",
+    fontWeight: 700,
+  },
+  progressTrack: {
+    height: "8px",
+    overflow: "hidden",
+    borderRadius: "999px",
+    background: "var(--theme-elevation-150)",
+    marginTop: "1rem",
+  },
+  progressBar: {
+    height: "100%",
+    background: "var(--theme-success-500, #15803d)",
+    transition: "width 200ms ease",
+  },
+  message: {
+    margin: "1rem 0 0",
+    color: "var(--theme-elevation-700)",
+  },
+  error: {
+    margin: "1rem 0 0",
+    padding: "0.75rem",
+    borderRadius: "8px",
+    background: "var(--theme-error-100, #fee2e2)",
+    color: "var(--theme-error-600, #b91c1c)",
+    fontWeight: 600,
+  },
+};
