@@ -1,4 +1,7 @@
-import type { CollectionConfig } from "payload";
+import type { Access, CollectionConfig } from "payload";
+
+const isAdmin: Access = ({ req }) =>
+  Boolean(req.user && "role" in req.user && req.user.role === "admin");
 
 export const DownloadLogs: CollectionConfig = {
   slug: "download-logs",
@@ -7,13 +10,15 @@ export const DownloadLogs: CollectionConfig = {
     useAsTitle: "accessCode",
     group: "Uyumluluk ve Kayıtlar",
     defaultColumns: ["productTitle", "accessCode", "ipAddress", "createdAt"],
+    description:
+      "Kodlar liste ekranında maskelenir. Sızıntı kontrolü için kayıt detayında tam kod görüntülenebilir.",
   },
   access: {
     // Log records are written only through trusted server-side Local API calls.
     create: () => false,
-    read: ({ req: { user } }) => Boolean(user),
+    read: isAdmin,
     update: () => false,
-    delete: ({ req: { user } }) => Boolean(user),
+    delete: isAdmin,
   },
   fields: [
     {
@@ -31,8 +36,13 @@ export const DownloadLogs: CollectionConfig = {
     {
       name: "accessCode",
       type: "text",
-      label: "Kod Özeti (Maskeli)",
-      admin: { readOnly: true },
+      label: "Kullanılan Kod",
+      admin: {
+        readOnly: true,
+        components: {
+          Cell: "/components/admin/DownloadLogCells#MaskedAccessCodeCell",
+        },
+      },
     },
     {
       name: "ipAddress",
