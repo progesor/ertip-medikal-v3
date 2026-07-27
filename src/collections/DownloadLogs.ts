@@ -10,8 +10,6 @@ export const DownloadLogs: CollectionConfig = {
     useAsTitle: "accessCode",
     group: "Uyumluluk ve Kayıtlar",
     defaultColumns: ["productTitle", "accessCode", "ipAddress", "createdAt"],
-    description:
-      "Kodlar liste ekranında maskelenir. Sızıntı kontrolü için kayıt detayında tam kod görüntülenebilir.",
   },
   access: {
     // Log records are written only through trusted server-side Local API calls.
@@ -36,7 +34,7 @@ export const DownloadLogs: CollectionConfig = {
     {
       name: "accessCode",
       type: "text",
-      label: "Kullanılan Kod (detayda açık)",
+      label: "Kullanılan Kod (listede maskeli, detayda açık)",
       admin: {
         readOnly: true,
         components: {
