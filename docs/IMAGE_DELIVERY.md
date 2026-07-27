@@ -1,80 +1,142 @@
-# Image Delivery Policy
+# Admin-Managed Image Optimization
 
-The website uses two complementary image layers:
+The website keeps every original upload unchanged and uses a manually triggered optimization pipeline for public raster images.
 
-1. Payload CMS stores the original upload and creates configured media derivatives.
-2. Next.js serves public website images through its managed image endpoint with responsive widths, WebP negotiation and cache reuse.
+The system has three layers:
 
-## Current delivery configuration
+1. Payload CMS stores the original media file in the persistent `media` volume.
+2. An administrator chooses format, maximum width and quality settings in **Site Yapılandırması → Görsel Optimizasyonu**.
+3. The administrator explicitly runs **Tüm Görselleri Optimize Et** to create persistent, aspect-ratio-safe derivatives.
 
-`next.config.mjs` defines:
+No public request performs expensive image encoding. Public delivery either serves an already generated derivative or falls back to the original media file.
 
-- WebP as the managed output format;
-- explicit quality tiers of `70`, `75` and `85`;
-- a minimum optimized-image cache lifetime of one day.
+## Crop policy
 
-The intended quality tiers are:
+Public product and content images must not use historical Payload derivatives that were created with a fixed width and height. Those files contain irreversible centre crops.
 
-- `70`: small avatars, logos and thumbnails;
-- `75`: normal cards, news images, team images and hero backgrounds;
-- `85`: primary product imagery and fullscreen/lightbox views.
+The Media collection now:
 
-Every responsive `next/image` instance must include an accurate `sizes` value. Components must not use `unoptimized` merely to work around missing sizing information.
+- disables Payload crop and focal-point controls;
+- creates its helper sizes with width only;
+- uses `withoutEnlargement`;
+- rewrites historical public `sizes.*.url` values to the original media URL;
+- preserves the original aspect ratio for all newly generated helper sizes.
 
-## Payload derivatives
+The manual optimizer also uses Sharp with `fit: inside` and `withoutEnlargement: true`. It never crops an image.
 
-The Media collection currently provides:
+## Admin settings
 
-- `thumbnail`: small preview derivative;
-- `card`: catalogue/card derivative;
-- `hero`: wide hero derivative.
+The `imageOptimization` global contains four profiles:
 
-Components may use a Payload derivative when its crop and aspect ratio are appropriate. They must fall back to the original media URL so existing uploads and incomplete historical derivatives continue to render.
+| Profile | Default width | Default quality | Typical use |
+| --- | ---: | ---: | --- |
+| Thumbnail | 320 px | 70 | Avatars, logos and small previews |
+| Card | 900 px | 75 | Product, news and catalogue cards |
+| Content | 1600 px | 80 | Galleries, certificates and content images |
+| Fullscreen | 2400 px | 85 | Product detail, hero and lightbox images |
 
-The product catalogue prefers the `card` derivative. Hero blocks prefer the `hero` derivative. Product-detail galleries keep the original image as the source for the main and fullscreen views while Next.js generates the requested delivery widths.
+Administrators may change every width and quality value. Quality is limited to `40–95`; width is limited to `64–3840` pixels.
 
-## Compatibility and safety
+The output format can be:
 
-This delivery phase:
+- **WebP**: default and recommended for balanced compatibility and CPU cost;
+- **AVIF**: smaller output in many cases, but more expensive to generate.
 
-- does not change the database schema;
-- does not require a Payload migration;
-- does not rewrite, delete or convert existing uploads;
-- does not change protected-document delivery;
-- preserves original media URLs;
-- allows the first request for a width/quality combination to populate the Next.js image cache.
+Changing format, width or quality marks the current configuration as stale. The new settings do not become active until the administrator saves the global and runs the full optimization again.
 
-SVG assets may remain effectively unoptimized by Next.js. PDF and other non-image media are never sent through the image optimizer.
+## Manual run workflow
 
-## Upload policy
+1. Open **Site Yapılandırması → Görsel Optimizasyonu**.
+2. Change format, width or quality values as needed.
+3. Save the Payload global.
+4. Click **Tüm Görselleri Optimize Et**.
+5. Keep the page open while the progress indicator advances.
+6. Review the processed, skipped and error counts.
 
-Do not force all uploads to WebP at ingestion time. The Media collection accepts both image and document uploads, and some assets require their original format or animation/transparency behavior.
+The browser sends small batches to the protected Payload endpoint. Only administrator users may read status or start a run.
 
-A future ingestion pipeline may add format-specific conversion and backfill tools, but it must:
+The pipeline processes JPEG, PNG, WebP, AVIF and TIFF uploads. PDF, SVG and animated GIF files remain unchanged.
 
-- classify raster images separately from SVG, GIF and documents;
-- retain originals or provide a reversible migration path;
-- define maximum dimensions and quality per content role;
-- include a controlled backfill for existing media;
-- verify that protected and public document references remain unchanged.
+## Persistent output
+
+Generated files are stored inside the existing persistent media volume:
+
+```text
+media/optimized/<settings-fingerprint>/<media-id>/<profile>.<format>
+```
+
+The settings fingerprint isolates different format/quality/size versions. After a successful full run, obsolete fingerprint directories are removed. Deleting or replacing a raster media record removes its generated variants and marks the optimizer as stale.
+
+Original files are never rewritten or deleted by the optimizer.
+
+## Public delivery
+
+`next/image` continues to emit responsive `srcset` widths, but its custom loader routes Payload media URLs to:
+
+```text
+/api/image-delivery?src=<payload-media-url>&w=<requested-width>
+```
+
+The route:
+
+1. validates that the source is a local Payload media URL;
+2. resolves the media record;
+3. reuses protected-media access checks;
+4. chooses the smallest configured profile that can satisfy the requested width;
+5. serves the generated WebP/AVIF file when available;
+6. redirects to the original upload when optimization is disabled, stale because settings changed, not yet run, unsupported or missing.
+
+When one media item changes after a successful run, existing generated files may continue to serve while that item falls back to its original. The admin panel reports that another manual run is required.
+
+Protected documents and protected media cannot be exposed through the image-delivery route.
+
+## Database migration
+
+The feature adds one Payload global and therefore requires the committed migration:
+
+```text
+20260727_131359_image_optimization_settings
+```
+
+It creates only:
+
+- the `image_optimization` global table;
+- the output-format enum;
+- the optimization-status enum.
+
+It does not alter product, media or content tables.
+
+Production deployment continues to use:
+
+```bash
+pnpm build:deploy
+```
+
+The committed migration runs before the production build.
 
 ## Release smoke test
 
-After deploying an image-delivery change to the non-public production environment:
+After deploying privately:
 
-1. Open the homepage and verify static and slider hero images.
-2. Open `/urunler` and verify catalogue search, category filtering, manual ordering and pagination.
-3. Open a product detail page and verify main, variant and shared gallery images.
-4. Verify product gallery navigation, thumbnails and fullscreen mode.
-5. Verify featured and related product cards.
-6. Verify page gallery layouts and lightbox mode.
-7. Verify news cards, certificates, team images, testimonials and logo sliders used by published pages.
-8. Check browser Network requests and confirm raster images are served through `/_next/image` with successful responses.
-9. Confirm no image optimizer `400` or `500` responses appear in browser or Coolify logs.
-10. Compare mobile and desktop rendering for unexpected crops, stretching or layout shift.
+1. Open `/urunler` and confirm every product remains fully visible without centre crop.
+2. Test catalogue search, categories, ordering and pagination.
+3. Open a product page and test main, shared and variant images, thumbnails and fullscreen mode.
+4. Verify hero, gallery, news, certificate, team, testimonial, logo, featured-product and related-product images.
+5. Open **Görsel Optimizasyonu**, save the default settings and run the full optimization.
+6. Confirm progress reaches completion and error count is zero, or inspect every reported error.
+7. Reload public pages and confirm image requests use `/api/image-delivery`.
+8. Confirm generated responses use `image/webp` or `image/avif`.
+9. Upload a new raster test image and confirm the admin status becomes stale while public rendering still falls back safely.
+10. Re-run optimization and confirm the new image receives generated variants.
+11. Confirm PDF, SVG and animated GIF behavior is unchanged.
+12. Verify protected documents remain inaccessible without their existing authorization flow.
+13. Check mobile and desktop layouts for crop, stretching and layout shift.
+14. Check Coolify logs for image-delivery or Sharp errors.
 
-## Operational notes
+## Operational requirements
 
-The Next.js image cache is deployment/runtime cache, not the canonical media store. A cache loss may cause temporary re-encoding work but must not cause data loss.
-
-If image encoding CPU or cache storage becomes material, measure actual production traffic before changing formats, qualities or cache lifetime. Do not disable optimization globally as a performance shortcut.
+- The application must keep `/app/media` or the configured media directory on persistent storage.
+- The generated `media/optimized` directory must be included in media-volume backup policy, although it can be regenerated from originals.
+- A full run consumes CPU and disk I/O, so it should be started during a quiet period when the media library is large.
+- Do not run multiple optimization jobs at the same time.
+- Do not delete the original media files after optimization.
