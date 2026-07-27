@@ -4,6 +4,11 @@ import { getPayload } from "payload";
 import { NextRequest, NextResponse } from "next/server";
 import { createProtectedDownloadToken } from "@/lib/security/protectedDownloadToken";
 import { getRelationId } from "@/lib/security/protectedMedia";
+import {
+  consumeRateLimit,
+  getClientIp,
+  rateLimitResponse,
+} from "@/lib/security/publicRequest";
 
 type VerifyManualBody = {
   productId?: unknown;
@@ -18,21 +23,10 @@ function secureCodeEquals(storedCode: string, suppliedCode: string) {
   return timingSafeEqual(storedDigest, suppliedDigest);
 }
 
-function getClientIp(request: NextRequest) {
-  const forwardedFor = request.headers.get("x-forwarded-for")?.split(",")[0];
-
-  return (
-    forwardedFor?.trim() ||
-    request.headers.get("cf-connecting-ip")?.trim() ||
-    request.headers.get("x-real-ip")?.trim() ||
-    "Bilinmiyor"
-  ).slice(0, 100);
-}
-
 function invalidCodeResponse() {
   return NextResponse.json(
     { success: false, message: "Geçersiz veya iptal edilmiş kod." },
-    { status: 403 },
+    { status: 403, headers: { "Cache-Control": "no-store" } },
   );
 }
 
@@ -67,6 +61,29 @@ export async function POST(request: NextRequest) {
       { success: false, message: "Geçersiz istek." },
       { status: 400 },
     );
+  }
+
+  const ipAddress = getClientIp(request.headers);
+  const generalLimit = consumeRateLimit({
+    bucket: "manual-verification-ip",
+    identity: ipAddress,
+    limit: 20,
+    windowMs: 15 * 60 * 1000,
+  });
+
+  if (!generalLimit.allowed) {
+    return rateLimitResponse(generalLimit.retryAfterSeconds);
+  }
+
+  const targetLimit = consumeRateLimit({
+    bucket: "manual-verification-target",
+    identity: `${ipAddress}:${String(productId)}:${documentLabel.toLowerCase()}`,
+    limit: 10,
+    windowMs: 15 * 60 * 1000,
+  });
+
+  if (!targetLimit.allowed) {
+    return rateLimitResponse(targetLimit.retryAfterSeconds);
   }
 
   const payload = await getPayload({ config: configPromise });
@@ -108,10 +125,8 @@ export async function POST(request: NextRequest) {
       data: {
         productTitle: product.title,
         documentName: protectedDocument.label,
-        // The list view masks this value. Admins can inspect the full code in
-        // the record detail when investigating a leaked credential.
         accessCode: code,
-        ipAddress: getClientIp(request),
+        ipAddress,
         deviceInfo: (request.headers.get("user-agent") || "Bilinmiyor").slice(
           0,
           500,
@@ -119,10 +134,13 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      fileUrl: `/api/protected-download?token=${encodeURIComponent(token)}`,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        fileUrl: `/api/protected-download?token=${encodeURIComponent(token)}`,
+      },
+      { headers: { "Cache-Control": "no-store" } },
+    );
   } catch (error) {
     payload.logger.error({ err: error }, "Protected document verification failed");
 

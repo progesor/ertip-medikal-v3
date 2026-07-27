@@ -10,12 +10,11 @@ export const Subscribers: CollectionConfig = {
     useAsTitle: "email",
     group: "Müşteri İletişimi",
     defaultColumns: ["email", "status", "createdAt"],
-    // Gelecekte Excel/CSV olarak kolayca kopyalayabilmen için
     description: "E-bültene kayıt olan kullanıcıların listesi.",
   },
   access: {
-    // Dışarıdan sadece veri oluşturulabilir (form gönderimi)
-    create: () => true,
+    // Anonymous subscriptions go through /api/public/newsletter.
+    create: ({ req: { user } }) => Boolean(user),
     read: ({ req: { user } }) => Boolean(user),
     update: ({ req: { user } }) => Boolean(user),
     delete: ({ req: { user } }) => Boolean(user),
@@ -25,7 +24,7 @@ export const Subscribers: CollectionConfig = {
       name: "email",
       type: "email",
       required: true,
-      unique: true, // Aynı mailin iki kere kayıt olmasını engeller
+      unique: true,
       label: "E-Posta Adresi",
     },
     {
@@ -48,7 +47,7 @@ export const Subscribers: CollectionConfig = {
       defaultValue: "Website Footer",
       admin: {
         position: "sidebar",
-        readOnly: true, // Sadece bilgi amaçlı
+        readOnly: true,
       },
     },
   ],

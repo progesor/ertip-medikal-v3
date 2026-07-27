@@ -13,7 +13,9 @@ export const Inquiries: CollectionConfig = {
     defaultColumns: ["name", "email", "status", "createdAt"],
   },
   access: {
-    create: () => true,
+    // Anonymous submissions go through /api/public/contact, where validation,
+    // honeypot checks, and rate limiting are applied.
+    create: ({ req: { user } }) => Boolean(user),
     read: ({ req: { user } }) => Boolean(user),
     update: ({ req: { user } }) => Boolean(user),
     delete: ({ req: { user } }) => Boolean(user),

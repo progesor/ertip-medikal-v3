@@ -4,57 +4,68 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  Trash2,
+  ArrowRight,
+  Minus,
+  Plus,
   Send,
   ShoppingCart,
-  ArrowRight,
-  Plus,
-  Minus,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/providers/CartProvider";
 
+type QuoteResponse = {
+  success?: boolean;
+  message?: string;
+};
+
 export default function QuoteCartPage() {
   const { cartItems, removeFromCart, updateQuantity, clearCart } = useCart();
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setIsSubmitting(true);
+    setError(null);
 
-    const formData = new FormData(e.currentTarget);
-    const payloadData = {
-      customerName: formData.get("customerName"),
-      company: formData.get("company"),
-      email: formData.get("email"),
-      phone: formData.get("phone"),
-      message: formData.get("message"),
-      items: cartItems.map((item) => ({
-        productTitle: item.title,
-        variantInfo: item.variant,
-        sku: item.sku,
-        quantity: item.quantity,
-      })),
-    };
+    const form = event.currentTarget;
+    const formData = new FormData(form);
 
     try {
-      const res = await fetch("/api/quote-requests", {
+      const response = await fetch("/api/public/quote-request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payloadData),
+        body: JSON.stringify({
+          customerName: formData.get("customerName"),
+          company: formData.get("company"),
+          email: formData.get("email"),
+          phone: formData.get("phone"),
+          message: formData.get("message"),
+          website: formData.get("website"),
+          items: cartItems.map((item) => ({
+            productTitle: item.title,
+            variantInfo: item.variant,
+            sku: item.sku,
+            quantity: item.quantity,
+          })),
+        }),
       });
+      const data = (await response.json()) as QuoteResponse;
 
-      if (res.ok) {
+      if (response.ok && data.success) {
         setIsSuccess(true);
         clearCart();
+        form.reset();
       } else {
-        alert("Bir hata oluştu, lütfen daha sonra tekrar deneyin.");
+        setError(
+          data.message || "Bir hata oluştu. Lütfen daha sonra tekrar deneyin.",
+        );
       }
-    } catch (error) {
-      console.error(error);
-      alert("Bağlantı hatası yaşandı.");
+    } catch (submissionError) {
+      console.error(submissionError);
+      setError("Bağlantı hatası yaşandı. Lütfen tekrar deneyin.");
     } finally {
       setIsSubmitting(false);
     }
@@ -62,250 +73,250 @@ export default function QuoteCartPage() {
 
   if (isSuccess) {
     return (
-        <div className="min-h-screen bg-background py-24 flex items-center justify-center">
-          <div className="bg-surface p-12 rounded-[var(--radius-3xl)] shadow-lg shadow-surface-inverse/5 border border-border/80 text-center max-w-lg">
-            <div className="w-24 h-24 bg-success/10 text-success rounded-full flex items-center justify-center mx-auto mb-6">
-              <Send className="w-10 h-10" />
-            </div>
-            <h2 className="text-3xl font-black text-text-main mb-4">
-              Talebiniz Alındı!
-            </h2>
-            <p className="text-text-muted mb-8 leading-relaxed">
-              Teklif listeniz uzman ekibimize başarıyla ulaştı. En kısa sürede
-              sizinle iletişime geçeceğiz.
-            </p>
-            <Button asChild size="lg" className="rounded-xl font-bold h-14 px-8">
-              <Link href="/urunler">Kataloğa Geri Dön</Link>
-            </Button>
+      <div className="flex min-h-screen items-center justify-center bg-background py-24">
+        <div className="max-w-lg rounded-[var(--radius-3xl)] border border-border/80 bg-surface p-12 text-center shadow-lg shadow-surface-inverse/5">
+          <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-success/10 text-success">
+            <Send className="h-10 w-10" />
           </div>
+          <h2 className="mb-4 text-3xl font-black text-text-main">
+            Talebiniz Alındı!
+          </h2>
+          <p className="mb-8 leading-relaxed text-text-muted">
+            Teklif listeniz uzman ekibimize başarıyla ulaştı. En kısa sürede
+            sizinle iletişime geçeceğiz.
+          </p>
+          <Button asChild size="lg" className="h-14 rounded-xl px-8 font-bold">
+            <Link href="/urunler">Kataloğa Geri Dön</Link>
+          </Button>
         </div>
+      </div>
     );
   }
 
   return (
-      <div className="bg-background min-h-screen pt-12 pb-24">
-        {/* Üst Kısım: Her temada şık duran koyu zemin */}
-        {/*
-        <div className="bg-primary py-[4.5rem] mb-12">
-          <div className="container mx-auto px-4 max-w-7xl">
-            <div className="mb-5 inline-flex items-center rounded-full border border-surface-inverse-foreground/10 bg-surface-inverse-foreground/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-surface-inverse-foreground/75">
-              B2B Quote Request
-            </div>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-surface-inverse-foreground mb-4 tracking-tight">
-              Teklif Sepeti
-            </h1>
-            <p className="text-lg text-surface-inverse-foreground/70">
-              Seçtiğiniz medikal ürünler için hızlıca fiyat teklifi isteyin.
-            </p>
-          </div>
-        </div>
-        */}
-
-        {/* Minimal ve şık üst kısım */}
-        <div className="py-2 mb-8">
-          <div className="container mx-auto px-4 max-w-7xl text-center">
-            <h1 className="text-3xl font-bold text-text-main mb-2">
-              Teklif Sepeti
-            </h1>
-            <p className="text-text-muted">
-              Seçtiğiniz ürünler için fiyat teklifi isteyin.
-            </p>
-          </div>
-        </div>
-
-        <div className="container mx-auto px-4 max-w-7xl">
-          {cartItems.length === 0 ? (
-              <div className="bg-surface p-16 rounded-[var(--radius-3xl)] shadow-sm shadow-surface-inverse/5 border border-border/80 text-center flex flex-col items-center">
-                <ShoppingCart className="w-20 h-20 text-text-muted/30 mb-6" />
-                <h3 className="text-2xl font-bold text-text-main mb-2">
-                  Listeniz Şimdilik Boş
-                </h3>
-                <p className="text-text-muted mb-8">
-                  Teklif almak için ürün detay sayfalarından sepetinize ürün
-                  ekleyebilirsiniz.
-                </p>
-                <Button
-                    asChild
-                    size="lg"
-                    className="rounded-2xl font-bold h-14 px-8"
-                >
-                  <Link href="/urunler">
-                    Ürünleri İncele <ArrowRight className="ml-2 w-5 h-5" />
-                  </Link>
-                </Button>
-              </div>
-          ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
-                {/* SOL BÖLÜM: Ürün Listesi */}
-                <div className="lg:col-span-3 space-y-6">
-                  <h2 className="text-2xl font-bold text-text-main flex items-center gap-2">
-                <span className="bg-primary text-primary-foreground w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-md">
-                  {cartItems.length}
-                </span>
-                    Seçilen Ürünler
-                  </h2>
-
-                  <div className="bg-surface rounded-[var(--radius-2xl)] border border-border/80 shadow-sm shadow-surface-inverse/5 overflow-hidden divide-y divide-border">
-                    {cartItems.map((item, index) => (
-                        <div
-                            key={index}
-                            className="p-6 flex flex-col sm:flex-row items-center gap-6 group hover:bg-surface-muted transition-colors"
-                        >
-                          <Link
-                              href={`/urunler/${item.slug}`}
-                              className="w-24 h-24 relative bg-surface-muted/70 rounded-[var(--radius-xl)] p-2 shrink-0 hover:opacity-80 transition-opacity"
-                          >
-                            <Image
-                                src={item.image || "/placeholder.jpg"}
-                                alt={item.title}
-                                fill
-                                className="object-contain mix-blend-multiply"
-                                unoptimized
-                            />
-                          </Link>
-
-                          <div className="flex-1 text-center sm:text-left">
-                            <Link
-                                href={`/urunler/${item.slug}`}
-                                className="group/title"
-                            >
-                              <h4 className="font-bold text-text-main text-lg group-hover/title:text-primary transition-colors">
-                                {item.title}
-                              </h4>
-                            </Link>
-                            <p className="text-sm text-text-muted mt-1">
-                              {item.variant}
-                            </p>
-                            <span className="inline-block mt-2 bg-surface-muted text-text-muted px-3 py-1 rounded-full text-xs font-mono font-bold border border-border">
-                        SKU: {item.sku}
-                      </span>
-                          </div>
-
-                          {/* ADET SEÇİCİ */}
-                          <div className="flex items-center gap-3 bg-surface-muted p-1.5 rounded-[var(--radius)] border border-border">
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    updateQuantity(index, (item.quantity || 1) - 1)
-                                }
-                                className="w-8 h-8 flex items-center justify-center bg-surface rounded-lg text-text-muted hover:text-primary shadow-sm transition-all"
-                            >
-                              <Minus className="w-4 h-4" />
-                            </button>
-
-                            <span className="w-8 text-center font-bold text-text-main">
-                        {item.quantity || 1}
-                      </span>
-
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    updateQuantity(index, (item.quantity || 1) + 1)
-                                }
-                                className="w-8 h-8 flex items-center justify-center bg-surface rounded-lg text-text-muted hover:text-primary shadow-sm transition-all"
-                            >
-                              <Plus className="w-4 h-4" />
-                            </button>
-                          </div>
-
-                          <button
-                              onClick={() => removeFromCart(index)}
-                              className="w-12 h-12 rounded-full flex items-center justify-center text-error/60 hover:text-error-foreground hover:bg-error transition-all shrink-0"
-                          >
-                            <Trash2 className="w-5 h-5" />
-                          </button>
-                        </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* SAĞ BÖLÜM: İletişim Formu */}
-                <div className="lg:col-span-2">
-                  <div className="bg-surface p-8 rounded-[var(--radius-2xl)] border border-border/80 shadow-xl shadow-surface-inverse/5 sticky top-24">
-                    <h3 className="text-2xl font-bold text-text-main mb-6">
-                      İletişim Bilgileriniz
-                    </h3>
-
-                    <form onSubmit={handleSubmit} className="space-y-5">
-                      <div>
-                        <label className="block text-sm font-bold text-text-main mb-2">
-                          Ad Soyad / Yetkili Adı *
-                        </label>
-                        <input
-                            required
-                            name="customerName"
-                            type="text"
-                            className="w-full px-4 py-3 rounded-xl border border-border bg-background text-text-main focus:border-primary focus:ring-1 focus:ring-ring outline-none transition-all placeholder:text-text-muted/50"
-                            placeholder="Örn: Dr. Ahmet Yılmaz"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-bold text-text-main mb-2">
-                          Klinik / Firma Adı
-                        </label>
-                        <input
-                            name="company"
-                            type="text"
-                            className="w-full px-4 py-3 rounded-xl border border-border bg-background text-text-main focus:border-primary focus:ring-1 focus:ring-ring outline-none transition-all placeholder:text-text-muted/50"
-                            placeholder="Opsiyonel"
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-bold text-text-main mb-2">
-                            E-Posta *
-                          </label>
-                          <input
-                              required
-                              name="email"
-                              type="email"
-                              className="w-full px-4 py-3 rounded-xl border border-border bg-background text-text-main focus:border-primary focus:ring-1 focus:ring-ring outline-none transition-all placeholder:text-text-muted/50"
-                              placeholder="ornek@klinik.com"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-bold text-text-main mb-2">
-                            Telefon *
-                          </label>
-                          <input
-                              required
-                              name="phone"
-                              type="tel"
-                              className="w-full px-4 py-3 rounded-xl border border-border bg-background text-text-main focus:border-primary focus:ring-1 focus:ring-ring outline-none transition-all placeholder:text-text-muted/50"
-                              placeholder="+90 5XX XXX XX XX"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-bold text-text-main mb-2">
-                          Ek Notunuz (Opsiyonel)
-                        </label>
-                        <textarea
-                            name="message"
-                            rows={3}
-                            className="w-full px-4 py-3 rounded-xl border border-border bg-background text-text-main focus:border-primary focus:ring-1 focus:ring-ring outline-none transition-all resize-none placeholder:text-text-muted/50"
-                            placeholder="Belirtmek istediğiniz özel bir durum var mı?"
-                        ></textarea>
-                      </div>
-
-                      <Button
-                          type="submit"
-                          disabled={isSubmitting}
-                          className="w-full h-14 rounded-xl text-lg font-bold mt-4"
-                      >
-                        {isSubmitting
-                            ? "Gönderiliyor..."
-                            : "Teklif İsteğini Gönder"}
-                      </Button>
-                      <p className="text-xs text-center text-text-muted mt-4">
-                        Bilgileriniz KVKK kapsamında korunmaktadır.
-                      </p>
-                    </form>
-                  </div>
-                </div>
-              </div>
-          )}
+    <div className="min-h-screen bg-background pb-24 pt-12">
+      <div className="mb-8 py-2">
+        <div className="container mx-auto max-w-7xl px-4 text-center">
+          <h1 className="mb-2 text-3xl font-bold text-text-main">Teklif Sepeti</h1>
+          <p className="text-text-muted">
+            Seçtiğiniz ürünler için fiyat teklifi isteyin.
+          </p>
         </div>
       </div>
+
+      <div className="container mx-auto max-w-7xl px-4">
+        {cartItems.length === 0 ? (
+          <div className="flex flex-col items-center rounded-[var(--radius-3xl)] border border-border/80 bg-surface p-16 text-center shadow-sm shadow-surface-inverse/5">
+            <ShoppingCart className="mb-6 h-20 w-20 text-text-muted/30" />
+            <h3 className="mb-2 text-2xl font-bold text-text-main">
+              Listeniz Şimdilik Boş
+            </h3>
+            <p className="mb-8 text-text-muted">
+              Teklif almak için ürün detay sayfalarından sepetinize ürün
+              ekleyebilirsiniz.
+            </p>
+            <Button
+              asChild
+              size="lg"
+              className="h-14 rounded-2xl px-8 font-bold"
+            >
+              <Link href="/urunler">
+                Ürünleri İncele <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-5">
+            <div className="space-y-6 lg:col-span-3">
+              <h2 className="flex items-center gap-2 text-2xl font-bold text-text-main">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm text-primary-foreground shadow-md">
+                  {cartItems.length}
+                </span>
+                Seçilen Ürünler
+              </h2>
+
+              <div className="divide-y divide-border overflow-hidden rounded-[var(--radius-2xl)] border border-border/80 bg-surface shadow-sm shadow-surface-inverse/5">
+                {cartItems.map((item, index) => (
+                  <div
+                    key={`${item.id}-${item.variant}-${index}`}
+                    className="group flex flex-col items-center gap-6 p-6 transition-colors hover:bg-surface-muted sm:flex-row"
+                  >
+                    <Link
+                      href={`/urunler/${item.slug}`}
+                      className="relative h-24 w-24 shrink-0 rounded-[var(--radius-xl)] bg-surface-muted/70 p-2 transition-opacity hover:opacity-80"
+                    >
+                      <Image
+                        src={item.image || "/placeholder.jpg"}
+                        alt={item.title}
+                        fill
+                        className="object-contain mix-blend-multiply"
+                        unoptimized
+                      />
+                    </Link>
+
+                    <div className="flex-1 text-center sm:text-left">
+                      <Link href={`/urunler/${item.slug}`} className="group/title">
+                        <h4 className="text-lg font-bold text-text-main transition-colors group-hover/title:text-primary">
+                          {item.title}
+                        </h4>
+                      </Link>
+                      <p className="mt-1 text-sm text-text-muted">{item.variant}</p>
+                      <span className="mt-2 inline-block rounded-full border border-border bg-surface-muted px-3 py-1 font-mono text-xs font-bold text-text-muted">
+                        SKU: {item.sku}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3 rounded-[var(--radius)] border border-border bg-surface-muted p-1.5">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          updateQuantity(index, (item.quantity || 1) - 1)
+                        }
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface text-text-muted shadow-sm transition-all hover:text-primary"
+                        aria-label={`${item.title} miktarını azalt`}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </button>
+                      <span className="w-8 text-center font-bold text-text-main">
+                        {item.quantity || 1}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          updateQuantity(index, (item.quantity || 1) + 1)
+                        }
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface text-text-muted shadow-sm transition-all hover:text-primary"
+                        aria-label={`${item.title} miktarını artır`}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => removeFromCart(index)}
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-error/60 transition-all hover:bg-error hover:text-error-foreground"
+                      aria-label={`${item.title} ürününü teklif sepetinden kaldır`}
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="lg:col-span-2">
+              <div className="sticky top-24 rounded-[var(--radius-2xl)] border border-border/80 bg-surface p-8 shadow-xl shadow-surface-inverse/5">
+                <h3 className="mb-6 text-2xl font-bold text-text-main">
+                  İletişim Bilgileriniz
+                </h3>
+
+                <form onSubmit={handleSubmit} className="relative space-y-5">
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -left-[10000px] top-auto h-px w-px overflow-hidden"
+                  >
+                    <label htmlFor="quote-website">Website</label>
+                    <input
+                      id="quote-website"
+                      name="website"
+                      type="text"
+                      tabIndex={-1}
+                      autoComplete="off"
+                    />
+                  </div>
+
+                  {error && (
+                    <div className="rounded-xl border border-error/25 bg-error/10 p-4 text-sm font-semibold text-error">
+                      {error}
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="mb-2 block text-sm font-bold text-text-main">
+                      Ad Soyad / Yetkili Adı *
+                    </label>
+                    <input
+                      required
+                      name="customerName"
+                      type="text"
+                      maxLength={120}
+                      className="w-full rounded-xl border border-border bg-background px-4 py-3 text-text-main outline-none transition-all placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring"
+                      placeholder="Örn: Dr. Ahmet Yılmaz"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-bold text-text-main">
+                      Klinik / Firma Adı
+                    </label>
+                    <input
+                      name="company"
+                      type="text"
+                      maxLength={160}
+                      className="w-full rounded-xl border border-border bg-background px-4 py-3 text-text-main outline-none transition-all placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring"
+                      placeholder="Opsiyonel"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className="mb-2 block text-sm font-bold text-text-main">
+                        E-Posta *
+                      </label>
+                      <input
+                        required
+                        name="email"
+                        type="email"
+                        maxLength={254}
+                        className="w-full rounded-xl border border-border bg-background px-4 py-3 text-text-main outline-none transition-all placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring"
+                        placeholder="ornek@klinik.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-bold text-text-main">
+                        Telefon *
+                      </label>
+                      <input
+                        required
+                        name="phone"
+                        type="tel"
+                        minLength={5}
+                        maxLength={50}
+                        className="w-full rounded-xl border border-border bg-background px-4 py-3 text-text-main outline-none transition-all placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring"
+                        placeholder="+90 5XX XXX XX XX"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-bold text-text-main">
+                      Ek Notunuz (Opsiyonel)
+                    </label>
+                    <textarea
+                      name="message"
+                      rows={3}
+                      maxLength={5_000}
+                      className="w-full resize-none rounded-xl border border-border bg-background px-4 py-3 text-text-main outline-none transition-all placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring"
+                      placeholder="Belirtmek istediğiniz özel bir durum var mı?"
+                    />
+                  </div>
+
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="mt-4 h-14 w-full rounded-xl text-lg font-bold"
+                  >
+                    {isSubmitting
+                      ? "Gönderiliyor..."
+                      : "Teklif İsteğini Gönder"}
+                  </Button>
+                  <p className="mt-4 text-center text-xs text-text-muted">
+                    Bilgileriniz KVKK kapsamında korunmaktadır.
+                  </p>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
