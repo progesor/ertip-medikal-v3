@@ -110,12 +110,14 @@ export interface Config {
     'main-menu': MainMenu;
     emailSettings: EmailSetting;
     themeSettings: ThemeSetting;
+    imageOptimization: ImageOptimization;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     'main-menu': MainMenuSelect<false> | MainMenuSelect<true>;
     emailSettings: EmailSettingsSelect<false> | EmailSettingsSelect<true>;
     themeSettings: ThemeSettingsSelect<false> | ThemeSettingsSelect<true>;
+    imageOptimization: ImageOptimizationSelect<false> | ImageOptimizationSelect<true>;
   };
   locale: null;
   widgets: {
@@ -1789,6 +1791,65 @@ export interface ThemeSetting {
   createdAt?: string | null;
 }
 /**
+ * Orijinal görselleri koruyarak site için kırpmasız WebP/AVIF türevleri üretin.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "imageOptimization".
+ */
+export interface ImageOptimization {
+  id: number;
+  /**
+   * Hazır bir optimizasyon çalışması varsa site üretilmiş türevleri kullanır. Kapalıyken orijinal görseller sunulur.
+   */
+  enabled?: boolean | null;
+  format: 'webp' | 'avif';
+  /**
+   * Görseller kırpılmaz; yalnızca en-boy oranı korunarak belirtilen azami genişliğe küçültülür.
+   */
+  profiles: {
+    /**
+     * Logo, avatar ve küçük önizleme alanları.
+     */
+    thumbnail: {
+      width: number;
+      quality: number;
+    };
+    /**
+     * Ürün kataloğu, haber ve benzeri kartlar.
+     */
+    card: {
+      width: number;
+      quality: number;
+    };
+    /**
+     * Sayfa galerileri, ekip ve sertifika görselleri.
+     */
+    content: {
+      width: number;
+      quality: number;
+    };
+    /**
+     * Ürün detay ana görseli, hero ve lightbox görüntüleri.
+     */
+    fullscreen: {
+      width: number;
+      quality: number;
+    };
+  };
+  settingsFingerprint?: string | null;
+  activeFingerprint?: string | null;
+  optimizationRunId?: string | null;
+  optimizationStatus?: ('idle' | 'stale' | 'running' | 'ready' | 'partial') | null;
+  lastOptimizedAt?: string | null;
+  processedCount?: number | null;
+  skippedCount?: number | null;
+  errorCount?: number | null;
+  totalCount?: number | null;
+  lastMessage?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
@@ -1950,6 +2011,55 @@ export interface EmailSettingsSelect<T extends boolean = true> {
 export interface ThemeSettingsSelect<T extends boolean = true> {
   colorPalette?: T;
   borderRadius?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "imageOptimization_select".
+ */
+export interface ImageOptimizationSelect<T extends boolean = true> {
+  enabled?: T;
+  format?: T;
+  profiles?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              width?: T;
+              quality?: T;
+            };
+        card?:
+          | T
+          | {
+              width?: T;
+              quality?: T;
+            };
+        content?:
+          | T
+          | {
+              width?: T;
+              quality?: T;
+            };
+        fullscreen?:
+          | T
+          | {
+              width?: T;
+              quality?: T;
+            };
+      };
+  settingsFingerprint?: T;
+  activeFingerprint?: T;
+  optimizationRunId?: T;
+  optimizationStatus?: T;
+  lastOptimizedAt?: T;
+  processedCount?: T;
+  skippedCount?: T;
+  errorCount?: T;
+  totalCount?: T;
+  lastMessage?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
