@@ -39,6 +39,10 @@ function getSafeSourcePath(filename: string) {
   return sourcePath;
 }
 
+function getSafeMediaDirectoryName(mediaId: number | string) {
+  return String(mediaId).replace(/[^a-z0-9_-]/gi, "_");
+}
+
 export async function loadImageOptimizationSettings(payload: Payload) {
   const document = await payload.findGlobal({
     slug: "imageOptimization",
@@ -57,6 +61,27 @@ export async function loadImageOptimizationSettings(payload: Payload) {
   };
 }
 
+export async function markImageOptimizationStale(
+  payload: Payload,
+  message: string,
+) {
+  const document = await payload.findGlobal({
+    slug: "imageOptimization",
+    overrideAccess: true,
+  });
+
+  if (document.optimizationStatus === "running") return;
+
+  await payload.updateGlobal({
+    slug: "imageOptimization",
+    overrideAccess: true,
+    data: {
+      optimizationStatus: "stale",
+      lastMessage: message,
+    },
+  });
+}
+
 async function writeProfileVariant({
   sourcePath,
   outputPath,
@@ -70,7 +95,7 @@ async function writeProfileVariant({
 }) {
   const profileSettings = settings.profiles[profile];
   const temporaryPath = `${outputPath}.tmp-${process.pid}-${Date.now()}`;
-  let pipeline = sharp(sourcePath, { animated: false })
+  const pipeline = sharp(sourcePath, { animated: false })
     .rotate()
     .resize({
       width: profileSettings.width,
@@ -78,10 +103,11 @@ async function writeProfileVariant({
       withoutEnlargement: true,
     });
 
-  pipeline =
-    settings.format === "avif"
-      ? pipeline.avif({ quality: profileSettings.quality, effort: 4 })
-      : pipeline.webp({ quality: profileSettings.quality, effort: 4 });
+  if (settings.format === "avif") {
+    pipeline.avif({ quality: profileSettings.quality, effort: 4 });
+  } else {
+    pipeline.webp({ quality: profileSettings.quality, effort: 4 });
+  }
 
   try {
     await pipeline.toFile(temporaryPath);
@@ -204,6 +230,27 @@ export async function readOptimizedImage({
   } catch {
     return null;
   }
+}
+
+export async function removeOptimizedMediaVariants(
+  mediaId: number | string,
+) {
+  await fs.mkdir(OPTIMIZED_MEDIA_ROOT, { recursive: true });
+  const versions = await fs.readdir(OPTIMIZED_MEDIA_ROOT, {
+    withFileTypes: true,
+  });
+  const mediaDirectory = getSafeMediaDirectoryName(mediaId);
+
+  await Promise.all(
+    versions
+      .filter((entry) => entry.isDirectory())
+      .map((entry) =>
+        fs.rm(path.join(OPTIMIZED_MEDIA_ROOT, entry.name, mediaDirectory), {
+          recursive: true,
+          force: true,
+        }),
+      ),
+  );
 }
 
 export async function removeInactiveOptimizationVersions(
