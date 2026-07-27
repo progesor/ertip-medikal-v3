@@ -1,6 +1,13 @@
 import type { CollectionConfig } from "payload";
 import { escapeHtml, sanitizeEmailSubject } from "@/lib/security/html";
 
+type QuoteRequestItem = {
+  productTitle?: string | null;
+  variantInfo?: string | null;
+  sku?: string | null;
+  quantity?: number | null;
+};
+
 export const QuoteRequests: CollectionConfig = {
   slug: "quote-requests",
   labels: { singular: "Teklif Talebi", plural: "Teklif Talepleri" },
@@ -98,7 +105,7 @@ export const QuoteRequests: CollectionConfig = {
 
             if (receivers.length > 0) {
               const itemRows = (doc.items ?? [])
-                .map((item) => {
+                .map((item: QuoteRequestItem) => {
                   const variant = item.variantInfo
                     ? ` — ${escapeHtml(item.variantInfo)}`
                     : "";
