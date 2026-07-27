@@ -1,6 +1,7 @@
 import configPromise from "@payload-config";
 import { getPayload } from "payload";
 import { NextRequest, NextResponse } from "next/server";
+import { serverEnv } from "@/lib/config/env";
 import { escapeHtml } from "@/lib/security/html";
 import {
   consumeRateLimit,
@@ -19,20 +20,6 @@ type UnsubscribeRequestBody = {
 
 const GENERIC_MESSAGE =
   "Adres abonelik listemizde bulunuyorsa doğrulama bağlantısı e-posta adresinize gönderildi.";
-
-function getPublicOrigin(request: NextRequest) {
-  const configuredOrigin = process.env.NEXT_PUBLIC_SERVER_URL?.trim();
-
-  if (configuredOrigin) {
-    try {
-      return new URL(configuredOrigin).origin;
-    } catch {
-      // Fall back to the current request origin when configuration is invalid.
-    }
-  }
-
-  return request.nextUrl.origin;
-}
 
 export async function POST(request: NextRequest) {
   const ipAddress = getClientIp(request.headers);
@@ -105,7 +92,7 @@ export async function POST(request: NextRequest) {
       });
       const confirmationURL = new URL(
         "/abonelikten-ayril",
-        getPublicOrigin(request),
+        serverEnv.publicSiteUrl,
       );
       confirmationURL.searchParams.set("token", token);
       const safeURL = escapeHtml(confirmationURL.toString());

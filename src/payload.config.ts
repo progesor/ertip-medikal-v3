@@ -27,6 +27,7 @@ import { MainMenu } from "@/globals/MainMenu";
 import { EmailSettings } from "@/globals/EmailSettings";
 import { ThemeSettings } from "@/globals/ThemeSettings";
 import { invalidateProtectedMediaCache } from "@/lib/security/protectedMedia";
+import { serverEnv } from "@/lib/config/env";
 import {
   adminsOnly,
   contentManagers,
@@ -132,6 +133,14 @@ const ThemeSettingsWithRBAC = withGlobalUpdateAccess(
   adminsOnly,
 );
 
+const smtpAuth =
+  serverEnv.smtp.user && serverEnv.smtp.pass
+    ? {
+        user: serverEnv.smtp.user,
+        pass: serverEnv.smtp.pass,
+      }
+    : undefined;
+
 export default buildConfig({
   admin: {
     user: Users.slug,
@@ -168,27 +177,23 @@ export default buildConfig({
     ThemeSettingsWithRBAC,
   ],
   editor: lexicalEditor({}),
-  secret: process.env.PAYLOAD_SECRET || "SECRET_KEY_MISSING",
+  secret: serverEnv.payloadSecret,
   typescript: {
     outputFile: path.resolve(dirname, "payload-types.ts"),
   },
   db: postgresAdapter({
     pool: {
-      connectionString: process.env.DATABASE_URI || "",
+      connectionString: serverEnv.databaseUri,
     },
   }),
   sharp,
   email: nodemailerAdapter({
-    defaultFromName: process.env.SMTP_FROM_NAME || "Ertıp Medikal",
-    defaultFromAddress:
-      process.env.SMTP_FROM_ADDRESS || "iletisim@ertip.com.tr",
+    defaultFromName: serverEnv.smtp.fromName,
+    defaultFromAddress: serverEnv.smtp.fromAddress,
     transportOptions: {
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT),
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
+      host: serverEnv.smtp.host,
+      port: serverEnv.smtp.port,
+      ...(smtpAuth ? { auth: smtpAuth } : {}),
     },
   }),
 });
