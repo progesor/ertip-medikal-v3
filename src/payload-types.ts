@@ -1791,8 +1791,6 @@ export interface ThemeSetting {
   createdAt?: string | null;
 }
 /**
- * Orijinal görselleri koruyarak site için kırpmasız WebP/AVIF türevleri üretin.
- *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "imageOptimization".
  */
