@@ -47,6 +47,15 @@ jobs:
       - name: Verify generated types are committed
         run: git diff --exit-code -- src/payload-types.ts
 
+      - name: Upload generated Payload types on drift
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-payload-types
+          path: src/payload-types.ts
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Typecheck
         run: pnpm typecheck
 
