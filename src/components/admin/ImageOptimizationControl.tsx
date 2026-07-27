@@ -70,7 +70,6 @@ async function readErrorMessage(response: Response, fallback: string) {
 
 export function ImageOptimizationControl() {
   const [status, setStatus] = useState<OptimizationStatus | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [isRunning, setIsRunning] = useState(false);
   const [progressMessage, setProgressMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -104,9 +103,6 @@ export function ImageOptimizationControl() {
               ? statusError.message
               : "Optimizasyon durumu okunamadı.",
           );
-        })
-        .finally(() => {
-          if (!cancelled) setIsLoading(false);
         });
     }, 0);
 
@@ -217,11 +213,11 @@ export function ImageOptimizationControl() {
         <button
           type="button"
           onClick={() => void runOptimization()}
-          disabled={isLoading || isRunning}
+          disabled={isRunning}
           style={{
             ...styles.actionButton,
-            cursor: isLoading || isRunning ? "not-allowed" : "pointer",
-            opacity: isLoading || isRunning ? 0.6 : 1,
+            cursor: isRunning ? "not-allowed" : "pointer",
+            opacity: isRunning ? 0.6 : 1,
           }}
         >
           {isRunning ? "Görseller İşleniyor..." : "Tüm Görselleri Optimize Et"}
