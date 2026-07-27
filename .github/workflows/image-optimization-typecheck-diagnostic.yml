@@ -1,0 +1,67 @@
+name: Image Optimization Typecheck Diagnostic
+
+on:
+  push:
+    branches:
+      - feature/m7-image-delivery-optimization
+    paths:
+      - .github/workflows/image-optimization-typecheck-diagnostic.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "10"
+  DATABASE_URI: postgresql://payload:payload@127.0.0.1:5432/ertip_diagnostic
+  PAYLOAD_SECRET: ci-only-secret-not-used-outside-github-actions
+  NEXT_PUBLIC_SITE_URL: http://localhost:3000
+  SMTP_HOST: 127.0.0.1
+  SMTP_PORT: "1025"
+  SMTP_USER: ci
+  SMTP_PASS: ci
+  SMTP_FROM_NAME: Ertip Medikal CI
+  SMTP_FROM_ADDRESS: ci@example.invalid
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/m7-image-delivery-optimization
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Capture typecheck
+        id: typecheck
+        shell: bash
+        run: |
+          set +e
+          set -o pipefail
+          pnpm typecheck 2>&1 | tee typecheck.log
+          status=${PIPESTATUS[0]}
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Upload complete diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-optimization-typecheck-log
+          path: typecheck.log
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Preserve failure result
+        if: steps.typecheck.outputs.status != '0'
+        run: exit 1
