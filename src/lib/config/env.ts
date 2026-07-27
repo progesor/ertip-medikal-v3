@@ -1,5 +1,5 @@
 const PLACEHOLDER_VALUES = new Set([
-  "SECRET_KEY_MISSING",
+  "secret_key_missing",
   "change-me",
   "changeme",
   "your-secret-here",
