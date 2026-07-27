@@ -15,6 +15,8 @@ type RateLimitResult = {
   retryAfterSeconds: number;
 };
 
+const MAX_RATE_LIMIT_WINDOW_MS = 24 * 60 * 60 * 1000;
+
 const globalForRateLimit = globalThis as typeof globalThis & {
   __ertipRateLimitStore?: RateLimitStore;
 };
@@ -68,8 +70,12 @@ export function consumeRateLimit({
   rateLimitStore.set(key, recentAttempts);
 
   if (rateLimitStore.size > 5_000) {
+    const cleanupCutoff = now - MAX_RATE_LIMIT_WINDOW_MS;
+
     for (const [storedKey, timestamps] of rateLimitStore.entries()) {
-      const activeTimestamps = timestamps.filter((timestamp) => timestamp > cutoff);
+      const activeTimestamps = timestamps.filter(
+        (timestamp) => timestamp > cleanupCutoff,
+      );
 
       if (activeTimestamps.length === 0) {
         rateLimitStore.delete(storedKey);
