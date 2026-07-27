@@ -1,4 +1,4 @@
-import { buildConfig } from "payload";
+import { buildConfig, type CollectionConfig } from "payload";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import sharp from "sharp";
@@ -26,6 +26,16 @@ import { ThemeSettings } from "@/globals/ThemeSettings";
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
+const ProductsWithProtectedPublicApi: CollectionConfig = {
+  ...Products,
+  access: {
+    ...Products.access,
+    // The website uses Payload's server-side Local API. Anonymous REST/GraphQL
+    // reads stay closed until protected fields have dedicated field access.
+    read: ({ req }) => Boolean(req.user),
+  },
+};
+
 export default buildConfig({
   admin: {
     user: Users.slug,
@@ -45,7 +55,7 @@ export default buildConfig({
   collections: [
     Users,
     Media,
-    Products,
+    ProductsWithProtectedPublicApi,
     Categories,
     Inquiries,
     News,
