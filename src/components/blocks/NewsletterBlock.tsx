@@ -1,42 +1,49 @@
 "use client";
 
 import React, { useState } from "react";
-import { Send, CheckCircle2, AlertCircle } from "lucide-react";
+import { AlertCircle, CheckCircle2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+type NewsletterResponse = {
+  success?: boolean;
+  message?: string;
+};
+
 export function NewsletterBlock({ title, description, buttonText }: any) {
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setStatus("loading");
     setErrorMessage("");
 
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("email");
+    const form = event.currentTarget;
+    const formData = new FormData(form);
 
     try {
-      const res = await fetch("/api/subscribers", {
+      const response = await fetch("/api/public/newsletter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({
+          email: formData.get("email"),
+          website: formData.get("website"),
+        }),
       });
+      const data = (await response.json()) as NewsletterResponse;
 
-      if (res.ok) {
+      if (response.ok && data.success) {
         setStatus("success");
-        (e.target as HTMLFormElement).reset();
-        setTimeout(() => setStatus("idle"), 4000);
+        form.reset();
+        window.setTimeout(() => setStatus("idle"), 4_000);
       } else {
-        const errorData = await res.json();
         setStatus("error");
-
-        if (errorData.errors?.[0]?.message?.includes("unique")) {
-          setErrorMessage("Bu e-posta adresi zaten kayıtlı.");
-        } else {
-          setErrorMessage("Bir hata oluştu. Lütfen tekrar deneyin.");
-        }
+        setErrorMessage(
+          data.message || "Bir hata oluştu. Lütfen tekrar deneyin.",
+        );
       }
     } catch {
       setStatus("error");
@@ -45,62 +52,74 @@ export function NewsletterBlock({ title, description, buttonText }: any) {
   };
 
   return (
-      <section className="py-24 bg-primary relative overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-background/10 blur-[120px] rounded-full pointer-events-none" />
+    <section className="relative overflow-hidden bg-primary py-24">
+      <div className="pointer-events-none absolute left-1/2 top-0 h-[400px] w-[800px] -translate-x-1/2 rounded-full bg-background/10 blur-[120px]" />
 
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-3xl md:text-5xl font-extrabold text-primary-foreground mb-6 tracking-tight">
-              {title}
-            </h2>
-            {/* Metin, primary arkaplan üzerinde okunabilmesi için primary-foreground'un hafif saydam hali yapıldı */}
-            <p className="text-lg text-primary-foreground/80 mb-10 leading-relaxed">
-              {description}
-            </p>
+      <div className="container relative z-10 mx-auto px-4">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="mb-6 text-3xl font-extrabold tracking-tight text-primary-foreground md:text-5xl">
+            {title}
+          </h2>
+          <p className="mb-10 text-lg leading-relaxed text-primary-foreground/80">
+            {description}
+          </p>
 
-            <form
-                onSubmit={handleSubmit}
-                className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto"
+          <form
+            onSubmit={handleSubmit}
+            className="relative mx-auto flex max-w-lg flex-col gap-4 sm:flex-row"
+          >
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -left-[10000px] top-auto h-px w-px overflow-hidden"
             >
-              <div className="w-full relative">
-                <Input
-                    name="email"
-                    type="email"
-                    placeholder="E-Posta adresinizi girin..."
-                    required
-                    disabled={status === "loading" || status === "success"}
-                    // Input placeholder'ı ve metni primary-foreground oldu
-                    className="h-14 rounded-full bg-background/10 border-background/20 text-primary-foreground placeholder:text-primary-foreground/50 px-6 focus-visible:ring-ring text-lg w-full"
-                />
-                {status === "error" && (
-                    <p className="absolute -bottom-6 left-4 text-sm text-error-foreground flex items-center">
-                      <AlertCircle className="w-3 h-3 mr-1" /> {errorMessage}
-                    </p>
-                )}
-              </div>
+              <label htmlFor="newsletter-website">Website</label>
+              <input
+                id="newsletter-website"
+                name="website"
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+              />
+            </div>
 
-              <Button
-                  type="submit"
-                  size="lg"
-                  disabled={status === "loading" || status === "success"}
-                  // Buton bg-primary arkaplanında kaybolmasın diye zıt renk (bg-background) atandı
-                  className="h-14 rounded-full px-8 font-bold text-md w-full sm:w-auto transition-all duration-300 bg-background text-foreground hover:bg-surface-muted"
-              >
-                {status === "loading" ? (
-                    "Kayıt..."
-                ) : status === "success" ? (
-                    <>
-                      <CheckCircle2 className="w-5 h-5 mr-2 text-success" /> Başarılı
-                    </>
-                ) : (
-                    <>
-                      {buttonText || "Kayıt Ol"} <Send className="w-5 h-5 ml-2" />
-                    </>
-                )}
-              </Button>
-            </form>
-          </div>
+            <div className="relative w-full">
+              <Input
+                name="email"
+                type="email"
+                maxLength={254}
+                placeholder="E-Posta adresinizi girin..."
+                required
+                disabled={status === "loading" || status === "success"}
+                className="h-14 w-full rounded-full border-background/20 bg-background/10 px-6 text-lg text-primary-foreground placeholder:text-primary-foreground/50 focus-visible:ring-ring"
+              />
+              {status === "error" && (
+                <p className="absolute -bottom-7 left-4 flex items-center text-sm text-error-foreground">
+                  <AlertCircle className="mr-1 h-3 w-3" /> {errorMessage}
+                </p>
+              )}
+            </div>
+
+            <Button
+              type="submit"
+              size="lg"
+              disabled={status === "loading" || status === "success"}
+              className="h-14 w-full rounded-full bg-background px-8 text-md font-bold text-foreground transition-all duration-300 hover:bg-surface-muted sm:w-auto"
+            >
+              {status === "loading" ? (
+                "Kayıt..."
+              ) : status === "success" ? (
+                <>
+                  <CheckCircle2 className="mr-2 h-5 w-5 text-success" /> Başarılı
+                </>
+              ) : (
+                <>
+                  {buttonText || "Kayıt Ol"} <Send className="ml-2 h-5 w-5" />
+                </>
+              )}
+            </Button>
+          </form>
         </div>
-      </section>
+      </div>
+    </section>
   );
 }
