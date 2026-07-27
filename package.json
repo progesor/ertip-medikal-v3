@@ -6,7 +6,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "pnpm payload:importmap",
     "dev": "next dev",
+    "prebuild": "pnpm payload:importmap",
     "build": "next build",
     "build:deploy": "pnpm db:migrate && pnpm build",
     "build:debug": "next build --debug-prerender",
@@ -19,6 +21,7 @@
     "clean": "rimraf .next",
     "payload": "payload",
     "payload:types": "payload generate:types",
+    "payload:importmap": "payload generate:importmap",
     "payload:graphql": "payload generate:graphQLSchema",
     "db:migrate": "payload migrate",
     "db:migrate:status": "payload migrate:status",
