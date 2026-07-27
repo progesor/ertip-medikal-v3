@@ -1,165 +1,188 @@
 "use client";
 
 import React, { useState } from "react";
+import { CheckCircle2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Send, CheckCircle2 } from "lucide-react";
+
+type ContactResponse = {
+  success?: boolean;
+  message?: string;
+};
 
 export function ContactForm({ departments }: { departments?: any[] }) {
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isSuccess, setIsSuccess] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setIsSubmitting(true);
-        setError(null);
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
 
-        const formData = new FormData(e.currentTarget);
-        const selectedDepartment = formData.get("department");
-        const rawMessage = formData.get("message");
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const selectedDepartment = formData.get("department");
+    const rawMessage = formData.get("message");
+    const finalMessage = selectedDepartment
+      ? `[İlgili Departman: ${selectedDepartment}]\n\n${rawMessage}`
+      : rawMessage;
 
-        // Inquiries koleksiyonunda 'department' alanı olmadığı için mesajın başına ekliyoruz
-        const finalMessage = selectedDepartment
-            ? `[İlgili Departman: ${selectedDepartment}]\n\n${rawMessage}`
-            : rawMessage;
+    try {
+      const response = await fetch("/api/public/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.get("name"),
+          email: formData.get("email"),
+          phone: formData.get("phone"),
+          message: finalMessage,
+          website: formData.get("website"),
+        }),
+      });
+      const data = (await response.json()) as ContactResponse;
 
-        // Payload CMS API'sine gönderilecek veri objesi
-        const payloadData = {
-            name: formData.get("name"),
-            email: formData.get("email"),
-            phone: formData.get("phone"),
-            message: finalMessage,
-        };
-
-        try {
-            // Doğrudan senin mevcut Inquiries koleksiyonuna POST atıyoruz
-            const res = await fetch("/api/inquiries", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payloadData),
-            });
-
-            if (res.ok) {
-                setIsSuccess(true);
-                (e.target as HTMLFormElement).reset();
-            } else {
-                const errorData = await res.json();
-                setError(errorData.errors?.[0]?.message || "Bir hata oluştu. Lütfen tekrar deneyin.");
-            }
-        } catch (err) {
-            console.error("Form submission error:", err);
-            setError("Bağlantı hatası yaşandı. Lütfen internetinizi kontrol edin.");
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    // Başarılı gönderim ekranı
-    if (isSuccess) {
-        return (
-            <div className="flex flex-col items-center justify-center text-center p-8 bg-success/10 rounded-2xl border border-success/25">
-                <CheckCircle2 className="w-16 h-16 text-success mb-4" />
-                <h3 className="text-2xl font-bold text-text-main mb-2">Mesajınız Alındı!</h3>
-                <p className="text-text-muted mb-6">
-                    Talebiniz ilgili departmanımıza başarıyla iletildi. En kısa sürede sizinle iletişime geçeceğiz.
-                </p>
-                <Button
-                    variant="outline"
-                    onClick={() => setIsSuccess(false)}
-                    className="font-bold border-border text-text-main"
-                >
-                    Yeni Mesaj Gönder
-                </Button>
-            </div>
-        );
+      if (response.ok && data.success) {
+        setIsSuccess(true);
+        form.reset();
+      } else {
+        setError(data.message || "Bir hata oluştu. Lütfen tekrar deneyin.");
+      }
+    } catch (submissionError) {
+      console.error("Form submission error:", submissionError);
+      setError("Bağlantı hatası yaşandı. Lütfen internetinizi kontrol edin.");
+    } finally {
+      setIsSubmitting(false);
     }
+  };
 
+  if (isSuccess) {
     return (
-        <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-                <div className="p-4 bg-error/10 text-error text-sm font-semibold rounded-xl border border-error/25">
-                    {error}
-                </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-text-main">Ad Soyad *</label>
-                    <input
-                        required
-                        name="name"
-                        type="text"
-                        className="w-full px-4 py-3 rounded-xl border border-border bg-background text-text-main placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring outline-none transition-all"
-                        placeholder="Örn: Dr. Ahmet Yılmaz"
-                    />
-                </div>
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-text-main">E-Posta *</label>
-                    <input
-                        required
-                        name="email"
-                        type="email"
-                        className="w-full px-4 py-3 rounded-xl border border-border bg-background text-text-main placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring outline-none transition-all"
-                        placeholder="ornek@klinik.com"
-                    />
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-text-main">Telefon</label>
-                    <input
-                        name="phone"
-                        type="tel"
-                        className="w-full px-4 py-3 rounded-xl border border-border bg-background text-text-main placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring outline-none transition-all"
-                        placeholder="+90 5XX XXX XX XX"
-                    />
-                </div>
-
-                {/* CMS'ten gelen dinamik departmanlar */}
-                {departments && departments.length > 0 && (
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-text-main">İlgili Departman</label>
-                        <select
-                            name="department"
-                            className="w-full px-4 py-3 rounded-xl border border-border bg-background text-text-main focus:border-primary focus:ring-1 focus:ring-ring outline-none transition-all"
-                        >
-                            <option value="">Genel / Diğer</option>
-                            {departments.map((dep: any, index: number) => (
-                                <option key={index} value={dep.label}>
-                                    {dep.label}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                )}
-            </div>
-
-            <div className="space-y-2">
-                <label className="text-sm font-bold text-text-main">Mesajınız *</label>
-                <textarea
-                    required
-                    name="message"
-                    rows={4}
-                    className="w-full px-4 py-3 rounded-xl border border-border bg-background text-text-main placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring outline-none transition-all resize-none"
-                    placeholder="Talebinizi detaylıca buraya yazabilirsiniz..."
-                />
-            </div>
-
-            <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full h-14 rounded-xl text-lg font-bold group"
-            >
-                {isSubmitting ? (
-                    "Gönderiliyor..."
-                ) : (
-                    <>
-                        Mesajı Gönder
-                        <Send className="w-5 h-5 ml-2 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                    </>
-                )}
-            </Button>
-        </form>
+      <div className="flex flex-col items-center justify-center rounded-2xl border border-success/25 bg-success/10 p-8 text-center">
+        <CheckCircle2 className="mb-4 h-16 w-16 text-success" />
+        <h3 className="mb-2 text-2xl font-bold text-text-main">
+          Mesajınız Alındı!
+        </h3>
+        <p className="mb-6 text-text-muted">
+          Talebiniz ilgili departmanımıza başarıyla iletildi. En kısa sürede
+          sizinle iletişime geçeceğiz.
+        </p>
+        <Button
+          variant="outline"
+          onClick={() => setIsSuccess(false)}
+          className="border-border font-bold text-text-main"
+        >
+          Yeni Mesaj Gönder
+        </Button>
+      </div>
     );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="relative space-y-6">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-[10000px] top-auto h-px w-px overflow-hidden"
+      >
+        <label htmlFor="contact-website">Website</label>
+        <input
+          id="contact-website"
+          name="website"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+        />
+      </div>
+
+      {error && (
+        <div className="rounded-xl border border-error/25 bg-error/10 p-4 text-sm font-semibold text-error">
+          {error}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="space-y-2">
+          <label className="text-sm font-bold text-text-main">Ad Soyad *</label>
+          <input
+            required
+            name="name"
+            type="text"
+            maxLength={120}
+            className="w-full rounded-xl border border-border bg-background px-4 py-3 text-text-main outline-none transition-all placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring"
+            placeholder="Örn: Dr. Ahmet Yılmaz"
+          />
+        </div>
+        <div className="space-y-2">
+          <label className="text-sm font-bold text-text-main">E-Posta *</label>
+          <input
+            required
+            name="email"
+            type="email"
+            maxLength={254}
+            className="w-full rounded-xl border border-border bg-background px-4 py-3 text-text-main outline-none transition-all placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring"
+            placeholder="ornek@klinik.com"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="space-y-2">
+          <label className="text-sm font-bold text-text-main">Telefon</label>
+          <input
+            name="phone"
+            type="tel"
+            maxLength={50}
+            className="w-full rounded-xl border border-border bg-background px-4 py-3 text-text-main outline-none transition-all placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring"
+            placeholder="+90 5XX XXX XX XX"
+          />
+        </div>
+
+        {departments && departments.length > 0 && (
+          <div className="space-y-2">
+            <label className="text-sm font-bold text-text-main">
+              İlgili Departman
+            </label>
+            <select
+              name="department"
+              className="w-full rounded-xl border border-border bg-background px-4 py-3 text-text-main outline-none transition-all focus:border-primary focus:ring-1 focus:ring-ring"
+            >
+              <option value="">Genel / Diğer</option>
+              {departments.map((department: any, index: number) => (
+                <option key={department.id || index} value={department.label}>
+                  {department.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-bold text-text-main">Mesajınız *</label>
+        <textarea
+          required
+          name="message"
+          rows={4}
+          minLength={5}
+          maxLength={5_000}
+          className="w-full resize-none rounded-xl border border-border bg-background px-4 py-3 text-text-main outline-none transition-all placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring"
+          placeholder="Talebinizi detaylıca buraya yazabilirsiniz..."
+        />
+      </div>
+
+      <Button
+        type="submit"
+        disabled={isSubmitting}
+        className="group h-14 w-full rounded-xl text-lg font-bold"
+      >
+        {isSubmitting ? (
+          "Gönderiliyor..."
+        ) : (
+          <>
+            Mesajı Gönder
+            <Send className="ml-2 h-5 w-5 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
+          </>
+        )}
+      </Button>
+    </form>
+  );
 }
