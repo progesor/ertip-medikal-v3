@@ -1,4 +1,8 @@
-import { buildConfig, type CollectionConfig } from "payload";
+import {
+  buildConfig,
+  type CollectionConfig,
+  type GlobalConfig,
+} from "payload";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import sharp from "sharp";
@@ -23,17 +27,73 @@ import { MainMenu } from "@/globals/MainMenu";
 import { EmailSettings } from "@/globals/EmailSettings";
 import { ThemeSettings } from "@/globals/ThemeSettings";
 import { invalidateProtectedMediaCache } from "@/lib/security/protectedMedia";
+import {
+  adminsOnly,
+  contentManagers,
+} from "@/access/roles";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
+
+function withContentAccess(collection: CollectionConfig): CollectionConfig {
+  return {
+    ...collection,
+    access: {
+      ...collection.access,
+      create: contentManagers,
+      read: contentManagers,
+      update: contentManagers,
+      delete: adminsOnly,
+    },
+  };
+}
+
+function withAdminAccess(collection: CollectionConfig): CollectionConfig {
+  return {
+    ...collection,
+    access: {
+      ...collection.access,
+      create: adminsOnly,
+      read: adminsOnly,
+      update: adminsOnly,
+      delete: adminsOnly,
+    },
+  };
+}
+
+function withGlobalUpdateAccess(
+  global: GlobalConfig,
+  update: typeof adminsOnly | typeof contentManagers,
+): GlobalConfig {
+  return {
+    ...global,
+    access: {
+      ...global.access,
+      update,
+    },
+  };
+}
+
+const MediaWithRBAC: CollectionConfig = {
+  ...Media,
+  access: {
+    ...Media.access,
+    create: contentManagers,
+    update: contentManagers,
+    delete: adminsOnly,
+  },
+};
 
 const ProductsWithProtectedPublicApi: CollectionConfig = {
   ...Products,
   access: {
     ...Products.access,
+    create: contentManagers,
     // The website uses Payload's server-side Local API. Anonymous REST/GraphQL
     // reads stay closed until protected fields have dedicated field access.
     read: ({ req }) => Boolean(req.user),
+    update: contentManagers,
+    delete: adminsOnly,
   },
   hooks: {
     ...Products.hooks,
@@ -54,6 +114,24 @@ const ProductsWithProtectedPublicApi: CollectionConfig = {
   },
 };
 
+const SiteSettingsWithRBAC = withGlobalUpdateAccess(
+  SiteSettings,
+  contentManagers,
+);
+const MainMenuWithRBAC = withGlobalUpdateAccess(MainMenu, contentManagers);
+const EmailSettingsWithRBAC: GlobalConfig = {
+  ...EmailSettings,
+  access: {
+    ...EmailSettings.access,
+    read: adminsOnly,
+    update: adminsOnly,
+  },
+};
+const ThemeSettingsWithRBAC = withGlobalUpdateAccess(
+  ThemeSettings,
+  adminsOnly,
+);
+
 export default buildConfig({
   admin: {
     user: Users.slug,
@@ -72,18 +150,23 @@ export default buildConfig({
   },
   collections: [
     Users,
-    Media,
+    MediaWithRBAC,
     ProductsWithProtectedPublicApi,
-    Categories,
-    Inquiries,
-    News,
-    Pages,
-    NewsCategories,
-    QuoteRequests,
+    withContentAccess(Categories),
+    withAdminAccess(Inquiries),
+    withContentAccess(News),
+    withContentAccess(Pages),
+    withContentAccess(NewsCategories),
+    withAdminAccess(QuoteRequests),
     DownloadLogs,
-    Subscribers,
+    withAdminAccess(Subscribers),
   ],
-  globals: [SiteSettings, MainMenu, EmailSettings, ThemeSettings],
+  globals: [
+    SiteSettingsWithRBAC,
+    MainMenuWithRBAC,
+    EmailSettingsWithRBAC,
+    ThemeSettingsWithRBAC,
+  ],
   editor: lexicalEditor({}),
   secret: process.env.PAYLOAD_SECRET || "SECRET_KEY_MISSING",
   typescript: {

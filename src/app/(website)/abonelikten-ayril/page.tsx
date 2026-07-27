@@ -1,129 +1,24 @@
-import React from "react";
-import { getPayload } from "payload";
-import configPromise from "@payload-config";
-import Link from "next/link";
-import { CheckCircle2, AlertCircle, ArrowLeft, MailX } from "lucide-react";
+import type { Metadata } from "next";
+import { UnsubscribeClient } from "@/components/newsletter/UnsubscribeClient";
 
-// Next.js 15 kuralı: searchParams artık bir Promise
+export const metadata: Metadata = {
+  title: "Abonelikten Ayrıl | Ertip Medikal",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
+
 type Props = {
-    searchParams: Promise<{ email?: string }>;
+  searchParams: Promise<{
+    token?: string | string[];
+  }>;
 };
 
 export default async function UnsubscribePage({ searchParams }: Props) {
-    const { email } = await searchParams;
-    const payload = await getPayload({ config: configPromise });
+  const { token: tokenParam } = await searchParams;
+  const token =
+    typeof tokenParam === "string" ? tokenParam.trim().slice(0, 4_096) : "";
 
-    // 1. EĞER URL'DE EMAIL YOKSA: MANUEL FORMU GÖSTER
-    if (!email) {
-        return (
-            <div className="min-h-[70vh] flex flex-col items-center justify-center bg-surface-muted/30 px-4 py-20">
-                <div className="max-w-md w-full bg-surface p-8 md:p-12 rounded-[var(--radius-3xl)] shadow-2xl shadow-surface-inverse/5 border border-border/80 text-center">
-                    <div className="w-20 h-20 bg-surface-muted rounded-full flex items-center justify-center mx-auto mb-6">
-                        <MailX className="w-10 h-10 text-text-muted" />
-                    </div>
-                    <h1 className="text-2xl md:text-3xl font-black text-text-main mb-4">
-                        Abonelikten Ayrıl
-                    </h1>
-                    <p className="text-text-muted mb-8 leading-relaxed">
-                        E-bülten aboneliğinizi iptal etmek için lütfen e-posta adresinizi girin.
-                    </p>
-
-                    {/* Harika numara: form action ile GET isteği atıldığında URL'ye ?email= ekler */}
-                    <form action="/abonelikten-ayril" method="GET" className="space-y-4">
-                        <input
-                            type="email"
-                            name="email"
-                            required
-                            placeholder="E-posta adresiniz..."
-                            className="w-full px-4 py-3 rounded-[var(--radius)] border border-input bg-background focus:border-primary focus:ring-2 focus:ring-ring/30 outline-none transition-all text-text-main placeholder:text-text-muted/50"
-                        />
-                        <button
-                            type="submit"
-                            className="w-full h-14 rounded-[var(--radius-xl)] bg-error hover:bg-error/90 text-error-foreground font-bold transition-all shadow-lg shadow-error/20"
-                        >
-                            Aboneliğimi İptal Et
-                        </button>
-                    </form>
-
-                    <Link
-                        href="/"
-                        className="inline-block mt-6 text-sm font-semibold text-text-muted hover:text-primary transition-colors"
-                    >
-                        Vazgeç ve Anasayfaya Dön
-                    </Link>
-                </div>
-            </div>
-        );
-    }
-
-    // 2. EĞER URL'DE EMAIL VARSA: VERİTABANINDA İŞLEM YAP
-    let isSuccess = false;
-    let message = "Geçersiz veya eksik bağlantı. Lütfen e-postanızdaki linki kontrol edin.";
-
-    // E-posta adresini veritabanında ara
-    const { docs } = await payload.find({
-        collection: "subscribers",
-        where: { email: { equals: email } },
-        limit: 1,
-    });
-
-    if (docs.length > 0) {
-        const subscriber = docs[0];
-
-        // Eğer zaten çıkmışsa bilgi ver
-        if (subscriber.status === "unsubscribed") {
-            isSuccess = true;
-            message = "Bu e-posta adresi zaten e-bülten listemizden çıkarılmış durumda.";
-        } else {
-            // Durumu "unsubscribed" olarak güncelle
-            await payload.update({
-                collection: "subscribers",
-                id: subscriber.id,
-                data: { status: "unsubscribed" },
-            });
-            isSuccess = true;
-            message = "E-bülten aboneliğiniz başarıyla iptal edildi. Artık bizden tanıtım e-postası almayacaksınız.";
-        }
-    } else {
-        message = "Bu e-posta adresi sistemimizde kayıtlı değil.";
-    }
-
-    return (
-        <div className="min-h-[70vh] flex flex-col items-center justify-center bg-surface-muted/30 px-4 py-20">
-            <div className="max-w-md w-full bg-surface p-8 md:p-12 rounded-[var(--radius-3xl)] shadow-2xl shadow-surface-inverse/5 border border-border/80 text-center">
-                {isSuccess ? (
-                    <>
-                        <div className="w-20 h-20 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <CheckCircle2 className="w-10 h-10 text-success" />
-                        </div>
-                        <h1 className="text-2xl md:text-3xl font-black text-text-main mb-4">
-                            Abonelik İptal Edildi
-                        </h1>
-                        <p className="text-text-muted mb-8 leading-relaxed">
-                            {message}
-                        </p>
-                    </>
-                ) : (
-                    <>
-                        <div className="w-20 h-20 bg-error/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <AlertCircle className="w-10 h-10 text-error" />
-                        </div>
-                        <h1 className="text-2xl md:text-3xl font-black text-text-main mb-4">
-                            İşlem Başarısız
-                        </h1>
-                        <p className="text-text-muted mb-8 leading-relaxed">
-                            {message}
-                        </p>
-                    </>
-                )}
-
-                <Link
-                    href="/"
-                    className="inline-flex items-center justify-center px-6 py-3 rounded-[var(--radius-xl)] bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-all w-full"
-                >
-                    <ArrowLeft className="w-5 h-5 mr-2" /> Anasayfaya Dön
-                </Link>
-            </div>
-        </div>
-    );
+  return token ? <UnsubscribeClient token={token} /> : <UnsubscribeClient />;
 }
