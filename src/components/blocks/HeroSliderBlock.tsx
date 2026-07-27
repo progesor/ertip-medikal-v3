@@ -21,58 +21,64 @@ export function HeroSliderBlock({ slides }: any) {
 
   return (
     <section className="relative h-[80vh] min-h-[600px] w-full overflow-hidden bg-primary">
-      {slides.map((slide: any, index: number) => (
-        <div
-          key={index}
-          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === current ? "opacity-100 z-10" : "opacity-0 z-0"}`}
-        >
-          {/* Arkaplan Resmi */}
-          {slide.image?.url ? (
-            <Image
-              src={slide.image.url}
-              alt={slide.title}
-              fill
-              className="object-cover"
-              priority={index === 0}
-              unoptimized
-            />
-          ) : (
-            // Resim yoksa şık bir kurumsal gradyan
-            <div className="absolute inset-0 bg-gradient-to-br from-surface-inverse via-primary/20 to-surface-inverse" />
-          )}
+      {slides.map((slide: any, index: number) => {
+        const imageUrl =
+          slide.image?.sizes?.hero?.url || slide.image?.url || null;
 
-          {/* Karartma Overlay */}
+        return (
           <div
-            className="absolute inset-0 bg-surface-inverse"
-            style={{ opacity: parseFloat(slide.overlayOpacity || "0.4") }}
-          />
+            key={index}
+            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === current ? "opacity-100 z-10" : "opacity-0 z-0"}`}
+          >
+            {/* Arkaplan Resmi */}
+            {imageUrl ? (
+              <Image
+                src={imageUrl}
+                alt={slide.image?.alt || slide.title}
+                fill
+                className="object-cover"
+                sizes="100vw"
+                quality={75}
+                preload={index === 0}
+              />
+            ) : (
+              // Resim yoksa şık bir kurumsal gradyan
+              <div className="absolute inset-0 bg-gradient-to-br from-surface-inverse via-primary/20 to-surface-inverse" />
+            )}
 
-          {/* İçerik */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="container mx-auto px-4 text-center text-surface-inverse-foreground space-y-6">
-              <h1 className="text-4xl md:text-7xl font-black tracking-tight animate-in fade-in slide-in-from-bottom-8 duration-700">
-                {slide.title}
-              </h1>
-              {slide.subtitle && (
-                <p className="text-lg md:text-2xl text-surface-inverse-foreground/80 max-w-3xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-12 duration-1000">
-                  {slide.subtitle}
-                </p>
-              )}
-              {slide.buttonText && slide.buttonLink && (
-                <div className="pt-8 animate-in fade-in slide-in-from-bottom-16 duration-1000">
-                  <Button
-                    size="lg"
-                    className="rounded-full px-10 h-14 text-lg font-bold"
-                    asChild
-                  >
-                    <Link href={slide.buttonLink}>{slide.buttonText}</Link>
-                  </Button>
-                </div>
-              )}
+            {/* Karartma Overlay */}
+            <div
+              className="absolute inset-0 bg-surface-inverse"
+              style={{ opacity: parseFloat(slide.overlayOpacity || "0.4") }}
+            />
+
+            {/* İçerik */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="container mx-auto px-4 text-center text-surface-inverse-foreground space-y-6">
+                <h1 className="text-4xl md:text-7xl font-black tracking-tight animate-in fade-in slide-in-from-bottom-8 duration-700">
+                  {slide.title}
+                </h1>
+                {slide.subtitle && (
+                  <p className="text-lg md:text-2xl text-surface-inverse-foreground/80 max-w-3xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-12 duration-1000">
+                    {slide.subtitle}
+                  </p>
+                )}
+                {slide.buttonText && slide.buttonLink && (
+                  <div className="pt-8 animate-in fade-in slide-in-from-bottom-16 duration-1000">
+                    <Button
+                      size="lg"
+                      className="rounded-full px-10 h-14 text-lg font-bold"
+                      asChild
+                    >
+                      <Link href={slide.buttonLink}>{slide.buttonText}</Link>
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       {/* Navigasyon Okları */}
       <button
