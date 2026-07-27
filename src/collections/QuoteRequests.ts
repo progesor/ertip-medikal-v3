@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { escapeHtml, sanitizeEmailSubject } from "@/lib/security/html";
 
 export const QuoteRequests: CollectionConfig = {
   slug: "quote-requests",
@@ -8,10 +9,9 @@ export const QuoteRequests: CollectionConfig = {
     group: "Müşteri İletişimi",
     defaultColumns: ["customerName", "company", "createdAt", "status"],
   },
-  // Dışarıdan form gönderilebilmesi için yetkileri açıyoruz
   access: {
     create: () => true,
-    read: ({ req: { user } }) => Boolean(user), // Sadece admin okuyabilir
+    read: ({ req: { user } }) => Boolean(user),
     update: ({ req: { user } }) => Boolean(user),
     delete: ({ req: { user } }) => Boolean(user),
   },
@@ -84,42 +84,50 @@ export const QuoteRequests: CollectionConfig = {
       ],
     },
   ],
-
   hooks: {
     afterChange: [
       async ({ doc, operation, req }) => {
-        // Sadece YENİ bir teklif oluşturulduğunda çalıştır (güncellemelerde mail atma)
         if (operation === "create") {
           try {
-            // 1. Admin panelinden ayarladığımız "Alıcılar" listesini çek
             const emailSettings = await req.payload.findGlobal({
               slug: "emailSettings",
             });
-
-            // Eğer alıcı girilmemişse boş bir dizi döndür
-            const receivers =
-              emailSettings.quoteReceivers?.map((r: any) => r.email) || [];
+            const receivers = (emailSettings.quoteReceivers ?? [])
+              .map((receiver) => receiver.email)
+              .filter((email): email is string => Boolean(email));
 
             if (receivers.length > 0) {
-              // 2. Mail içeriğini oluştur (Şık bir HTML formatı)
+              const itemRows = (doc.items ?? [])
+                .map((item) => {
+                  const variant = item.variantInfo
+                    ? ` — ${escapeHtml(item.variantInfo)}`
+                    : "";
+
+                  return `<li>${escapeHtml(item.quantity ?? 1)}x ${escapeHtml(item.productTitle)}${variant} (SKU: ${escapeHtml(item.sku || "-")})</li>`;
+                })
+                .join("");
+              const safeMessage = escapeHtml(doc.message || "-").replace(
+                /\r?\n/g,
+                "<br/>",
+              );
+
               const htmlContent = `
-                <h2>Yeni Bir B2B Teklif Talebi Geldi!</h2>
-                <p><strong>Müşteri:</strong> ${doc.customerName}</p>
-                <p><strong>Firma:</strong> ${doc.company || "Belirtilmedi"}</p>
-                <p><strong>E-Posta:</strong> ${doc.email}</p>
-                <p><strong>Telefon:</strong> ${doc.phone}</p>
-                <hr/>
-                <h3>Talep Edilen Ürünler:</h3>
-                <ul>
-                  ${doc.items.map((item: any) => `<li>${item.quantity}x ${item.productTitle} (SKU: ${item.sku})</li>`).join("")}
-                </ul>
-                <p><strong>Not:</strong> ${doc.message || "-"}</p>
+                <div style="font-family: sans-serif; max-width: 700px; padding: 20px;">
+                  <h2>Yeni Bir B2B Teklif Talebi Geldi!</h2>
+                  <p><strong>Müşteri:</strong> ${escapeHtml(doc.customerName)}</p>
+                  <p><strong>Firma:</strong> ${escapeHtml(doc.company || "Belirtilmedi")}</p>
+                  <p><strong>E-Posta:</strong> ${escapeHtml(doc.email)}</p>
+                  <p><strong>Telefon:</strong> ${escapeHtml(doc.phone)}</p>
+                  <hr/>
+                  <h3>Talep Edilen Ürünler:</h3>
+                  <ul>${itemRows}</ul>
+                  <p><strong>Not:</strong> ${safeMessage}</p>
+                </div>
               `;
 
-              // 3. Payload'un dahili sistemiyle maili gönder
               await req.payload.sendEmail({
-                to: receivers.join(","), // [satis@..., info@...] listesini stringe çevirir
-                subject: `YENİ TEKLİF: ${doc.customerName} - Ertıp Medikal`,
+                to: receivers.join(","),
+                subject: `YENİ TEKLİF: ${sanitizeEmailSubject(doc.customerName)} - Ertip Medikal`,
                 html: htmlContent,
               });
             }
