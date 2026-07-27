@@ -10,8 +10,6 @@ import type { CartContextType, CartItem } from "@/types";
 const CART_STORAGE_KEY = "quote_cart";
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-type StoredCartItem = Partial<CartItem> & Record<string, unknown>;
-
 function readStoredCart(): CartItem[] {
   try {
     const storedValue = localStorage.getItem(CART_STORAGE_KEY);
@@ -23,9 +21,9 @@ function readStoredCart(): CartItem[] {
     return parsedValue.flatMap((value) => {
       if (!value || typeof value !== "object") return [];
 
-      const item = value as StoredCartItem;
+      const item = value as Record<string, unknown>;
       if (
-        typeof item.id !== "string" ||
+        (typeof item.id !== "string" && typeof item.id !== "number") ||
         typeof item.title !== "string" ||
         typeof item.slug !== "string" ||
         typeof item.variant !== "string" ||
@@ -41,7 +39,7 @@ function readStoredCart(): CartItem[] {
           : 1;
 
       return [{
-        id: item.id,
+        id: String(item.id),
         title: item.title,
         slug: item.slug,
         variant: item.variant,
