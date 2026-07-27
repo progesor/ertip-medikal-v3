@@ -18,6 +18,8 @@ env:
   NODE_VERSION: "22"
   PNPM_VERSION: "10"
   NEXT_TELEMETRY_DISABLED: "1"
+  DATABASE_URI: postgresql://payload:payload@127.0.0.1:5432/ertip_ci
+  PAYLOAD_SECRET: ci-only-secret-not-used-outside-github-actions
 
 jobs:
   quality:
