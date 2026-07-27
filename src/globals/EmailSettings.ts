@@ -1,4 +1,4 @@
-import { GlobalConfig } from "payload";
+import type { GlobalConfig } from "payload";
 
 export const EmailSettings: GlobalConfig = {
   slug: "emailSettings",
@@ -7,7 +7,8 @@ export const EmailSettings: GlobalConfig = {
     group: "Sistem",
   },
   access: {
-    read: () => true,
+    // Bildirim alıcıları dahili yapılandırmadır; public API üzerinden okunmamalıdır.
+    read: ({ req }) => Boolean(req.user),
   },
   fields: [
     {

@@ -1,33 +1,49 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
-import { useSearchParams, ReadonlyURLSearchParams } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
 import {
-  Check,
-  Info,
-  ShoppingCart,
-  Award,
-  PlayCircle,
-  PackageOpen,
-  Ruler,
-  FileText,
   AlertCircle,
-  X,
+  Award,
+  Check,
   Download,
+  FileText,
+  Info,
+  PackageOpen,
+  PlayCircle,
+  Ruler,
+  ShoppingCart,
+  X,
 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
+import remarkGfm from "remark-gfm";
+import { ProductGallery } from "@/components/product/ProductGallery";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
 import { useCart } from "@/providers/CartProvider";
-import { ProductGallery } from "@/components/product/ProductGallery";
+
+type LogisticsMode = "sidebar" | "wide";
+
+type LogisticsProps = {
+  mode: LogisticsMode;
+  product: any;
+};
+
+type VerificationResponse = {
+  success?: boolean;
+  fileUrl?: string;
+  message?: string;
+};
 
 function getYouTubeId(url: string) {
   if (!url) return null;
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-  const match = url.match(regExp);
+
+  const expression =
+    /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(expression);
+
   return match && match[2].length === 11 ? match[2] : null;
 }
 
@@ -46,9 +62,8 @@ function getInitialSelectedAttributes(product: any) {
         .split("-")
         .map((value: string) => value.trim())
         .filter(Boolean);
-
       const matchingValue = [...values]
-        .sort((a, b) => b.length - a.length)
+        .sort((first, second) => second.length - first.length)
         .find(
           (value) =>
             firstVariantTitle.includes(`${value} mm ${attribute.name}`) ||
@@ -65,32 +80,193 @@ function getInitialSelectedAttributes(product: any) {
   );
 }
 
+function NetDimensions({ mode, product }: LogisticsProps) {
+  if (!product.width && !product.height && !product.depth && !product.weight) {
+    return null;
+  }
+
+  if (mode === "sidebar") {
+    return (
+      <div className="space-y-4 rounded-2xl border border-border bg-surface-muted p-6">
+        <h4 className="flex items-center gap-2 text-md font-bold text-text-main">
+          <Ruler className="h-4 w-4 text-primary" /> Net Ürün Boyutları
+        </h4>
+        <ul className="space-y-2 text-sm">
+          {(product.width || product.height || product.depth) && (
+            <li className="flex justify-between border-b border-border pb-2">
+              <span className="text-text-muted">Ölçüler (G-Y-D):</span>
+              <strong className="text-text-main">
+                {product.width || "-"}x{product.height || "-"}x
+                {product.depth || "-"} mm
+              </strong>
+            </li>
+          )}
+          {product.weight && (
+            <li className="flex justify-between pt-1">
+              <span className="text-text-muted">Net Ağırlık:</span>
+              <strong className="text-text-main">{product.weight} gr</strong>
+            </li>
+          )}
+        </ul>
+      </div>
+    );
+  }
+
+  const dimensions = [
+    { label: "Genişlik", value: product.width, unit: "mm" },
+    { label: "Yükseklik", value: product.height, unit: "mm" },
+    { label: "Derinlik", value: product.depth, unit: "mm" },
+    { label: "Net Ağırlık", value: product.weight, unit: "gr" },
+  ];
+
+  return (
+    <div className="space-y-4">
+      <h3 className="flex items-center gap-2 text-xl font-bold text-text-main">
+        <span className="h-6 w-1.5 rounded-full bg-primary" /> Ürün Boyut ve
+        Ağırlığı (Net)
+      </h3>
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        {dimensions.map(
+          (item) =>
+            item.value && (
+              <div
+                key={item.label}
+                className="rounded-2xl border border-border bg-surface p-5 shadow-sm"
+              >
+                <p className="mb-1 text-xs font-bold uppercase tracking-wider text-text-muted">
+                  {item.label}
+                </p>
+                <p className="text-lg font-black text-text-main">
+                  {item.value}{" "}
+                  <span className="text-sm font-normal text-text-muted">
+                    {item.unit}
+                  </span>
+                </p>
+              </div>
+            ),
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PackagingTable({ mode, product }: LogisticsProps) {
+  if (!Array.isArray(product.packaging) || product.packaging.length === 0) {
+    return null;
+  }
+
+  if (mode === "sidebar") {
+    return (
+      <div className="space-y-4 rounded-2xl border border-border bg-surface-muted p-6">
+        <h4 className="flex items-center gap-2 text-md font-bold text-text-main">
+          <PackageOpen className="h-4 w-4 text-primary" /> Lojistik Bilgisi
+        </h4>
+        <div className="space-y-3">
+          {product.packaging.map((packaging: any, index: number) => (
+            <div
+              key={packaging.id || index}
+              className="border-b border-border pb-3 text-sm last:border-0 last:pb-0"
+            >
+              <p className="mb-1 font-bold text-text-muted">
+                {packaging.packageLabel}{" "}
+                <span className="text-primary">({packaging.quantity} Adet)</span>
+              </p>
+              <p className="text-xs text-text-muted">
+                Boyut: {packaging.p_width}x{packaging.p_height}x
+                {packaging.p_depth} cm
+              </p>
+              <p className="mt-0.5 text-xs text-text-muted">
+                Brüt Ağırlık:{" "}
+                <strong className="text-text-muted">
+                  {packaging.grossWeight} kg
+                </strong>
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-10 space-y-4">
+      <h3 className="flex items-center gap-2 text-xl font-bold text-text-main">
+        <span className="h-6 w-1.5 rounded-full bg-primary" /> Lojistik ve
+        Ambalaj Bilgileri
+      </h3>
+      <div className="overflow-hidden rounded-2xl border border-border shadow-sm">
+        <table className="w-full border-collapse text-left text-sm">
+          <thead className="border-b border-border bg-surface-muted">
+            <tr>
+              <th className="px-6 py-4 font-bold text-text-main">
+                Paketleme Formu
+              </th>
+              <th className="px-6 py-4 font-bold text-text-main">
+                İçerik Adedi
+              </th>
+              <th className="px-6 py-4 font-bold text-text-main">
+                Ölçüler (cm)
+              </th>
+              <th className="px-6 py-4 font-bold text-text-main">
+                Brüt Ağırlık
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {product.packaging.map((packaging: any, index: number) => (
+              <tr
+                key={packaging.id || index}
+                className="transition-colors hover:bg-surface-muted/50"
+              >
+                <td className="px-6 py-4 font-bold text-text-muted">
+                  {packaging.packageLabel}
+                </td>
+                <td className="px-6 py-4 text-text-muted">
+                  {packaging.quantity} Adet
+                </td>
+                <td className="px-6 py-4 font-mono text-text-muted">
+                  {packaging.p_width}x{packaging.p_height}x{packaging.p_depth}
+                </td>
+                <td className="px-6 py-4 font-bold text-text-main">
+                  {packaging.grossWeight} kg
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 export function ProductView({ product }: any) {
   const { addToCart } = useCart();
+  const searchParams = useSearchParams();
   const [selectedAttrs, setSelectedAttrs] = useState<Record<string, string>>(
     () => getInitialSelectedAttributes(product),
   );
   const [manualCode, setManualCode] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
-
-  // YENİ STATE'LER: Hata ve Başarı Durumları İçin
   const [verifyError, setVerifyError] = useState<string | null>(null);
   const [verifiedDoc, setVerifiedDoc] = useState<{
     url: string;
     label: string;
   } | null>(null);
 
-  // TS2339 Hatası Çözümü: Tip zorlaması ve optional chaining (?)
-  const searchParams = useSearchParams() as ReadonlyURLSearchParams | null;
-  const activeTab = searchParams?.get("tab") || "description";
-  const autoCode = searchParams?.get("code");
+  const activeTab = searchParams.get("tab") || "description";
+  const autoCode = searchParams.get("code");
 
   const currentVariant = useMemo(() => {
-    if (!product.variants || product.variants.length === 0) return null;
-    return product.variants.find((v: any) => {
-      return Object.values(selectedAttrs).every((val) => v.title.includes(val));
-    });
-  }, [selectedAttrs, product.variants]);
+    if (!Array.isArray(product.variants) || product.variants.length === 0) {
+      return null;
+    }
+
+    return product.variants.find((variant: any) =>
+      Object.values(selectedAttrs).every((value) =>
+        variant.title.includes(value),
+      ),
+    );
+  }, [product.variants, selectedAttrs]);
 
   const hasCompleteVariantSelection = useMemo(() => {
     if (!Array.isArray(product.attributes) || product.attributes.length === 0) {
@@ -141,18 +317,64 @@ export function ProductView({ product }: any) {
     product.variants,
   ]);
 
-  useEffect(() => {
-    if (activeTab === "docs" && autoCode) {
-      if (product.protectedDocs && product.protectedDocs.length > 0) {
-        handleVerify(product.protectedDocs[0].label, autoCode);
+  const verifyDocument = useCallback(
+    async (docLabel: string, code: string) => {
+      if (!code.trim()) {
+        setVerifyError("Lütfen erişim kodunu girin.");
+        return;
       }
+
+      setIsVerifying(true);
+      setVerifyError(null);
+
+      try {
+        const response = await fetch("/api/verify-manual", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            productId: product.id,
+            code: code.trim(),
+            docLabel,
+          }),
+        });
+        const data = (await response.json()) as VerificationResponse;
+
+        if (response.ok && data.success && data.fileUrl) {
+          setVerifiedDoc({ url: data.fileUrl, label: docLabel });
+          return;
+        }
+
+        setVerifyError(data.message || "Geçersiz kod.");
+        window.setTimeout(() => setVerifyError(null), 5000);
+      } catch {
+        setVerifyError(
+          "Doğrulama servisine ulaşılamadı. Lütfen internet bağlantınızı kontrol edin.",
+        );
+        window.setTimeout(() => setVerifyError(null), 5000);
+      } finally {
+        setIsVerifying(false);
+      }
+    },
+    [product.id],
+  );
+
+  useEffect(() => {
+    const firstProtectedDocument = product.protectedDocs?.[0];
+
+    if (activeTab !== "docs" || !autoCode || !firstProtectedDocument?.label) {
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoCode, activeTab]);
+
+    const timeoutId = window.setTimeout(() => {
+      void verifyDocument(firstProtectedDocument.label, autoCode);
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [activeTab, autoCode, product.protectedDocs, verifyDocument]);
 
   const handleAddToCart = () => {
-    const itemToAdd = {
-      id: product.id,
+    addToCart({
+      id: String(product.id),
       title: product.title,
       slug: product.slug,
       variant: currentVariant?.title || "Standart",
@@ -163,97 +385,54 @@ export function ProductView({ product }: any) {
           : typeof product.mainImage === "object"
             ? product.mainImage?.url
             : "",
-    };
-    addToCart(itemToAdd);
-  };
-
-  const handleVerify = async (docLabel: string, codeInput?: string) => {
-    setIsVerifying(true);
-    setVerifyError(null);
-    const codeToVerify = codeInput || manualCode;
-
-    try {
-      const res = await fetch("/api/verify-manual", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productId: product.id,
-          code: codeToVerify,
-          docLabel,
-        }),
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        // Popup blocker'a takılmamak için tarayıcıda yeni pencere açmıyor, kendi UI'mıza alıyoruz
-        setVerifiedDoc({ url: data.fileUrl, label: docLabel });
-      } else {
-        setVerifyError(data.message || "Geçersiz kod.");
-        setTimeout(() => setVerifyError(null), 5000); // 5 Saniye sonra hatayı gizle
-      }
-    } catch {
-      setVerifyError(
-        "Doğrulama servisine ulaşılamadı. Lütfen internet bağlantınızı kontrol edin.",
-      );
-      setTimeout(() => setVerifyError(null), 5000);
-    } finally {
-      setIsVerifying(false);
-    }
+    });
   };
 
   const videoId = getYouTubeId(product.videoUrl || "");
-  const pos = product.logisticDisplayPosition || "below";
+  const logisticsPosition = product.logisticDisplayPosition || "below";
 
   const mainProductImages = useMemo(() => {
     if (typeof product.mainImage === "object" && product.mainImage?.url) {
-      return [{
-        url: product.mainImage.url,
-        alt: product.mainImage.alt || product.title,
-      }];
+      return [
+        {
+          url: product.mainImage.url,
+          alt: product.mainImage.alt || product.title,
+        },
+      ];
     }
 
     return [];
   }, [product.mainImage, product.title]);
 
   const sharedProductImages = useMemo(() => {
-    const images: { url: string; alt?: string }[] = [];
+    if (!Array.isArray(product.gallery)) return [];
 
-    if (Array.isArray(product.gallery)) {
-      product.gallery.forEach((item: any) => {
-        const image = item?.image;
+    return product.gallery.flatMap((item: any) => {
+      const image = item?.image;
 
-        if (typeof image === "object" && image?.url) {
-          images.push({
-            url: image.url,
-            alt: image.alt || product.title,
-          });
-        }
-      });
-    }
-
-    return images;
+      return typeof image === "object" && image?.url
+        ? [{ url: image.url, alt: image.alt || product.title }]
+        : [];
+    });
   }, [product.gallery, product.title]);
 
   const variantImages = useMemo(() => {
     if (!Array.isArray(mediaVariant?.variantImages)) return [];
 
-    return mediaVariant.variantImages.reduce(
-      (images: { url: string; alt?: string }[], item: any) => {
-        const image = item?.image;
+    return mediaVariant.variantImages.flatMap((item: any) => {
+      const image = item?.image;
 
-        if (typeof image === "object" && image?.url) {
-          images.push({
-            url: image.url,
-            alt:
-              image.alt ||
-              `${product.title} - ${currentVariant?.title || mediaVariant.title}`,
-          });
-        }
-
-        return images;
-      },
-      [],
-    );
+      return typeof image === "object" && image?.url
+        ? [
+            {
+              url: image.url,
+              alt:
+                image.alt ||
+                `${product.title} - ${currentVariant?.title || mediaVariant.title}`,
+            },
+          ]
+        : [];
+    });
   }, [currentVariant?.title, mediaVariant, product.title]);
 
   const displayedProductImages = useMemo(() => {
@@ -280,234 +459,82 @@ export function ProductView({ product }: any) {
     variantImages,
   ]);
 
-  const NetDimensions = ({ mode }: { mode: "sidebar" | "wide" }) => {
-    if (!product.width && !product.height && !product.depth && !product.weight)
-      return null;
-
-    if (mode === "sidebar") {
-      return (
-        <div className="bg-surface-muted p-6 rounded-2xl border border-border space-y-4">
-          <h4 className="font-bold flex items-center gap-2 text-md text-text-main">
-            <Ruler className="text-primary w-4 h-4" /> Net Ürün Boyutları
-          </h4>
-          <ul className="space-y-2 text-sm">
-            {(product.width || product.height || product.depth) && (
-              <li className="flex justify-between border-b border-border pb-2">
-                <span className="text-text-muted">Ölçüler (G-Y-D):</span>
-                <strong className="text-text-main">
-                  {product.width || "-"}x{product.height || "-"}x
-                  {product.depth || "-"} mm
-                </strong>
-              </li>
-            )}
-            {product.weight && (
-              <li className="flex justify-between pt-1">
-                <span className="text-text-muted">Net Ağırlık:</span>
-                <strong className="text-text-main">{product.weight} gr</strong>
-              </li>
-            )}
-          </ul>
-        </div>
-      );
-    }
-
-    return (
-      <div className="space-y-4">
-        <h3 className="text-xl font-bold text-text-main flex items-center gap-2">
-          <div className="w-1.5 h-6 bg-primary rounded-full" /> Ürün Boyut ve
-          Ağırlığı (Net)
-        </h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { label: "Genişlik", value: product.width, unit: "mm" },
-            { label: "Yükseklik", value: product.height, unit: "mm" },
-            { label: "Derinlik", value: product.depth, unit: "mm" },
-            { label: "Net Ağırlık", value: product.weight, unit: "gr" },
-          ].map(
-            (item, idx) =>
-              item.value && (
-                <div
-                  key={idx}
-                  className="bg-surface border border-border p-5 rounded-2xl shadow-sm"
-                >
-                  <p className="text-xs text-text-muted font-bold uppercase tracking-wider mb-1">
-                    {item.label}
-                  </p>
-                  <p className="text-lg font-black text-text-main">
-                    {item.value}{" "}
-                    <span className="text-sm font-normal text-text-muted">
-                      {item.unit}
-                    </span>
-                  </p>
-                </div>
-              ),
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  const PackagingTable = ({ mode }: { mode: "sidebar" | "wide" }) => {
-    if (!product.packaging || product.packaging.length === 0) return null;
-
-    if (mode === "sidebar") {
-      return (
-        <div className="bg-surface-muted p-6 rounded-2xl border border-border space-y-4">
-          <h4 className="font-bold flex items-center gap-2 text-md text-text-main">
-            <PackageOpen className="text-primary w-4 h-4" /> Lojistik Bilgisi
-          </h4>
-          <div className="space-y-3">
-            {product.packaging.map((p: any, i: number) => (
-              <div
-                key={i}
-                className="text-sm border-b border-border pb-3 last:border-0 last:pb-0"
-              >
-                <p className="font-bold text-text-muted mb-1">
-                  {p.packageLabel}{" "}
-                  <span className="text-primary">({p.quantity} Adet)</span>
-                </p>
-                <p className="text-text-muted text-xs">
-                  Boyut: {p.p_width}x{p.p_height}x{p.p_depth} cm
-                </p>
-                <p className="text-text-muted text-xs mt-0.5">
-                  Brüt Ağırlık:{" "}
-                  <strong className="text-text-muted">{p.grossWeight} kg</strong>
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="space-y-4 mt-10">
-        <h3 className="text-xl font-bold text-text-main flex items-center gap-2">
-          <div className="w-1.5 h-6 bg-primary rounded-full" /> Lojistik ve
-          Ambalaj Bilgileri
-        </h3>
-        <div className="overflow-hidden rounded-2xl border border-border shadow-sm">
-          <table className="w-full text-left border-collapse text-sm">
-            <thead className="bg-surface-muted border-b border-border">
-              <tr>
-                <th className="px-6 py-4 font-bold text-text-main">
-                  Paketleme Formu
-                </th>
-                <th className="px-6 py-4 font-bold text-text-main">
-                  İçerik Adedi
-                </th>
-                <th className="px-6 py-4 font-bold text-text-main">
-                  Ölçüler (cm)
-                </th>
-                <th className="px-6 py-4 font-bold text-text-main">
-                  Brüt Ağırlık
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {product.packaging.map((p: any, i: number) => (
-                <tr key={i} className="hover:bg-surface-muted/50 transition-colors">
-                  <td className="px-6 py-4 font-bold text-text-muted">
-                    {p.packageLabel}
-                  </td>
-                  <td className="px-6 py-4 text-text-muted">
-                    {p.quantity} Adet
-                  </td>
-                  <td className="px-6 py-4 font-mono text-text-muted">
-                    {p.p_width}x{p.p_height}x{p.p_depth}
-                  </td>
-                  <td className="px-6 py-4 text-text-main font-bold">
-                    {p.grossWeight} kg
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <div className="container mx-auto px-4 max-w-7xl pt-12 relative">
-      {/* GÖRÜNTÜLEYİCİ MODAL */}
+    <div className="container relative mx-auto max-w-7xl px-4 pt-12">
       {verifiedDoc && (
-        <div className="fixed inset-0 z-[100] flex flex-col bg-surface-inverse/95 backdrop-blur-md p-2 sm:p-8">
-          <div className="bg-surface flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-t-3xl max-w-6xl w-full mx-auto shadow-2xl gap-4">
+        <div className="fixed inset-0 z-[100] flex flex-col bg-surface-inverse/95 p-2 backdrop-blur-md sm:p-8">
+          <div className="mx-auto flex w-full max-w-6xl flex-col justify-between gap-4 rounded-t-3xl bg-surface p-4 shadow-2xl sm:flex-row sm:items-center">
             <div className="flex flex-col gap-1">
-              <h3 className="font-bold text-text-main flex items-center gap-2 line-clamp-1">
-                <FileText className="w-5 h-5 text-primary shrink-0" />{" "}
+              <h3 className="flex items-center gap-2 line-clamp-1 font-bold text-text-main">
+                <FileText className="h-5 w-5 shrink-0 text-primary" />
                 {verifiedDoc.label}
               </h3>
-              {/* YENİ: Bilgilendirme Notu */}
-              <p className="text-[10px] md:text-xs text-text-muted flex items-center gap-1.5 italic">
-                <Info className="w-3 h-3 text-text-muted" />
+              <p className="flex items-center gap-1.5 text-[10px] italic text-text-muted md:text-xs">
+                <Info className="h-3 w-3 text-text-muted" />
                 Dosyayı cihazınıza kaydetmek için İndir butonuna sağ tıklayıp
-                "Bağlantıyı farklı kaydet" seçeneğini kullanabilirsiniz.
+                “Bağlantıyı farklı kaydet” seçeneğini kullanabilirsiniz.
               </p>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
-              {/* İndirme Butonu */}
+            <div className="flex shrink-0 items-center gap-2 self-end sm:self-center">
               <a
                 href={verifiedDoc.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground px-5 py-2.5 rounded-2xl text-sm font-bold transition-all shadow-sm"
+                className="flex items-center gap-2 rounded-2xl bg-primary/10 px-5 py-2.5 text-sm font-bold text-primary shadow-sm transition-all hover:bg-primary hover:text-primary-foreground"
               >
-                <Download className="w-4 h-4" /> İndir / Yeni Sekmede Aç
+                <Download className="h-4 w-4" /> İndir / Yeni Sekmede Aç
               </a>
-
               <button
+                type="button"
                 onClick={() => setVerifiedDoc(null)}
-                className="p-2.5 bg-error/10 text-error hover:bg-error hover:text-error-foreground rounded-2xl transition-all"
+                className="rounded-2xl bg-error/10 p-2.5 text-error transition-all hover:bg-error hover:text-error-foreground"
                 title="Kapat"
+                aria-label="Belge görüntüleyicisini kapat"
               >
-                <X className="w-6 h-6" />
+                <X className="h-6 w-6" />
               </button>
             </div>
           </div>
 
-          {/* Tarayıcı içi Görüntüleyici (iframe) */}
-          <div className="bg-surface-muted flex-1 max-w-6xl w-full mx-auto rounded-b-3xl overflow-hidden shadow-2xl relative">
+          <div className="relative mx-auto w-full max-w-6xl flex-1 overflow-hidden rounded-b-3xl bg-surface-muted shadow-2xl">
             <iframe
               src={`${verifiedDoc.url}#toolbar=0`}
-              className="w-full h-full border-none"
+              className="h-full w-full border-none"
               title={verifiedDoc.label}
             />
           </div>
         </div>
       )}
 
-      {/* HATA TOAST BİLDİRİMİ (BAŞARISIZ GİRİŞ) */}
       <AnimatePresence>
         {verifyError && (
           <motion.div
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            className="fixed bottom-8 right-8 z-[110] bg-surface p-4 rounded-2xl shadow-2xl border-l-4 border-l-error flex items-center gap-3 min-w-[300px]"
+            className="fixed bottom-8 right-8 z-[110] flex min-w-[300px] items-center gap-3 rounded-2xl border-l-4 border-l-error bg-surface p-4 shadow-2xl"
           >
-            <div className="w-10 h-10 bg-error/10 text-error rounded-full flex items-center justify-center shrink-0">
-              <AlertCircle className="w-5 h-5" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-error/10 text-error">
+              <AlertCircle className="h-5 w-5" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-bold text-text-main">
-                Erişim Reddedildi
-              </p>
+              <p className="text-sm font-bold text-text-main">Erişim Reddedildi</p>
               <p className="text-xs text-text-muted">{verifyError}</p>
             </div>
             <button
+              type="button"
               onClick={() => setVerifyError(null)}
-              className="text-text-muted hover:text-text-main p-1"
+              className="p-1 text-text-muted hover:text-text-main"
+              aria-label="Hata bildirimini kapat"
             >
-              <X className="w-4 h-4" />
+              <X className="h-4 w-4" />
             </button>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-20">
+      <div className="mb-20 grid grid-cols-1 gap-16 lg:grid-cols-2">
         <ProductGallery
           key={
             hasCompleteVariantSelection && currentVariant
@@ -524,54 +551,58 @@ export function ProductView({ product }: any) {
 
         <div className="flex flex-col space-y-8">
           <div>
-            <h1 className="text-3xl md:text-4xl font-black text-text-main mb-4">
+            <h1 className="mb-4 text-3xl font-black text-text-main md:text-4xl">
               {product.title}
             </h1>
             <div className="flex items-center gap-4">
-              <span className="bg-surface-muted text-text-muted px-3 py-1 rounded-full border border-border/70 text-xs font-mono font-bold">
+              <span className="rounded-full border border-border/70 bg-surface-muted px-3 py-1 font-mono text-xs font-bold text-text-muted">
                 SKU: {currentVariant?.sku || product.sku || "Belirtilmedi"}
               </span>
               {product.isOriginalErtipProduct !== false && (
-                  <span className="text-primary text-sm font-bold flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1">
-    <Award className="w-4 h-4" /> Orijinal Ertip Ürünü
-  </span>
+                <span className="flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm font-bold text-primary">
+                  <Award className="h-4 w-4" /> Orijinal Ertip Ürünü
+                </span>
               )}
             </div>
           </div>
 
           {product.shortDescription && (
-            <p className="text-text-muted leading-relaxed">
+            <p className="leading-relaxed text-text-muted">
               {product.shortDescription}
             </p>
           )}
 
-          {product.attributes && product.attributes.length > 0 && (
+          {Array.isArray(product.attributes) && product.attributes.length > 0 && (
             <div className="space-y-6 pt-4">
-              {product.attributes.map((attr: any, i: number) => {
-                const values = attr.values
+              {product.attributes.map((attribute: any, index: number) => {
+                const values = String(attribute.values || "")
                   .split("-")
-                  .map((v: string) => v.trim());
+                  .map((value) => value.trim())
+                  .filter(Boolean);
+
                 return (
-                  <div key={i} className="space-y-3">
-                    <label className="text-sm font-bold text-text-main uppercase tracking-wider">
-                      {attr.name} Seçimi
-                    </label>
+                  <div key={attribute.id || index} className="space-y-3">
+                    <p className="text-sm font-bold uppercase tracking-wider text-text-main">
+                      {attribute.name} Seçimi
+                    </p>
                     <div className="flex flex-wrap gap-2">
-                      {values.map((val: string) => (
+                      {values.map((value) => (
                         <button
-                          key={val}
+                          key={value}
+                          type="button"
                           onClick={() =>
-                            setSelectedAttrs((prev) => ({
-                              ...prev,
-                              [attr.name]: val,
+                            setSelectedAttrs((previousAttributes) => ({
+                              ...previousAttributes,
+                              [attribute.name]: value,
                             }))
                           }
-                          className={`px-5 py-2.5 rounded-[var(--radius)] text-sm font-bold border transition-all ${selectedAttrs[attr.name] === val
-                            ? "bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/20"
-                            : "bg-surface border-border text-text-muted hover:border-primary hover:bg-primary/5 hover:text-primary"
-                            }`}
+                          className={`rounded-[var(--radius)] border px-5 py-2.5 text-sm font-bold transition-all ${
+                            selectedAttrs[attribute.name] === value
+                              ? "border-primary bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                              : "border-border bg-surface text-text-muted hover:border-primary hover:bg-primary/5 hover:text-primary"
+                          }`}
                         >
-                          {val}
+                          {value}
                         </button>
                       ))}
                     </div>
@@ -581,31 +612,31 @@ export function ProductView({ product }: any) {
             </div>
           )}
 
-          <div className="pt-8 flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col gap-4 pt-8 sm:flex-row">
             <Button
               size="lg"
-              className="h-16 px-10 rounded-[var(--radius-xl)] text-lg font-bold flex-1"
+              className="h-16 flex-1 rounded-[var(--radius-xl)] px-10 text-lg font-bold"
               onClick={handleAddToCart}
             >
-              <ShoppingCart className="mr-2 w-6 h-6" /> Teklif Sepetine Ekle
+              <ShoppingCart className="mr-2 h-6 w-6" /> Teklif Sepetine Ekle
             </Button>
           </div>
         </div>
       </div>
 
       <Tabs defaultValue={activeTab} className="w-full">
-        <TabsList className="w-full justify-start border-b border-border rounded-none bg-transparent h-auto p-0 mb-12 flex-wrap gap-y-4">
+        <TabsList className="mb-12 h-auto w-full flex-wrap justify-start gap-y-4 rounded-none border-b border-border bg-transparent p-0">
           <TabsTrigger
             value="description"
-            className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 md:px-8 py-4 font-bold text-base md:text-lg"
+            className="rounded-none border-b-2 border-transparent px-6 py-4 text-base font-bold data-[state=active]:border-primary data-[state=active]:bg-transparent md:px-8 md:text-lg"
           >
             Açıklama
           </TabsTrigger>
 
-          {product.variants && product.variants.length > 0 && (
+          {Array.isArray(product.variants) && product.variants.length > 0 && (
             <TabsTrigger
               value="variants"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 md:px-8 py-4 font-bold text-base md:text-lg"
+              className="rounded-none border-b-2 border-transparent px-6 py-4 text-base font-bold data-[state=active]:border-primary data-[state=active]:bg-transparent md:px-8 md:text-lg"
             >
               Tüm Modeller (SKU)
             </TabsTrigger>
@@ -614,45 +645,29 @@ export function ProductView({ product }: any) {
           {videoId && (
             <TabsTrigger
               value="video"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 md:px-8 py-4 font-bold text-base md:text-lg flex items-center gap-2"
+              className="flex items-center gap-2 rounded-none border-b-2 border-transparent px-6 py-4 text-base font-bold data-[state=active]:border-primary data-[state=active]:bg-transparent md:px-8 md:text-lg"
             >
-              <PlayCircle className="w-5 h-5" /> Tanıtım Videosu
+              <PlayCircle className="h-5 w-5" /> Tanıtım Videosu
             </TabsTrigger>
           )}
 
-          {((product.publicDocs && product.publicDocs.length > 0) ||
-            (product.protectedDocs && product.protectedDocs.length > 0)) && (
-              <TabsTrigger
-                value="docs"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 md:px-8 py-4 font-bold text-base md:text-lg flex items-center gap-2"
-              >
-                <FileText className="w-5 h-5" /> Dokümanlar
-              </TabsTrigger>
-            )}
+          {((Array.isArray(product.publicDocs) && product.publicDocs.length > 0) ||
+            (Array.isArray(product.protectedDocs) &&
+              product.protectedDocs.length > 0)) && (
+            <TabsTrigger
+              value="docs"
+              className="flex items-center gap-2 rounded-none border-b-2 border-transparent px-6 py-4 text-base font-bold data-[state=active]:border-primary data-[state=active]:bg-transparent md:px-8 md:text-lg"
+            >
+              <FileText className="h-5 w-5" /> Dokümanlar
+            </TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="description" className="max-w-none">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
-            <div className="lg:col-span-2 text-text-muted leading-relaxed space-y-8">
+          <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-3">
+            <div className="space-y-8 leading-relaxed text-text-muted lg:col-span-2">
               {product.description ? (
-                <div
-                  className="prose prose-lg max-w-none
-                                    prose-p:text-text-muted prose-li:text-text-muted
-                                    prose-headings:text-text-main
-                                    prose-strong:text-text-main
-                                    prose-a:text-primary hover:prose-a:text-primary/80
-                                    prose-blockquote:border-primary prose-blockquote:text-text-main
-                                    prose-img:rounded-2xl prose-img:border prose-img:border-border
-                                    prose-table:border-collapse prose-table:w-full
-                                    prose-th:bg-surface-muted prose-th:p-4 prose-th:text-text-main
-                                    prose-td:p-4 prose-td:border-b prose-td:border-border prose-td:text-text-muted
-
-                                    prose-code:bg-surface-muted prose-code:text-text-muted
-                                    prose-code:px-2.5 prose-code:py-1 prose-code:rounded-lg
-                                    prose-code:font-mono prose-code:text-sm prose-code:font-bold
-                                    prose-code:before:hidden prose-code:after:hidden
-                                "
-                >
+                <div className="prose prose-lg max-w-none prose-headings:text-text-main prose-p:text-text-muted prose-a:text-primary prose-strong:text-text-main prose-blockquote:border-primary prose-blockquote:text-text-main prose-li:text-text-muted prose-img:rounded-2xl prose-img:border prose-img:border-border prose-table:w-full prose-table:border-collapse prose-th:bg-surface-muted prose-th:p-4 prose-th:text-text-main prose-td:border-b prose-td:border-border prose-td:p-4 prose-td:text-text-muted prose-code:rounded-lg prose-code:bg-surface-muted prose-code:px-2.5 prose-code:py-1 prose-code:font-mono prose-code:text-sm prose-code:font-bold prose-code:text-text-muted prose-code:before:hidden prose-code:after:hidden hover:prose-a:text-primary/80">
                   {typeof product.description === "string" ? (
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
@@ -661,7 +676,7 @@ export function ProductView({ product }: any) {
                       {product.description}
                     </ReactMarkdown>
                   ) : (
-                    <div className="p-4 bg-warning/10 text-warning border border-warning/25 rounded-xl">
+                    <div className="rounded-xl border border-warning/25 bg-warning/10 p-4 text-warning">
                       ⚠️ Bu ürünün açıklaması eski formatta (Lexical) kayıtlı
                       kalmış. Lütfen Admin panelinden bu ürünü düzenleyip
                       açıklamasını HTML/Markdown olarak yeniden yapıştırıp
@@ -675,28 +690,29 @@ export function ProductView({ product }: any) {
                 </p>
               )}
 
-              {(pos === "below" || pos === "both") && (
+              {(logisticsPosition === "below" ||
+                logisticsPosition === "both") && (
                 <div className="mt-16 space-y-12 border-t border-border pt-10">
-                  <NetDimensions mode="wide" />
-                  <PackagingTable mode="wide" />
+                  <NetDimensions mode="wide" product={product} />
+                  <PackagingTable mode="wide" product={product} />
                 </div>
               )}
             </div>
 
-            <div className="space-y-6 sticky top-24">
-              {product.specs && product.specs.length > 0 && (
-                <div className="bg-surface-muted p-8 rounded-2xl border border-border space-y-6">
-                  <h4 className="font-bold flex items-center gap-2 text-lg">
-                    <Info className="text-primary w-5 h-5" /> Temel Özellikler
+            <div className="sticky top-24 space-y-6">
+              {Array.isArray(product.specs) && product.specs.length > 0 && (
+                <div className="space-y-6 rounded-2xl border border-border bg-surface-muted p-8">
+                  <h4 className="flex items-center gap-2 text-lg font-bold">
+                    <Info className="h-5 w-5 text-primary" /> Temel Özellikler
                   </h4>
                   <ul className="space-y-4 text-sm">
-                    {product.specs.map((spec: any, i: number) => (
+                    {product.specs.map((spec: any, index: number) => (
                       <li
-                        key={i}
-                        className="flex justify-between items-center border-b border-border pb-3 last:border-0 last:pb-0"
+                        key={spec.id || index}
+                        className="flex items-center justify-between border-b border-border pb-3 last:border-0 last:pb-0"
                       >
                         <span className="text-text-muted">{spec.key}:</span>
-                        <strong className="text-text-main text-right max-w-[60%]">
+                        <strong className="max-w-[60%] text-right text-text-main">
                           {spec.value}
                         </strong>
                       </li>
@@ -705,21 +721,22 @@ export function ProductView({ product }: any) {
                 </div>
               )}
 
-              {(pos === "sidebar" || pos === "both") && (
+              {(logisticsPosition === "sidebar" ||
+                logisticsPosition === "both") && (
                 <>
-                  <NetDimensions mode="sidebar" />
-                  <PackagingTable mode="sidebar" />
+                  <NetDimensions mode="sidebar" product={product} />
+                  <PackagingTable mode="sidebar" product={product} />
                 </>
               )}
             </div>
           </div>
         </TabsContent>
 
-        {product.variants && product.variants.length > 0 && (
+        {Array.isArray(product.variants) && product.variants.length > 0 && (
           <TabsContent value="variants">
             <div className="overflow-x-auto rounded-2xl border border-border shadow-sm">
-              <table className="w-full text-left border-collapse min-w-[600px]">
-                <thead className="bg-surface-muted border-b border-border">
+              <table className="w-full min-w-[600px] border-collapse text-left">
+                <thead className="border-b border-border bg-surface-muted">
                   <tr>
                     <th className="px-6 py-4 font-bold text-text-main">
                       Varyant Modeli
@@ -727,27 +744,31 @@ export function ProductView({ product }: any) {
                     <th className="px-6 py-4 font-bold text-text-main">
                       Ürün Kodu (SKU)
                     </th>
-                    <th className="px-6 py-4 font-bold text-text-main">
-                      Durum
-                    </th>
+                    <th className="px-6 py-4 font-bold text-text-main">Durum</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {product.variants.map((v: any, i: number) => (
+                  {product.variants.map((variant: any, index: number) => (
                     <tr
-                      key={i}
-                      className={`hover:bg-surface-muted/50 transition-colors ${currentVariant?.sku === v.sku ? "bg-primary/5" : ""}`}
+                      key={variant.id || index}
+                      className={`transition-colors hover:bg-surface-muted/50 ${
+                        currentVariant?.sku === variant.sku ? "bg-primary/5" : ""
+                      }`}
                     >
                       <td className="px-6 py-4 text-sm font-medium text-text-muted">
-                        {v.title}
+                        {variant.title}
                       </td>
-                      <td className="px-6 py-4 text-sm font-mono text-primary font-bold">
-                        {v.sku}
+                      <td className="px-6 py-4 font-mono text-sm font-bold text-primary">
+                        {variant.sku}
                       </td>
                       <td className="px-6 py-4 text-sm">
-                        <span className="flex items-center gap-1 text-success font-bold">
-                          <Check className="w-4 h-4" /> Stokta Var
-                        </span>
+                        {variant.isActive === false ? (
+                          <span className="font-bold text-text-muted">Pasif</span>
+                        ) : (
+                          <span className="flex items-center gap-1 font-bold text-success">
+                            <Check className="h-4 w-4" /> Stokta Var
+                          </span>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -759,77 +780,89 @@ export function ProductView({ product }: any) {
 
         {videoId && (
           <TabsContent value="video" className="pt-4">
-            <div className="max-w-4xl mx-auto">
-              <div className="aspect-video w-full rounded-2xl overflow-hidden shadow-xl border border-border bg-surface-inverse">
+            <div className="mx-auto max-w-4xl">
+              <div className="aspect-video w-full overflow-hidden rounded-2xl border border-border bg-surface-inverse shadow-xl">
                 <iframe
                   width="100%"
                   height="100%"
                   src={`https://www.youtube.com/embed/${videoId}?rel=0`}
                   title={`${product.title} Tanıtım Videosu`}
-                  frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
-                  className="w-full h-full"
-                ></iframe>
+                  className="h-full w-full"
+                />
               </div>
             </div>
           </TabsContent>
         )}
 
         <TabsContent value="docs" className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
             <div className="space-y-4">
-              <h3 className="font-bold text-text-main flex items-center gap-2 italic">
-                <Info className="w-5 h-5 text-primary" /> Tanıtım Materyalleri
+              <h3 className="flex items-center gap-2 font-bold italic text-text-main">
+                <Info className="h-5 w-5 text-primary" /> Tanıtım Materyalleri
               </h3>
-              {product.publicDocs?.map((doc: any, i: number) => (
-                <a
-                  key={i}
-                  href={doc.file.url}
-                  target="_blank"
-                  className="flex items-center justify-between p-4 bg-surface-muted rounded-2xl border border-border hover:border-primary transition-all group"
-                >
-                  <span className="font-medium text-text-muted">
-                    {doc.label}
-                  </span>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="group-hover:text-primary"
+              {product.publicDocs?.map((document: any, index: number) => {
+                const fileUrl =
+                  typeof document.file === "object" ? document.file?.url : null;
+
+                if (!fileUrl) return null;
+
+                return (
+                  <a
+                    key={document.id || index}
+                    href={fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-center justify-between rounded-2xl border border-border bg-surface-muted p-4 transition-all hover:border-primary"
                   >
-                    İndir
-                  </Button>
-                </a>
-              ))}
+                    <span className="font-medium text-text-muted">
+                      {document.label}
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="group-hover:text-primary"
+                    >
+                      İndir
+                    </Button>
+                  </a>
+                );
+              })}
             </div>
 
             <div className="space-y-4">
-              <h3 className="font-bold text-text-main flex items-center gap-2 italic">
-                <Award className="w-5 h-5 text-primary" /> Teknik Dokümantasyon
+              <h3 className="flex items-center gap-2 font-bold italic text-text-main">
+                <Award className="h-5 w-5 text-primary" /> Teknik Dokümantasyon
                 (MDR)
               </h3>
-              {product.protectedDocs?.map((doc: any, i: number) => (
+              {product.protectedDocs?.map((document: any, index: number) => (
                 <div
-                  key={i}
-                  className="p-4 bg-surface rounded-2xl border-2 border-dashed border-border"
+                  key={document.id || index}
+                  className="rounded-2xl border-2 border-dashed border-border bg-surface p-4"
                 >
-                  <p className="font-bold text-text-main mb-3">{doc.label}</p>
-                  <div className="flex gap-2 relative">
+                  <p className="mb-3 font-bold text-text-main">
+                    {document.label}
+                  </p>
+                  <div className="relative flex gap-2">
                     <input
                       type="text"
+                      value={manualCode}
                       placeholder="Erişim Kodu / Seri No"
-                      className="flex-1 px-3 py-2 rounded-xl border border-border bg-background text-text-main placeholder:text-text-muted/50 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-ring"
-                      onChange={(e) => setManualCode(e.target.value)}
+                      className="flex-1 rounded-xl border border-border bg-background px-3 py-2 text-sm text-text-main outline-none placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring"
+                      onChange={(event) => setManualCode(event.target.value)}
                     />
                     <Button
                       size="sm"
-                      onClick={() => handleVerify(doc.label)}
-                      disabled={isVerifying}
+                      onClick={() =>
+                        void verifyDocument(document.label, manualCode)
+                      }
+                      disabled={isVerifying || !manualCode.trim()}
                     >
                       {isVerifying ? "..." : "Eriş"}
                     </Button>
                   </div>
-                  <p className="text-[10px] text-text-muted mt-2 italic">
+                  <p className="mt-2 text-[10px] italic text-text-muted">
                     * Bu belgeye erişiminiz kayıt altına alınmaktadır.
                   </p>
                 </div>

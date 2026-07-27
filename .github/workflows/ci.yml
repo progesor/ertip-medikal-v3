@@ -1,0 +1,147 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "10"
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  quality:
+    name: Types and lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Payload types
+        run: pnpm payload:types
+
+      - name: Verify generated types are committed
+        run: git diff --exit-code -- src/payload-types.ts
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+  production-build:
+    name: Production build
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: payload
+          POSTGRES_PASSWORD: payload
+          POSTGRES_DB: ertip_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U payload -d ertip_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      mailpit:
+        image: axllent/mailpit:v1.27
+        ports:
+          - 1025:1025
+    env:
+      DATABASE_URI: postgresql://payload:payload@127.0.0.1:5432/ertip_ci
+      PAYLOAD_SECRET: ci-only-secret-not-used-outside-github-actions
+      NEXT_PUBLIC_SERVER_URL: http://localhost:3000
+      SMTP_HOST: 127.0.0.1
+      SMTP_PORT: "1025"
+      SMTP_USER: ci
+      SMTP_PASS: ci
+      SMTP_FROM_NAME: Ertip Medikal CI
+      SMTP_FROM_ADDRESS: ci@example.invalid
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # CI starts from an empty, disposable database. Until the repository owns
+      # committed Payload migrations, generate an ephemeral baseline migration.
+      # Once committed migrations exist, the same job applies those instead.
+      - name: Prepare ephemeral Payload schema
+        shell: bash
+        run: |
+          if compgen -G "src/migrations/*.ts" > /dev/null; then
+            pnpm exec payload migrate
+          else
+            pnpm exec payload migrate:create ci-initial --force-accept-warning
+            pnpm exec payload migrate
+          fi
+
+      - name: Build with diagnostic fallback
+        id: production-build
+        shell: bash
+        run: |
+          set +e
+          set -o pipefail
+
+          pnpm build 2>&1 | tee production-build.log
+          build_status=${PIPESTATUS[0]}
+
+          if [[ $build_status -ne 0 ]]; then
+            echo "Normal production build failed; rerunning with Next.js prerender diagnostics." | tee -a production-build.log
+            pnpm build:debug 2>&1 | tee -a production-build.log
+            debug_status=${PIPESTATUS[0]}
+            echo "normal_build_status=$build_status" >> "$GITHUB_OUTPUT"
+            echo "debug_build_status=$debug_status" >> "$GITHUB_OUTPUT"
+            exit $build_status
+          fi
+
+          echo "normal_build_status=0" >> "$GITHUB_OUTPUT"
+          echo "debug_build_status=not-run" >> "$GITHUB_OUTPUT"
+
+      - name: Upload production build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-build-log
+          path: production-build.log
+          if-no-files-found: error
+          retention-days: 7

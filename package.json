@@ -8,6 +8,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:debug": "next build --debug-prerender",
+    "build:webpack": "next build --webpack",
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -70,11 +72,5 @@
   },
   "engines": {
     "node": ">=20.0.0"
-  },
-  "pnpm": {
-    "overrides": {
-      "react": "19.0.0-rc-f994737d14-20240522",
-      "react-dom": "19.0.0-rc-f994737d14-20240522"
-    }
   }
 }

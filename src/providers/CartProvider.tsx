@@ -1,13 +1,62 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { CheckCircle2, X, ShoppingBag } from "lucide-react";
+import { CheckCircle2, ShoppingBag, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import type { CartItem, CartContextType } from "@/types";
+import type { CartContextType, CartItem } from "@/types";
 
+const CART_STORAGE_KEY = "quote_cart";
 const CartContext = createContext<CartContextType | undefined>(undefined);
+
+function readStoredCart(): CartItem[] {
+  try {
+    const storedValue = localStorage.getItem(CART_STORAGE_KEY);
+    if (!storedValue) return [];
+
+    const parsedValue: unknown = JSON.parse(storedValue);
+    if (!Array.isArray(parsedValue)) return [];
+
+    return parsedValue.flatMap((value) => {
+      if (!value || typeof value !== "object") return [];
+
+      const item = value as Record<string, unknown>;
+      if (
+        (typeof item.id !== "string" && typeof item.id !== "number") ||
+        typeof item.title !== "string" ||
+        typeof item.slug !== "string" ||
+        typeof item.variant !== "string" ||
+        typeof item.sku !== "string" ||
+        typeof item.image !== "string"
+      ) {
+        return [];
+      }
+
+      const quantity =
+        typeof item.quantity === "number" && Number.isFinite(item.quantity)
+          ? Math.max(1, Math.floor(item.quantity))
+          : 1;
+
+      return [{
+        id: String(item.id),
+        title: item.title,
+        slug: item.slug,
+        variant: item.variant,
+        sku: item.sku,
+        image: item.image,
+        quantity,
+      }];
+    });
+  } catch (error) {
+    console.error("Sepet okuma hatası", error);
+    return [];
+  }
+}
+
+function persistCart(cartItems: CartItem[]) {
+  localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+}
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -16,75 +65,63 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     item: null,
   });
 
-  // İlk yüklemede LocalStorage'dan sepeti çek
   useEffect(() => {
-    const stored = localStorage.getItem("quote_cart");
-    if (stored) {
-      try {
-        const parsedCart = JSON.parse(stored);
-        // GÜVENLİK KONTROLÜ: Eski sepette 'quantity' alanı yoksa varsayılan olarak 1 ata
-        const validatedCart = parsedCart.map((item: any) => ({
-          ...item,
-          quantity: item.quantity || 1,
-        }));
-        setCartItems(validatedCart);
-      } catch (e) {
-        console.error("Sepet okuma hatası", e);
-      }
-    }
+    const hydrateCart = () => setCartItems(readStoredCart());
+    const timeoutId = window.setTimeout(hydrateCart, 0);
+
+    window.addEventListener("storage", hydrateCart);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.removeEventListener("storage", hydrateCart);
+    };
   }, []);
 
   const addToCart = (item: Omit<CartItem, "quantity">) => {
-    setCartItems((prevCart) => {
-      // Sepette aynı SKU'ya sahip ürün var mı kontrol et
-      const existingItemIndex = prevCart.findIndex((i) => i.sku === item.sku);
+    setCartItems((previousCart) => {
+      const existingItemIndex = previousCart.findIndex(
+        (cartItem) => cartItem.sku === item.sku,
+      );
+      const nextCart =
+        existingItemIndex >= 0
+          ? previousCart.map((cartItem, index) =>
+              index === existingItemIndex
+                ? { ...cartItem, quantity: cartItem.quantity + 1 }
+                : cartItem,
+            )
+          : [...previousCart, { ...item, quantity: 1 }];
 
-      let newCart;
-      if (existingItemIndex >= 0) {
-        // VARSA: Mevcut ürünün adedini 1 artır (Immutable update)
-        newCart = prevCart.map((cartItem, index) =>
-          index === existingItemIndex
-            ? { ...cartItem, quantity: (cartItem.quantity || 1) + 1 }
-            : cartItem,
-        );
-      } else {
-        // YOKSA: Yeni ürün olarak adet=1 ile ekle
-        newCart = [...prevCart, { ...item, quantity: 1 }];
-      }
-
-      localStorage.setItem("quote_cart", JSON.stringify(newCart));
-      return newCart;
+      persistCart(nextCart);
+      return nextCart;
     });
 
-    // Toast Bildirimi
-    setToast({ show: true, item: { ...item, quantity: 1 } as CartItem });
-    setTimeout(() => setToast({ show: false, item: null }), 4000);
+    setToast({ show: true, item: { ...item, quantity: 1 } });
+    window.setTimeout(() => setToast({ show: false, item: null }), 4000);
   };
 
   const removeFromCart = (index: number) => {
-    setCartItems((prevCart) => {
-      const newCart = prevCart.filter((_, i) => i !== index);
-      localStorage.setItem("quote_cart", JSON.stringify(newCart));
-      return newCart;
+    setCartItems((previousCart) => {
+      const nextCart = previousCart.filter((_, itemIndex) => itemIndex !== index);
+      persistCart(nextCart);
+      return nextCart;
     });
   };
 
   const updateQuantity = (index: number, newQuantity: number) => {
-    if (newQuantity < 1) return; // 1'den az olamaz
+    if (newQuantity < 1) return;
 
-    setCartItems((prevCart) => {
-      // Doğru ve güvenli array güncelleme yöntemi (Immutable)
-      const newCart = prevCart.map((item, i) =>
-        i === index ? { ...item, quantity: newQuantity } : item,
+    setCartItems((previousCart) => {
+      const nextCart = previousCart.map((item, itemIndex) =>
+        itemIndex === index ? { ...item, quantity: newQuantity } : item,
       );
-      localStorage.setItem("quote_cart", JSON.stringify(newCart));
-      return newCart;
+      persistCart(nextCart);
+      return nextCart;
     });
   };
 
   const clearCart = () => {
     setCartItems([]);
-    localStorage.removeItem("quote_cart");
+    localStorage.removeItem(CART_STORAGE_KEY);
   };
 
   return (
@@ -99,7 +136,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     >
       {children}
 
-      {/* ÖZEL ANİMASYONLU BİLDİRİM (TOAST) */}
       <AnimatePresence>
         {toast.show && toast.item && (
           <motion.div
@@ -119,7 +155,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             </div>
             <div className="flex-1">
               <p className="mb-1 flex items-center gap-1 text-xs font-bold text-success">
-                <CheckCircle2 className="w-4 h-4" /> Teklif Listesine Eklendi
+                <CheckCircle2 className="h-4 w-4" /> Teklif Listesine Eklendi
               </p>
               <p className="line-clamp-1 text-sm font-bold text-card-foreground">
                 {toast.item.title}
@@ -134,14 +170,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
               className="rounded-[var(--radius)] bg-primary/10 p-3 text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
               aria-label="Teklif sepetine git"
             >
-              <ShoppingBag className="w-5 h-5" />
+              <ShoppingBag className="h-5 w-5" />
             </Link>
             <button
+              type="button"
               onClick={() => setToast({ show: false, item: null })}
               className="absolute -right-2 -top-2 rounded-full border border-border bg-card p-1 text-muted-foreground shadow-sm transition-colors hover:text-foreground"
               aria-label="Bildirimi kapat"
             >
-              <X className="w-3 h-3" />
+              <X className="h-3 w-3" />
             </button>
           </motion.div>
         )}
