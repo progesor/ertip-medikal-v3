@@ -93,15 +93,27 @@ export function ImageOptimizationControl() {
   }, []);
 
   useEffect(() => {
-    void loadStatus()
-      .catch((statusError) => {
-        setError(
-          statusError instanceof Error
-            ? statusError.message
-            : "Optimizasyon durumu okunamadı.",
-        );
-      })
-      .finally(() => setIsLoading(false));
+    let cancelled = false;
+    const timeoutId = window.setTimeout(() => {
+      void loadStatus()
+        .catch((statusError) => {
+          if (cancelled) return;
+
+          setError(
+            statusError instanceof Error
+              ? statusError.message
+              : "Optimizasyon durumu okunamadı.",
+          );
+        })
+        .finally(() => {
+          if (!cancelled) setIsLoading(false);
+        });
+    }, 0);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
   }, [loadStatus]);
 
   const runOptimization = async () => {
