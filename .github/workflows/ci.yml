@@ -70,6 +70,10 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
+      mailpit:
+        image: axllent/mailpit:v1.27
+        ports:
+          - 1025:1025
     env:
       DATABASE_URI: postgresql://payload:payload@127.0.0.1:5432/ertip_ci
       PAYLOAD_SECRET: ci-only-secret-not-used-outside-github-actions
@@ -97,6 +101,16 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Prepare ephemeral Payload schema
+        shell: bash
+        run: |
+          if compgen -G "src/migrations/*.ts" > /dev/null; then
+            pnpm exec payload migrate
+          else
+            pnpm exec payload migrate:create ci-initial --force-accept-warning
+            pnpm exec payload migrate
+          fi
 
       - name: Build with diagnostic fallback
         id: production-build
