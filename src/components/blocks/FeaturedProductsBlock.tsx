@@ -102,8 +102,8 @@ export async function FeaturedProductsBlock({
                     alt={product.title}
                     fill
                     className="object-contain p-6 transition-transform duration-500 group-hover:scale-110 mix-blend-multiply"
-                    sizes="(max-width: 768px) 100vw, 25vw"
-                    unoptimized
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    quality={75}
                   />
                   {/* SKU Rozeti */}
                   {product.sku && (
