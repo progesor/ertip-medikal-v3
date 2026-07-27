@@ -1,0 +1,62 @@
+name: Refresh Image Optimization Types
+
+on:
+  push:
+    branches:
+      - feature/m7-image-delivery-optimization
+    paths:
+      - .github/workflows/refresh-image-optimization-types.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "10"
+  DATABASE_URI: postgresql://payload:payload@127.0.0.1:5432/unused_types
+  PAYLOAD_SECRET: ci-only-secret-not-used-outside-github-actions
+  NEXT_PUBLIC_SITE_URL: http://localhost:3000
+  SMTP_HOST: 127.0.0.1
+  SMTP_PORT: "1025"
+  SMTP_USER: ci
+  SMTP_PASS: ci
+  SMTP_FROM_NAME: Ertip Medikal CI
+  SMTP_FROM_ADDRESS: ci@example.invalid
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/m7-image-delivery-optimization
+          fetch-depth: 0
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Payload types
+        run: pnpm payload:types
+
+      - name: Commit generated types and remove workflow
+        run: |
+          rm .github/workflows/refresh-image-optimization-types.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/payload-types.ts .github/workflows/refresh-image-optimization-types.yml
+          git diff --cached --quiet && exit 0
+          git commit -m "chore(images): refresh generated admin types"
+          git push origin HEAD:feature/m7-image-delivery-optimization
