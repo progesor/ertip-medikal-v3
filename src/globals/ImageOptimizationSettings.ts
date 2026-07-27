@@ -54,8 +54,12 @@ export const ImageOptimizationSettings: GlobalConfig = {
   label: "Görsel Optimizasyonu",
   admin: {
     group: "Site Yapılandırması",
-    description:
-      "Orijinal görselleri koruyarak site için kırpmasız WebP/AVIF türevleri üretin.",
+    components: {
+      elements: {
+        Description:
+          "/components/admin/ImageOptimizationControl#ImageOptimizationControl",
+      },
+    },
   },
   access: {
     read: adminsOnly,
@@ -173,16 +177,6 @@ export const ImageOptimizationSettings: GlobalConfig = {
           "Ürün detay ana görseli, hero ve lightbox görüntüleri.",
         ),
       ],
-    },
-    {
-      name: "optimizerControl",
-      type: "ui",
-      admin: {
-        components: {
-          Field:
-            "/components/admin/ImageOptimizationControl#ImageOptimizationControl",
-        },
-      },
     },
     {
       name: "settingsFingerprint",
