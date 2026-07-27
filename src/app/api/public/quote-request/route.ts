@@ -116,10 +116,10 @@ export async function POST(request: NextRequest) {
       overrideAccess: true,
       data: {
         customerName,
-        company: company || undefined,
+        company: company || null,
         email,
         phone,
-        message: message || undefined,
+        message: message || null,
         items,
       },
     });
