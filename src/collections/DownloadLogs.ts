@@ -1,4 +1,4 @@
-import { CollectionConfig } from "payload";
+import type { CollectionConfig } from "payload";
 
 export const DownloadLogs: CollectionConfig = {
   slug: "download-logs",
@@ -9,9 +9,10 @@ export const DownloadLogs: CollectionConfig = {
     defaultColumns: ["productTitle", "accessCode", "ipAddress", "createdAt"],
   },
   access: {
-    create: () => true, // API üzerinden veri yazılabilmesi için
+    // Log records are written only through trusted server-side Local API calls.
+    create: () => false,
     read: ({ req: { user } }) => Boolean(user),
-    update: () => false, // Log güvenliği için güncelleme kapalı
+    update: () => false,
     delete: ({ req: { user } }) => Boolean(user),
   },
   fields: [
@@ -30,8 +31,11 @@ export const DownloadLogs: CollectionConfig = {
     {
       name: "accessCode",
       type: "text",
-      label: "Kullanılan Kod",
-      admin: { readOnly: true },
+      label: "Kod Özeti",
+      admin: {
+        readOnly: true,
+        description: "Güvenlik nedeniyle erişim kodunun tamamı kaydedilmez.",
+      },
     },
     {
       name: "ipAddress",
