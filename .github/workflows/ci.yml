@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "10"
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  quality:
+    name: Types and lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Payload types
+        run: pnpm payload:types
+
+      - name: Verify generated types are committed
+        run: git diff --exit-code -- src/payload-types.ts
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+  production-build:
+    name: Production build
+    runs-on: ubuntu-latest
+    env:
+      CI_DATABASE_URI: ${{ secrets.CI_DATABASE_URI }}
+      CI_PAYLOAD_SECRET: ${{ secrets.CI_PAYLOAD_SECRET }}
+    steps:
+      - name: Check build environment
+        id: build-env
+        shell: bash
+        run: |
+          if [[ -n "$CI_DATABASE_URI" && -n "$CI_PAYLOAD_SECRET" ]]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Production build skipped::Set CI_DATABASE_URI and CI_PAYLOAD_SECRET repository secrets to enable database-backed Next.js build validation."
+          fi
+
+      - name: Checkout
+        if: steps.build-env.outputs.configured == 'true'
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        if: steps.build-env.outputs.configured == 'true'
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Set up Node.js
+        if: steps.build-env.outputs.configured == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        if: steps.build-env.outputs.configured == 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Build with diagnostic fallback
+        if: steps.build-env.outputs.configured == 'true'
+        env:
+          DATABASE_URI: ${{ env.CI_DATABASE_URI }}
+          PAYLOAD_SECRET: ${{ env.CI_PAYLOAD_SECRET }}
+          NEXT_PUBLIC_SERVER_URL: http://localhost:3000
+        shell: bash
+        run: |
+          pnpm build || {
+            echo "Normal production build failed; rerunning with Next.js prerender diagnostics."
+            pnpm build:debug
+            exit 1
+          }
