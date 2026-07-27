@@ -14,6 +14,15 @@ const eslintConfig = defineConfig([
       "@typescript-eslint/no-unused-vars": "warn",
     },
   },
+  {
+    // Payload generates `up`/`down` signatures with `payload` and `req`
+    // parameters even when a specific migration does not use them. Keep the
+    // generated source byte-for-byte intact while linting all other rules.
+    files: ["src/migrations/*.ts"],
+    rules: {
+      "@typescript-eslint/no-unused-vars": "off",
+    },
+  },
   globalIgnores([
     ".next/**",
     "node_modules/**",
