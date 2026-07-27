@@ -99,10 +99,32 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build with diagnostic fallback
+        id: production-build
         shell: bash
         run: |
-          pnpm build || {
-            echo "Normal production build failed; rerunning with Next.js prerender diagnostics."
-            pnpm build:debug
-            exit 1
-          }
+          set +e
+          set -o pipefail
+
+          pnpm build 2>&1 | tee production-build.log
+          build_status=${PIPESTATUS[0]}
+
+          if [[ $build_status -ne 0 ]]; then
+            echo "Normal production build failed; rerunning with Next.js prerender diagnostics." | tee -a production-build.log
+            pnpm build:debug 2>&1 | tee -a production-build.log
+            debug_status=${PIPESTATUS[0]}
+            echo "normal_build_status=$build_status" >> "$GITHUB_OUTPUT"
+            echo "debug_build_status=$debug_status" >> "$GITHUB_OUTPUT"
+            exit $build_status
+          fi
+
+          echo "normal_build_status=0" >> "$GITHUB_OUTPUT"
+          echo "debug_build_status=not-run" >> "$GITHUB_OUTPUT"
+
+      - name: Upload production build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-build-log
+          path: production-build.log
+          if-no-files-found: error
+          retention-days: 7
