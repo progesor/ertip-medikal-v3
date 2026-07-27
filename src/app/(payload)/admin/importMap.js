@@ -31,7 +31,9 @@ import { StrikethroughFeatureClient as StrikethroughFeatureClient_e70f5e05f09f93
 import { UnderlineFeatureClient as UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
+import { MaskedAccessCodeCell as MaskedAccessCodeCell_eaf81d43e0bebff327adac4dab6c4b1d } from '../../../components/admin/DownloadLogCells'
 import { default as default_241328c85efc932e9142e9a487516caf } from '@/components/admin/ThemePreview'
+import { ImageOptimizationControl as ImageOptimizationControl_4a8fdaca49089913df1bffbea4778896 } from '../../../components/admin/ImageOptimizationControl'
 import { AdminIcon as AdminIcon_db845eae23ef682757f9df5d4893ae70 } from '../../../components/admin/AdminBrand'
 import { AdminLogo as AdminLogo_db845eae23ef682757f9df5d4893ae70 } from '../../../components/admin/AdminBrand'
 import { AdminNavFooter as AdminNavFooter_db845eae23ef682757f9df5d4893ae70 } from '../../../components/admin/AdminBrand'
@@ -72,7 +74,9 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#UnderlineFeatureClient": UnderlineFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#BoldFeatureClient": BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
+  "/components/admin/DownloadLogCells#MaskedAccessCodeCell": MaskedAccessCodeCell_eaf81d43e0bebff327adac4dab6c4b1d,
   "@/components/admin/ThemePreview#default": default_241328c85efc932e9142e9a487516caf,
+  "/components/admin/ImageOptimizationControl#ImageOptimizationControl": ImageOptimizationControl_4a8fdaca49089913df1bffbea4778896,
   "/components/admin/AdminBrand#AdminIcon": AdminIcon_db845eae23ef682757f9df5d4893ae70,
   "/components/admin/AdminBrand#AdminLogo": AdminLogo_db845eae23ef682757f9df5d4893ae70,
   "/components/admin/AdminBrand#AdminNavFooter": AdminNavFooter_db845eae23ef682757f9df5d4893ae70,
