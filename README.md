@@ -36,7 +36,7 @@ GitHub Actions her pull request ve `main` güncellemesinde aşağıdaki kontroll
 - ESLint
 - İzole PostgreSQL 17 ve Mailpit servisleri üzerinde production `next build`
 
-Production build işi Coolify veya canlı veritabanına bağlanmaz. Her çalışmada geçici bir PostgreSQL veritabanı oluşturulur, Payload şeması yalnızca bu ortam için hazırlanır ve iş sonunda silinir.
+Production build işi Coolify veya canlı veritabanına bağlanmaz. Her çalışmada geçici bir PostgreSQL veritabanı oluşturulur, Payload şeması yalnızca bu ortam için hazırlanır ve iş sonunda silinir. CI içinde kullanılan veritabanı ve e-posta servisi gerçek müşteri ya da ürün verisi içermez.
 
 ## Mimari
 
