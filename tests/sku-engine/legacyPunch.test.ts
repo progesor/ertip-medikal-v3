@@ -158,14 +158,29 @@ test("keeps fallback concatenation for non-Punch attributes", () => {
   );
 });
 
-test("preserves legacy title, prefix and suffix formatting", () => {
+test("preserves legacy title and prefix formatting", () => {
   assert.equal(
     buildLegacyVariantTitle(attributes, ["0.6", "20"]),
     "0.6 mm Çap - 20 mm Uzunluk",
   );
   assert.equal(
-    buildLegacyPunchSku(attributes, ["0.6", "20"], "110-", " S-303 "),
+    buildLegacyPunchSku(attributes, ["0.6", "20"], "110-", ""),
+    "110-0620",
+  );
+});
+
+test("uses suffix spacing exactly as entered by the administrator", () => {
+  assert.equal(
+    buildLegacyPunchSku(attributes, ["0.6", "20"], "110-", "S-303"),
+    "110-0620S-303",
+  );
+  assert.equal(
+    buildLegacyPunchSku(attributes, ["0.6", "20"], "110-", " S-303"),
     "110-0620 S-303",
+  );
+  assert.equal(
+    buildLegacyPunchSku(attributes, ["0.6", "20"], "110-", "-303"),
+    "110-0620-303",
   );
 });
 
