@@ -79,6 +79,14 @@ pnpm build
 
 The dedicated `SKU Engine` GitHub Actions workflow runs the characterization suite whenever SKU engine, product registration, tests, or supporting configuration changes.
 
+For a focused local admin smoke test, use a copied product with `Çap` values `0.6-0.65` and `Uzunluk` values `2.5-3.0-3.5-4.0-5.0`. After explicitly requesting generation, verify these representative outputs:
+
+- `0.6 × 2.5` → `625`;
+- `0.65 × 3.0` → `653`;
+- `0.6 × 4.0` → `064`;
+- `1.0 × 3.5` → `1035`;
+- the configured prefix and suffix remain unchanged around the generated code.
+
 ## Next phase
 
 The next implementation phase may add:
