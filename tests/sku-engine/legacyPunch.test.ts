@@ -6,7 +6,7 @@ import {
   buildLegacyVariantTitle,
   createCombinationKey,
   parseLegacyAttributes,
-} from "../../src/lib/sku-engine/legacyPunch.js";
+} from "../../src/lib/sku-engine/legacyPunch";
 
 const attributes = parseLegacyAttributes([
   { name: "Çap", values: "0.6-0.65" },
