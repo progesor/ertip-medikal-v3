@@ -21,7 +21,7 @@ The `legacy-punch` implementation preserves the valid historical behavior from t
 - `Çap` and `Uzunluk` use the verified Punch code transformation;
 - non-Punch attributes retain concatenation with periods removed;
 - prefix formatting remains unchanged;
-- suffix formatting remains one leading space plus the trimmed suffix;
+- suffix text and spacing are used exactly as entered by the administrator;
 - existing variant metadata is preserved by exact generated-SKU match;
 - normal saves do not regenerate variants;
 - the explicit generation checkbox resets after a successful generation.
@@ -40,6 +40,16 @@ The matrix establishes these rules:
 - therefore `0.65 × 3.0` canonically becomes `653`, not `6503`, `6530`, or `0653`.
 
 Numeric aliases that normalize to the same SKU, such as `3` and `3.0` in the same length list, are rejected by duplicate-SKU validation before variants are replaced.
+
+### Explicit suffix spacing
+
+The engine does not insert or trim separator whitespace around the suffix. The administrator controls the complete suffix boundary:
+
+- prefix `110-` and suffix `S-303` produce `110-625S-303`;
+- prefix `110-` and suffix ` S-303` produce `110-625 S-303`;
+- prefix `110-` and suffix `-303` produce `110-625-303`.
+
+Existing products are unchanged until the explicit variant-generation checkbox is selected and the product is saved.
 
 ## Added safety boundaries
 
@@ -85,7 +95,8 @@ For a focused local admin smoke test, use a copied product with `Çap` values `0
 - `0.65 × 3.0` → `653`;
 - `0.6 × 4.0` → `064`;
 - `1.0 × 3.5` → `1035`;
-- the configured prefix and suffix remain unchanged around the generated code.
+- suffix `S-303` is attached without a space;
+- suffix ` S-303` retains its leading space.
 
 ## Next phase
 
