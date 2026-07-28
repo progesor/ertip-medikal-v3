@@ -17,7 +17,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
-    "test:sku": "rimraf .tmp/sku-tests && tsc -p tsconfig.sku-tests.json && node --test .tmp/sku-tests/tests/sku-engine/legacyPunch.test.js .tmp/sku-tests/tests/sku-engine/generateLegacyVariants.test.js && rimraf .tmp/sku-tests",
+    "test:sku": "rimraf .tmp/sku-tests && tsc -p tsconfig.sku-tests.json && node -e \"require('node:fs').writeFileSync('.tmp/sku-tests/package.json', '{\\\"type\\\":\\\"commonjs\\\"}\\n')\" && node --test .tmp/sku-tests/tests/sku-engine/legacyPunch.test.js .tmp/sku-tests/tests/sku-engine/generateLegacyVariants.test.js && rimraf .tmp/sku-tests",
     "format": "prettier --write \"src/**/*.{ts,tsx,md,json,css}\"",
     "clean": "rimraf .next",
     "payload": "payload",
