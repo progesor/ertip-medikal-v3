@@ -24,14 +24,14 @@ export function normalizeTemplateValue(
 
   if (normalization === "slug") {
     return decomposed
-      .toLocaleLowerCase("tr-TR")
+      .toLowerCase()
       .replace(/[^\p{L}\p{N}]+/gu, "-")
       .replace(/^-+|-+$/g, "");
   }
 
   const compact = decomposed.replace(/[^\p{L}\p{N}]+/gu, "");
   return normalization === "uppercase-compact"
-    ? compact.toLocaleUpperCase("tr-TR")
+    ? compact.toUpperCase()
     : compact;
 }
 
