@@ -48,12 +48,15 @@ test("preserves manual fields by exact legacy SKU match", () => {
   assert.equal(result.ok, true);
   if (!result.ok) return;
 
-  assert.deepEqual(result.variants[0], {
-    ...existingVariant,
-    title: "0.6 mm Çap - 1.5 mm Uzunluk",
-    sku: "615",
-    isActive: false,
-  });
+  assert.equal(result.variants[0]?.id, "row-1");
+  assert.equal(result.variants[0]?.title, "0.6 mm Çap - 1.5 mm Uzunluk");
+  assert.equal(result.variants[0]?.sku, "615");
+  assert.equal(result.variants[0]?.price, "125");
+  assert.deepEqual(result.variants[0]?.variantImages, [{ image: 42 }]);
+  assert.equal(result.variants[0]?.isActive, false);
+  assert.equal(result.variants[0]?.customField, "preserve-me");
+  assert.equal(typeof result.variants[0]?.combinationKey, "string");
+  assert.equal(result.candidates[0]?.matchStrategy, "target-sku");
 });
 
 test("defaults null active state to true like the original hook", () => {

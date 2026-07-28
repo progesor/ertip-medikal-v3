@@ -1,7 +1,7 @@
-import { generateLegacyVariants } from "./generateLegacyVariants";
-import { parseLegacyAttributes } from "./legacyPunch";
+import { buildConfigurableGenerationInput } from "./configuration";
+import { generateVariants } from "./generateVariants";
 import type {
-  ExistingVariant,
+  ConfigurableGenerationResult,
   LegacyGenerationOptions,
   VariantGenerationData,
 } from "./types";
@@ -16,40 +16,30 @@ export class SkuGenerationValidationError extends Error {
   }
 }
 
-export function applyLegacyVariantGeneration<T extends VariantGenerationData>(
-  data: T,
-  options: LegacyGenerationOptions = {},
-): T {
-  if (
-    !data.triggerVariantGeneration ||
-    !Array.isArray(data.attributes) ||
-    data.attributes.length === 0
-  ) {
-    return data;
-  }
+export function previewConfiguredVariantGeneration(
+  data: VariantGenerationData,
+): ConfigurableGenerationResult | null {
+  const input = buildConfigurableGenerationInput(data);
+  return input ? generateVariants(input) : null;
+}
 
-  const attributes = parseLegacyAttributes(data.attributes);
-  if (attributes.length === 0) {
+export function applyConfiguredVariantGeneration<
+  T extends VariantGenerationData,
+>(data: T): T {
+  if (!data.triggerVariantGeneration) return data;
+
+  const input = buildConfigurableGenerationInput(data);
+  if (!input) {
     data.triggerVariantGeneration = false;
     return data;
   }
 
-  const existingVariants = Array.isArray(data.variants)
-    ? (data.variants.filter(
-        (variant): variant is ExistingVariant =>
-          Boolean(variant) && typeof variant === "object",
-      ) as ExistingVariant[])
-    : [];
+  if (input.attributes.length === 0) {
+    data.triggerVariantGeneration = false;
+    return data;
+  }
 
-  const result = generateLegacyVariants(
-    {
-      attributes,
-      existingVariants,
-      skuPrefix: data.skuPrefix,
-      skuSuffix: data.skuSuffix,
-    },
-    options,
-  );
+  const result = generateVariants(input);
 
   if (!result.ok) {
     throw new SkuGenerationValidationError(
@@ -60,4 +50,20 @@ export function applyLegacyVariantGeneration<T extends VariantGenerationData>(
   data.variants = result.variants;
   data.triggerVariantGeneration = false;
   return data;
+}
+
+/**
+ * Backwards-compatible export retained for the M7.1 characterization suite.
+ */
+export function applyLegacyVariantGeneration<T extends VariantGenerationData>(
+  data: T,
+  options: LegacyGenerationOptions = {},
+): T {
+  if (options.maximumCombinationCount !== undefined) {
+    data.maxVariantCombinations = options.maximumCombinationCount;
+  }
+  if (data.skuRuleProfile === undefined) {
+    data.skuRuleProfile = "legacy-punch";
+  }
+  return applyConfiguredVariantGeneration(data);
 }

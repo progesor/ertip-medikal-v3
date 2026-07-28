@@ -1,10 +1,12 @@
 import type { CollectionConfig } from "payload";
-import { applyLegacyVariantGeneration } from "./applyLegacyVariantGeneration";
+import { applyConfiguredVariantGeneration } from "./applyLegacyVariantGeneration";
 import type { VariantGenerationData } from "./types";
 
 type BeforeChangeHook = NonNullable<
   NonNullable<CollectionConfig["hooks"]>["beforeChange"]
 >[number];
 
-export const legacyVariantGenerationHook: BeforeChangeHook = ({ data }) =>
-  applyLegacyVariantGeneration(data as VariantGenerationData);
+export const configurableVariantGenerationHook: BeforeChangeHook = ({ data }) =>
+  applyConfiguredVariantGeneration(data as VariantGenerationData);
+
+export const legacyVariantGenerationHook = configurableVariantGenerationHook;
