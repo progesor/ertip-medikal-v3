@@ -27,23 +27,23 @@ export function parseLegacyAttributes(input: unknown): ParsedAttribute[] {
     }));
 }
 
-function getAttributeIdentity(attribute: ParsedAttribute): string {
-  return attribute.id
-    ? `id:${attribute.id}`
-    : `name:${normalizeAttributeName(attribute.name)}`;
-}
-
 export function createCombinationKey(
   attributes: readonly ParsedAttribute[],
   combination: readonly string[],
 ): string {
   return JSON.stringify(
     attributes
-      .map((attribute, index) => [
-        getAttributeIdentity(attribute),
-        combination[index] ?? "",
-      ])
-      .sort(([left], [right]) => left.localeCompare(right, "tr-TR")),
+      .map((attribute, index) => ({
+        identity: attribute.id ? `id:${attribute.id}` : attribute.name,
+        sortKey: attribute.id
+          ? `id:${attribute.id}`
+          : `name:${normalizeAttributeName(attribute.name)}`,
+        value: combination[index] ?? "",
+      }))
+      .sort((left, right) =>
+        left.sortKey.localeCompare(right.sortKey, "tr-TR"),
+      )
+      .map(({ identity, value }) => [identity, value]),
   );
 }
 
