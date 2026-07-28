@@ -23,7 +23,7 @@ test("generates Cartesian products in the historical order", () => {
 
   assert.deepEqual(
     result.variants.map((variant) => variant.sku),
-    ["615", "0620", "6515", "06520"],
+    ["615", "0620", "6515", "6520"],
   );
 });
 
@@ -70,11 +70,11 @@ test("defaults null active state to true like the original hook", () => {
   assert.equal(result.variants[0]?.isActive, true);
 });
 
-test("blocks duplicate generated SKUs", () => {
+test("blocks duplicate generated SKUs after numeric normalization", () => {
   const result = generateLegacyVariants({
     attributes: parseLegacyAttributes([
-      { name: "Çap", values: "0.6-06" },
-      { name: "Uzunluk", values: "20" },
+      { name: "Çap", values: "0.65" },
+      { name: "Uzunluk", values: "3-3.0" },
     ]),
     existingVariants: [],
   });
@@ -82,7 +82,7 @@ test("blocks duplicate generated SKUs", () => {
   assert.equal(result.ok, false);
   if (result.ok) return;
   assert.equal(result.issues[0]?.code, "DUPLICATE_GENERATED_SKU");
-  assert.equal(result.issues[0]?.sku, "0620");
+  assert.equal(result.issues[0]?.sku, "653");
 });
 
 test("blocks ambiguous duplicate existing SKUs", () => {
