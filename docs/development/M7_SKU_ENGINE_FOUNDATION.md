@@ -13,18 +13,33 @@ The production image optimization rollout is considered verified before this wor
 
 ## Compatibility contract
 
-The `legacy-punch` implementation preserves the valid historical behavior from the original `Products.ts` hook:
+The `legacy-punch` implementation preserves the valid historical behavior from the original `Products.ts` hook while correcting numeric normalization against the verified Ertip Punch SKU matrix:
 
 - attribute values remain hyphen-separated;
 - combinations retain their current Cartesian-product order;
 - titles remain `<value> mm <attribute>` joined with ` - `;
-- `Çap` and `Uzunluk` use the existing Punch code transformation;
+- `Çap` and `Uzunluk` use the verified Punch code transformation;
 - non-Punch attributes retain concatenation with periods removed;
 - prefix formatting remains unchanged;
 - suffix formatting remains one leading space plus the trimmed suffix;
 - existing variant metadata is preserved by exact generated-SKU match;
 - normal saves do not regenerate variants;
 - the explicit generation checkbox resets after a successful generation.
+
+### Canonical Punch numeric normalization
+
+The user-verified 55-entry matrix for 11 diameters and five lengths is committed as a characterization fixture.
+
+The matrix establishes these rules:
+
+- trailing-zero lengths such as `3.0`, `4.0`, and `5.0` are integer measurements and produce `3`, `4`, and `5` tokens;
+- fractional lengths such as `2.5` and `3.5` produce `25` and `35` tokens;
+- two-decimal sub-1 diameters such as `0.65` produce `65` without a leading zero;
+- one-decimal sub-1 diameters use a two-character token only with integer lengths, so `0.6 × 3.0` becomes `063`;
+- the same one-decimal diameter does not retain that padding with a fractional length, so `0.6 × 2.5` becomes `625`;
+- therefore `0.65 × 3.0` canonically becomes `653`, not `6503`, `6530`, or `0653`.
+
+Numeric aliases that normalize to the same SKU, such as `3` and `3.0` in the same length list, are rejected by duplicate-SKU validation before variants are replaced.
 
 ## Added safety boundaries
 
