@@ -28,7 +28,10 @@ export function createCombinationKey(
   combination: readonly string[],
 ): string {
   return JSON.stringify(
-    attributes.map((attribute, index) => [attribute.name, combination[index] ?? ""]),
+    attributes.map((attribute, index) => [
+      attribute.name,
+      combination[index] ?? "",
+    ]),
   );
 }
 
@@ -43,6 +46,69 @@ export function buildLegacyVariantTitle(
     })
     .filter((part): part is string => Boolean(part))
     .join(" - ");
+}
+
+interface ParsedPunchMeasurement {
+  readonly compactToken: string;
+  readonly decimalPlaces: number;
+  readonly isInteger: boolean;
+  readonly numericValue: number;
+}
+
+function parsePunchMeasurement(value: string): ParsedPunchMeasurement | null {
+  const trimmed = value.trim();
+  const match = /^(\d+)(?:\.(\d+))?$/.exec(trimmed);
+  if (!match) return null;
+
+  const integerPart = match[1] ?? "";
+  const fractionalPart = match[2] ?? "";
+  const numericValue = Number(trimmed);
+  if (!Number.isFinite(numericValue)) return null;
+
+  const compactToken = String(
+    parseInt(`${integerPart}${fractionalPart}`, 10),
+  );
+
+  return {
+    compactToken,
+    decimalPlaces: fractionalPart.length,
+    isInteger: Number.isInteger(numericValue),
+    numericValue,
+  };
+}
+
+function buildPunchDiameterToken(
+  diameter: string,
+  lengthMeasurement: ParsedPunchMeasurement,
+): string {
+  const diameterMeasurement = parsePunchMeasurement(diameter);
+  if (!diameterMeasurement) return diameter.replace(/\./g, "");
+
+  if (
+    lengthMeasurement.isInteger &&
+    diameterMeasurement.numericValue > 0 &&
+    diameterMeasurement.numericValue < 1 &&
+    diameterMeasurement.decimalPlaces === 1
+  ) {
+    return diameterMeasurement.compactToken.padStart(2, "0");
+  }
+
+  return diameterMeasurement.compactToken;
+}
+
+function buildPunchLengthToken(length: string): {
+  readonly measurement: ParsedPunchMeasurement;
+  readonly token: string;
+} | null {
+  const measurement = parsePunchMeasurement(length);
+  if (!measurement) return null;
+
+  return {
+    measurement,
+    token: measurement.isInteger
+      ? String(measurement.numericValue)
+      : measurement.compactToken,
+  };
 }
 
 export function buildLegacyPunchSkuCode(
@@ -62,14 +128,16 @@ export function buildLegacyPunchSkuCode(
   });
 
   if (diameter && length) {
-    const cleanLength = length.replace(/\./g, "");
-    const cleanDiameter = diameter.replace(/\./g, "");
+    const lengthToken = buildPunchLengthToken(length);
 
-    if (length.includes(".")) {
-      return `${parseInt(cleanDiameter, 10)}${cleanLength}`;
+    if (lengthToken) {
+      return `${buildPunchDiameterToken(
+        diameter,
+        lengthToken.measurement,
+      )}${lengthToken.token}`;
     }
 
-    return `${cleanDiameter}${cleanLength}`;
+    return `${diameter.replace(/\./g, "")}${length.replace(/\./g, "")}`;
   }
 
   return combination.join("").replace(/\./g, "");
