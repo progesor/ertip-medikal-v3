@@ -1,4 +1,5 @@
 import type { ParsedAttribute } from "./types";
+import { normalizeAttributeName } from "./templateProfile";
 
 export function parseLegacyAttributes(input: unknown): ParsedAttribute[] {
   if (!Array.isArray(input)) return [];
@@ -12,6 +13,9 @@ export function parseLegacyAttributes(input: unknown): ParsedAttribute[] {
         Boolean(attribute.values),
     )
     .map((attribute) => ({
+      ...(typeof attribute.id === "string" && attribute.id
+        ? { id: attribute.id }
+        : {}),
       name: String(attribute.name),
       values:
         typeof attribute.values === "string"
@@ -23,15 +27,23 @@ export function parseLegacyAttributes(input: unknown): ParsedAttribute[] {
     }));
 }
 
+function getAttributeIdentity(attribute: ParsedAttribute): string {
+  return attribute.id
+    ? `id:${attribute.id}`
+    : `name:${normalizeAttributeName(attribute.name)}`;
+}
+
 export function createCombinationKey(
   attributes: readonly ParsedAttribute[],
   combination: readonly string[],
 ): string {
   return JSON.stringify(
-    attributes.map((attribute, index) => [
-      attribute.name,
-      combination[index] ?? "",
-    ]),
+    attributes
+      .map((attribute, index) => [
+        getAttributeIdentity(attribute),
+        combination[index] ?? "",
+      ])
+      .sort(([left], [right]) => left.localeCompare(right, "tr-TR")),
   );
 }
 
@@ -122,7 +134,7 @@ export function buildLegacyPunchSkuCode(
     const attributeName = attributes[index]?.name;
     if (!attributeName) return;
 
-    const normalizedName = attributeName.toLowerCase();
+    const normalizedName = attributeName.toLocaleLowerCase("tr-TR");
     if (normalizedName.includes("çap")) diameter = value;
     if (normalizedName.includes("uzunluk")) length = value;
   });
