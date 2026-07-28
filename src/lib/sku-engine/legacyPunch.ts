@@ -150,6 +150,6 @@ export function buildLegacyPunchSku(
   suffix: unknown,
 ): string {
   const finalPrefix = prefix ? String(prefix) : "";
-  const finalSuffix = suffix ? ` ${String(suffix).trim()}` : "";
+  const finalSuffix = suffix ? String(suffix) : "";
   return `${finalPrefix}${buildLegacyPunchSkuCode(attributes, combination)}${finalSuffix}`;
 }
