@@ -255,7 +255,27 @@ export interface Product {
       }[]
     | null;
   videoUrl?: string | null;
+  /**
+   * Punch ürünlerinde doğrulanmış profili, diğer ürün ailelerinde Şablon profilini kullanın.
+   */
+  skuRuleProfile: 'legacy-punch' | 'template' | 'manual';
+  /**
+   * Yanlış veri girişinde çok fazla varyant oluşmasını engelleyen ürün bazlı güvenlik sınırı.
+   */
+  maxVariantCombinations?: number | null;
+  /**
+   * Belirteçler: {prefix}, {suffix}, {values}, {value:Özellik Adı}, {raw:Özellik Adı}.
+   */
+  skuTemplate?: string | null;
+  /**
+   * Örnek: -, / veya boş değer.
+   */
+  skuValueSeparator?: string | null;
+  skuValueNormalization?: ('none' | 'compact' | 'uppercase-compact' | 'slug') | null;
   skuPrefix?: string | null;
+  /**
+   * Son ek aynen kullanılır. Boşluk isteniyorsa başına boşluk ekleyin: “ S-303”.
+   */
   skuSuffix?: string | null;
   /**
    * Değerleri TİRE (-) ile ayırarak yazın. Örn: 0.6-0.65-0.7
@@ -268,7 +288,7 @@ export interface Product {
       }[]
     | null;
   /**
-   * Bunu işaretleyip kaydettiğinizde, yukarıdaki özelliklerin tüm kombinasyonları hesaplanır, özel kurallara göre SKU kodları oluşturulur ve aşağıdaki listeye otomatik eklenir.
+   * Önizleme kullanmadan doğrudan üretim yapmak için işaretleyin. Hata oluşursa mevcut varyantlar değiştirilmez.
    */
   triggerVariantGeneration?: boolean | null;
   /**
@@ -284,6 +304,7 @@ export interface Product {
    */
   variants?:
     | {
+        combinationKey?: string | null;
         title: string;
         sku: string;
         price?: string | null;
@@ -1056,6 +1077,11 @@ export interface ProductsSelect<T extends boolean = true> {
         id?: T;
       };
   videoUrl?: T;
+  skuRuleProfile?: T;
+  maxVariantCombinations?: T;
+  skuTemplate?: T;
+  skuValueSeparator?: T;
+  skuValueNormalization?: T;
   skuPrefix?: T;
   skuSuffix?: T;
   attributes?:
@@ -1071,6 +1097,7 @@ export interface ProductsSelect<T extends boolean = true> {
   variants?:
     | T
     | {
+        combinationKey?: T;
         title?: T;
         sku?: T;
         price?: T;

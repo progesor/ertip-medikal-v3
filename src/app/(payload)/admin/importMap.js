@@ -2,6 +2,7 @@ import { ProductTitleCell as ProductTitleCell_f39a3ec76b51f65f3faaf8a9a0089e08 }
 import { MarkdownEditor as MarkdownEditor_0d02660a52a6d77227b43bb8fbabb167 } from '../../../components/admin/MarkdownEditor'
 import { SpecRowLabel as SpecRowLabel_ec41670ca22349b6e293b43001df200d } from '../../../components/admin/ArrayRowLabels'
 import { GalleryRowLabel as GalleryRowLabel_ec41670ca22349b6e293b43001df200d } from '../../../components/admin/ArrayRowLabels'
+import { SkuRuleWorkbench as SkuRuleWorkbench_f2bcb6e835f22ba03c71643275dd02a4 } from '../../../components/admin/SkuRuleWorkbench'
 import { AttributeRowLabel as AttributeRowLabel_ec41670ca22349b6e293b43001df200d } from '../../../components/admin/ArrayRowLabels'
 import { VariantSummaryCell as VariantSummaryCell_f39a3ec76b51f65f3faaf8a9a0089e08 } from '../../../components/admin/ProductListCells'
 import { VariantRowLabel as VariantRowLabel_ec41670ca22349b6e293b43001df200d } from '../../../components/admin/ArrayRowLabels'
@@ -45,6 +46,7 @@ export const importMap = {
   "/components/admin/MarkdownEditor#MarkdownEditor": MarkdownEditor_0d02660a52a6d77227b43bb8fbabb167,
   "/components/admin/ArrayRowLabels#SpecRowLabel": SpecRowLabel_ec41670ca22349b6e293b43001df200d,
   "/components/admin/ArrayRowLabels#GalleryRowLabel": GalleryRowLabel_ec41670ca22349b6e293b43001df200d,
+  "/components/admin/SkuRuleWorkbench#SkuRuleWorkbench": SkuRuleWorkbench_f2bcb6e835f22ba03c71643275dd02a4,
   "/components/admin/ArrayRowLabels#AttributeRowLabel": AttributeRowLabel_ec41670ca22349b6e293b43001df200d,
   "/components/admin/ProductListCells#VariantSummaryCell": VariantSummaryCell_f39a3ec76b51f65f3faaf8a9a0089e08,
   "/components/admin/ArrayRowLabels#VariantRowLabel": VariantRowLabel_ec41670ca22349b6e293b43001df200d,
