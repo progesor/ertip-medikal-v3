@@ -1,12 +1,12 @@
 import {
   calculateCombinationCount,
   getCombinations,
-} from "./combinations.js";
+} from "./combinations";
 import {
   buildLegacyPunchSku,
   buildLegacyVariantTitle,
   createCombinationKey,
-} from "./legacyPunch.js";
+} from "./legacyPunch";
 import type {
   ExistingVariant,
   GeneratedVariantCandidate,
@@ -14,7 +14,7 @@ import type {
   LegacyGenerationOptions,
   LegacyGenerationResult,
   SkuGenerationIssue,
-} from "./types.js";
+} from "./types";
 
 export const LEGACY_PUNCH_DEFAULT_MAX_COMBINATIONS = 500;
 
