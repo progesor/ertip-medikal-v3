@@ -1,6 +1,6 @@
 import type { CollectionConfig } from "payload";
-import { applyLegacyVariantGeneration } from "./applyLegacyVariantGeneration.js";
-import type { VariantGenerationData } from "./types.js";
+import { applyLegacyVariantGeneration } from "./applyLegacyVariantGeneration";
+import type { VariantGenerationData } from "./types";
 
 type BeforeChangeHook = NonNullable<
   NonNullable<CollectionConfig["hooks"]>["beforeChange"]
