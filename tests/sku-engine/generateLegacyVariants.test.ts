@@ -3,9 +3,9 @@ import test from "node:test";
 import {
   applyLegacyVariantGeneration,
   SkuGenerationValidationError,
-} from "../../src/lib/sku-engine/applyLegacyVariantGeneration.js";
-import { generateLegacyVariants } from "../../src/lib/sku-engine/generateLegacyVariants.js";
-import { parseLegacyAttributes } from "../../src/lib/sku-engine/legacyPunch.js";
+} from "../../src/lib/sku-engine/applyLegacyVariantGeneration";
+import { generateLegacyVariants } from "../../src/lib/sku-engine/generateLegacyVariants";
+import { parseLegacyAttributes } from "../../src/lib/sku-engine/legacyPunch";
 
 const attributes = parseLegacyAttributes([
   { name: "Çap", values: "0.6-0.65" },
