@@ -1,10 +1,10 @@
-import { generateLegacyVariants } from "./generateLegacyVariants.js";
-import { parseLegacyAttributes } from "./legacyPunch.js";
+import { generateLegacyVariants } from "./generateLegacyVariants";
+import { parseLegacyAttributes } from "./legacyPunch";
 import type {
   ExistingVariant,
   LegacyGenerationOptions,
   VariantGenerationData,
-} from "./types.js";
+} from "./types";
 
 export class SkuGenerationValidationError extends Error {
   readonly issues: readonly string[];
