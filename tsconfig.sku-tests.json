@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "rootDir": ".",
+    "outDir": ".tmp/sku-tests",
+    "types": ["node"]
+  },
+  "include": [
+    "src/lib/sku-engine/**/*.ts",
+    "tests/sku-engine/**/*.ts"
+  ],
+  "exclude": [
+    "src/lib/sku-engine/payloadHook.ts"
+  ]
+}

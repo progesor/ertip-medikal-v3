@@ -12,7 +12,7 @@ import { nodemailerAdapter } from "@payloadcms/email-nodemailer";
 
 import { Users } from "@/collections/Users";
 import { Media } from "@/collections/Media";
-import { Products } from "@/collections/Products";
+import { Products } from "@/collections/ProductsWithSkuEngine";
 import { Categories } from "@/collections/Categories";
 import { Inquiries } from "@/collections/Inquiries";
 import { News } from "@/collections/News";
