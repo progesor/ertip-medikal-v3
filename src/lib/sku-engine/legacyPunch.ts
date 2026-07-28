@@ -1,4 +1,4 @@
-import type { ParsedAttribute } from "./types.js";
+import type { ParsedAttribute } from "./types";
 
 export function parseLegacyAttributes(input: unknown): ParsedAttribute[] {
   if (!Array.isArray(input)) return [];
