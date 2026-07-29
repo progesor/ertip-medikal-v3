@@ -20,6 +20,8 @@ import { ContactFormBlock } from "@/components/blocks/ContactFormBlock";
 import { Metadata } from "next";
 import { NewsFeedBlock } from "@/components/blocks/NewsFeedBlock";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   // absolute: layout.tsx'teki template kuralını ezer ve sadece buradaki metni kullanır
   title: {
