@@ -45,8 +45,10 @@ export default function QuoteCartPage() {
           message: formData.get("message"),
           website: formData.get("website"),
           items: cartItems.map((item) => ({
-            productTitle: item.title,
-            variantInfo: item.variant,
+            productId: item.id,
+            ...(item.combinationKey
+              ? { combinationKey: item.combinationKey }
+              : {}),
             sku: item.sku,
             quantity: item.quantity,
           })),
