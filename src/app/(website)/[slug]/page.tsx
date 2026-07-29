@@ -21,6 +21,8 @@ import { CTABlock } from "@/components/blocks/CTABlock";
 import {ContactFormBlock} from "@/components/blocks/ContactFormBlock";
 import {NewsFeedBlock} from "@/components/blocks/NewsFeedBlock";
 
+export const dynamic = "force-dynamic";
+
 type Args = {
   params: Promise<{
     slug: string;

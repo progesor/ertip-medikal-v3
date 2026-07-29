@@ -40,7 +40,7 @@ type ErrorResponse = {
 
 const statusLabels: Record<OptimizationStatusValue, string> = {
   idle: "Henüz çalıştırılmadı",
-  stale: "Yeniden çalıştırılmalı",
+  stale: "Yeni / değişen görseller bekliyor",
   running: "İşleniyor",
   ready: "Hazır",
   partial: "Kısmen tamamlandı",
@@ -112,18 +112,24 @@ export function ImageOptimizationControl() {
     };
   }, [loadStatus]);
 
-  const runOptimization = async () => {
+  const runOptimization = async (force: boolean) => {
     if (isRunning) return;
 
     const confirmed = window.confirm(
-      "Kaydedilmiş boyut ve kalite ayarlarıyla tüm görseller yeniden oluşturulacak. Orijinal dosyalar değiştirilmeyecek. Devam edilsin mi?",
+      force
+        ? "Kaydedilmiş boyut ve kalite ayarlarıyla tüm görseller yeniden oluşturulacak. Orijinal dosyalar değiştirilmeyecek. Devam edilsin mi?"
+        : "Yalnızca optimize türevi eksik olan yeni veya değişen görseller işlenecek. Hazır türevler yeniden oluşturulmadan atlanacak. Devam edilsin mi?",
     );
 
     if (!confirmed) return;
 
     setIsRunning(true);
     setError(null);
-    setProgressMessage("Kaydedilmiş ayarlar okunuyor...");
+    setProgressMessage(
+      force
+        ? "Tüm görseller için ayarlar okunuyor..."
+        : "Yeni ve değişen görseller kontrol ediliyor...",
+    );
 
     try {
       const savedStatus = await loadStatus();
@@ -147,7 +153,7 @@ export function ImageOptimizationControl() {
             runId,
             page,
             batchSize: 5,
-            force: true,
+            force,
             expectedFingerprint: savedStatus.currentFingerprint,
           }),
         });
@@ -178,7 +184,11 @@ export function ImageOptimizationControl() {
       }
 
       await loadStatus();
-      setProgressMessage("Optimizasyon tamamlandı.");
+      setProgressMessage(
+        force
+          ? "Tüm görseller yeniden oluşturuldu."
+          : "Yeni ve değişen görsellerin optimizasyonu tamamlandı.",
+      );
     } catch (runError) {
       setError(
         runError instanceof Error
@@ -205,23 +215,40 @@ export function ImageOptimizationControl() {
           <h3 style={styles.title}>Toplu Görsel Optimizasyonu</h3>
           <p style={styles.description}>
             Önce yukarıdaki ayarları Payload’ın Kaydet düğmesiyle kaydedin.
-            Ardından bu düğme tüm raster görseller için kırpmasız ve kalıcı
-            türevler üretir. PDF, SVG ve hareketli GIF dosyaları değiştirilmez.
+            Ardından yeni veya değişen raster görselleri artımlı olarak optimize
+            edin. Gerektiğinde tüm türevleri yeniden oluşturabilirsiniz. PDF,
+            SVG ve hareketli GIF dosyaları değiştirilmez.
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => void runOptimization()}
-          disabled={isRunning}
-          style={{
-            ...styles.actionButton,
-            cursor: isRunning ? "not-allowed" : "pointer",
-            opacity: isRunning ? 0.6 : 1,
-          }}
-        >
-          {isRunning ? "Görseller İşleniyor..." : "Tüm Görselleri Optimize Et"}
-        </button>
+        <div style={styles.actionGroup}>
+          <button
+            type="button"
+            onClick={() => void runOptimization(false)}
+            disabled={isRunning}
+            style={{
+              ...styles.actionButton,
+              cursor: isRunning ? "not-allowed" : "pointer",
+              opacity: isRunning ? 0.6 : 1,
+            }}
+          >
+            {isRunning
+              ? "Görseller İşleniyor..."
+              : "Yeni / Değişenleri Optimize Et"}
+          </button>
+          <button
+            type="button"
+            onClick={() => void runOptimization(true)}
+            disabled={isRunning}
+            style={{
+              ...styles.secondaryActionButton,
+              cursor: isRunning ? "not-allowed" : "pointer",
+              opacity: isRunning ? 0.6 : 1,
+            }}
+          >
+            Tümünü Yeniden Oluştur
+          </button>
+        </div>
       </div>
 
       <div style={styles.statusGrid}>
@@ -289,6 +316,12 @@ const styles: Record<string, React.CSSProperties> = {
   descriptionColumn: {
     maxWidth: "720px",
   },
+  actionGroup: {
+    display: "flex",
+    flexWrap: "wrap",
+    justifyContent: "flex-end",
+    gap: "0.65rem",
+  },
   title: {
     margin: 0,
     fontSize: "1rem",
@@ -304,6 +337,14 @@ const styles: Record<string, React.CSSProperties> = {
     padding: "0.8rem 1.1rem",
     background: "var(--theme-success-500, #15803d)",
     color: "white",
+    fontWeight: 700,
+  },
+  secondaryActionButton: {
+    border: "1px solid var(--theme-elevation-250)",
+    borderRadius: "8px",
+    padding: "0.8rem 1.1rem",
+    background: "var(--theme-elevation-0)",
+    color: "var(--theme-elevation-800)",
     fontWeight: 700,
   },
   statusGrid: {
