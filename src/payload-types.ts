@@ -556,6 +556,41 @@ export interface Page {
             blockType: 'content';
           }
         | {
+            /**
+             * Ana başlığın üzerinde küçük vurgu metni olarak gösterilir.
+             */
+            eyebrow?: string | null;
+            title: string;
+            content: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            };
+            image: number | Media;
+            imagePosition?: ('left' | 'right') | null;
+            imageFit?: ('cover' | 'contain') | null;
+            theme?: ('light' | 'muted' | 'dark') | null;
+            /**
+             * Kısa bir kurumsal mesaj veya önemli bilgi için kullanılır.
+             */
+            highlight?: string | null;
+            buttonText?: string | null;
+            buttonLink?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'mediaText';
+          }
+        | {
             title?: string | null;
             subtitle?: string | null;
             layoutMode?: ('auto' | 'grid' | 'featured' | 'compact') | null;
@@ -1252,6 +1287,22 @@ export interface PagesSelect<T extends boolean = true> {
           | T
           | {
               content?: T;
+              id?: T;
+              blockName?: T;
+            };
+        mediaText?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              content?: T;
+              image?: T;
+              imagePosition?: T;
+              imageFit?: T;
+              theme?: T;
+              highlight?: T;
+              buttonText?: T;
+              buttonLink?: T;
               id?: T;
               blockName?: T;
             };
