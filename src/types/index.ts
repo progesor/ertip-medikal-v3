@@ -9,6 +9,7 @@ export type CartItem = {
   slug: string;
   variant: string;
   sku: string;
+  combinationKey?: string;
   image: string;
   quantity: number;
 };
