@@ -379,6 +379,9 @@ export function ProductView({ product }: any) {
       slug: product.slug,
       variant: currentVariant?.title || "Standart",
       sku: currentVariant?.sku || product.sku,
+      ...(currentVariant?.combinationKey
+        ? { combinationKey: currentVariant.combinationKey }
+        : {}),
       image:
         typeof mediaVariant?.variantImages?.[0]?.image === "object"
           ? mediaVariant.variantImages[0].image?.url
