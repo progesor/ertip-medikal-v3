@@ -24,7 +24,7 @@ async function markRasterMediaChanged({
     await removeOptimizedMediaVariants(id);
     await markImageOptimizationStale(
       payload,
-      `${filename || "Bir görsel"} değişti. Güncel türevleri üretmek için toplu optimizasyonu yeniden çalıştırın.`,
+      `${filename || "Bir görsel"} değişti. Güncel türevleri üretmek için yeni/değişen görseller optimizasyonunu çalıştırın.`,
     );
   } catch (error) {
     payload.logger.error(
