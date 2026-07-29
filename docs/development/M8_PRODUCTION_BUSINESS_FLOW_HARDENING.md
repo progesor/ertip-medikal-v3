@@ -38,7 +38,7 @@ No Payload schema or database migration change was required.
 
 ### M8.2 — Critical-flow automated coverage
 
-Status: implemented in PR #16.
+Status: implemented and passing in PR #16.
 
 Coverage:
 
@@ -69,9 +69,10 @@ Implemented behavior:
 
 ### M8.4 — Documentation and release closure
 
-Status: in progress until PR #16 is approved and merged.
+Status: ready for merge approval.
 
 - `PROJECT_STATUS.md` reflects production migrations, image optimization, security hardening, configurable SKU rules, RFQ integrity, and mobile navigation;
+- `PROJECT_CONTEXT.md` is now the current canonical developer context;
 - this document records the M8 implementation and test contract;
 - the final M8 exit report will record the merged canonical commit and production smoke result;
 - obsolete historical PRs remain excluded from the release path and must not be merged into current `main`.
