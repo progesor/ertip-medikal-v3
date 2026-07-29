@@ -49,4 +49,18 @@ test.describe("M8 business-flow hardening", () => {
     expect(body.success).toBe(false);
     expect(String(body.message)).toMatch(/sepet|ürün|varyant/i);
   });
+
+  test("protected document endpoint rejects incomplete verification data", async ({ request }) => {
+    const response = await request.post("/api/verify-manual", {
+      data: {
+        productId: "999999999",
+        code: "",
+        docLabel: "Forged Manual",
+      },
+    });
+
+    expect(response.status()).toBe(400);
+    const body = await response.json();
+    expect(body).toEqual({ success: false, message: "Geçersiz istek." });
+  });
 });
