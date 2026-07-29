@@ -6,7 +6,7 @@ The system has three layers:
 
 1. Payload CMS stores the original media file in the persistent `media` volume.
 2. An administrator chooses format, maximum width and quality settings in **Site Yapılandırması → Görsel Optimizasyonu**.
-3. The administrator explicitly runs **Tüm Görselleri Optimize Et** to create persistent, aspect-ratio-safe derivatives.
+3. The administrator runs **Yeni / Değişenleri Optimize Et** for routine uploads and replacements, or **Tümünü Yeniden Oluştur** when every derivative must be regenerated.
 
 No public request performs expensive image encoding. Public delivery either serves an already generated derivative or falls back to the original media file.
 
@@ -42,7 +42,7 @@ The output format can be:
 - **WebP**: default and recommended for balanced compatibility and CPU cost;
 - **AVIF**: smaller output in many cases, but more expensive to generate.
 
-Changing format, width or quality marks the current configuration as stale. The new settings do not become active until the administrator saves the global and runs the full optimization again.
+Changing format, width or quality marks the current configuration as stale. The new settings do not become active until the administrator saves the global and runs **Tümünü Yeniden Oluştur**.
 
 ## Admin component import map
 
@@ -62,14 +62,15 @@ The repository exposes `pnpm payload:importmap`, and both `pnpm dev` and `pnpm b
 
 ## Manual run workflow
 
-The optimization control panel is rendered directly below the **Görsel Optimizasyonu** page title and above the editable settings, so the action button and run status remain visible without relying on a custom UI field inside the form.
+The optimization control panel is rendered directly below the **Görsel Optimizasyonu** page title and above the editable settings, so the action buttons and run status remain visible without relying on a custom UI field inside the form.
 
 1. Open **Site Yapılandırması → Görsel Optimizasyonu**.
 2. Change format, width or quality values as needed.
 3. Save the Payload global.
-4. Click **Tüm Görselleri Optimize Et**.
-5. Keep the page open while the progress indicator advances.
-6. Review the processed, skipped and error counts.
+4. For normal uploads or replacements, click **Yeni / Değişenleri Optimize Et**. Existing complete derivatives are detected and skipped.
+5. Use **Tümünü Yeniden Oluştur** only after a format/profile change or when every derivative must be regenerated.
+6. Keep the page open while the progress indicator advances.
+7. Review the processed, skipped and error counts.
 
 The browser sends small batches to the protected Payload endpoint. Only administrator users may read status or start a run.
 
@@ -83,7 +84,7 @@ Generated files are stored inside the existing persistent media volume:
 media/optimized/<settings-fingerprint>/<media-id>/<profile>.<format>
 ```
 
-The settings fingerprint isolates different format/quality/size versions. After a successful full run, obsolete fingerprint directories are removed. Deleting or replacing a raster media record removes its generated variants and marks the optimizer as stale.
+The settings fingerprint isolates different format/quality/size versions. After a successful run, obsolete fingerprint directories are removed. Deleting or replacing a raster media record removes its generated variants and marks the optimizer as stale.
 
 Original files are never rewritten or deleted by the optimizer.
 
@@ -98,13 +99,15 @@ Original files are never rewritten or deleted by the optimizer.
 The route:
 
 1. validates that the source is a local Payload media URL;
-2. resolves the media record;
+2. resolves the media record from either its original filename or a Payload helper-size filename;
 3. reuses protected-media access checks;
 4. chooses the smallest configured profile that can satisfy the requested width;
 5. serves the generated WebP/AVIF file when available;
 6. redirects to the original upload when optimization is disabled, not yet run, unsupported or missing.
 
-When one media item changes after a successful run, existing generated files may continue to serve while that item falls back to its original. The admin panel reports that another manual run is required.
+When one media item changes after a successful run, its generated files are removed and that item falls back to its original. The admin panel reports that the new/dechanged media optimization should be run. Previously completed derivatives remain in place and are skipped by an incremental run.
+
+CMS-driven homepage and dynamic page routes are request-dynamic so newly published media and block changes become visible without waiting for a new application deployment.
 
 Protected documents and protected media cannot be exposed through the image-delivery route.
 
@@ -140,12 +143,12 @@ After deploying privately:
 2. Test catalogue search, categories, ordering and pagination.
 3. Open a product page and test main, shared and variant images, thumbnails and fullscreen mode.
 4. Verify hero, gallery, news, certificate, team, testimonial, logo, featured-product and related-product images.
-5. Open **Görsel Optimizasyonu**, save the default settings and run the full optimization.
+5. Open **Görsel Optimizasyonu**, save the default settings and run **Tümünü Yeniden Oluştur** once for a clean baseline.
 6. Confirm progress reaches completion and error count is zero, or inspect every reported error.
 7. Reload public pages and confirm image requests use `/api/image-delivery`.
 8. Confirm generated responses use `image/webp` or `image/avif`.
 9. Upload a new raster test image and confirm the admin status becomes stale while public rendering still falls back safely.
-10. Re-run optimization and confirm the new image receives generated variants.
+10. Run **Yeni / Değişenleri Optimize Et** and confirm only the new image is processed while existing derivatives are skipped.
 11. Confirm PDF, SVG and animated GIF behavior is unchanged.
 12. Verify protected documents remain inaccessible without their existing authorization flow.
 13. Check mobile and desktop layouts for crop, stretching and layout shift.
@@ -155,4 +158,4 @@ After deploying privately:
 
 - The application must keep `/app/media` or the configured media directory on persistent storage.
 - The generated `media/optimized` directory must be included in media-volume backup policy, although it can be regenerated from originals.
-- A full run consumes CPU and disk I/O, so it should be started during a quiet period when the media library is large.
+- A full rebuild consumes CPU and disk I/O; prefer the incremental action during routine content operations.
