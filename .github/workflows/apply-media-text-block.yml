@@ -1,4 +1,4 @@
-name: Apply MediaTextBlock
+name: Generate MediaTextBlock Artifacts
 
 on:
   push:
@@ -10,28 +10,36 @@ on:
 permissions:
   contents: write
 
+env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "10"
+  DATABASE_URI: postgresql://payload:payload@127.0.0.1:5432/ertip_media_text
+  PAYLOAD_SECRET: media-text-block-ci-secret-value
+  NEXT_PUBLIC_SITE_URL: http://localhost:3000
+  SMTP_HOST: 127.0.0.1
+  SMTP_PORT: "1025"
+  SMTP_USER: ci
+  SMTP_PASS: ci
+  SMTP_FROM_NAME: Ertip Medikal CI
+  SMTP_FROM_ADDRESS: ci@example.invalid
+
 jobs:
-  implement:
+  generate:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:17
+        image: postgres:17-alpine
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: payload
+          POSTGRES_PASSWORD: payload
           POSTGRES_DB: ertip_media_text
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U postgres -d ertip_media_text"
-          --health-interval 10s
+          --health-cmd "pg_isready -U payload -d ertip_media_text"
+          --health-interval 5s
           --health-timeout 5s
           --health-retries 10
-    env:
-      DATABASE_URI: postgres://postgres:postgres@127.0.0.1:5432/ertip_media_text
-      PAYLOAD_SECRET: media-text-block-ci-secret-value
-      NEXT_PUBLIC_SERVER_URL: http://localhost:3000
-      NEXT_PUBLIC_SITE_URL: http://localhost:3000
     steps:
       - name: Checkout feature branch
         uses: actions/checkout@v4
@@ -42,346 +50,38 @@ jobs:
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Write block schema and renderer
-        shell: bash
-        run: |
-          cat > src/blocks/MediaTextBlock.ts <<'EOF'
-          import type { Block } from "payload";
-
-          export const MediaTextBlock: Block = {
-            slug: "mediaText",
-            labels: {
-              singular: "Görsel ve Metin",
-              plural: "Görsel ve Metin Blokları",
-            },
-            fields: [
-              {
-                name: "eyebrow",
-                type: "text",
-                label: "Küçük Üst Başlık",
-                admin: {
-                  placeholder: "Örn: Kurumsal Hikâyemiz",
-                  description: "Ana başlığın üzerinde küçük vurgu metni olarak gösterilir.",
-                },
-              },
-              {
-                name: "title",
-                type: "text",
-                required: true,
-                label: "Ana Başlık",
-              },
-              {
-                name: "content",
-                type: "richText",
-                required: true,
-                label: "İçerik",
-              },
-              {
-                name: "image",
-                type: "upload",
-                relationTo: "media",
-                required: true,
-                label: "Görsel",
-              },
-              {
-                type: "row",
-                fields: [
-                  {
-                    name: "imagePosition",
-                    type: "select",
-                    label: "Görsel Konumu",
-                    defaultValue: "left",
-                    options: [
-                      { label: "Solda", value: "left" },
-                      { label: "Sağda", value: "right" },
-                    ],
-                  },
-                  {
-                    name: "imageFit",
-                    type: "select",
-                    label: "Görsel Yerleşimi",
-                    defaultValue: "cover",
-                    options: [
-                      { label: "Alanı Doldur", value: "cover" },
-                      { label: "Görselin Tamamını Göster", value: "contain" },
-                    ],
-                  },
-                  {
-                    name: "theme",
-                    type: "select",
-                    label: "Arka Plan Teması",
-                    defaultValue: "light",
-                    options: [
-                      { label: "Açık", value: "light" },
-                      { label: "Yumuşak Gri", value: "muted" },
-                      { label: "Koyu", value: "dark" },
-                    ],
-                  },
-                ],
-              },
-              {
-                name: "highlight",
-                type: "textarea",
-                label: "Vurgu Kutusu (Opsiyonel)",
-                admin: {
-                  description: "Kısa bir kurumsal mesaj veya önemli bilgi için kullanılır.",
-                },
-              },
-              {
-                type: "row",
-                fields: [
-                  {
-                    name: "buttonText",
-                    type: "text",
-                    label: "Buton Metni (Opsiyonel)",
-                  },
-                  {
-                    name: "buttonLink",
-                    type: "text",
-                    label: "Buton Bağlantısı (Opsiyonel)",
-                    admin: { placeholder: "/iletisim" },
-                  },
-                ],
-              },
-            ],
-          };
-          EOF
-
-          cat > src/components/blocks/MediaTextBlock.tsx <<'EOF'
-          import Image from "next/image";
-          import Link from "next/link";
-          import { ArrowRight, Quote } from "lucide-react";
-          import { RichText } from "@payloadcms/richtext-lexical/react";
-          import { Button } from "@/components/ui/button";
-
-          type MediaValue =
-            | number
-            | string
-            | {
-                url?: string | null;
-                alt?: string | null;
-              }
-            | null;
-
-          type MediaTextBlockProps = {
-            eyebrow?: string | null;
-            title: string;
-            content: Parameters<typeof RichText>[0]["data"];
-            image: MediaValue;
-            imagePosition?: "left" | "right" | null;
-            imageFit?: "cover" | "contain" | null;
-            theme?: "light" | "muted" | "dark" | null;
-            highlight?: string | null;
-            buttonText?: string | null;
-            buttonLink?: string | null;
-          };
-
-          const themeClasses = {
-            light: {
-              section: "bg-background text-text-main",
-              eyebrow: "border-primary/15 bg-primary/10 text-primary",
-              body: "text-text-muted",
-              highlight: "border-primary/20 bg-primary/10 text-text-main",
-              image: "bg-surface-muted",
-            },
-            muted: {
-              section: "border-y border-border bg-surface-muted text-text-main",
-              eyebrow: "border-primary/15 bg-surface text-primary",
-              body: "text-text-muted",
-              highlight: "border-primary/20 bg-surface text-text-main",
-              image: "bg-surface",
-            },
-            dark: {
-              section: "bg-surface-inverse text-surface-inverse-foreground",
-              eyebrow:
-                "border-primary-foreground/15 bg-primary-foreground/10 text-primary-foreground",
-              body: "text-surface-inverse-foreground/75",
-              highlight:
-                "border-primary-foreground/15 bg-primary-foreground/10 text-surface-inverse-foreground",
-              image: "bg-surface-inverse-foreground/5",
-            },
-          } as const;
-
-          export function MediaTextBlock({
-            eyebrow,
-            title,
-            content,
-            image,
-            imagePosition = "left",
-            imageFit = "cover",
-            theme = "light",
-            highlight,
-            buttonText,
-            buttonLink,
-          }: MediaTextBlockProps) {
-            const media = typeof image === "object" && image ? image : null;
-            const imageUrl = media?.url || null;
-            const resolvedTheme = theme || "light";
-            const classes = themeClasses[resolvedTheme];
-            const imageOnRight = imagePosition === "right";
-            const isDark = resolvedTheme === "dark";
-
-            if (!imageUrl) return null;
-
-            return (
-              <section className={`relative overflow-hidden py-16 md:py-24 lg:py-28 ${classes.section}`}>
-                <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-                  <div className="absolute -right-32 -top-32 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
-                  <div className="absolute -bottom-40 -left-32 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
-                </div>
-
-                <div className="container relative mx-auto max-w-7xl px-4">
-                  <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16 xl:gap-24">
-                    <div
-                      className={`relative order-1 ${imageOnRight ? "lg:order-2" : "lg:order-1"}`}
-                    >
-                      <div className="absolute -inset-4 rounded-[var(--radius-3xl)] border border-primary/10 bg-primary/5 md:-inset-6" />
-                      <div
-                        className={`relative aspect-[4/3] overflow-hidden rounded-[var(--radius-3xl)] border border-border/50 shadow-2xl shadow-surface-inverse/15 ${classes.image}`}
-                      >
-                        <Image
-                          src={imageUrl}
-                          alt={media?.alt || title}
-                          fill
-                          className={imageFit === "contain" ? "object-contain p-6" : "object-cover"}
-                          sizes="(max-width: 1024px) 100vw, 50vw"
-                          quality={80}
-                        />
-                        {imageFit !== "contain" && (
-                          <div className="absolute inset-0 bg-gradient-to-t from-surface-inverse/20 via-transparent to-transparent" />
-                        )}
-                      </div>
-                    </div>
-
-                    <div
-                      className={`order-2 ${imageOnRight ? "lg:order-1" : "lg:order-2"}`}
-                    >
-                      {eyebrow && (
-                        <div
-                          className={`mb-5 inline-flex rounded-full border px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] ${classes.eyebrow}`}
-                        >
-                          {eyebrow}
-                        </div>
-                      )}
-
-                      <h2 className="max-w-2xl text-3xl font-black leading-tight tracking-tight md:text-4xl lg:text-5xl">
-                        {title}
-                      </h2>
-
-                      <div
-                        className={`mt-7 space-y-5 text-base leading-8 md:text-lg [&_a]:font-semibold [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4 [&_h3]:pt-3 [&_h3]:text-2xl [&_h3]:font-bold [&_li]:mb-2 [&_ol]:ml-5 [&_ol]:list-decimal [&_p]:leading-8 [&_ul]:ml-5 [&_ul]:list-disc ${classes.body}`}
-                      >
-                        <RichText data={content} />
-                      </div>
-
-                      {highlight && (
-                        <div
-                          className={`mt-8 flex gap-4 rounded-[var(--radius-2xl)] border p-5 md:p-6 ${classes.highlight}`}
-                        >
-                          <Quote className="mt-0.5 h-6 w-6 shrink-0 text-primary" aria-hidden="true" />
-                          <p className="text-base font-semibold leading-7 md:text-lg">{highlight}</p>
-                        </div>
-                      )}
-
-                      {buttonText && buttonLink && (
-                        <div className="mt-9">
-                          <Button
-                            size="lg"
-                            variant={isDark ? "secondary" : "default"}
-                            className="h-12 rounded-[var(--radius-2xl)] px-7 font-bold"
-                            asChild
-                          >
-                            <Link href={buttonLink}>
-                              {buttonText}
-                              <ArrowRight className="ml-2 h-4 w-4" />
-                            </Link>
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </section>
-            );
-          }
-          EOF
-
-      - name: Register block in CMS and renderers
-        shell: python
-        run: |
-          from pathlib import Path
-
-          pages = Path("src/collections/Pages.ts")
-          text = pages.read_text()
-          text = text.replace(
-              'import { NewsFeedBlock } from "@/blocks/NewsFeedBlock";\n',
-              'import { NewsFeedBlock } from "@/blocks/NewsFeedBlock";\nimport { MediaTextBlock } from "@/blocks/MediaTextBlock";\n',
-          )
-          text = text.replace(
-              '                NewsFeedBlock,\n',
-              '                NewsFeedBlock,\n                MediaTextBlock,\n',
-          )
-          pages.write_text(text)
-
-          dynamic_page = Path("src/app/(website)/[slug]/page.tsx")
-          text = dynamic_page.read_text()
-          text = text.replace(
-              'import {NewsFeedBlock} from "@/components/blocks/NewsFeedBlock";\n',
-              'import {NewsFeedBlock} from "@/components/blocks/NewsFeedBlock";\nimport { MediaTextBlock } from "@/components/blocks/MediaTextBlock";\n',
-          )
-          text = text.replace(
-              '          case "newsFeed":\n            return <NewsFeedBlock key={index} {...block} />;\n',
-              '          case "newsFeed":\n            return <NewsFeedBlock key={index} {...block} />;\n          case "mediaText":\n            return <MediaTextBlock key={index} {...block} />;\n',
-          )
-          dynamic_page.write_text(text)
-
-          home_page = Path("src/app/(website)/page.tsx")
-          text = home_page.read_text()
-          text = text.replace(
-              'import { NewsFeedBlock } from "@/components/blocks/NewsFeedBlock";\n',
-              'import { NewsFeedBlock } from "@/components/blocks/NewsFeedBlock";\nimport { MediaTextBlock } from "@/components/blocks/MediaTextBlock";\n',
-          )
-          text = text.replace(
-              '            case "newsFeed":\n              return <NewsFeedBlock key={index} {...block} />;\n',
-              '            case "newsFeed":\n              return <NewsFeedBlock key={index} {...block} />;\n            case "mediaText":\n              return <MediaTextBlock key={index} {...block} />;\n',
-          )
-          home_page.write_text(text)
-
       - name: Apply existing migrations
-        run: pnpm exec payload migrate
+        run: pnpm db:migrate
 
       - name: Generate Payload types and import map
         run: |
-          pnpm exec payload generate:types
-          pnpm exec payload generate:importmap
+          pnpm payload:types
+          pnpm payload:importmap
 
-      - name: Create committed schema migration
-        run: pnpm exec payload migrate:create media_text_block
+      - name: Create MediaTextBlock migration
+        run: pnpm db:migrate:create media_text_block
 
-      - name: Verify code quality
-        run: |
-          pnpm typecheck
-          pnpm lint
-
-      - name: Commit implementation
+      - name: Commit generated artifacts
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src migrations
+          git add src/payload-types.ts 'src/app/(payload)/admin/importMap.js' src/migrations
           if git diff --cached --quiet; then
-            echo "No implementation changes to commit."
+            echo "No generated artifacts changed."
             exit 0
           fi
-          git commit -m "feat(cms): add reusable MediaTextBlock"
+          git commit -m "chore(cms): commit MediaTextBlock schema artifacts"
           git push origin HEAD:agent/media-text-block
