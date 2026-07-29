@@ -19,6 +19,7 @@ import { ProcessBlock } from "@/blocks/ProcessBlock";
 import { CTABlock } from "@/blocks/CTABlock";
 import { ContactFormBlock } from "@/blocks/ContactFormBlock";
 import { NewsFeedBlock } from "@/blocks/NewsFeedBlock";
+import { MediaTextBlock } from "@/blocks/MediaTextBlock";
 
 export const Pages: CollectionConfig = {
   slug: "pages",
@@ -50,6 +51,7 @@ export const Pages: CollectionConfig = {
               blocks: [
                 HeroBlock,
                 ContentBlock,
+                MediaTextBlock,
                 FeaturesBlock,
                 FeaturedProductsBlock,
                 FAQBlock,
