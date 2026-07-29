@@ -1,7 +1,9 @@
 import { getPayload } from "payload";
 import configPromise from "@payload-config";
+import type { Metadata } from "next";
 import { HeroBlock } from "@/components/blocks/HeroBlock";
 import { ContentBlock } from "@/components/blocks/ContentBlock";
+import { MediaTextBlock } from "@/components/blocks/MediaTextBlock";
 import { FeaturesBlock } from "@/components/blocks/FeaturesBlock";
 import { FeaturedProductsBlock } from "@/components/blocks/FeaturedProductsBlock";
 import { FAQBlock } from "@/components/blocks/FAQBlock";
@@ -17,22 +19,20 @@ import { CertificateGridBlock } from "@/components/blocks/CertificateGridBlock";
 import { ProcessBlock } from "@/components/blocks/ProcessBlock";
 import { CTABlock } from "@/components/blocks/CTABlock";
 import { ContactFormBlock } from "@/components/blocks/ContactFormBlock";
-import { Metadata } from "next";
 import { NewsFeedBlock } from "@/components/blocks/NewsFeedBlock";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  // absolute: layout.tsx'teki template kuralını ezer ve sadece buradaki metni kullanır
   title: {
     absolute: "Ertip Medikal | Yenilikçi Medikal Cihazlar ve Çözümler",
   },
   description:
-      "Ertip Medikal ürün kataloğu, iğnesiz anestezi cihazları, mikro motorlar ve yenilikçi saç ekim teknolojileri.",
+    "Ertip Medikal ürün kataloğu, iğnesiz anestezi cihazları, mikro motorlar ve yenilikçi saç ekim teknolojileri.",
   openGraph: {
     title: "Ertip Medikal | Yenilikçi Medikal Çözümler",
     description:
-        "Ertip Medikal ürün kataloğu, iğnesiz anestezi cihazları, mikro motorlar ve yenilikçi saç ekim teknolojileri.",
+      "Ertip Medikal ürün kataloğu, iğnesiz anestezi cihazları, mikro motorlar ve yenilikçi saç ekim teknolojileri.",
     type: "website",
   },
 };
@@ -40,7 +40,6 @@ export const metadata: Metadata = {
 export default async function HomePage() {
   const payload = await getPayload({ config: configPromise });
 
-  // Slug'ı 'home' olan sayfayı bul
   const { docs } = await payload.find({
     collection: "pages",
     where: { slug: { equals: "home" }, _status: { equals: "published" } },
@@ -49,69 +48,73 @@ export default async function HomePage() {
 
   const homePage = docs[0];
 
-  // Eğer CMS'te 'home' sayfası henüz oluşturulmadıysa bir uyarı gösterelim (veya fallback yapalım)
   if (!homePage) {
     return (
-        <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-10 bg-background">
-          <h1 className="text-2xl font-bold mb-4 text-text-main/70">
-            Anasayfa Yapılandırılmadı
-          </h1>
-          <p className="text-text-muted">
-            Lütfen Payload CMS üzerinden 'home' slug değerine sahip bir sayfa
-            oluşturun ve bloklarınızı ekleyin.
-          </p>
-        </div>
+      <div className="flex min-h-[60vh] flex-col items-center justify-center bg-background p-10 text-center">
+        <h1 className="mb-4 text-2xl font-bold text-text-main/70">
+          Anasayfa Yapılandırılmadı
+        </h1>
+        <p className="text-text-muted">
+          Lütfen Payload CMS üzerinden &apos;home&apos; slug değerine sahip bir
+          sayfa oluşturun ve bloklarınızı ekleyin.
+        </p>
+      </div>
     );
   }
 
   return (
-      <main className="flex flex-col bg-background">
-        {homePage.layout?.map((block: any, index: number) => {
-          switch (block.blockType) {
-            case "hero":
-              return <HeroBlock key={index} {...block} />;
-            case "heroSlider":
-              return <HeroSliderBlock key={index} {...block} />;
-            case "content":
-              return <ContentBlock key={index} {...block} />;
-            case "features":
-              return <FeaturesBlock key={index} {...block} />;
-            case "featuredProducts":
-              return <FeaturedProductsBlock key={index} {...block} />;
-            case "faq":
-              return <FAQBlock key={index} {...block} />;
-            case "testimonial":
-              return <TestimonialBlock key={index} {...block} />;
-            case "stats":
-              return <StatsBlock key={index} {...block} />;
-            case "gallery":
-              return <GalleryBlock key={index} {...block} />;
-            case "logoSlider":
-              return <LogoSliderBlock key={index} {...block} />;
-            case "location":
-              return <LocationBlock key={index} {...block} />;
-            case "team":
-              return <TeamBlock key={index} {...block} />;
-            case "newsletter":
-              return <NewsletterBlock key={index} {...block} />;
-            case "certificateGrid":
-              return <CertificateGridBlock key={index} {...block} />;
-            case "process":
-              return <ProcessBlock key={index} {...block} />;
-            case "cta":
-              return <CTABlock key={index} {...block} />;
-            case "contactForm":
-              return <ContactFormBlock key={index} {...block} />;
-            case "newsFeed":
-              return <NewsFeedBlock key={index} {...block} />;
-            default:
-              return (
-                  <section key={index} className="p-8 bg-error/10 text-error font-medium border-y border-error/20">
-                    Tanımsız blok: {String(block.blockType)}
-                  </section>
-              );
-          }
-        })}
-      </main>
+    <main className="flex flex-col bg-background">
+      {homePage.layout?.map((block: any, index: number) => {
+        switch (block.blockType) {
+          case "hero":
+            return <HeroBlock key={index} {...block} />;
+          case "heroSlider":
+            return <HeroSliderBlock key={index} {...block} />;
+          case "content":
+            return <ContentBlock key={index} {...block} />;
+          case "mediaText":
+            return <MediaTextBlock key={index} {...block} />;
+          case "features":
+            return <FeaturesBlock key={index} {...block} />;
+          case "featuredProducts":
+            return <FeaturedProductsBlock key={index} {...block} />;
+          case "faq":
+            return <FAQBlock key={index} {...block} />;
+          case "testimonial":
+            return <TestimonialBlock key={index} {...block} />;
+          case "stats":
+            return <StatsBlock key={index} {...block} />;
+          case "gallery":
+            return <GalleryBlock key={index} {...block} />;
+          case "logoSlider":
+            return <LogoSliderBlock key={index} {...block} />;
+          case "location":
+            return <LocationBlock key={index} {...block} />;
+          case "team":
+            return <TeamBlock key={index} {...block} />;
+          case "newsletter":
+            return <NewsletterBlock key={index} {...block} />;
+          case "certificateGrid":
+            return <CertificateGridBlock key={index} {...block} />;
+          case "process":
+            return <ProcessBlock key={index} {...block} />;
+          case "cta":
+            return <CTABlock key={index} {...block} />;
+          case "contactForm":
+            return <ContactFormBlock key={index} {...block} />;
+          case "newsFeed":
+            return <NewsFeedBlock key={index} {...block} />;
+          default:
+            return (
+              <section
+                key={index}
+                className="border-y border-error/20 bg-error/10 p-8 font-medium text-error"
+              >
+                Tanımsız blok: {String(block.blockType)}
+              </section>
+            );
+        }
+      })}
+    </main>
   );
 }
