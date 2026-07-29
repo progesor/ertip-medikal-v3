@@ -23,7 +23,7 @@ export function HeroSliderBlock({ slides }: any) {
     <section className="relative h-[80vh] min-h-[600px] w-full overflow-hidden bg-primary">
       {slides.map((slide: any, index: number) => {
         const imageUrl =
-          slide.image?.sizes?.hero?.url || slide.image?.url || null;
+          slide.image?.url || slide.image?.sizes?.hero?.url || null;
 
         return (
           <div
