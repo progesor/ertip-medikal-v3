@@ -10,7 +10,7 @@ export function HeroBlock({
 }: any) {
   const bgUrl =
     typeof backgroundImage === "object"
-      ? backgroundImage?.sizes?.hero?.url || backgroundImage?.url || null
+      ? backgroundImage?.url || backgroundImage?.sizes?.hero?.url || null
       : null;
 
   return (
