@@ -1,49 +1,52 @@
-# Ertip Medikal v3 - AI/Developer Context
+# Ertip Medikal v3 — AI/Developer Context
 
-Bu doküman, projeyi yeni bir geliştiriciye veya AI asistana hızlıca anlatmak için hazırlanmıştır.
+Bu dosya projenin güncel kanonik geliştirici bağlamıdır. Eski sohbet notları veya tarihsel belgeler bu dosya ve güncel `main` ile çelişirse güncel kaynak kod ve bu bağlam esas alınır.
 
-## Kısa Özet
+## Ürün özeti
 
-Ertip Medikal v3, Next.js 16 + Payload CMS 3 tabanlı kurumsal medikal web sitesi ve B2B ürün/RFQ portalıdır. Ürün/PIM yönetimi, teklif sepeti, korumalı doküman doğrulama, CMS Page Builder, tema sistemi, dinamik header/footer ve hızlı iletişim butonu içerir.
+Ertip Medikal v3, Next.js 16 + Payload CMS 3 tabanlı kurumsal medikal web sitesi, ürün/PIM yönetim sistemi ve B2B teklif talebi portalıdır.
 
-## Mimari
+Ana yetenekler:
 
-- App Router kullanılır.
-- Payload ve website route grupları ayrıdır.
-- Dinamik CMS sayfaları `src/app/(website)/[slug]/page.tsx` içinden `pages.layout` bloklarıyla render edilir.
-- `/urunler` ve `/teklif-sepeti` kilitli statik uygulama rotalarıdır; CMS sayfasına çevrilmemelidir.
+- CMS Page Builder ve dinamik kurumsal sayfalar;
+- ürün kataloğu ve ürün detay sayfaları;
+- varyant ve SKU yönetimi;
+- teklif sepeti ve RFQ akışı;
+- korumalı doküman erişimi;
+- admin kontrollü görsel optimizasyonu;
+- tema, header, footer ve iletişim ayarları;
+- güvenlik, RBAC, rate limit ve migration altyapısı.
 
-## Önemli Dosyalar
+## Teknik yığın
 
-- `src/payload.config.ts`: Payload koleksiyon/global kayıtları.
-- `src/collections/*`: Payload koleksiyonları.
-- `src/globals/*`: Site, tema, menü, e-posta global ayarları.
-- `src/blocks/*`: Page Builder blok şemaları.
-- `src/components/blocks/*`: Blok frontend render bileşenleri.
-- `src/lib/themeConfig.ts`: Tema paletleri ve radius presetleri.
-- `src/styles/globals.css`: Varsayılan CSS değişkenleri ve Tailwind base.
-- `src/components/layout/Header.tsx`: CMS kontrollü header.
-- `src/components/layout/FloatingActionButton.tsx`: CMS kontrollü hızlı iletişim butonu.
-- `src/providers/CartProvider.tsx`: Teklif sepeti state yönetimi.
-- `src/components/product/ProductView.tsx`: Ürün detay arayüzü.
-- `src/components/product/ProductGallery.tsx`: Thumbnail, navigation, fullscreen ve klavye destekli ürün galerisi.
+- Next.js `16.2.3`
+- Payload CMS `3.79.1`
+- React / React DOM `19.2.8`
+- PostgreSQL `17`
+- pnpm `10`
+- Node.js `22` CI hedefi
+- Coolify auto-deploy from `main`
 
-## Ana Rotalar
+## Ana rotalar
 
-- `/`: CMS ana sayfa.
-- `/[slug]`: CMS sayfaları.
-- `/urunler`: Ürün katalog/listing.
-- `/urunler/[slug]`: Ürün detay.
-- `/teklif-sepeti`: RFQ teklif sepeti.
-- `/haberler/[slug]`: Haber detay.
-- `/abonelikten-ayril`: Bülten abonelikten çıkma.
-- `/admin/[[...segments]]`: Payload admin.
-- `/api/[...slug]`: Payload REST.
-- `/graphql`: Payload GraphQL.
-- `/api/verify-manual`: Korumalı doküman erişim doğrulama.
-- `/sitemap.xml`: Sitemap.
+- `/`: CMS ana sayfa
+- `/[slug]`: dinamik CMS sayfaları
+- `/urunler`: ürün kataloğu
+- `/urunler/[slug]`: ürün detay
+- `/teklif-sepeti`: RFQ teklif sepeti
+- `/haberler/[slug]`: haber detay
+- `/abonelikten-ayril`: güvenli abonelikten çıkış
+- `/admin/[[...segments]]`: Payload admin
+- `/api/public/contact`: public iletişim endpointi
+- `/api/public/newsletter`: public bülten endpointi
+- `/api/public/quote-request`: doğrulanmış RFQ endpointi
+- `/api/verify-manual`: korumalı doküman kod doğrulama
+- `/api/protected-download`: imzalı korumalı dosya teslimatı
+- `/api/image-delivery`: optimize görsel teslimatı
 
-## Koleksiyonlar
+`/urunler` ve `/teklif-sepeti` sabit uygulama rotalarıdır; CMS sayfasına dönüştürülmemelidir.
+
+## Payload koleksiyonları
 
 - `users`
 - `media`
@@ -57,218 +60,197 @@ Ertip Medikal v3, Next.js 16 + Payload CMS 3 tabanlı kurumsal medikal web sites
 - `download-logs`
 - `subscribers`
 
-## Global Ayarlar
+## Payload global ayarları
 
-- `site-settings`: logo, `symbolLogo`, header, contact, floating action, social media, footer.
-- `main-menu`: Header navigasyonu.
-- `emailSettings`: İletişim/teklif bildirim alıcıları.
-- `themeSettings`: Renk paleti, radius ve admin `ThemePreview`.
+- `site-settings`
+- `main-menu`
+- `emailSettings`
+- `themeSettings`
+- `image-optimization`
 
-## Tema Sistemi
+## Production deployment sözleşmesi
 
-Tema sistemi `src/lib/themeConfig.ts`, `src/styles/globals.css`, Tailwind tokenları ve `ThemeSettings` globaliyle çalışır.
+Coolify build komutu:
 
-Paletler:
+```bash
+pnpm build:deploy
+```
 
-- `dark-luxury`
-- `medical-blue`
-- `medical-aqua`
-- `ocean`
-- `emerald`
-- `clinical-mint`
-- `premium-navy`
-- `surgical-teal`
-- `ruby`
+Bu komut:
 
-Önemli tokenlar:
+```bash
+pnpm db:migrate && pnpm build
+```
+
+çalıştırır.
+
+Start komutu:
+
+```bash
+pnpm start
+```
+
+Production build komutu düz `pnpm build` olarak değiştirilmemelidir; committed migration zinciri deployment sırasında uygulanmalıdır.
+
+## Migration politikası
+
+- Payload-generated migration dosyaları `src/migrations` altında commitlenir.
+- Production baseline adoption daha önce tamamlanmıştır.
+- Schema değişikliği migration, generated Payload types ve gerektiğinde import-map güncellemesi olmadan merge edilmez.
+- CI disposable PostgreSQL üzerinde migration zincirini, baseline adoption simülasyonunu ve schema drift’i doğrular.
+- Production migration geçmişi elle düzenlenmez.
+
+## Güvenlik sınırları
+
+- Public formlar doğrudan Payload collection create endpointlerini kullanmaz.
+- Contact, newsletter ve quote request özel server endpointlerinden geçer.
+- Honeypot ve process-local rate limit uygulanır.
+- Çoklu instance deployment olursa rate limit state’i Redis gibi ortak store’a taşınmalıdır.
+- Admin ve editor rolleri ayrıdır.
+- Korumalı dosyalar kısa ömürlü imzalı URL ile teslim edilir.
+- Abonelikten çıkış açık e-posta parametresiyle mutation yapmaz; imzalı ve onaylı akış kullanır.
+- Environment ve SMTP değişkenleri production başlangıcında doğrulanır.
+- Raw HTML ürün açıklamalarında çalıştırılmaz.
+
+## Görsel teslimat ve optimizasyon
+
+- Orijinal media dosyaları korunur.
+- Admin, WebP veya AVIF profil ayarlarını yönetir.
+- Thumbnail, card, content ve fullscreen profilleri bulunur.
+- Full-library optimizasyonu admin tarafından manuel başlatılır.
+- Üretilen dosyalar persistent media volume altında tutulur.
+- Eksik veya desteklenmeyen türevlerde güvenli original fallback uygulanır.
+- Historical fixed-ratio crop türevleri public görüntü kaynağı olarak kullanılmaz.
+
+## Ürün ve SKU sistemi
+
+Products koleksiyonu başlık, kısa açıklama, Markdown açıklama, specs, görseller, varyantlar, lojistik, dokümanlar, kategoriler, ilgili ürünler ve SEO alanlarını içerir.
+
+SKU profilleri:
+
+- `legacy-punch`: doğrulanmış Ertip Punch SKU matrisi;
+- `template`: token tabanlı genel SKU kuralı;
+- `manual`: otomatik üretimi kapatır.
+
+SKU motoru:
+
+- ürün bazlı kombinasyon limiti uygular;
+- duplicate ve collision kontrolü yapar;
+- preview ile apply arasında stale fingerprint kontrolü yapar;
+- varyantları kalıcı `combinationKey` ile uzlaştırır;
+- fiyat, görsel, aktiflik, satır ID’si ve diğer manuel metadata’yı korur;
+- geçersiz konfigürasyonda mevcut varyantları değiştirmez;
+- mevcut Punch davranışını testlerle korur.
+
+## RFQ ve teklif sepeti
+
+- `CartProvider` localStorage tabanlıdır.
+- Yeni sepet satırları ürün ID’si, SKU ve mümkünse `combinationKey` taşır.
+- Eski localStorage sepetleri benzersiz SKU fallback ile desteklenir.
+- Tarayıcıdan gelen ürün adı, varyant adı ve SKU kayıt için otorite değildir.
+- RFQ endpointi yayınlanmış ürünü Payload’dan yeniden okur.
+- Varyant önce `combinationKey`, eski sepetlerde exact unique SKU ile çözümlenir.
+- Pasif, silinmiş, draft, stale veya belirsiz varyantlar reddedilir.
+- Kayıt satırları güncel veritabanı ürün adı, varyant adı ve SKU ile oluşturulur.
+- Duplicate logical satırlar güvenli biçimde birleştirilir.
+
+## Header ve mobil navigasyon
+
+- Desktop navigasyon server-rendered kalır.
+- Mobil breakpoint altında erişilebilir hamburger menü bulunur.
+- Menü CMS main-menu linklerini, ürün aramasını, teklif sepetini ve CTA’yı gösterir.
+- Escape, backdrop ve link seçimi menüyü kapatır.
+- Menü açıkken body scroll durdurulur.
+- Renk ve radius yalnızca theme tokenlarından gelir.
+
+## Tema ve tasarım sistemi
+
+Yeni UI hardcoded renk veya radius eklememelidir.
+
+Temel tokenlar:
 
 - `primary`, `primary-foreground`
 - `background`, `foreground`
-- `surface`, `surface-muted`, `surface-inverse`, `surface-inverse-foreground`
+- `surface`, `surface-muted`, `surface-inverse`
 - `text-main`, `text-muted`
 - `success`, `error`, `warning`, `info`, `destructive`
 - `border`, `input`, `ring`
 - `--radius`, `--radius-xl`, `--radius-2xl`, `--radius-3xl`
 
-Kural: Yeni UI eklerken hardcoded renk/radius yerine tema tokenları kullanılmalı.
+Mevcut görsel iyileştirme çalışmaları bu token sistemini ve Payload içerik modelini korumalıdır.
 
-## Site Settings Özeti
+## Test katmanları
 
-Genel logo:
+- `pnpm test:sku`: legacy ve configurable SKU karakterizasyonu
+- `pnpm test:quote`: authoritative RFQ domain testleri
+- `pnpm test:e2e`: Chromium mobil navigasyon, sahte RFQ kimliği reddi ve korumalı doküman istek sınırı
+- `pnpm typecheck`
+- `pnpm lint`
+- Payload types/import-map drift kontrolleri
+- migration ve production build CI
 
-- `siteLogo`
-- `whiteLogo`
-- `symbolLogo`
+Browser E2E, production’a test-only seed endpointi eklemez; migrated boş database ve public sınırlar üzerinde çalışır. Başarılı RFQ persistence canlı/kopya ürünle manuel smoke testte doğrulanır.
 
-Header:
+## M8 durumu
 
-- `showLogoInHeader`
-- `headerLogoVariant`: `auto | default | white | symbol`
-- `showCompanyNameInHeader`
-- `showTaglineInHeader`
-- `headerCompanyName`
-- `headerTagline`
-- `headerLayout`: `default | compact | brand`
-- `headerCtaLabel`
-- `headerCtaHref`
+M8 Production and Business Flow Hardening kapsamı:
 
-Floating action:
+- authoritative RFQ item validation;
+- legacy cart compatibility;
+- inactive/stale variant rejection;
+- mobile hamburger navigation;
+- RFQ domain tests;
+- Chromium E2E;
+- güncel status ve milestone dokümantasyonu.
 
-- `enabled`
-- `type`: `whatsapp | phone | email | custom`
-- `position`: `bottom-right | bottom-left`
-- `label`
-- `openInNewTab`
-- `styleMode`: `theme | whatsapp`
-- `appearance`: `pill | chat-bubble | icon-only`
-- `showIcon`
-- `showPulse`
-- `showHelperText`
-- `helperText`
-- `phoneNumber`, `message`, `email`, `customUrl`
+Kapanış şartları:
 
-Ürün kataloğu:
+- bütün CI kapıları yeşil;
+- kullanıcı browser testlerini onaylamış;
+- PR merge için ayrıca açık kullanıcı onayı verilmiş;
+- merge sonrası production smoke sonucu exit report’a yazılmış.
 
-- `SiteSettings.productCatalog.defaultSortMode`: `newest | oldest | manual`
-- `SiteSettings.productCatalog.manualProductOrder`
-- Kategori override alanları:
-  - `Category.productSortMode`: `inherit | newest | oldest | manual`
-  - `Category.manualProductOrder`
-- Manuel listede olmayan ürünler, manuel ürünlerin ardından yeni ürün önce
-  sırasıyla gösterilir.
+## Sonraki ana yön: görsel tasarım ve sayfa deneyimi
 
-## CMS Blokları
+M8 kapandıktan sonra ana milestone görsel ve UX geliştirmesi olacaktır.
 
-Page Builder blokları:
+Öncelikli inceleme alanları:
 
-- `HeroBlock`
-- `HeroSliderBlock`
-- `ContentBlock`
-- `FeaturesBlock`
-- `FeaturedProductsBlock`
-- `FAQBlock`
-- `TestimonialBlock`
-- `StatsBlock`
-- `GalleryBlock`
-- `LogoSliderBlock`
-- `LocationBlock`
-- `TeamBlock`
-- `NewsletterBlock`
-- `CertificateGridBlock`
-- `ProcessBlock`
-- `CTABlock`
-- `ContactFormBlock`
-- `NewsFeedBlock`
+- ana sayfa hiyerarşisi ve marka sunumu;
+- ürün katalog kartları, filtre alanları ve responsive grid;
+- ürün detay sayfası, galeri, teknik bilgiler, dokümanlar ve RFQ CTA’ları;
+- CMS bloklarının layout seçenekleri;
+- header, footer ve navigasyon görünümü;
+- tipografi, spacing, motion, empty/loading/error/success durumları;
+- desktop, tablet ve mobil tutarlılığı;
+- kritik sayfalar için visual regression koruması.
 
-Esnek layout eklenen bloklar:
+Bu çalışma görsel teslimat pipeline’ını, SKU motorunu, RFQ doğrulamasını, korumalı doküman güvenliğini ve route sözleşmelerini bozmamalıdır.
 
-- `FeaturesBlock`: `layoutMode`, `alignment`
-- `TestimonialBlock`: `layoutMode`
-- `TeamBlock`: `layoutMode`
-- `GalleryBlock`: `galleryLayout`
-- `LocationBlock`: `layoutMode`
-- `StatsBlock`: item count bazlı otomatik grid
+## Güvenli geliştirme kuralları
 
-## Ürün/PIM Sistemi
+- Kullanıcı açıkça onaylamadan PR merge edilmez.
+- Schema değişiklikleri migration’sız yapılmaz.
+- Generated Payload types ve admin import-map drift’e bırakılmaz.
+- `/urunler` ve `/teklif-sepeti` route sözleşmeleri korunur.
+- Yeni client component yalnızca gerekli leaf seviyede `"use client"` kullanır.
+- Yeni dependency gerekçeli olmalı ve lockfile commitlenmelidir.
+- Secret değerler log, PR veya sohbette paylaşılmaz.
 
-`products` koleksiyonu:
-
-- Ürün başlık, kısa açıklama, Markdown/HTML açıklama.
-- Teknik özellikler.
-- Ana görsel, galeri, video URL.
-- Attribute bazlı varyant/SKU üretimi.
-- Her varyant için opsiyonel `variantImages`.
-- `inheritVariantImagesFromPrevious` açıkken görselsiz varyant, listede en yakın
-  önceki görselli varyantın görsellerini devralır. Yeni görselli varyant yeni
-  grubu başlatır.
-- İlk varyant ürün sayfası açıldığında otomatik seçilir.
-- Varyant görselleri galeride önce, ortak `gallery` görselleri ardından gösterilir.
-- `hideMainImageWhenVariantSelected` varsayılan açıkken varyant görseli mevcutsa
-  `mainImage` gizlenir; ürün bazında kapatılabilir.
-- Lojistik ölçüler ve paketleme.
-- Public/protected dokümanlar.
-- `accessCodes` ile korumalı doküman erişimi.
-- `isFeatured`, `isOriginalErtipProduct`.
-- Kategoriler, ilgili ürünler, SEO.
-
-## RFQ / Quote Cart
-
-- `CartProvider` localStorage tabanlı sepet yönetir.
-- Ürün varyantları sepete eklenir.
-- `/teklif-sepeti` müşteri bilgileriyle `quote-requests` kaydı oluşturur.
-- `QuoteRequests` create hook’u, `emailSettings.quoteReceivers` varsa e-posta gönderir.
-
-## Korumalı Doküman Sistemi
-
-- Public docs doğrudan gösterilir.
-- Protected docs erişim kodu ister.
-- API: `src/app/api/verify-manual/route.ts`
-- Log koleksiyonu: `download-logs`
-- Ürün detayında QR/URL parametreli otomatik doğrulama desteği vardır.
-
-## Admin Araçları
-
-- `MarkdownEditor`: Ürün açıklamaları için özel Markdown editör.
-- `ThemePreview`: Tema/radius canlı önizleme.
-- `src/components/admin/AdminDashboard.tsx`: İçerik sayaçları, yeni müşteri
-  talepleri, son ürünler ve hızlı işlem bağlantıları.
-- `src/components/admin/ProductListCells.tsx`: Ürün görseli/SKU ve varyant
-  özetli liste hücreleri.
-- `src/components/admin/ArrayRowLabels.tsx`: Uzun ürün dizileri için açıklayıcı
-  admin satır başlıkları.
-- `src/app/(payload)/admin.css`: Payload çekirdeğini değiştirmeden admin
-  markalama, dashboard, liste ve form yüzeylerini düzenleyen stiller.
-- Koleksiyonlar admin menüsünde iş alanlarına göre gruplandırılmıştır.
-
-## Bilinen Uyarılar
-
-- `next.config.mjs` içinde `experimental.reactCompiler` kullanılıyor. Next.js 16 build uyarısı, bunun top-level `reactCompiler` alanına taşınmasını öneriyor.
-- `git diff --check` CRLF normalizasyon uyarıları gösterebilir; içerik hatası değildir.
-- Mobil header/hamburger davranışı ayrıca görsel QA gerektirir.
-
-## Son Büyük İyileştirmeler
-
-- Tema/token refactor.
-- State/inverse tokenları.
-- Gelişmiş `ThemePreview`.
-- Dinamik header ve `symbolLogo`.
-- Floating contact button.
-- Ürün galerisi fullscreen/keyboard desteği.
-- Esnek CMS blok layout modları.
-- Location/Stats item-count-aware layout.
-
-## Sonraki Öncelikler
-
-1. `next.config.mjs` reactCompiler uyarısını düzelt.
-2. Header mobil menü deneyimini kontrol et/geliştir.
-3. `FeaturedProductsBlock`, `ProcessBlock`, `LogoSliderBlock`, `CertificateGridBlock`, `NewsGridClient` için layout seçenekleri.
-4. Ürün/RFQ/doküman erişim akışları için E2E test.
-5. Çoklu dil stratejisini planla.
-
-## Güvenli Geliştirme Kuralları
-
-- `/urunler` ve `/teklif-sepeti` CMS route’a çevrilmemeli.
-- `QuoteRequests`, `DownloadLogs`, `verify-manual`, `CartProvider` ve product query davranışı bozulmamalı.
-- Payload schema değişince `src/payload-types.ts` güncel tutulmalı.
-- Tema token sistemi korunmalı; hardcoded Tailwind renkleri eklenmemeli.
-- Yeni client component yalnızca gerekli leaf seviyede `"use client"` kullanmalı.
-- Yeni dependency ekleme; gerekirse önce gerekçelendir.
-
-## Komutlar
+## Temel komutlar
 
 ```bash
 pnpm dev
 pnpm build
+pnpm build:deploy
 pnpm start
 pnpm lint
-pnpm lint:fix
 pnpm typecheck
-pnpm format
-pnpm clean
+pnpm test:sku
+pnpm test:quote
+pnpm test:e2e
 pnpm payload:types
-pnpm payload:graphql
-pnpm db:generate
+pnpm payload:importmap
 pnpm db:migrate
-pnpm db:push
-pnpm db:studio
+pnpm db:migrate:status
 ```
