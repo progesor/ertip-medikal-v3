@@ -1,0 +1,51 @@
+name: M8 Wire Combination Key
+
+on:
+  push:
+    branches:
+      - agent/m8-rfq-hardening
+    paths:
+      - .github/workflows/m8-wire-combination-key.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/m8-rfq-hardening
+
+      - name: Add combination key to cart payload
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/components/product/ProductView.tsx')
+          content = path.read_text()
+          old = '''      variant: currentVariant?.title || "Standart",
+                sku: currentVariant?.sku || product.sku,
+                image:'''
+          new = '''      variant: currentVariant?.title || "Standart",
+                sku: currentVariant?.sku || product.sku,
+                ...(currentVariant?.combinationKey
+                  ? { combinationKey: currentVariant.combinationKey }
+                  : {}),
+                image:'''
+
+          if content.count(old) != 1:
+              raise SystemExit('Expected ProductView cart payload snippet was not found exactly once')
+
+          path.write_text(content.replace(old, new))
+          PY
+
+      - name: Commit generated patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/components/product/ProductView.tsx
+          git commit -m "feat(rfq): send stable variant combination key"
+          git push origin HEAD:agent/m8-rfq-hardening
