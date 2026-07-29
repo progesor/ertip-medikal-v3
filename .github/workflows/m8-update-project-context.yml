@@ -1,0 +1,81 @@
+name: M8 Update Project Context
+
+on:
+  push:
+    branches:
+      - agent/m8-rfq-hardening
+    paths:
+      - .github/workflows/m8-update-project-context.yml
+
+permissions:
+  contents: write
+
+jobs:
+  update-context:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/m8-rfq-hardening
+
+      - name: Append canonical M8 context
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('PROJECT_CONTEXT.md')
+          content = path.read_text()
+          marker = '## 2026-07-29 Kanonik Güncelleme — M7 ve M8'
+
+          if marker not in content:
+              content += '''
+
+## 2026-07-29 Kanonik Güncelleme — M7 ve M8
+
+Bu bölüm, yukarıdaki tarihsel özetle çelişen durumlarda güncel kaynak kabul edilir.
+
+### Production temeli
+
+- Payload/PostgreSQL migration baseline kurulmuştur.
+- Coolify build komutu `pnpm build:deploy`, start komutu `pnpm start` olmalıdır.
+- `build:deploy`, `pnpm db:migrate && pnpm build` çalıştırır.
+- Güvenlik sınırları; public form endpointleri, RBAC, abonelikten çıkış, environment validation ve korumalı dosya teslimatı için güçlendirilmiştir.
+
+### Görsel teslimat
+
+- Admin kontrollü WebP/AVIF optimizasyonu bulunmaktadır.
+- Orijinal yüklemeler korunur ve eksik türevlerde güvenli fallback kullanılır.
+- Ürün kartı, içerik ve fullscreen profilleri persistent media volume altında üretilir.
+
+### SKU sistemi
+
+- Ürünler `legacy-punch`, `template` ve `manual` SKU profillerini destekler.
+- Ürün bazlı kombinasyon limiti, çakışma kontrolü ve önizleme/uygulama çalışma alanı vardır.
+- Varyantlar kalıcı `combinationKey` ile uzlaştırılır; fiyat, görsel, aktiflik ve satır kimliği korunur.
+- Mevcut Punch SKU matrisi karakterizasyon testleriyle korunur.
+
+### M8 iş akışı güvenliği
+
+- Teklif sepeti ürün ve varyant kimliğini gönderir; tarayıcıdan gelen başlık ve SKU kayıt için otorite değildir.
+- RFQ endpointi yayınlanmış ürünü Payload'dan yeniden okur ve varyantı `combinationKey`, eski sepetlerde benzersiz SKU ile çözümler.
+- Pasif, draft, silinmiş, stale veya belirsiz varyantlar reddedilir.
+- Teklif satırları güncel veritabanı ürün adı, varyant adı ve SKU ile oluşturulur.
+- Mobil header altında erişilebilir hamburger menü, ürün araması, teklif sepeti ve CTA bulunur.
+- Node/TypeScript domain testlerine ek olarak Chromium E2E testleri mobil navigasyonu, sahte RFQ kimliği reddini ve korumalı doküman istek sınırını doğrular.
+
+### Sonraki ürün yönü
+
+M8 kapandıktan sonraki ana milestone görsel tasarım ve sayfa deneyimi olacaktır. Ana sayfa, ürün kataloğu, ürün detayları, CMS blokları, header/footer, responsive düzen, tipografi, hareket ve geri bildirim durumları birlikte ele alınacaktır. Bu çalışma mevcut theme tokenlarını, Payload içerik modelini, görsel teslimatını, RFQ güvenliğini ve route sözleşmelerini korumalıdır.
+'''
+              path.write_text(content)
+          PY
+
+      - name: Remove one-time workflow and commit
+        run: |
+          rm .github/workflows/m8-update-project-context.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add PROJECT_CONTEXT.md .github/workflows/m8-update-project-context.yml
+          git commit -m "docs(m8): refresh canonical project context"
+          git push origin HEAD:agent/m8-rfq-hardening
