@@ -10,6 +10,12 @@ import type { CartContextType, CartItem } from "@/types";
 const CART_STORAGE_KEY = "quote_cart";
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+function getCartIdentity(
+  item: Pick<CartItem, "id" | "sku" | "combinationKey">,
+) {
+  return `${item.id}::${item.combinationKey || item.sku || "standard"}`;
+}
+
 function readStoredCart(): CartItem[] {
   try {
     const storedValue = localStorage.getItem(CART_STORAGE_KEY);
@@ -37,16 +43,23 @@ function readStoredCart(): CartItem[] {
         typeof item.quantity === "number" && Number.isFinite(item.quantity)
           ? Math.max(1, Math.floor(item.quantity))
           : 1;
+      const combinationKey =
+        typeof item.combinationKey === "string"
+          ? item.combinationKey.trim()
+          : "";
 
-      return [{
-        id: String(item.id),
-        title: item.title,
-        slug: item.slug,
-        variant: item.variant,
-        sku: item.sku,
-        image: item.image,
-        quantity,
-      }];
+      return [
+        {
+          id: String(item.id),
+          title: item.title,
+          slug: item.slug,
+          variant: item.variant,
+          sku: item.sku,
+          ...(combinationKey ? { combinationKey } : {}),
+          image: item.image,
+          quantity,
+        },
+      ];
     });
   } catch (error) {
     console.error("Sepet okuma hatası", error);
@@ -79,8 +92,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addToCart = (item: Omit<CartItem, "quantity">) => {
     setCartItems((previousCart) => {
+      const itemIdentity = getCartIdentity(item);
       const existingItemIndex = previousCart.findIndex(
-        (cartItem) => cartItem.sku === item.sku,
+        (cartItem) => getCartIdentity(cartItem) === itemIdentity,
       );
       const nextCart =
         existingItemIndex >= 0

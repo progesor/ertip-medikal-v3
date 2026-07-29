@@ -2,6 +2,10 @@ import configPromise from "@payload-config";
 import { getPayload } from "payload";
 import { NextRequest, NextResponse } from "next/server";
 import {
+  resolveQuoteItems,
+  type QuoteProductRecord,
+} from "@/lib/quote/resolveQuoteItems";
+import {
   consumeRateLimit,
   getClientIp,
   isHoneypotFilled,
@@ -9,13 +13,6 @@ import {
   normalizeText,
   rateLimitResponse,
 } from "@/lib/security/publicRequest";
-
-type QuoteItemBody = {
-  productTitle?: unknown;
-  variantInfo?: unknown;
-  sku?: unknown;
-  quantity?: unknown;
-};
 
 type QuoteBody = {
   customerName?: unknown;
@@ -26,6 +23,10 @@ type QuoteBody = {
   items?: unknown;
   website?: unknown;
 };
+
+function payloadProductId(productId: string): string | number {
+  return /^\d+$/.test(productId) ? Number(productId) : productId;
+}
 
 export async function POST(request: NextRequest) {
   const ipAddress = getClientIp(request.headers);
@@ -60,55 +61,44 @@ export async function POST(request: NextRequest) {
   const email = normalizeText(body.email, 254).toLowerCase();
   const phone = normalizeText(body.phone, 50);
   const message = normalizeText(body.message, 5_000);
-  const rawItems = Array.isArray(body.items) ? body.items : [];
 
   if (
     customerName.length < 2 ||
     !isValidEmail(email) ||
-    phone.length < 5 ||
-    rawItems.length === 0 ||
-    rawItems.length > 50
+    phone.length < 5
   ) {
     return NextResponse.json(
       {
         success: false,
-        message: "Teklif talebi geçerli müşteri ve ürün bilgileri içermelidir.",
+        message: "Teklif talebi geçerli müşteri bilgileri içermelidir.",
       },
       { status: 400 },
     );
   }
 
-  const items = rawItems.map((rawItem) => {
-    const item = (rawItem ?? {}) as QuoteItemBody;
-    const quantity =
-      typeof item.quantity === "number" && Number.isInteger(item.quantity)
-        ? item.quantity
-        : Number(item.quantity);
+  const payload = await getPayload({ config: configPromise });
+  const resolvedItems = await resolveQuoteItems(body.items, async (productId) => {
+    try {
+      const product = await payload.findByID({
+        collection: "products",
+        id: payloadProductId(productId),
+        depth: 0,
+        draft: false,
+        overrideAccess: true,
+      });
 
-    return {
-      productTitle: normalizeText(item.productTitle, 200),
-      variantInfo: normalizeText(item.variantInfo, 200),
-      sku: normalizeText(item.sku, 120),
-      quantity,
-    };
+      return product as unknown as QuoteProductRecord;
+    } catch {
+      return null;
+    }
   });
 
-  const hasInvalidItem = items.some(
-    (item) =>
-      item.productTitle.length < 1 ||
-      !Number.isInteger(item.quantity) ||
-      item.quantity < 1 ||
-      item.quantity > 999,
-  );
-
-  if (hasInvalidItem) {
+  if (!resolvedItems.ok) {
     return NextResponse.json(
-      { success: false, message: "Ürün listesi geçersiz." },
+      { success: false, message: resolvedItems.message },
       { status: 400 },
     );
   }
-
-  const payload = await getPayload({ config: configPromise });
 
   try {
     await payload.create({
@@ -120,7 +110,7 @@ export async function POST(request: NextRequest) {
         email,
         phone,
         message: message || null,
-        items,
+        items: resolvedItems.items,
       },
     });
 
