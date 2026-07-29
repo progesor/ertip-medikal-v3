@@ -15,6 +15,7 @@ import {
 const MEDIA_FILE_MARKER = "/api/media/file/";
 const SETTINGS_CACHE_TTL = 15_000;
 const MEDIA_CACHE_TTL = 60_000;
+const MISSING_MEDIA_CACHE_TTL = 2_000;
 
 type CachedSettings = Awaited<
   ReturnType<typeof loadImageOptimizationSettings>
@@ -65,15 +66,19 @@ async function getMediaByFilename(filename: string) {
     depth: 0,
     limit: 1,
     where: {
-      filename: {
-        equals: filename,
-      },
+      or: [
+        { filename: { equals: filename } },
+        { "sizes.thumbnail.filename": { equals: filename } },
+        { "sizes.card.filename": { equals: filename } },
+        { "sizes.hero.filename": { equals: filename } },
+      ],
     },
   });
   const document = result.docs[0] || null;
 
   mediaCache.set(filename, {
-    expiresAt: now + MEDIA_CACHE_TTL,
+    expiresAt:
+      now + (document ? MEDIA_CACHE_TTL : MISSING_MEDIA_CACHE_TTL),
     document,
   });
 
