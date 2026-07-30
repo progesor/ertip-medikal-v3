@@ -576,9 +576,21 @@ export interface Page {
               };
               [k: string]: unknown;
             };
-            image: number | Media;
+            /**
+             * Görsel seçilmezse blok otomatik olarak gelişmiş bir metin bölümüne dönüşür.
+             */
+            image?: (number | null) | Media;
+            layoutMode?: ('split' | 'wrap') | null;
+            columnRatio?: ('mediaOneThird' | 'equal' | 'mediaTwoThird') | null;
             imagePosition?: ('left' | 'right') | null;
+            verticalAlignment?: ('start' | 'center') | null;
             imageFit?: ('cover' | 'contain') | null;
+            imageRatio?: ('auto' | 'landscape' | 'wide' | 'square' | 'portrait') | null;
+            /**
+             * Görselsiz ve metin-akışlı yerleşimlerde içerik genişliğini belirler.
+             */
+            contentWidth?: ('compact' | 'standard' | 'wide' | 'full') | null;
+            contentAlignment?: ('left' | 'center') | null;
             theme?: ('light' | 'muted' | 'dark') | null;
             /**
              * Kısa bir kurumsal mesaj veya önemli bilgi için kullanılır.
@@ -1297,8 +1309,14 @@ export interface PagesSelect<T extends boolean = true> {
               title?: T;
               content?: T;
               image?: T;
+              layoutMode?: T;
+              columnRatio?: T;
               imagePosition?: T;
+              verticalAlignment?: T;
               imageFit?: T;
+              imageRatio?: T;
+              contentWidth?: T;
+              contentAlignment?: T;
               theme?: T;
               highlight?: T;
               buttonText?: T;
