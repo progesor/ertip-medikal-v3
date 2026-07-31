@@ -1,0 +1,336 @@
+import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
+
+export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+  await db.execute(sql`
+   CREATE TYPE "public"."enum_pages_blocks_hero_buttons_style" AS ENUM('solid', 'secondary', 'outline');
+  CREATE TYPE "public"."enum_pages_blocks_hero_height" AS ENUM('compact', 'standard', 'large', 'screen');
+  CREATE TYPE "public"."enum_pages_blocks_hero_content_alignment" AS ENUM('left', 'center', 'right');
+  CREATE TYPE "public"."enum_pages_blocks_hero_content_width" AS ENUM('compact', 'standard', 'wide');
+  CREATE TYPE "public"."enum_pages_blocks_hero_theme" AS ENUM('primary', 'dark', 'light');
+  CREATE TYPE "public"."enum_pages_blocks_hero_overlay_opacity" AS ENUM('low', 'medium', 'high');
+  CREATE TYPE "public"."enum_pages_blocks_hero_image_focus" AS ENUM('center', 'top', 'bottom', 'left', 'right');
+  CREATE TYPE "public"."enum_pages_blocks_hero_section_background" AS ENUM('transparent', 'light', 'muted', 'dark', 'primary');
+  CREATE TYPE "public"."enum_pages_blocks_hero_section_spacing" AS ENUM('none', 'compact', 'standard', 'large');
+  CREATE TYPE "public"."enum_pages_blocks_hero_section_content_width" AS ENUM('compact', 'standard', 'wide', 'full');
+  CREATE TYPE "public"."enum_pages_blocks_hero_section_decoration" AS ENUM('none', 'glow', 'grid');
+  CREATE TYPE "public"."enum_pages_blocks_content_layout_mode" AS ENUM('single', 'columns');
+  CREATE TYPE "public"."enum_pages_blocks_content_body_size" AS ENUM('compact', 'standard', 'large');
+  CREATE TYPE "public"."enum_pages_blocks_content_heading_alignment" AS ENUM('left', 'center');
+  CREATE TYPE "public"."enum_pages_blocks_content_section_background" AS ENUM('transparent', 'light', 'muted', 'dark', 'primary');
+  CREATE TYPE "public"."enum_pages_blocks_content_section_spacing" AS ENUM('none', 'compact', 'standard', 'large');
+  CREATE TYPE "public"."enum_pages_blocks_content_section_content_width" AS ENUM('compact', 'standard', 'wide', 'full');
+  CREATE TYPE "public"."enum_pages_blocks_content_section_decoration" AS ENUM('none', 'glow', 'grid');
+  CREATE TYPE "public"."enum_pages_blocks_cta_buttons_style" AS ENUM('solid', 'secondary', 'outline');
+  CREATE TYPE "public"."enum_pages_blocks_cta_layout_mode" AS ENUM('card', 'banner');
+  CREATE TYPE "public"."enum_pages_blocks_cta_alignment" AS ENUM('left', 'center');
+  CREATE TYPE "public"."enum_pages_blocks_cta_section_background" AS ENUM('transparent', 'light', 'muted', 'dark', 'primary');
+  CREATE TYPE "public"."enum_pages_blocks_cta_section_spacing" AS ENUM('none', 'compact', 'standard', 'large');
+  CREATE TYPE "public"."enum_pages_blocks_cta_section_content_width" AS ENUM('compact', 'standard', 'wide', 'full');
+  CREATE TYPE "public"."enum_pages_blocks_cta_section_decoration" AS ENUM('none', 'glow', 'grid');
+  CREATE TYPE "public"."enum__pages_v_blocks_hero_buttons_style" AS ENUM('solid', 'secondary', 'outline');
+  CREATE TYPE "public"."enum__pages_v_blocks_hero_height" AS ENUM('compact', 'standard', 'large', 'screen');
+  CREATE TYPE "public"."enum__pages_v_blocks_hero_content_alignment" AS ENUM('left', 'center', 'right');
+  CREATE TYPE "public"."enum__pages_v_blocks_hero_content_width" AS ENUM('compact', 'standard', 'wide');
+  CREATE TYPE "public"."enum__pages_v_blocks_hero_theme" AS ENUM('primary', 'dark', 'light');
+  CREATE TYPE "public"."enum__pages_v_blocks_hero_overlay_opacity" AS ENUM('low', 'medium', 'high');
+  CREATE TYPE "public"."enum__pages_v_blocks_hero_image_focus" AS ENUM('center', 'top', 'bottom', 'left', 'right');
+  CREATE TYPE "public"."enum__pages_v_blocks_hero_section_background" AS ENUM('transparent', 'light', 'muted', 'dark', 'primary');
+  CREATE TYPE "public"."enum__pages_v_blocks_hero_section_spacing" AS ENUM('none', 'compact', 'standard', 'large');
+  CREATE TYPE "public"."enum__pages_v_blocks_hero_section_content_width" AS ENUM('compact', 'standard', 'wide', 'full');
+  CREATE TYPE "public"."enum__pages_v_blocks_hero_section_decoration" AS ENUM('none', 'glow', 'grid');
+  CREATE TYPE "public"."enum__pages_v_blocks_content_layout_mode" AS ENUM('single', 'columns');
+  CREATE TYPE "public"."enum__pages_v_blocks_content_body_size" AS ENUM('compact', 'standard', 'large');
+  CREATE TYPE "public"."enum__pages_v_blocks_content_heading_alignment" AS ENUM('left', 'center');
+  CREATE TYPE "public"."enum__pages_v_blocks_content_section_background" AS ENUM('transparent', 'light', 'muted', 'dark', 'primary');
+  CREATE TYPE "public"."enum__pages_v_blocks_content_section_spacing" AS ENUM('none', 'compact', 'standard', 'large');
+  CREATE TYPE "public"."enum__pages_v_blocks_content_section_content_width" AS ENUM('compact', 'standard', 'wide', 'full');
+  CREATE TYPE "public"."enum__pages_v_blocks_content_section_decoration" AS ENUM('none', 'glow', 'grid');
+  CREATE TYPE "public"."enum__pages_v_blocks_cta_buttons_style" AS ENUM('solid', 'secondary', 'outline');
+  CREATE TYPE "public"."enum__pages_v_blocks_cta_layout_mode" AS ENUM('card', 'banner');
+  CREATE TYPE "public"."enum__pages_v_blocks_cta_alignment" AS ENUM('left', 'center');
+  CREATE TYPE "public"."enum__pages_v_blocks_cta_section_background" AS ENUM('transparent', 'light', 'muted', 'dark', 'primary');
+  CREATE TYPE "public"."enum__pages_v_blocks_cta_section_spacing" AS ENUM('none', 'compact', 'standard', 'large');
+  CREATE TYPE "public"."enum__pages_v_blocks_cta_section_content_width" AS ENUM('compact', 'standard', 'wide', 'full');
+  CREATE TYPE "public"."enum__pages_v_blocks_cta_section_decoration" AS ENUM('none', 'glow', 'grid');
+  ALTER TYPE "public"."enum_pages_blocks_cta_theme" ADD VALUE 'light';
+  ALTER TYPE "public"."enum__pages_v_blocks_cta_theme" ADD VALUE 'light';
+  CREATE TABLE "pages_blocks_cta_buttons" (
+  	"_order" integer NOT NULL,
+  	"_parent_id" varchar NOT NULL,
+  	"id" varchar PRIMARY KEY NOT NULL,
+  	"label" varchar,
+  	"link" varchar,
+  	"style" "enum_pages_blocks_cta_buttons_style" DEFAULT 'solid'
+  );
+  
+  CREATE TABLE "_pages_v_blocks_cta_buttons" (
+  	"_order" integer NOT NULL,
+  	"_parent_id" integer NOT NULL,
+  	"id" serial PRIMARY KEY NOT NULL,
+  	"label" varchar,
+  	"link" varchar,
+  	"style" "enum__pages_v_blocks_cta_buttons_style" DEFAULT 'solid',
+  	"_uuid" varchar
+  );
+  
+  ALTER TABLE "pages_blocks_hero_buttons" ADD COLUMN "style" "enum_pages_blocks_hero_buttons_style" DEFAULT 'solid';
+  ALTER TABLE "pages_blocks_hero" ADD COLUMN "eyebrow" varchar;
+  ALTER TABLE "pages_blocks_hero" ADD COLUMN "mobile_background_image_id" integer;
+  ALTER TABLE "pages_blocks_hero" ADD COLUMN "height" "enum_pages_blocks_hero_height" DEFAULT 'standard';
+  ALTER TABLE "pages_blocks_hero" ADD COLUMN "content_alignment" "enum_pages_blocks_hero_content_alignment" DEFAULT 'center';
+  ALTER TABLE "pages_blocks_hero" ADD COLUMN "content_width" "enum_pages_blocks_hero_content_width" DEFAULT 'standard';
+  ALTER TABLE "pages_blocks_hero" ADD COLUMN "theme" "enum_pages_blocks_hero_theme" DEFAULT 'primary';
+  ALTER TABLE "pages_blocks_hero" ADD COLUMN "overlay_opacity" "enum_pages_blocks_hero_overlay_opacity" DEFAULT 'medium';
+  ALTER TABLE "pages_blocks_hero" ADD COLUMN "image_focus" "enum_pages_blocks_hero_image_focus" DEFAULT 'center';
+  ALTER TABLE "pages_blocks_hero" ADD COLUMN "show_breadcrumb" boolean DEFAULT false;
+  ALTER TABLE "pages_blocks_hero" ADD COLUMN "section_anchor" varchar;
+  ALTER TABLE "pages_blocks_hero" ADD COLUMN "section_background" "enum_pages_blocks_hero_section_background" DEFAULT 'transparent';
+  ALTER TABLE "pages_blocks_hero" ADD COLUMN "section_spacing" "enum_pages_blocks_hero_section_spacing" DEFAULT 'none';
+  ALTER TABLE "pages_blocks_hero" ADD COLUMN "section_content_width" "enum_pages_blocks_hero_section_content_width" DEFAULT 'full';
+  ALTER TABLE "pages_blocks_hero" ADD COLUMN "section_divider_top" boolean DEFAULT false;
+  ALTER TABLE "pages_blocks_hero" ADD COLUMN "section_divider_bottom" boolean DEFAULT false;
+  ALTER TABLE "pages_blocks_hero" ADD COLUMN "section_decoration" "enum_pages_blocks_hero_section_decoration" DEFAULT 'none';
+  ALTER TABLE "pages_blocks_content" ADD COLUMN "eyebrow" varchar;
+  ALTER TABLE "pages_blocks_content" ADD COLUMN "title" varchar;
+  ALTER TABLE "pages_blocks_content" ADD COLUMN "layout_mode" "enum_pages_blocks_content_layout_mode" DEFAULT 'single';
+  ALTER TABLE "pages_blocks_content" ADD COLUMN "body_size" "enum_pages_blocks_content_body_size" DEFAULT 'standard';
+  ALTER TABLE "pages_blocks_content" ADD COLUMN "heading_alignment" "enum_pages_blocks_content_heading_alignment" DEFAULT 'left';
+  ALTER TABLE "pages_blocks_content" ADD COLUMN "section_anchor" varchar;
+  ALTER TABLE "pages_blocks_content" ADD COLUMN "section_background" "enum_pages_blocks_content_section_background" DEFAULT 'light';
+  ALTER TABLE "pages_blocks_content" ADD COLUMN "section_spacing" "enum_pages_blocks_content_section_spacing" DEFAULT 'standard';
+  ALTER TABLE "pages_blocks_content" ADD COLUMN "section_content_width" "enum_pages_blocks_content_section_content_width" DEFAULT 'compact';
+  ALTER TABLE "pages_blocks_content" ADD COLUMN "section_divider_top" boolean DEFAULT false;
+  ALTER TABLE "pages_blocks_content" ADD COLUMN "section_divider_bottom" boolean DEFAULT false;
+  ALTER TABLE "pages_blocks_content" ADD COLUMN "section_decoration" "enum_pages_blocks_content_section_decoration" DEFAULT 'none';
+  ALTER TABLE "pages_blocks_cta" ADD COLUMN "eyebrow" varchar;
+  ALTER TABLE "pages_blocks_cta" ADD COLUMN "background_image_id" integer;
+  ALTER TABLE "pages_blocks_cta" ADD COLUMN "layout_mode" "enum_pages_blocks_cta_layout_mode" DEFAULT 'card';
+  ALTER TABLE "pages_blocks_cta" ADD COLUMN "alignment" "enum_pages_blocks_cta_alignment" DEFAULT 'center';
+  ALTER TABLE "pages_blocks_cta" ADD COLUMN "trust_note" varchar;
+  ALTER TABLE "pages_blocks_cta" ADD COLUMN "section_anchor" varchar;
+  ALTER TABLE "pages_blocks_cta" ADD COLUMN "section_background" "enum_pages_blocks_cta_section_background" DEFAULT 'transparent';
+  ALTER TABLE "pages_blocks_cta" ADD COLUMN "section_spacing" "enum_pages_blocks_cta_section_spacing" DEFAULT 'compact';
+  ALTER TABLE "pages_blocks_cta" ADD COLUMN "section_content_width" "enum_pages_blocks_cta_section_content_width" DEFAULT 'wide';
+  ALTER TABLE "pages_blocks_cta" ADD COLUMN "section_divider_top" boolean DEFAULT false;
+  ALTER TABLE "pages_blocks_cta" ADD COLUMN "section_divider_bottom" boolean DEFAULT false;
+  ALTER TABLE "pages_blocks_cta" ADD COLUMN "section_decoration" "enum_pages_blocks_cta_section_decoration" DEFAULT 'none';
+  ALTER TABLE "_pages_v_blocks_hero_buttons" ADD COLUMN "style" "enum__pages_v_blocks_hero_buttons_style" DEFAULT 'solid';
+  ALTER TABLE "_pages_v_blocks_hero" ADD COLUMN "eyebrow" varchar;
+  ALTER TABLE "_pages_v_blocks_hero" ADD COLUMN "mobile_background_image_id" integer;
+  ALTER TABLE "_pages_v_blocks_hero" ADD COLUMN "height" "enum__pages_v_blocks_hero_height" DEFAULT 'standard';
+  ALTER TABLE "_pages_v_blocks_hero" ADD COLUMN "content_alignment" "enum__pages_v_blocks_hero_content_alignment" DEFAULT 'center';
+  ALTER TABLE "_pages_v_blocks_hero" ADD COLUMN "content_width" "enum__pages_v_blocks_hero_content_width" DEFAULT 'standard';
+  ALTER TABLE "_pages_v_blocks_hero" ADD COLUMN "theme" "enum__pages_v_blocks_hero_theme" DEFAULT 'primary';
+  ALTER TABLE "_pages_v_blocks_hero" ADD COLUMN "overlay_opacity" "enum__pages_v_blocks_hero_overlay_opacity" DEFAULT 'medium';
+  ALTER TABLE "_pages_v_blocks_hero" ADD COLUMN "image_focus" "enum__pages_v_blocks_hero_image_focus" DEFAULT 'center';
+  ALTER TABLE "_pages_v_blocks_hero" ADD COLUMN "show_breadcrumb" boolean DEFAULT false;
+  ALTER TABLE "_pages_v_blocks_hero" ADD COLUMN "section_anchor" varchar;
+  ALTER TABLE "_pages_v_blocks_hero" ADD COLUMN "section_background" "enum__pages_v_blocks_hero_section_background" DEFAULT 'transparent';
+  ALTER TABLE "_pages_v_blocks_hero" ADD COLUMN "section_spacing" "enum__pages_v_blocks_hero_section_spacing" DEFAULT 'none';
+  ALTER TABLE "_pages_v_blocks_hero" ADD COLUMN "section_content_width" "enum__pages_v_blocks_hero_section_content_width" DEFAULT 'full';
+  ALTER TABLE "_pages_v_blocks_hero" ADD COLUMN "section_divider_top" boolean DEFAULT false;
+  ALTER TABLE "_pages_v_blocks_hero" ADD COLUMN "section_divider_bottom" boolean DEFAULT false;
+  ALTER TABLE "_pages_v_blocks_hero" ADD COLUMN "section_decoration" "enum__pages_v_blocks_hero_section_decoration" DEFAULT 'none';
+  ALTER TABLE "_pages_v_blocks_content" ADD COLUMN "eyebrow" varchar;
+  ALTER TABLE "_pages_v_blocks_content" ADD COLUMN "title" varchar;
+  ALTER TABLE "_pages_v_blocks_content" ADD COLUMN "layout_mode" "enum__pages_v_blocks_content_layout_mode" DEFAULT 'single';
+  ALTER TABLE "_pages_v_blocks_content" ADD COLUMN "body_size" "enum__pages_v_blocks_content_body_size" DEFAULT 'standard';
+  ALTER TABLE "_pages_v_blocks_content" ADD COLUMN "heading_alignment" "enum__pages_v_blocks_content_heading_alignment" DEFAULT 'left';
+  ALTER TABLE "_pages_v_blocks_content" ADD COLUMN "section_anchor" varchar;
+  ALTER TABLE "_pages_v_blocks_content" ADD COLUMN "section_background" "enum__pages_v_blocks_content_section_background" DEFAULT 'light';
+  ALTER TABLE "_pages_v_blocks_content" ADD COLUMN "section_spacing" "enum__pages_v_blocks_content_section_spacing" DEFAULT 'standard';
+  ALTER TABLE "_pages_v_blocks_content" ADD COLUMN "section_content_width" "enum__pages_v_blocks_content_section_content_width" DEFAULT 'compact';
+  ALTER TABLE "_pages_v_blocks_content" ADD COLUMN "section_divider_top" boolean DEFAULT false;
+  ALTER TABLE "_pages_v_blocks_content" ADD COLUMN "section_divider_bottom" boolean DEFAULT false;
+  ALTER TABLE "_pages_v_blocks_content" ADD COLUMN "section_decoration" "enum__pages_v_blocks_content_section_decoration" DEFAULT 'none';
+  ALTER TABLE "_pages_v_blocks_cta" ADD COLUMN "eyebrow" varchar;
+  ALTER TABLE "_pages_v_blocks_cta" ADD COLUMN "background_image_id" integer;
+  ALTER TABLE "_pages_v_blocks_cta" ADD COLUMN "layout_mode" "enum__pages_v_blocks_cta_layout_mode" DEFAULT 'card';
+  ALTER TABLE "_pages_v_blocks_cta" ADD COLUMN "alignment" "enum__pages_v_blocks_cta_alignment" DEFAULT 'center';
+  ALTER TABLE "_pages_v_blocks_cta" ADD COLUMN "trust_note" varchar;
+  ALTER TABLE "_pages_v_blocks_cta" ADD COLUMN "section_anchor" varchar;
+  ALTER TABLE "_pages_v_blocks_cta" ADD COLUMN "section_background" "enum__pages_v_blocks_cta_section_background" DEFAULT 'transparent';
+  ALTER TABLE "_pages_v_blocks_cta" ADD COLUMN "section_spacing" "enum__pages_v_blocks_cta_section_spacing" DEFAULT 'compact';
+  ALTER TABLE "_pages_v_blocks_cta" ADD COLUMN "section_content_width" "enum__pages_v_blocks_cta_section_content_width" DEFAULT 'wide';
+  ALTER TABLE "_pages_v_blocks_cta" ADD COLUMN "section_divider_top" boolean DEFAULT false;
+  ALTER TABLE "_pages_v_blocks_cta" ADD COLUMN "section_divider_bottom" boolean DEFAULT false;
+  ALTER TABLE "_pages_v_blocks_cta" ADD COLUMN "section_decoration" "enum__pages_v_blocks_cta_section_decoration" DEFAULT 'none';
+  ALTER TABLE "pages_blocks_cta_buttons" ADD CONSTRAINT "pages_blocks_cta_buttons_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."pages_blocks_cta"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "_pages_v_blocks_cta_buttons" ADD CONSTRAINT "_pages_v_blocks_cta_buttons_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."_pages_v_blocks_cta"("id") ON DELETE cascade ON UPDATE no action;
+  CREATE INDEX "pages_blocks_cta_buttons_order_idx" ON "pages_blocks_cta_buttons" USING btree ("_order");
+  CREATE INDEX "pages_blocks_cta_buttons_parent_id_idx" ON "pages_blocks_cta_buttons" USING btree ("_parent_id");
+  CREATE INDEX "_pages_v_blocks_cta_buttons_order_idx" ON "_pages_v_blocks_cta_buttons" USING btree ("_order");
+  CREATE INDEX "_pages_v_blocks_cta_buttons_parent_id_idx" ON "_pages_v_blocks_cta_buttons" USING btree ("_parent_id");
+  ALTER TABLE "pages_blocks_hero" ADD CONSTRAINT "pages_blocks_hero_mobile_background_image_id_media_id_fk" FOREIGN KEY ("mobile_background_image_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
+  ALTER TABLE "pages_blocks_cta" ADD CONSTRAINT "pages_blocks_cta_background_image_id_media_id_fk" FOREIGN KEY ("background_image_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
+  ALTER TABLE "_pages_v_blocks_hero" ADD CONSTRAINT "_pages_v_blocks_hero_mobile_background_image_id_media_id_fk" FOREIGN KEY ("mobile_background_image_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
+  ALTER TABLE "_pages_v_blocks_cta" ADD CONSTRAINT "_pages_v_blocks_cta_background_image_id_media_id_fk" FOREIGN KEY ("background_image_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
+  CREATE INDEX "pages_blocks_hero_mobile_background_image_idx" ON "pages_blocks_hero" USING btree ("mobile_background_image_id");
+  CREATE INDEX "pages_blocks_cta_background_image_idx" ON "pages_blocks_cta" USING btree ("background_image_id");
+  CREATE INDEX "_pages_v_blocks_hero_mobile_background_image_idx" ON "_pages_v_blocks_hero" USING btree ("mobile_background_image_id");
+  CREATE INDEX "_pages_v_blocks_cta_background_image_idx" ON "_pages_v_blocks_cta" USING btree ("background_image_id");`)
+}
+
+export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
+  await db.execute(sql`
+   ALTER TABLE "pages_blocks_cta_buttons" DISABLE ROW LEVEL SECURITY;
+  ALTER TABLE "_pages_v_blocks_cta_buttons" DISABLE ROW LEVEL SECURITY;
+  DROP TABLE "pages_blocks_cta_buttons" CASCADE;
+  DROP TABLE "_pages_v_blocks_cta_buttons" CASCADE;
+  ALTER TABLE "pages_blocks_hero" DROP CONSTRAINT "pages_blocks_hero_mobile_background_image_id_media_id_fk";
+  
+  ALTER TABLE "pages_blocks_cta" DROP CONSTRAINT "pages_blocks_cta_background_image_id_media_id_fk";
+  
+  ALTER TABLE "_pages_v_blocks_hero" DROP CONSTRAINT "_pages_v_blocks_hero_mobile_background_image_id_media_id_fk";
+  
+  ALTER TABLE "_pages_v_blocks_cta" DROP CONSTRAINT "_pages_v_blocks_cta_background_image_id_media_id_fk";
+  
+  ALTER TABLE "pages_blocks_cta" ALTER COLUMN "theme" SET DATA TYPE text;
+  ALTER TABLE "pages_blocks_cta" ALTER COLUMN "theme" SET DEFAULT 'primary'::text;
+  DROP TYPE "public"."enum_pages_blocks_cta_theme";
+  CREATE TYPE "public"."enum_pages_blocks_cta_theme" AS ENUM('primary', 'dark');
+  ALTER TABLE "pages_blocks_cta" ALTER COLUMN "theme" SET DEFAULT 'primary'::"public"."enum_pages_blocks_cta_theme";
+  ALTER TABLE "pages_blocks_cta" ALTER COLUMN "theme" SET DATA TYPE "public"."enum_pages_blocks_cta_theme" USING "theme"::"public"."enum_pages_blocks_cta_theme";
+  ALTER TABLE "_pages_v_blocks_cta" ALTER COLUMN "theme" SET DATA TYPE text;
+  ALTER TABLE "_pages_v_blocks_cta" ALTER COLUMN "theme" SET DEFAULT 'primary'::text;
+  DROP TYPE "public"."enum__pages_v_blocks_cta_theme";
+  CREATE TYPE "public"."enum__pages_v_blocks_cta_theme" AS ENUM('primary', 'dark');
+  ALTER TABLE "_pages_v_blocks_cta" ALTER COLUMN "theme" SET DEFAULT 'primary'::"public"."enum__pages_v_blocks_cta_theme";
+  ALTER TABLE "_pages_v_blocks_cta" ALTER COLUMN "theme" SET DATA TYPE "public"."enum__pages_v_blocks_cta_theme" USING "theme"::"public"."enum__pages_v_blocks_cta_theme";
+  DROP INDEX "pages_blocks_hero_mobile_background_image_idx";
+  DROP INDEX "pages_blocks_cta_background_image_idx";
+  DROP INDEX "_pages_v_blocks_hero_mobile_background_image_idx";
+  DROP INDEX "_pages_v_blocks_cta_background_image_idx";
+  ALTER TABLE "pages_blocks_hero_buttons" DROP COLUMN "style";
+  ALTER TABLE "pages_blocks_hero" DROP COLUMN "eyebrow";
+  ALTER TABLE "pages_blocks_hero" DROP COLUMN "mobile_background_image_id";
+  ALTER TABLE "pages_blocks_hero" DROP COLUMN "height";
+  ALTER TABLE "pages_blocks_hero" DROP COLUMN "content_alignment";
+  ALTER TABLE "pages_blocks_hero" DROP COLUMN "content_width";
+  ALTER TABLE "pages_blocks_hero" DROP COLUMN "theme";
+  ALTER TABLE "pages_blocks_hero" DROP COLUMN "overlay_opacity";
+  ALTER TABLE "pages_blocks_hero" DROP COLUMN "image_focus";
+  ALTER TABLE "pages_blocks_hero" DROP COLUMN "show_breadcrumb";
+  ALTER TABLE "pages_blocks_hero" DROP COLUMN "section_anchor";
+  ALTER TABLE "pages_blocks_hero" DROP COLUMN "section_background";
+  ALTER TABLE "pages_blocks_hero" DROP COLUMN "section_spacing";
+  ALTER TABLE "pages_blocks_hero" DROP COLUMN "section_content_width";
+  ALTER TABLE "pages_blocks_hero" DROP COLUMN "section_divider_top";
+  ALTER TABLE "pages_blocks_hero" DROP COLUMN "section_divider_bottom";
+  ALTER TABLE "pages_blocks_hero" DROP COLUMN "section_decoration";
+  ALTER TABLE "pages_blocks_content" DROP COLUMN "eyebrow";
+  ALTER TABLE "pages_blocks_content" DROP COLUMN "title";
+  ALTER TABLE "pages_blocks_content" DROP COLUMN "layout_mode";
+  ALTER TABLE "pages_blocks_content" DROP COLUMN "body_size";
+  ALTER TABLE "pages_blocks_content" DROP COLUMN "heading_alignment";
+  ALTER TABLE "pages_blocks_content" DROP COLUMN "section_anchor";
+  ALTER TABLE "pages_blocks_content" DROP COLUMN "section_background";
+  ALTER TABLE "pages_blocks_content" DROP COLUMN "section_spacing";
+  ALTER TABLE "pages_blocks_content" DROP COLUMN "section_content_width";
+  ALTER TABLE "pages_blocks_content" DROP COLUMN "section_divider_top";
+  ALTER TABLE "pages_blocks_content" DROP COLUMN "section_divider_bottom";
+  ALTER TABLE "pages_blocks_content" DROP COLUMN "section_decoration";
+  ALTER TABLE "pages_blocks_cta" DROP COLUMN "eyebrow";
+  ALTER TABLE "pages_blocks_cta" DROP COLUMN "background_image_id";
+  ALTER TABLE "pages_blocks_cta" DROP COLUMN "layout_mode";
+  ALTER TABLE "pages_blocks_cta" DROP COLUMN "alignment";
+  ALTER TABLE "pages_blocks_cta" DROP COLUMN "trust_note";
+  ALTER TABLE "pages_blocks_cta" DROP COLUMN "section_anchor";
+  ALTER TABLE "pages_blocks_cta" DROP COLUMN "section_background";
+  ALTER TABLE "pages_blocks_cta" DROP COLUMN "section_spacing";
+  ALTER TABLE "pages_blocks_cta" DROP COLUMN "section_content_width";
+  ALTER TABLE "pages_blocks_cta" DROP COLUMN "section_divider_top";
+  ALTER TABLE "pages_blocks_cta" DROP COLUMN "section_divider_bottom";
+  ALTER TABLE "pages_blocks_cta" DROP COLUMN "section_decoration";
+  ALTER TABLE "_pages_v_blocks_hero_buttons" DROP COLUMN "style";
+  ALTER TABLE "_pages_v_blocks_hero" DROP COLUMN "eyebrow";
+  ALTER TABLE "_pages_v_blocks_hero" DROP COLUMN "mobile_background_image_id";
+  ALTER TABLE "_pages_v_blocks_hero" DROP COLUMN "height";
+  ALTER TABLE "_pages_v_blocks_hero" DROP COLUMN "content_alignment";
+  ALTER TABLE "_pages_v_blocks_hero" DROP COLUMN "content_width";
+  ALTER TABLE "_pages_v_blocks_hero" DROP COLUMN "theme";
+  ALTER TABLE "_pages_v_blocks_hero" DROP COLUMN "overlay_opacity";
+  ALTER TABLE "_pages_v_blocks_hero" DROP COLUMN "image_focus";
+  ALTER TABLE "_pages_v_blocks_hero" DROP COLUMN "show_breadcrumb";
+  ALTER TABLE "_pages_v_blocks_hero" DROP COLUMN "section_anchor";
+  ALTER TABLE "_pages_v_blocks_hero" DROP COLUMN "section_background";
+  ALTER TABLE "_pages_v_blocks_hero" DROP COLUMN "section_spacing";
+  ALTER TABLE "_pages_v_blocks_hero" DROP COLUMN "section_content_width";
+  ALTER TABLE "_pages_v_blocks_hero" DROP COLUMN "section_divider_top";
+  ALTER TABLE "_pages_v_blocks_hero" DROP COLUMN "section_divider_bottom";
+  ALTER TABLE "_pages_v_blocks_hero" DROP COLUMN "section_decoration";
+  ALTER TABLE "_pages_v_blocks_content" DROP COLUMN "eyebrow";
+  ALTER TABLE "_pages_v_blocks_content" DROP COLUMN "title";
+  ALTER TABLE "_pages_v_blocks_content" DROP COLUMN "layout_mode";
+  ALTER TABLE "_pages_v_blocks_content" DROP COLUMN "body_size";
+  ALTER TABLE "_pages_v_blocks_content" DROP COLUMN "heading_alignment";
+  ALTER TABLE "_pages_v_blocks_content" DROP COLUMN "section_anchor";
+  ALTER TABLE "_pages_v_blocks_content" DROP COLUMN "section_background";
+  ALTER TABLE "_pages_v_blocks_content" DROP COLUMN "section_spacing";
+  ALTER TABLE "_pages_v_blocks_content" DROP COLUMN "section_content_width";
+  ALTER TABLE "_pages_v_blocks_content" DROP COLUMN "section_divider_top";
+  ALTER TABLE "_pages_v_blocks_content" DROP COLUMN "section_divider_bottom";
+  ALTER TABLE "_pages_v_blocks_content" DROP COLUMN "section_decoration";
+  ALTER TABLE "_pages_v_blocks_cta" DROP COLUMN "eyebrow";
+  ALTER TABLE "_pages_v_blocks_cta" DROP COLUMN "background_image_id";
+  ALTER TABLE "_pages_v_blocks_cta" DROP COLUMN "layout_mode";
+  ALTER TABLE "_pages_v_blocks_cta" DROP COLUMN "alignment";
+  ALTER TABLE "_pages_v_blocks_cta" DROP COLUMN "trust_note";
+  ALTER TABLE "_pages_v_blocks_cta" DROP COLUMN "section_anchor";
+  ALTER TABLE "_pages_v_blocks_cta" DROP COLUMN "section_background";
+  ALTER TABLE "_pages_v_blocks_cta" DROP COLUMN "section_spacing";
+  ALTER TABLE "_pages_v_blocks_cta" DROP COLUMN "section_content_width";
+  ALTER TABLE "_pages_v_blocks_cta" DROP COLUMN "section_divider_top";
+  ALTER TABLE "_pages_v_blocks_cta" DROP COLUMN "section_divider_bottom";
+  ALTER TABLE "_pages_v_blocks_cta" DROP COLUMN "section_decoration";
+  DROP TYPE "public"."enum_pages_blocks_hero_buttons_style";
+  DROP TYPE "public"."enum_pages_blocks_hero_height";
+  DROP TYPE "public"."enum_pages_blocks_hero_content_alignment";
+  DROP TYPE "public"."enum_pages_blocks_hero_content_width";
+  DROP TYPE "public"."enum_pages_blocks_hero_theme";
+  DROP TYPE "public"."enum_pages_blocks_hero_overlay_opacity";
+  DROP TYPE "public"."enum_pages_blocks_hero_image_focus";
+  DROP TYPE "public"."enum_pages_blocks_hero_section_background";
+  DROP TYPE "public"."enum_pages_blocks_hero_section_spacing";
+  DROP TYPE "public"."enum_pages_blocks_hero_section_content_width";
+  DROP TYPE "public"."enum_pages_blocks_hero_section_decoration";
+  DROP TYPE "public"."enum_pages_blocks_content_layout_mode";
+  DROP TYPE "public"."enum_pages_blocks_content_body_size";
+  DROP TYPE "public"."enum_pages_blocks_content_heading_alignment";
+  DROP TYPE "public"."enum_pages_blocks_content_section_background";
+  DROP TYPE "public"."enum_pages_blocks_content_section_spacing";
+  DROP TYPE "public"."enum_pages_blocks_content_section_content_width";
+  DROP TYPE "public"."enum_pages_blocks_content_section_decoration";
+  DROP TYPE "public"."enum_pages_blocks_cta_buttons_style";
+  DROP TYPE "public"."enum_pages_blocks_cta_layout_mode";
+  DROP TYPE "public"."enum_pages_blocks_cta_alignment";
+  DROP TYPE "public"."enum_pages_blocks_cta_section_background";
+  DROP TYPE "public"."enum_pages_blocks_cta_section_spacing";
+  DROP TYPE "public"."enum_pages_blocks_cta_section_content_width";
+  DROP TYPE "public"."enum_pages_blocks_cta_section_decoration";
+  DROP TYPE "public"."enum__pages_v_blocks_hero_buttons_style";
+  DROP TYPE "public"."enum__pages_v_blocks_hero_height";
+  DROP TYPE "public"."enum__pages_v_blocks_hero_content_alignment";
+  DROP TYPE "public"."enum__pages_v_blocks_hero_content_width";
+  DROP TYPE "public"."enum__pages_v_blocks_hero_theme";
+  DROP TYPE "public"."enum__pages_v_blocks_hero_overlay_opacity";
+  DROP TYPE "public"."enum__pages_v_blocks_hero_image_focus";
+  DROP TYPE "public"."enum__pages_v_blocks_hero_section_background";
+  DROP TYPE "public"."enum__pages_v_blocks_hero_section_spacing";
+  DROP TYPE "public"."enum__pages_v_blocks_hero_section_content_width";
+  DROP TYPE "public"."enum__pages_v_blocks_hero_section_decoration";
+  DROP TYPE "public"."enum__pages_v_blocks_content_layout_mode";
+  DROP TYPE "public"."enum__pages_v_blocks_content_body_size";
+  DROP TYPE "public"."enum__pages_v_blocks_content_heading_alignment";
+  DROP TYPE "public"."enum__pages_v_blocks_content_section_background";
+  DROP TYPE "public"."enum__pages_v_blocks_content_section_spacing";
+  DROP TYPE "public"."enum__pages_v_blocks_content_section_content_width";
+  DROP TYPE "public"."enum__pages_v_blocks_content_section_decoration";
+  DROP TYPE "public"."enum__pages_v_blocks_cta_buttons_style";
+  DROP TYPE "public"."enum__pages_v_blocks_cta_layout_mode";
+  DROP TYPE "public"."enum__pages_v_blocks_cta_alignment";
+  DROP TYPE "public"."enum__pages_v_blocks_cta_section_background";
+  DROP TYPE "public"."enum__pages_v_blocks_cta_section_spacing";
+  DROP TYPE "public"."enum__pages_v_blocks_cta_section_content_width";
+  DROP TYPE "public"."enum__pages_v_blocks_cta_section_decoration";`)
+}

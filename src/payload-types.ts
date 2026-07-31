@@ -521,21 +521,48 @@ export interface Page {
   layout?:
     | (
         | {
+            eyebrow?: string | null;
             heading: string;
             subheading?: string | null;
             backgroundImage?: (number | null) | Media;
+            /**
+             * Boş bırakılırsa masaüstü görseli mobil cihazlarda da kullanılır.
+             */
+            mobileBackgroundImage?: (number | null) | Media;
+            height?: ('compact' | 'standard' | 'large' | 'screen') | null;
+            contentAlignment?: ('left' | 'center' | 'right') | null;
+            contentWidth?: ('compact' | 'standard' | 'wide') | null;
+            theme?: ('primary' | 'dark' | 'light') | null;
+            overlayOpacity?: ('low' | 'medium' | 'high') | null;
+            imageFocus?: ('center' | 'top' | 'bottom' | 'left' | 'right') | null;
+            showBreadcrumb?: boolean | null;
             buttons?:
               | {
                   label: string;
                   link: string;
+                  style?: ('solid' | 'secondary' | 'outline') | null;
                   id?: string | null;
                 }[]
               | null;
+            section?: {
+              /**
+               * Sayfa içi bağlantılarda kullanılacak benzersiz kimlik. Boşluk kullanmayın.
+               */
+              anchor?: string | null;
+              background?: ('transparent' | 'light' | 'muted' | 'dark' | 'primary') | null;
+              spacing?: ('none' | 'compact' | 'standard' | 'large') | null;
+              contentWidth?: ('compact' | 'standard' | 'wide' | 'full') | null;
+              dividerTop?: boolean | null;
+              dividerBottom?: boolean | null;
+              decoration?: ('none' | 'glow' | 'grid') | null;
+            };
             id?: string | null;
             blockName?: string | null;
             blockType: 'hero';
           }
         | {
+            eyebrow?: string | null;
+            title?: string | null;
             content: {
               root: {
                 type: string;
@@ -550,6 +577,21 @@ export interface Page {
                 version: number;
               };
               [k: string]: unknown;
+            };
+            layoutMode?: ('single' | 'columns') | null;
+            bodySize?: ('compact' | 'standard' | 'large') | null;
+            headingAlignment?: ('left' | 'center') | null;
+            section?: {
+              /**
+               * Sayfa içi bağlantılarda kullanılacak benzersiz kimlik. Boşluk kullanmayın.
+               */
+              anchor?: string | null;
+              background?: ('transparent' | 'light' | 'muted' | 'dark' | 'primary') | null;
+              spacing?: ('none' | 'compact' | 'standard' | 'large') | null;
+              contentWidth?: ('compact' | 'standard' | 'wide' | 'full') | null;
+              dividerTop?: boolean | null;
+              dividerBottom?: boolean | null;
+              decoration?: ('none' | 'glow' | 'grid') | null;
             };
             id?: string | null;
             blockName?: string | null;
@@ -788,11 +830,36 @@ export interface Page {
             blockType: 'process';
           }
         | {
+            eyebrow?: string | null;
             title: string;
             description?: string | null;
+            backgroundImage?: (number | null) | Media;
+            layoutMode?: ('card' | 'banner') | null;
+            alignment?: ('left' | 'center') | null;
+            theme?: ('primary' | 'dark' | 'light') | null;
+            buttons?:
+              | {
+                  label: string;
+                  link: string;
+                  style?: ('solid' | 'secondary' | 'outline') | null;
+                  id?: string | null;
+                }[]
+              | null;
+            trustNote?: string | null;
             buttonText?: string | null;
             buttonLink?: string | null;
-            theme?: ('primary' | 'dark') | null;
+            section?: {
+              /**
+               * Sayfa içi bağlantılarda kullanılacak benzersiz kimlik. Boşluk kullanmayın.
+               */
+              anchor?: string | null;
+              background?: ('transparent' | 'light' | 'muted' | 'dark' | 'primary') | null;
+              spacing?: ('none' | 'compact' | 'standard' | 'large') | null;
+              contentWidth?: ('compact' | 'standard' | 'wide' | 'full') | null;
+              dividerTop?: boolean | null;
+              dividerBottom?: boolean | null;
+              decoration?: ('none' | 'glow' | 'grid') | null;
+            };
             id?: string | null;
             blockName?: string | null;
             blockType: 'cta';
@@ -1282,15 +1349,36 @@ export interface PagesSelect<T extends boolean = true> {
         hero?:
           | T
           | {
+              eyebrow?: T;
               heading?: T;
               subheading?: T;
               backgroundImage?: T;
+              mobileBackgroundImage?: T;
+              height?: T;
+              contentAlignment?: T;
+              contentWidth?: T;
+              theme?: T;
+              overlayOpacity?: T;
+              imageFocus?: T;
+              showBreadcrumb?: T;
               buttons?:
                 | T
                 | {
                     label?: T;
                     link?: T;
+                    style?: T;
                     id?: T;
+                  };
+              section?:
+                | T
+                | {
+                    anchor?: T;
+                    background?: T;
+                    spacing?: T;
+                    contentWidth?: T;
+                    dividerTop?: T;
+                    dividerBottom?: T;
+                    decoration?: T;
                   };
               id?: T;
               blockName?: T;
@@ -1298,7 +1386,23 @@ export interface PagesSelect<T extends boolean = true> {
         content?:
           | T
           | {
+              eyebrow?: T;
+              title?: T;
               content?: T;
+              layoutMode?: T;
+              bodySize?: T;
+              headingAlignment?: T;
+              section?:
+                | T
+                | {
+                    anchor?: T;
+                    background?: T;
+                    spacing?: T;
+                    contentWidth?: T;
+                    dividerTop?: T;
+                    dividerBottom?: T;
+                    decoration?: T;
+                  };
               id?: T;
               blockName?: T;
             };
@@ -1519,11 +1623,35 @@ export interface PagesSelect<T extends boolean = true> {
         cta?:
           | T
           | {
+              eyebrow?: T;
               title?: T;
               description?: T;
+              backgroundImage?: T;
+              layoutMode?: T;
+              alignment?: T;
+              theme?: T;
+              buttons?:
+                | T
+                | {
+                    label?: T;
+                    link?: T;
+                    style?: T;
+                    id?: T;
+                  };
+              trustNote?: T;
               buttonText?: T;
               buttonLink?: T;
-              theme?: T;
+              section?:
+                | T
+                | {
+                    anchor?: T;
+                    background?: T;
+                    spacing?: T;
+                    contentWidth?: T;
+                    dividerTop?: T;
+                    dividerBottom?: T;
+                    decoration?: T;
+                  };
               id?: T;
               blockName?: T;
             };
