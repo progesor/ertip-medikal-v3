@@ -1,5 +1,6 @@
 name: Generate M9 New Content Block Artifacts
 
+# Generation revision: 2
 on:
   push:
     branches:
