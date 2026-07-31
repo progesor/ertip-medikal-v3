@@ -31,7 +31,7 @@ type RenderContext = {
 };
 
 type RenderBlocksProps = {
-  blocks?: BlockItem[] | null;
+  blocks?: unknown[] | null;
   context?: RenderContext;
 };
 
@@ -48,7 +48,8 @@ function UnknownBlock({ blockType }: { blockType?: string | null }) {
 export function RenderBlocks({ blocks, context }: RenderBlocksProps) {
   if (!blocks || blocks.length === 0) return null;
 
-  return blocks.map((block, index) => {
+  return blocks.map((rawBlock, index) => {
+    const block = rawBlock as BlockItem;
     const key = String(block.id || `${block.blockType || "block"}-${index}`);
     const props = block as any;
 
