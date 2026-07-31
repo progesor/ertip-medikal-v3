@@ -20,6 +20,9 @@ import { CTABlock } from "@/blocks/CTABlock";
 import { ContactFormBlock } from "@/blocks/ContactFormBlock";
 import { NewsFeedBlock } from "@/blocks/NewsFeedBlock";
 import { MediaTextBlock } from "@/blocks/MediaTextBlock";
+import { TimelineBlock } from "@/blocks/TimelineBlock";
+import { ProductCategoryShowcaseBlock } from "@/blocks/ProductCategoryShowcaseBlock";
+import { VideoMediaBlock } from "@/blocks/VideoMediaBlock";
 
 export const Pages: CollectionConfig = {
   slug: "pages",
@@ -52,6 +55,9 @@ export const Pages: CollectionConfig = {
                 HeroBlock,
                 ContentBlock,
                 MediaTextBlock,
+                TimelineBlock,
+                ProductCategoryShowcaseBlock,
+                VideoMediaBlock,
                 FeaturesBlock,
                 FeaturedProductsBlock,
                 FAQBlock,
@@ -78,7 +84,6 @@ export const Pages: CollectionConfig = {
         },
       ],
     },
-    // Yan Bar (Sidebar)
     slugField("title"),
   ],
 };
