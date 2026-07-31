@@ -3,6 +3,7 @@ import { sectionField } from "@/fields/section";
 
 export const ProductCategoryShowcaseBlock: Block = {
   slug: "productCategoryShowcase",
+  dbName: "cat_showcase",
   labels: {
     singular: "Ürün Kategori Vitrini",
     plural: "Ürün Kategori Vitrinleri",
