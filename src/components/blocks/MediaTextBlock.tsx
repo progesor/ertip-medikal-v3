@@ -10,6 +10,8 @@ type MediaValue =
   | {
       url?: string | null;
       alt?: string | null;
+      width?: number | null;
+      height?: number | null;
     }
   | null
   | undefined;
@@ -18,9 +20,15 @@ type MediaTextBlockProps = {
   eyebrow?: string | null;
   title: string;
   content: Parameters<typeof RichText>[0]["data"];
-  image: MediaValue;
+  image?: MediaValue;
+  layoutMode?: "split" | "wrap" | null;
+  columnRatio?: "mediaOneThird" | "equal" | "mediaTwoThird" | null;
   imagePosition?: "left" | "right" | null;
+  verticalAlignment?: "start" | "center" | null;
   imageFit?: "cover" | "contain" | null;
+  imageRatio?: "auto" | "landscape" | "wide" | "square" | "portrait" | null;
+  contentWidth?: "compact" | "standard" | "wide" | "full" | null;
+  contentAlignment?: "left" | "center" | null;
   theme?: "light" | "muted" | "dark" | null;
   highlight?: string | null;
   buttonText?: string | null;
@@ -53,13 +61,57 @@ const themeClasses = {
   },
 } as const;
 
+const ratioClasses = {
+  mediaOneThird: {
+    mediaGrid: "lg:col-span-4",
+    contentGrid: "lg:col-span-8",
+    wrapWidth: "lg:w-1/3",
+    sizes: "(max-width: 1023px) 100vw, 33vw",
+  },
+  equal: {
+    mediaGrid: "lg:col-span-6",
+    contentGrid: "lg:col-span-6",
+    wrapWidth: "lg:w-1/2",
+    sizes: "(max-width: 1023px) 100vw, 50vw",
+  },
+  mediaTwoThird: {
+    mediaGrid: "lg:col-span-8",
+    contentGrid: "lg:col-span-4",
+    wrapWidth: "lg:w-2/3",
+    sizes: "(max-width: 1023px) 100vw, 66vw",
+  },
+} as const;
+
+const contentWidthClasses = {
+  compact: "max-w-3xl",
+  standard: "max-w-5xl",
+  wide: "max-w-6xl",
+  full: "max-w-7xl",
+} as const;
+
+const fixedAspectRatios = {
+  landscape: "4 / 3",
+  wide: "16 / 9",
+  square: "1 / 1",
+  portrait: "3 / 4",
+} as const;
+
+const richTextClasses =
+  "space-y-5 text-base leading-8 md:text-lg [&_a]:font-semibold [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4 [&_h2]:pt-3 [&_h2]:text-2xl [&_h2]:font-bold [&_h3]:pt-3 [&_h3]:text-xl [&_h3]:font-bold [&_li]:mb-2 [&_ol]:ml-5 [&_ol]:list-decimal [&_p]:leading-8 [&_ul]:ml-5 [&_ul]:list-disc";
+
 export function MediaTextBlock({
   eyebrow,
   title,
   content,
   image,
+  layoutMode = "split",
+  columnRatio = "equal",
   imagePosition = "left",
+  verticalAlignment = "center",
   imageFit = "cover",
+  imageRatio = "landscape",
+  contentWidth = "standard",
+  contentAlignment = "left",
   theme = "light",
   highlight,
   buttonText,
@@ -68,11 +120,168 @@ export function MediaTextBlock({
   const media = typeof image === "object" && image ? image : null;
   const imageUrl = media?.url || null;
   const resolvedTheme = theme || "light";
+  const resolvedLayoutMode = layoutMode || "split";
+  const resolvedColumnRatio = columnRatio || "equal";
+  const resolvedImageRatio = imageRatio || "landscape";
+  const resolvedContentWidth = contentWidth || "standard";
   const classes = themeClasses[resolvedTheme];
+  const ratio = ratioClasses[resolvedColumnRatio];
   const imageOnRight = imagePosition === "right";
   const isDark = resolvedTheme === "dark";
+  const textOnlyCentered = !imageUrl && contentAlignment === "center";
+  const autoAspectRatio =
+    media?.width && media?.height
+      ? `${media.width} / ${media.height}`
+      : fixedAspectRatios.landscape;
+  const aspectRatio =
+    resolvedImageRatio === "auto"
+      ? autoAspectRatio
+      : fixedAspectRatios[resolvedImageRatio];
 
-  if (!imageUrl) return null;
+  const renderHeader = (centered = false) => (
+    <div className={centered ? "text-center" : undefined}>
+      {eyebrow && (
+        <div className={centered ? "flex justify-center" : undefined}>
+          <div
+            className={`mb-5 inline-flex rounded-full border px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] ${classes.eyebrow}`}
+          >
+            {eyebrow}
+          </div>
+        </div>
+      )}
+
+      <h2
+        className={`text-3xl font-black leading-tight tracking-tight md:text-4xl lg:text-5xl ${centered ? "mx-auto max-w-4xl" : "max-w-2xl"}`}
+      >
+        {title}
+      </h2>
+    </div>
+  );
+
+  const renderImage = (className: string, sizes: string) => {
+    if (!imageUrl) return null;
+
+    return (
+      <div className={`relative ${className}`}>
+        <div className="absolute -inset-3 rounded-[var(--radius-3xl)] border border-primary/10 bg-primary/5 md:-inset-5" />
+        <div
+          className={`relative overflow-hidden rounded-[var(--radius-3xl)] border border-border/50 shadow-2xl shadow-surface-inverse/15 ${classes.image}`}
+          style={{ aspectRatio }}
+        >
+          <Image
+            src={imageUrl}
+            alt={media?.alt || title}
+            fill
+            className={
+              imageFit === "contain" ? "object-contain p-6" : "object-cover"
+            }
+            sizes={sizes}
+            quality={80}
+          />
+          {imageFit !== "contain" && (
+            <div className="absolute inset-0 bg-gradient-to-t from-surface-inverse/20 via-transparent to-transparent" />
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderFooterContent = (centered = false) => (
+    <>
+      {highlight && (
+        <div
+          className={`mt-8 flex gap-4 rounded-[var(--radius-2xl)] border p-5 text-left md:p-6 ${classes.highlight}`}
+        >
+          <Quote
+            className="mt-0.5 h-6 w-6 shrink-0 text-primary"
+            aria-hidden="true"
+          />
+          <p className="text-base font-semibold leading-7 md:text-lg">
+            {highlight}
+          </p>
+        </div>
+      )}
+
+      {buttonText && buttonLink && (
+        <div className={`mt-9 ${centered ? "flex justify-center" : ""}`}>
+          <Button
+            size="lg"
+            variant={isDark ? "secondary" : "default"}
+            className="h-12 rounded-[var(--radius-2xl)] px-7 font-bold"
+            asChild
+          >
+            <Link href={buttonLink}>
+              {buttonText}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+      )}
+    </>
+  );
+
+  const renderTextOnly = () => (
+    <div
+      className={`${contentWidthClasses[resolvedContentWidth]} ${textOnlyCentered ? "mx-auto" : "mr-auto"}`}
+    >
+      {renderHeader(textOnlyCentered)}
+      <div
+        className={`mt-7 ${richTextClasses} ${classes.body} ${textOnlyCentered ? "text-left" : ""}`}
+      >
+        <RichText data={content} />
+      </div>
+      {renderFooterContent(textOnlyCentered)}
+    </div>
+  );
+
+  const renderWrapLayout = () => {
+    const floatClasses = imageOnRight
+      ? "lg:float-right lg:ml-10 xl:ml-12"
+      : "lg:float-left lg:mr-10 xl:mr-12";
+
+    return (
+      <div className={`${contentWidthClasses[resolvedContentWidth]} mx-auto`}>
+        {renderHeader()}
+        <div className="mt-9 flow-root">
+          {renderImage(
+            `mb-8 w-full lg:mb-6 ${floatClasses} ${ratio.wrapWidth}`,
+            ratio.sizes,
+          )}
+          <div className={`${richTextClasses} ${classes.body}`}>
+            <RichText data={content} />
+          </div>
+        </div>
+        {renderFooterContent()}
+      </div>
+    );
+  };
+
+  const renderSplitLayout = () => {
+    const alignmentClass =
+      verticalAlignment === "start" ? "items-start" : "items-center";
+
+    return (
+      <div
+        className={`grid gap-12 lg:grid-cols-12 lg:gap-16 xl:gap-20 ${alignmentClass}`}
+      >
+        <div
+          className={`${ratio.mediaGrid} ${imageOnRight ? "lg:order-2" : "lg:order-1"}`}
+        >
+          {renderImage("w-full", ratio.sizes)}
+        </div>
+
+        <div
+          className={`${ratio.contentGrid} ${imageOnRight ? "lg:order-1" : "lg:order-2"}`}
+        >
+          {renderHeader()}
+          <div className={`mt-7 ${richTextClasses} ${classes.body}`}>
+            <RichText data={content} />
+          </div>
+          {renderFooterContent()}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <section
@@ -87,84 +296,11 @@ export function MediaTextBlock({
       </div>
 
       <div className="container relative mx-auto max-w-7xl px-4">
-        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16 xl:gap-24">
-          <div
-            className={`relative order-1 ${imageOnRight ? "lg:order-2" : "lg:order-1"}`}
-          >
-            <div className="absolute -inset-4 rounded-[var(--radius-3xl)] border border-primary/10 bg-primary/5 md:-inset-6" />
-            <div
-              className={`relative aspect-[4/3] overflow-hidden rounded-[var(--radius-3xl)] border border-border/50 shadow-2xl shadow-surface-inverse/15 ${classes.image}`}
-            >
-              <Image
-                src={imageUrl}
-                alt={media?.alt || title}
-                fill
-                className={
-                  imageFit === "contain"
-                    ? "object-contain p-6"
-                    : "object-cover"
-                }
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                quality={80}
-              />
-              {imageFit !== "contain" && (
-                <div className="absolute inset-0 bg-gradient-to-t from-surface-inverse/20 via-transparent to-transparent" />
-              )}
-            </div>
-          </div>
-
-          <div
-            className={`order-2 ${imageOnRight ? "lg:order-1" : "lg:order-2"}`}
-          >
-            {eyebrow && (
-              <div
-                className={`mb-5 inline-flex rounded-full border px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] ${classes.eyebrow}`}
-              >
-                {eyebrow}
-              </div>
-            )}
-
-            <h2 className="max-w-2xl text-3xl font-black leading-tight tracking-tight md:text-4xl lg:text-5xl">
-              {title}
-            </h2>
-
-            <div
-              className={`mt-7 space-y-5 text-base leading-8 md:text-lg [&_a]:font-semibold [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4 [&_h2]:pt-3 [&_h2]:text-2xl [&_h2]:font-bold [&_h3]:pt-3 [&_h3]:text-xl [&_h3]:font-bold [&_li]:mb-2 [&_ol]:ml-5 [&_ol]:list-decimal [&_p]:leading-8 [&_ul]:ml-5 [&_ul]:list-disc ${classes.body}`}
-            >
-              <RichText data={content} />
-            </div>
-
-            {highlight && (
-              <div
-                className={`mt-8 flex gap-4 rounded-[var(--radius-2xl)] border p-5 md:p-6 ${classes.highlight}`}
-              >
-                <Quote
-                  className="mt-0.5 h-6 w-6 shrink-0 text-primary"
-                  aria-hidden="true"
-                />
-                <p className="text-base font-semibold leading-7 md:text-lg">
-                  {highlight}
-                </p>
-              </div>
-            )}
-
-            {buttonText && buttonLink && (
-              <div className="mt-9">
-                <Button
-                  size="lg"
-                  variant={isDark ? "secondary" : "default"}
-                  className="h-12 rounded-[var(--radius-2xl)] px-7 font-bold"
-                  asChild
-                >
-                  <Link href={buttonLink}>
-                    {buttonText}
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
+        {!imageUrl
+          ? renderTextOnly()
+          : resolvedLayoutMode === "wrap"
+            ? renderWrapLayout()
+            : renderSplitLayout()}
       </div>
     </section>
   );
