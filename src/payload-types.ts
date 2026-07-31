@@ -645,18 +645,53 @@ export interface Page {
             blockType: 'mediaText';
           }
         | {
+            eyebrow?: string | null;
             title?: string | null;
             subtitle?: string | null;
             layoutMode?: ('auto' | 'grid' | 'featured' | 'compact') | null;
+            columns?: ('auto' | 'two' | 'three' | 'four') | null;
             alignment?: ('center' | 'left') | null;
+            cardStyle?: ('elevated' | 'outlined' | 'soft' | 'minimal') | null;
+            iconStyle?: ('boxed' | 'circle' | 'plain') | null;
             features?:
               | {
-                  icon?: ('star' | 'shield' | 'cpu' | 'globe' | 'heart' | 'settings') | null;
+                  icon?:
+                    | (
+                        | 'star'
+                        | 'shield'
+                        | 'cpu'
+                        | 'globe'
+                        | 'heart'
+                        | 'settings'
+                        | 'check'
+                        | 'award'
+                        | 'wrench'
+                        | 'package'
+                        | 'truck'
+                        | 'headset'
+                      )
+                    | null;
+                  accent?: ('primary' | 'blue' | 'teal' | 'amber' | 'violet' | 'rose') | null;
+                  image?: (number | null) | Media;
                   featureTitle: string;
                   featureDescription?: string | null;
+                  linkText?: string | null;
+                  link?: string | null;
                   id?: string | null;
                 }[]
               | null;
+            section?: {
+              /**
+               * Sayfa içi bağlantılarda kullanılacak benzersiz kimlik. Boşluk kullanmayın.
+               */
+              anchor?: string | null;
+              background?: ('transparent' | 'light' | 'muted' | 'dark' | 'primary') | null;
+              spacing?: ('none' | 'compact' | 'standard' | 'large') | null;
+              contentWidth?: ('compact' | 'standard' | 'wide' | 'full') | null;
+              dividerTop?: boolean | null;
+              dividerBottom?: boolean | null;
+              decoration?: ('none' | 'glow' | 'grid') | null;
+            };
             id?: string | null;
             blockName?: string | null;
             blockType: 'features';
@@ -698,26 +733,70 @@ export interface Page {
             blockType: 'testimonial';
           }
         | {
+            eyebrow?: string | null;
+            title?: string | null;
+            subtitle?: string | null;
+            layoutMode?: ('cards' | 'band' | 'minimal') | null;
+            columns?: ('auto' | 'two' | 'three' | 'four') | null;
+            alignment?: ('center' | 'left') | null;
+            animateValues?: boolean | null;
+            showDividers?: boolean | null;
             stats?:
               | {
-                  label: string;
+                  icon?: ('none' | 'calendar' | 'globe' | 'package' | 'users' | 'award' | 'shield' | 'truck') | null;
+                  prefix?: string | null;
                   value: string;
+                  suffix?: string | null;
+                  label: string;
+                  note?: string | null;
                   id?: string | null;
                 }[]
               | null;
+            section?: {
+              /**
+               * Sayfa içi bağlantılarda kullanılacak benzersiz kimlik. Boşluk kullanmayın.
+               */
+              anchor?: string | null;
+              background?: ('transparent' | 'light' | 'muted' | 'dark' | 'primary') | null;
+              spacing?: ('none' | 'compact' | 'standard' | 'large') | null;
+              contentWidth?: ('compact' | 'standard' | 'wide' | 'full') | null;
+              dividerTop?: boolean | null;
+              dividerBottom?: boolean | null;
+              decoration?: ('none' | 'glow' | 'grid') | null;
+            };
             id?: string | null;
             blockName?: string | null;
             blockType: 'stats';
           }
         | {
+            eyebrow?: string | null;
             title?: string | null;
+            subtitle?: string | null;
             galleryLayout?: ('mosaic' | 'grid' | 'masonry' | 'featured') | null;
+            imageRatio?: ('auto' | 'landscape' | 'wide' | 'square' | 'portrait') | null;
+            alignment?: ('left' | 'center') | null;
+            enableLightbox?: boolean | null;
+            showCaptions?: boolean | null;
             images?:
               | {
                   image: number | Media;
+                  title?: string | null;
+                  description?: string | null;
                   id?: string | null;
                 }[]
               | null;
+            section?: {
+              /**
+               * Sayfa içi bağlantılarda kullanılacak benzersiz kimlik. Boşluk kullanmayın.
+               */
+              anchor?: string | null;
+              background?: ('transparent' | 'light' | 'muted' | 'dark' | 'primary') | null;
+              spacing?: ('none' | 'compact' | 'standard' | 'large') | null;
+              contentWidth?: ('compact' | 'standard' | 'wide' | 'full') | null;
+              dividerTop?: boolean | null;
+              dividerBottom?: boolean | null;
+              decoration?: ('none' | 'glow' | 'grid') | null;
+            };
             id?: string | null;
             blockName?: string | null;
             blockType: 'gallery';
@@ -815,16 +894,50 @@ export interface Page {
             blockType: 'certificateGrid';
           }
         | {
+            eyebrow?: string | null;
             title?: string | null;
+            subtitle?: string | null;
+            layoutMode?: ('horizontal' | 'timeline' | 'cards') | null;
+            alignment?: ('center' | 'left') | null;
+            connectorStyle?: ('arrows' | 'line' | 'none') | null;
             showArrows?: boolean | null;
+            animateConnectors?: boolean | null;
             steps?:
               | {
-                  stepNumber: string;
+                  stepNumber?: string | null;
+                  icon?:
+                    | (
+                        | 'none'
+                        | 'search'
+                        | 'message'
+                        | 'settings'
+                        | 'package'
+                        | 'wrench'
+                        | 'truck'
+                        | 'check'
+                        | 'headset'
+                      )
+                    | null;
+                  image?: (number | null) | Media;
                   title: string;
                   description?: string | null;
+                  linkText?: string | null;
+                  link?: string | null;
                   id?: string | null;
                 }[]
               | null;
+            section?: {
+              /**
+               * Sayfa içi bağlantılarda kullanılacak benzersiz kimlik. Boşluk kullanmayın.
+               */
+              anchor?: string | null;
+              background?: ('transparent' | 'light' | 'muted' | 'dark' | 'primary') | null;
+              spacing?: ('none' | 'compact' | 'standard' | 'large') | null;
+              contentWidth?: ('compact' | 'standard' | 'wide' | 'full') | null;
+              dividerTop?: boolean | null;
+              dividerBottom?: boolean | null;
+              decoration?: ('none' | 'glow' | 'grid') | null;
+            };
             id?: string | null;
             blockName?: string | null;
             blockType: 'process';
@@ -1431,17 +1544,36 @@ export interface PagesSelect<T extends boolean = true> {
         features?:
           | T
           | {
+              eyebrow?: T;
               title?: T;
               subtitle?: T;
               layoutMode?: T;
+              columns?: T;
               alignment?: T;
+              cardStyle?: T;
+              iconStyle?: T;
               features?:
                 | T
                 | {
                     icon?: T;
+                    accent?: T;
+                    image?: T;
                     featureTitle?: T;
                     featureDescription?: T;
+                    linkText?: T;
+                    link?: T;
                     id?: T;
+                  };
+              section?:
+                | T
+                | {
+                    anchor?: T;
+                    background?: T;
+                    spacing?: T;
+                    contentWidth?: T;
+                    dividerTop?: T;
+                    dividerBottom?: T;
+                    decoration?: T;
                   };
               id?: T;
               blockName?: T;
@@ -1488,12 +1620,35 @@ export interface PagesSelect<T extends boolean = true> {
         stats?:
           | T
           | {
+              eyebrow?: T;
+              title?: T;
+              subtitle?: T;
+              layoutMode?: T;
+              columns?: T;
+              alignment?: T;
+              animateValues?: T;
+              showDividers?: T;
               stats?:
                 | T
                 | {
-                    label?: T;
+                    icon?: T;
+                    prefix?: T;
                     value?: T;
+                    suffix?: T;
+                    label?: T;
+                    note?: T;
                     id?: T;
+                  };
+              section?:
+                | T
+                | {
+                    anchor?: T;
+                    background?: T;
+                    spacing?: T;
+                    contentWidth?: T;
+                    dividerTop?: T;
+                    dividerBottom?: T;
+                    decoration?: T;
                   };
               id?: T;
               blockName?: T;
@@ -1501,13 +1656,32 @@ export interface PagesSelect<T extends boolean = true> {
         gallery?:
           | T
           | {
+              eyebrow?: T;
               title?: T;
+              subtitle?: T;
               galleryLayout?: T;
+              imageRatio?: T;
+              alignment?: T;
+              enableLightbox?: T;
+              showCaptions?: T;
               images?:
                 | T
                 | {
                     image?: T;
+                    title?: T;
+                    description?: T;
                     id?: T;
+                  };
+              section?:
+                | T
+                | {
+                    anchor?: T;
+                    background?: T;
+                    spacing?: T;
+                    contentWidth?: T;
+                    dividerTop?: T;
+                    dividerBottom?: T;
+                    decoration?: T;
                   };
               id?: T;
               blockName?: T;
@@ -1607,15 +1781,36 @@ export interface PagesSelect<T extends boolean = true> {
         process?:
           | T
           | {
+              eyebrow?: T;
               title?: T;
+              subtitle?: T;
+              layoutMode?: T;
+              alignment?: T;
+              connectorStyle?: T;
               showArrows?: T;
+              animateConnectors?: T;
               steps?:
                 | T
                 | {
                     stepNumber?: T;
+                    icon?: T;
+                    image?: T;
                     title?: T;
                     description?: T;
+                    linkText?: T;
+                    link?: T;
                     id?: T;
+                  };
+              section?:
+                | T
+                | {
+                    anchor?: T;
+                    background?: T;
+                    spacing?: T;
+                    contentWidth?: T;
+                    dividerTop?: T;
+                    dividerBottom?: T;
+                    decoration?: T;
                   };
               id?: T;
               blockName?: T;
