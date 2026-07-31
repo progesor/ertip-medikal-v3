@@ -48,9 +48,11 @@ export function AnimatedStatValue({
     ).matches;
 
     if (prefersReducedMotion) {
-      setDisplayValue(numericValue);
-      setHasAnimated(true);
-      return;
+      const frame = requestAnimationFrame(() => {
+        setDisplayValue(numericValue);
+        setHasAnimated(true);
+      });
+      return () => cancelAnimationFrame(frame);
     }
 
     const element = rootRef.current;
