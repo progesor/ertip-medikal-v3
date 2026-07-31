@@ -1,0 +1,87 @@
+name: Generate M9 Content Block Artifacts
+
+on:
+  push:
+    branches:
+      - agent/m9-content-block-polish
+    paths:
+      - .github/workflows/generate-m9-content-block-polish.yml
+
+permissions:
+  contents: write
+
+env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "10"
+  DATABASE_URI: postgresql://payload:payload@127.0.0.1:5432/ertip_m9_content_blocks
+  PAYLOAD_SECRET: m9-content-block-polish-ci-secret
+  NEXT_PUBLIC_SITE_URL: http://localhost:3000
+  SMTP_HOST: 127.0.0.1
+  SMTP_PORT: "1025"
+  SMTP_USER: ci
+  SMTP_PASS: ci
+  SMTP_FROM_NAME: Ertip Medikal CI
+  SMTP_FROM_ADDRESS: ci@example.invalid
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: payload
+          POSTGRES_PASSWORD: payload
+          POSTGRES_DB: ertip_m9_content_blocks
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U payload -d ertip_m9_content_blocks"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/m9-content-block-polish
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Apply existing migrations
+        run: pnpm db:migrate
+
+      - name: Generate Payload types and import map
+        run: |
+          pnpm payload:types
+          pnpm payload:importmap
+
+      - name: Create M9 content block migration
+        run: pnpm db:migrate:create m9_content_block_polish
+
+      - name: Commit generated artifacts
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/payload-types.ts 'src/app/(payload)/admin/importMap.js' src/migrations
+          if git diff --cached --quiet; then
+            echo "No generated artifacts changed."
+            exit 0
+          fi
+          git commit -m "chore(cms): commit M9 content block artifacts"
+          git push origin HEAD:agent/m9-content-block-polish
