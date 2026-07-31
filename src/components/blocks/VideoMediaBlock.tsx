@@ -17,7 +17,8 @@ type MediaValue =
       alt?: string | null;
       mimeType?: string | null;
     }
-  | null;
+  | null
+  | undefined;
 
 type VideoMediaBlockProps = {
   eyebrow?: string | null;
@@ -49,17 +50,23 @@ function getMedia(value: MediaValue) {
 
 function getExternalEmbedUrl(
   rawUrl: string,
-  options: { autoplay: boolean; muted: boolean; loop: boolean; controls: boolean },
+  options: {
+    autoplay: boolean;
+    muted: boolean;
+    loop: boolean;
+    controls: boolean;
+  },
 ) {
   try {
     const url = new URL(rawUrl);
     const hostname = url.hostname.replace(/^www\./, "");
 
     if (hostname === "youtu.be" || hostname.endsWith("youtube.com")) {
-      const id = hostname === "youtu.be"
-        ? url.pathname.split("/").filter(Boolean)[0]
-        : url.searchParams.get("v") ||
-          url.pathname.match(/\/(?:embed|shorts)\/([^/?]+)/)?.[1];
+      const id =
+        hostname === "youtu.be"
+          ? url.pathname.split("/").filter(Boolean)[0]
+          : url.searchParams.get("v") ||
+            url.pathname.match(/\/(?:embed|shorts)\/([^/?]+)/)?.[1];
       if (!id) return null;
 
       const params = new URLSearchParams({
@@ -77,7 +84,10 @@ function getExternalEmbedUrl(
     }
 
     if (hostname === "vimeo.com" || hostname.endsWith("player.vimeo.com")) {
-      const id = url.pathname.split("/").filter(Boolean).find((part) => /^\d+$/.test(part));
+      const id = url.pathname
+        .split("/")
+        .filter(Boolean)
+        .find((part) => /^\d+$/.test(part));
       if (!id) return null;
       const params = new URLSearchParams({
         autoplay: options.autoplay ? "1" : "0",
@@ -99,7 +109,7 @@ const ratioClasses = {
   "16:9": "aspect-video",
   "4:3": "aspect-[4/3]",
   "1:1": "aspect-square",
-  "9:16": "aspect-[9/16] max-w-md mx-auto",
+  "9:16": "mx-auto aspect-[9/16] max-w-md",
 } as const;
 
 export function VideoMediaBlock({
@@ -140,9 +150,17 @@ export function VideoMediaBlock({
         controls: controls !== false,
       })
     : null;
-  const hasPlayableMedia = resolvedSource === "upload" ? Boolean(video?.url) : Boolean(embedUrl);
-  const inverse = section?.background === "dark" || section?.background === "primary";
-  const hasText = Boolean(eyebrow || title || subtitle || content || (buttonText && buttonLink));
+  const hasPlayableMedia =
+    resolvedSource === "upload" ? Boolean(video?.url) : Boolean(embedUrl);
+  const inverse =
+    section?.background === "dark" || section?.background === "primary";
+  const hasText = Boolean(
+    eyebrow ||
+      title ||
+      subtitle ||
+      content ||
+      (buttonText && buttonLink),
+  );
 
   if (!hasPlayableMedia && !hasText) return null;
 
@@ -152,7 +170,8 @@ export function VideoMediaBlock({
         className={cn(
           "relative overflow-hidden rounded-[var(--radius-2xl)] bg-surface-inverse",
           ratioClasses[resolvedRatio],
-          resolvedFrame === "elevated" && "border border-border/50 shadow-2xl shadow-surface-inverse/15",
+          resolvedFrame === "elevated" &&
+            "border border-border/50 shadow-2xl shadow-surface-inverse/15",
           resolvedFrame === "outlined" && "border border-border",
         )}
       >
@@ -177,7 +196,9 @@ export function VideoMediaBlock({
             loop={Boolean(loop)}
             playsInline
             preload="metadata"
-            aria-label={video.alt || title || "Ertip Medikal video içeriği"}
+            aria-label={
+              video.alt || title || "Ertip Medikal video içeriği"
+            }
           />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-surface-muted text-text-muted">
@@ -212,7 +233,11 @@ export function VideoMediaBlock({
         </div>
       )}
       {buttonText && buttonLink && (
-        <Button asChild size="lg" className="mt-8 rounded-[var(--radius-xl)] font-bold">
+        <Button
+          asChild
+          size="lg"
+          className="mt-8 rounded-[var(--radius-xl)] font-bold"
+        >
           <Link href={buttonLink}>
             {buttonText}
             <ArrowRight className="ml-2 h-4 w-4" />
@@ -231,8 +256,12 @@ export function VideoMediaBlock({
     >
       {resolvedLayout === "split" ? (
         <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-          <div className={cn(resolvedPosition === "right" && "lg:order-2")}>{mediaElement}</div>
-          <div className={cn(resolvedPosition === "right" && "lg:order-1")}>{textElement}</div>
+          <div className={cn(resolvedPosition === "right" && "lg:order-2")}>
+            {mediaElement}
+          </div>
+          <div className={cn(resolvedPosition === "right" && "lg:order-1")}>
+            {textElement}
+          </div>
         </div>
       ) : (
         <div>
