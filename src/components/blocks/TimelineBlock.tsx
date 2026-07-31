@@ -15,7 +15,8 @@ type MediaValue =
       url?: string | null;
       alt?: string | null;
     }
-  | null;
+  | null
+  | undefined;
 
 type TimelineItem = {
   dateLabel?: string | null;
@@ -65,7 +66,12 @@ function TimelineCard({
       )}
     >
       {media && (
-        <div className={cn("relative overflow-hidden", compact ? "aspect-[16/9]" : "aspect-[4/3]") }>
+        <div
+          className={cn(
+            "relative overflow-hidden",
+            compact ? "aspect-[16/9]" : "aspect-[4/3]",
+          )}
+        >
           <Image
             src={media.url!}
             alt={media.alt || item.itemTitle || "Zaman çizgisi görseli"}
@@ -76,7 +82,7 @@ function TimelineCard({
         </div>
       )}
 
-      <div className={cn(compact ? "p-5" : "p-6 md:p-8") }>
+      <div className={cn(compact ? "p-5" : "p-6 md:p-8")}>
         {item.dateLabel && (
           <div className="mb-3 inline-flex rounded-full bg-primary/10 px-3 py-1 text-sm font-black tracking-wide text-primary">
             {item.dateLabel}
@@ -120,7 +126,8 @@ export function TimelineBlock({
 
   const resolvedLayout = layoutMode || "alternating";
   const resolvedCardStyle = cardStyle || "elevated";
-  const inverse = section?.background === "dark" || section?.background === "primary";
+  const inverse =
+    section?.background === "dark" || section?.background === "primary";
 
   return (
     <SectionShell
@@ -154,12 +161,21 @@ export function TimelineBlock({
       {resolvedLayout === "vertical" && (
         <div className="relative mx-auto max-w-4xl space-y-8 before:absolute before:bottom-0 before:left-[15px] before:top-0 before:w-px before:bg-border md:before:left-[19px]">
           {items.map((item, index) => (
-            <div key={`${item.dateLabel || "item"}-${index}`} className="relative pl-12 md:pl-16">
-              <div className={cn(
-                "absolute left-0 top-7 h-8 w-8 rounded-full border-4 border-background bg-primary shadow-md md:h-10 md:w-10",
-                item.highlight && "ring-4 ring-primary/15",
-              )} />
-              <TimelineCard item={item} cardStyle={resolvedCardStyle} compact />
+            <div
+              key={`${item.dateLabel || "item"}-${index}`}
+              className="relative pl-12 md:pl-16"
+            >
+              <div
+                className={cn(
+                  "absolute left-0 top-7 h-8 w-8 rounded-full border-4 border-background bg-primary shadow-md md:h-10 md:w-10",
+                  item.highlight && "ring-4 ring-primary/15",
+                )}
+              />
+              <TimelineCard
+                item={item}
+                cardStyle={resolvedCardStyle}
+                compact
+              />
             </div>
           ))}
         </div>
@@ -174,13 +190,23 @@ export function TimelineBlock({
                 key={`${item.dateLabel || "item"}-${index}`}
                 className="relative grid gap-8 pl-12 md:grid-cols-2 md:pl-0"
               >
-                <div className={cn("md:pr-12", right && "md:col-start-2 md:pl-12 md:pr-0") }>
-                  <TimelineCard item={item} cardStyle={resolvedCardStyle} />
+                <div
+                  className={cn(
+                    "md:pr-12",
+                    right && "md:col-start-2 md:pl-12 md:pr-0",
+                  )}
+                >
+                  <TimelineCard
+                    item={item}
+                    cardStyle={resolvedCardStyle}
+                  />
                 </div>
-                <div className={cn(
-                  "absolute left-0 top-8 h-8 w-8 rounded-full border-4 border-background bg-primary shadow-md md:left-1/2 md:-translate-x-1/2 md:h-10 md:w-10",
-                  item.highlight && "ring-4 ring-primary/15",
-                )} />
+                <div
+                  className={cn(
+                    "absolute left-0 top-8 h-8 w-8 rounded-full border-4 border-background bg-primary shadow-md md:left-1/2 md:h-10 md:w-10 md:-translate-x-1/2",
+                    item.highlight && "ring-4 ring-primary/15",
+                  )}
+                />
               </div>
             );
           })}
