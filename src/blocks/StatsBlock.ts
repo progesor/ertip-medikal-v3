@@ -66,6 +66,10 @@ export const StatsBlock: Block = {
           type: "checkbox",
           label: "Sayısal Değerleri Animasyonla Göster",
           defaultValue: false,
+          admin: {
+            description:
+              "Yalnızca tamamen sayısal değerler animasyonla gösterilir. Global, Uçtan Uca veya ISO 13485 gibi metinler aynen kalır.",
+          },
         },
         {
           name: "showDividers",
@@ -109,9 +113,13 @@ export const StatsBlock: Block = {
             {
               name: "value",
               type: "text",
-              label: "Değer",
+              label: "Değer (Metin veya Sayı)",
               required: true,
-              admin: { placeholder: "25" },
+              admin: {
+                placeholder: "20 / Global / Uçtan Uca",
+                description:
+                  "Sayı veya metin girebilirsiniz. Tamamen sayısal değerler animasyon seçeneği açıksa animasyonla gösterilir.",
+              },
             },
             {
               name: "suffix",
