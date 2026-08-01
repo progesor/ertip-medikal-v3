@@ -43,6 +43,15 @@ function relationId(value: unknown) {
   return "";
 }
 
+function relationIds(value: unknown) {
+  if (Array.isArray(value)) {
+    return value.map(relationId).filter(Boolean);
+  }
+
+  const id = relationId(value);
+  return id ? [id] : [];
+}
+
 const ratioClasses = {
   "4:3": "aspect-[4/3]",
   "16:9": "aspect-video",
@@ -86,7 +95,7 @@ export async function ProductCategoryShowcaseBlock({
       where: { _status: { equals: "published" } },
       pagination: false,
       depth: 0,
-      select: { category: true },
+      select: { category: true, variants: true },
     }),
   ]);
 
@@ -108,11 +117,24 @@ export async function ProductCategoryShowcaseBlock({
       ? selectedIds.map((id) => byId.get(id)).filter(Boolean)
       : allCategories.filter((category) => !relationId(category.parent));
 
-  const directCounts = new Map<string, number>();
+  // Products can belong to multiple categories. Keep a per-category map keyed
+  // by product ID so a product assigned to both a parent and one of its child
+  // categories is still counted only once when descendant totals are combined.
+  const productsByCategory = new Map<string, Map<string, number>>();
+
   for (const product of productResult.docs) {
-    const categoryId = relationId(product.category);
-    if (!categoryId) continue;
-    directCounts.set(categoryId, (directCounts.get(categoryId) || 0) + 1);
+    const productId = String(product.id);
+    const categoryIds = [...new Set(relationIds(product.category))];
+    const activeVariantCount = Array.isArray(product.variants)
+      ? product.variants.filter((variant) => variant?.isActive !== false).length
+      : 0;
+
+    for (const categoryId of categoryIds) {
+      const categoryProducts =
+        productsByCategory.get(categoryId) || new Map<string, number>();
+      categoryProducts.set(productId, activeVariantCount);
+      productsByCategory.set(categoryId, categoryProducts);
+    }
   }
 
   const collectDescendants = (id: string, seen = new Set<string>()): string[] => {
@@ -124,7 +146,20 @@ export async function ProductCategoryShowcaseBlock({
 
   const countForCategory = (id: string) => {
     const ids = includeChildProducts ? [id, ...collectDescendants(id)] : [id];
-    return ids.reduce((total, currentId) => total + (directCounts.get(currentId) || 0), 0);
+    const products = new Map<string, number>();
+
+    for (const categoryId of ids) {
+      for (const [productId, variantCount] of productsByCategory.get(categoryId) || []) {
+        if (!products.has(productId)) {
+          products.set(productId, variantCount);
+        }
+      }
+    }
+
+    return {
+      products: products.size,
+      variants: [...products.values()].reduce((total, count) => total + count, 0),
+    };
   };
 
   const inverse = section?.background === "dark" || section?.background === "primary";
@@ -162,6 +197,19 @@ export async function ProductCategoryShowcaseBlock({
             const featured = resolvedLayout === "featured" && index === 0;
             const compact = resolvedLayout === "compact";
             const href = `/urunler?category=${encodeURIComponent(category.slug)}`;
+
+            const countLabel = (
+              <>
+                <Package className="h-4 w-4" />
+                <span>{productCount.products} ürün</span>
+                {productCount.variants > 0 && (
+                  <>
+                    <span aria-hidden="true">•</span>
+                    <span>{productCount.variants} varyant</span>
+                  </>
+                )}
+              </>
+            );
 
             return (
               <Link
@@ -208,8 +256,8 @@ export async function ProductCategoryShowcaseBlock({
                       )}
                       <div className="mt-5 flex items-center justify-between gap-4">
                         {showProductCount && (
-                          <span className="inline-flex items-center gap-2 text-sm font-bold text-surface-inverse-foreground/80">
-                            <Package className="h-4 w-4" /> {productCount} ürün
+                          <span className="inline-flex flex-wrap items-center gap-2 text-sm font-bold text-surface-inverse-foreground/80">
+                            {countLabel}
                           </span>
                         )}
                         <ArrowUpRight className="ml-auto h-5 w-5 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
@@ -232,8 +280,8 @@ export async function ProductCategoryShowcaseBlock({
                       </p>
                     )}
                     {showProductCount && (
-                      <div className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-primary">
-                        <Package className="h-4 w-4" /> {productCount} ürün
+                      <div className="mt-5 inline-flex flex-wrap items-center gap-2 text-sm font-bold text-primary">
+                        {countLabel}
                       </div>
                     )}
                   </div>
