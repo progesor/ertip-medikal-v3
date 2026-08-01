@@ -176,7 +176,7 @@ export interface User {
   collection: 'users';
 }
 /**
- * Ürün görsellerini, belgeleri ve site medyalarını yönetin.
+ * Ürün görsellerini, videoları, belgeleri ve site medyalarını yönetin.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
@@ -184,7 +184,7 @@ export interface User {
 export interface Media {
   id: number;
   /**
-   * Görseller için SEO metni, PDF'ler için dosya başlığı olarak kullanılır.
+   * Görseller için SEO metni; video ve PDF'ler için erişilebilir dosya başlığı olarak kullanılır.
    */
   alt: string;
   caption?: string | null;
@@ -643,6 +643,138 @@ export interface Page {
             id?: string | null;
             blockName?: string | null;
             blockType: 'mediaText';
+          }
+        | {
+            eyebrow?: string | null;
+            title?: string | null;
+            subtitle?: string | null;
+            layoutMode?: ('alternating' | 'vertical' | 'cards') | null;
+            alignment?: ('center' | 'left') | null;
+            cardStyle?: ('elevated' | 'outlined' | 'minimal') | null;
+            items?:
+              | {
+                  dateLabel: string;
+                  itemTitle: string;
+                  description?: string | null;
+                  image?: (number | null) | Media;
+                  highlight?: boolean | null;
+                  linkText?: string | null;
+                  link?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            section?: {
+              /**
+               * Sayfa içi bağlantılarda kullanılacak benzersiz kimlik. Boşluk kullanmayın.
+               */
+              anchor?: string | null;
+              background?: ('transparent' | 'light' | 'muted' | 'dark' | 'primary') | null;
+              spacing?: ('none' | 'compact' | 'standard' | 'large') | null;
+              contentWidth?: ('compact' | 'standard' | 'wide' | 'full') | null;
+              dividerTop?: boolean | null;
+              dividerBottom?: boolean | null;
+              decoration?: ('none' | 'glow' | 'grid') | null;
+            };
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'timeline';
+          }
+        | {
+            eyebrow?: string | null;
+            title?: string | null;
+            subtitle?: string | null;
+            selectionMode?: ('topLevel' | 'manual') | null;
+            layoutMode?: ('grid' | 'featured' | 'compact') | null;
+            columns?: ('2' | '3' | '4') | null;
+            /**
+             * Kategorileri görünmesini istediğiniz sırayla seçin.
+             */
+            categories?: (number | Category)[] | null;
+            cardStyle?: ('overlay' | 'card' | 'minimal') | null;
+            imageRatio?: ('4:3' | '16:9' | '1:1' | '3:4') | null;
+            alignment?: ('center' | 'left') | null;
+            showDescription?: boolean | null;
+            showProductCount?: boolean | null;
+            includeChildProducts?: boolean | null;
+            emptyStateText?: string | null;
+            section?: {
+              /**
+               * Sayfa içi bağlantılarda kullanılacak benzersiz kimlik. Boşluk kullanmayın.
+               */
+              anchor?: string | null;
+              background?: ('transparent' | 'light' | 'muted' | 'dark' | 'primary') | null;
+              spacing?: ('none' | 'compact' | 'standard' | 'large') | null;
+              contentWidth?: ('compact' | 'standard' | 'wide' | 'full') | null;
+              dividerTop?: boolean | null;
+              dividerBottom?: boolean | null;
+              decoration?: ('none' | 'glow' | 'grid') | null;
+            };
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'productCategoryShowcase';
+          }
+        | {
+            eyebrow?: string | null;
+            title?: string | null;
+            subtitle?: string | null;
+            content?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            sourceType?: ('external' | 'upload') | null;
+            layoutMode?: ('full' | 'split') | null;
+            mediaPosition?: ('left' | 'right') | null;
+            /**
+             * Yalnızca YouTube veya Vimeo bağlantıları gömülür.
+             */
+            externalUrl?: string | null;
+            /**
+             * MP4, WebM veya OGG video dosyası seçin.
+             */
+            videoFile?: (number | null) | Media;
+            /**
+             * Video başlamadan önce gösterilecek kapak görseli.
+             */
+            poster?: (number | null) | Media;
+            aspectRatio?: ('16:9' | '4:3' | '1:1' | '9:16') | null;
+            frameStyle?: ('elevated' | 'outlined' | 'plain') | null;
+            alignment?: ('center' | 'left') | null;
+            controls?: boolean | null;
+            /**
+             * Tarayıcı kuralları gereği otomatik oynatma sessiz başlar.
+             */
+            autoplay?: boolean | null;
+            loop?: boolean | null;
+            muted?: boolean | null;
+            caption?: string | null;
+            buttonText?: string | null;
+            buttonLink?: string | null;
+            section?: {
+              /**
+               * Sayfa içi bağlantılarda kullanılacak benzersiz kimlik. Boşluk kullanmayın.
+               */
+              anchor?: string | null;
+              background?: ('transparent' | 'light' | 'muted' | 'dark' | 'primary') | null;
+              spacing?: ('none' | 'compact' | 'standard' | 'large') | null;
+              contentWidth?: ('compact' | 'standard' | 'wide' | 'full') | null;
+              dividerTop?: boolean | null;
+              dividerBottom?: boolean | null;
+              decoration?: ('none' | 'glow' | 'grid') | null;
+            };
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'videoMedia';
           }
         | {
             eyebrow?: string | null;
@@ -1538,6 +1670,109 @@ export interface PagesSelect<T extends boolean = true> {
               highlight?: T;
               buttonText?: T;
               buttonLink?: T;
+              id?: T;
+              blockName?: T;
+            };
+        timeline?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              subtitle?: T;
+              layoutMode?: T;
+              alignment?: T;
+              cardStyle?: T;
+              items?:
+                | T
+                | {
+                    dateLabel?: T;
+                    itemTitle?: T;
+                    description?: T;
+                    image?: T;
+                    highlight?: T;
+                    linkText?: T;
+                    link?: T;
+                    id?: T;
+                  };
+              section?:
+                | T
+                | {
+                    anchor?: T;
+                    background?: T;
+                    spacing?: T;
+                    contentWidth?: T;
+                    dividerTop?: T;
+                    dividerBottom?: T;
+                    decoration?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        productCategoryShowcase?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              subtitle?: T;
+              selectionMode?: T;
+              layoutMode?: T;
+              columns?: T;
+              categories?: T;
+              cardStyle?: T;
+              imageRatio?: T;
+              alignment?: T;
+              showDescription?: T;
+              showProductCount?: T;
+              includeChildProducts?: T;
+              emptyStateText?: T;
+              section?:
+                | T
+                | {
+                    anchor?: T;
+                    background?: T;
+                    spacing?: T;
+                    contentWidth?: T;
+                    dividerTop?: T;
+                    dividerBottom?: T;
+                    decoration?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        videoMedia?:
+          | T
+          | {
+              eyebrow?: T;
+              title?: T;
+              subtitle?: T;
+              content?: T;
+              sourceType?: T;
+              layoutMode?: T;
+              mediaPosition?: T;
+              externalUrl?: T;
+              videoFile?: T;
+              poster?: T;
+              aspectRatio?: T;
+              frameStyle?: T;
+              alignment?: T;
+              controls?: T;
+              autoplay?: T;
+              loop?: T;
+              muted?: T;
+              caption?: T;
+              buttonText?: T;
+              buttonLink?: T;
+              section?:
+                | T
+                | {
+                    anchor?: T;
+                    background?: T;
+                    spacing?: T;
+                    contentWidth?: T;
+                    dividerTop?: T;
+                    dividerBottom?: T;
+                    decoration?: T;
+                  };
               id?: T;
               blockName?: T;
             };

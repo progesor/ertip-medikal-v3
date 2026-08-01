@@ -39,7 +39,8 @@ export const Media: CollectionConfig = {
   labels: { singular: "Medya", plural: "Medyalar" },
   admin: {
     group: "Ürün Yönetimi",
-    description: "Ürün görsellerini, belgeleri ve site medyalarını yönetin.",
+    description:
+      "Ürün görsellerini, videoları, belgeleri ve site medyalarını yönetin.",
   },
   access: {
     read: async ({ req, id }) => {
@@ -53,10 +54,6 @@ export const Media: CollectionConfig = {
       ({ doc, req }) => {
         if (req.user || !doc?.url || !doc?.sizes) return doc;
 
-        // Historical Payload sizes were generated with fixed width + height and
-        // therefore contain irreversible centre crops. Public website reads
-        // always start from the original asset; the manual optimizer creates
-        // its own aspect-ratio-safe derivatives from that source.
         const sizes = Object.fromEntries(
           Object.entries(doc.sizes).map(([name, size]) => [
             name,
@@ -95,8 +92,6 @@ export const Media: CollectionConfig = {
     ],
   },
   upload: {
-    // Dosyaları projenin kök dizinindeki 'media' klasörüne kaydeder.
-    // Payload bunları otomatik olarak /api/media/file/resim.jpg adresinden sunar.
     staticDir: path.resolve(process.cwd(), "media"),
     crop: false,
     focalPoint: false,
@@ -106,7 +101,7 @@ export const Media: CollectionConfig = {
       { name: "hero", width: 1920, withoutEnlargement: true },
     ],
     adminThumbnail: "thumbnail",
-    mimeTypes: ["image/*", "application/pdf"],
+    mimeTypes: ["image/*", "video/mp4", "video/webm", "video/ogg", "application/pdf"],
   },
   fields: [
     {
@@ -116,7 +111,7 @@ export const Media: CollectionConfig = {
       label: "Alternatif Metin / Belge Adı",
       admin: {
         description:
-          "Görseller için SEO metni, PDF'ler için dosya başlığı olarak kullanılır.",
+          "Görseller için SEO metni; video ve PDF'ler için erişilebilir dosya başlığı olarak kullanılır.",
       },
     },
     {

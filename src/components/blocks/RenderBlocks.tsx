@@ -2,6 +2,9 @@ import { HeroBlock } from "@/components/blocks/HeroBlock";
 import { HeroSliderBlock } from "@/components/blocks/HeroSliderBlock";
 import { ContentBlock } from "@/components/blocks/ContentBlock";
 import { MediaTextBlock } from "@/components/blocks/MediaTextBlock";
+import { TimelineBlock } from "@/components/blocks/TimelineBlock";
+import { ProductCategoryShowcaseBlock } from "@/components/blocks/ProductCategoryShowcaseBlock";
+import { VideoMediaBlock } from "@/components/blocks/VideoMediaBlock";
 import { FeaturesBlock } from "@/components/blocks/FeaturesBlock";
 import { FeaturedProductsBlock } from "@/components/blocks/FeaturedProductsBlock";
 import { FAQBlock } from "@/components/blocks/FAQBlock";
@@ -70,6 +73,12 @@ export function RenderBlocks({ blocks, context }: RenderBlocksProps) {
         return <ContentBlock key={key} {...props} />;
       case "mediaText":
         return <MediaTextBlock key={key} {...props} />;
+      case "timeline":
+        return <TimelineBlock key={key} {...props} />;
+      case "productCategoryShowcase":
+        return <ProductCategoryShowcaseBlock key={key} {...props} />;
+      case "videoMedia":
+        return <VideoMediaBlock key={key} {...props} />;
       case "features":
         return <FeaturesBlock key={key} {...props} />;
       case "featuredProducts":
