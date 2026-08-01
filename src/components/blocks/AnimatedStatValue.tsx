@@ -11,12 +11,13 @@ type AnimatedStatValueProps = {
 };
 
 function parseNumericValue(value: string) {
-  const normalized = value
-    .trim()
-    .replace(/\s/g, "")
-    .replace(",", ".")
-    .replace(/[^0-9.-]/g, "");
-  const parsed = Number(normalized);
+  const normalized = value.trim().replace(/\s/g, "");
+
+  // Animate only values that are genuinely numeric from start to finish.
+  // Textual values such as "Global", "Uçtan Uca" or "ISO 13485" must stay text.
+  if (!/^-?\d+(?:[.,]\d+)?$/.test(normalized)) return null;
+
+  const parsed = Number(normalized.replace(",", "."));
   return Number.isFinite(parsed) ? parsed : null;
 }
 
@@ -24,6 +25,11 @@ function getDecimalPlaces(value: number) {
   const valueString = String(value);
   const decimalIndex = valueString.indexOf(".");
   return decimalIndex === -1 ? 0 : valueString.length - decimalIndex - 1;
+}
+
+function isLikelyYear(value: string, numericValue: number) {
+  const normalized = value.trim().replace(/\s/g, "");
+  return /^\d{4}$/.test(normalized) && numericValue >= 1800 && numericValue <= 2199;
 }
 
 export function AnimatedStatValue({
@@ -94,6 +100,7 @@ export function AnimatedStatValue({
       : new Intl.NumberFormat("tr-TR", {
           minimumFractionDigits: getDecimalPlaces(numericValue),
           maximumFractionDigits: getDecimalPlaces(numericValue),
+          useGrouping: !isLikelyYear(value, numericValue),
         }).format(displayValue ?? numericValue);
 
   const accessibleValue = `${prefix || ""}${value}${suffix || ""}`;

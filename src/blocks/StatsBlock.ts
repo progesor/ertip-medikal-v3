@@ -109,9 +109,9 @@ export const StatsBlock: Block = {
             {
               name: "value",
               type: "text",
-              label: "Değer",
+              label: "Değer (Metin veya Sayı)",
               required: true,
-              admin: { placeholder: "25" },
+              admin: { placeholder: "20 / Global / Uçtan Uca" },
             },
             {
               name: "suffix",
