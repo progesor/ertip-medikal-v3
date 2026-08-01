@@ -11,12 +11,13 @@ type AnimatedStatValueProps = {
 };
 
 function parseNumericValue(value: string) {
-  const normalized = value
-    .trim()
-    .replace(/\s/g, "")
-    .replace(",", ".")
-    .replace(/[^0-9.-]/g, "");
-  const parsed = Number(normalized);
+  const normalized = value.trim().replace(/\s/g, "");
+
+  // Animate only values that are genuinely numeric from start to finish.
+  // Textual values such as "Global", "Uçtan Uca" or "ISO 13485" must stay text.
+  if (!/^-?\d+(?:[.,]\d+)?$/.test(normalized)) return null;
+
+  const parsed = Number(normalized.replace(",", "."));
   return Number.isFinite(parsed) ? parsed : null;
 }
 
