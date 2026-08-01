@@ -7,7 +7,7 @@
   "type": "module",
   "scripts": {
     "predev": "pnpm payload:importmap",
-    "dev": "next dev",
+    "dev": "next dev --no-server-fast-refresh",
     "prebuild": "pnpm payload:importmap",
     "build": "next build",
     "build:deploy": "pnpm db:migrate && pnpm build",
