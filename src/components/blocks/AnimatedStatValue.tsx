@@ -27,6 +27,11 @@ function getDecimalPlaces(value: number) {
   return decimalIndex === -1 ? 0 : valueString.length - decimalIndex - 1;
 }
 
+function isLikelyYear(value: string, numericValue: number) {
+  const normalized = value.trim().replace(/\s/g, "");
+  return /^\d{4}$/.test(normalized) && numericValue >= 1800 && numericValue <= 2199;
+}
+
 export function AnimatedStatValue({
   value,
   prefix,
@@ -95,6 +100,7 @@ export function AnimatedStatValue({
       : new Intl.NumberFormat("tr-TR", {
           minimumFractionDigits: getDecimalPlaces(numericValue),
           maximumFractionDigits: getDecimalPlaces(numericValue),
+          useGrouping: !isLikelyYear(value, numericValue),
         }).format(displayValue ?? numericValue);
 
   const accessibleValue = `${prefix || ""}${value}${suffix || ""}`;
