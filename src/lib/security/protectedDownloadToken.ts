@@ -28,6 +28,13 @@ function sign(encodedPayload: string) {
     .digest("base64url");
 }
 
+export function fingerprintProtectedAccessCode(code: string) {
+  return `hmac:${createHmac("sha256", getSigningSecret())
+    .update(`access-code:${code}`)
+    .digest("hex")
+    .slice(0, 16)}`;
+}
+
 export function createProtectedDownloadToken(
   payload: Omit<ProtectedDownloadTokenPayload, "version" | "expiresAt">,
 ) {

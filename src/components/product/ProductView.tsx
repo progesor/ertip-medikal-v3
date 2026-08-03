@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -254,7 +254,6 @@ export function ProductView({ product }: any) {
   } | null>(null);
 
   const activeTab = searchParams.get("tab") || "description";
-  const autoCode = searchParams.get("code");
 
   const currentVariant = useMemo(() => {
     if (!Array.isArray(product.variants) || product.variants.length === 0) {
@@ -357,20 +356,6 @@ export function ProductView({ product }: any) {
     },
     [product.id],
   );
-
-  useEffect(() => {
-    const firstProtectedDocument = product.protectedDocs?.[0];
-
-    if (activeTab !== "docs" || !autoCode || !firstProtectedDocument?.label) {
-      return;
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      void verifyDocument(firstProtectedDocument.label, autoCode);
-    }, 0);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [activeTab, autoCode, product.protectedDocs, verifyDocument]);
 
   const handleAddToCart = () => {
     addToCart({

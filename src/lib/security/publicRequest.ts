@@ -26,15 +26,30 @@ const rateLimitStore =
 
 globalForRateLimit.__ertipRateLimitStore = rateLimitStore;
 
-export function getClientIp(headers: Headers) {
-  const forwardedFor = headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+function normalizeClientIp(value: string | null | undefined) {
+  const candidate = value?.trim();
+  if (!candidate) return null;
 
-  return (
-    forwardedFor ||
-    headers.get("cf-connecting-ip")?.trim() ||
-    headers.get("x-real-ip")?.trim() ||
-    "unknown"
-  ).slice(0, 100);
+  return candidate.slice(0, 100);
+}
+
+export function getClientIp(headers: Headers) {
+  const cloudflareIp = normalizeClientIp(headers.get("cf-connecting-ip"));
+  if (cloudflareIp) return cloudflareIp;
+
+  const realIp = normalizeClientIp(headers.get("x-real-ip"));
+  if (realIp) return realIp;
+
+  const forwardedFor = headers
+    .get("x-forwarded-for")
+    ?.split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  // Traefik and similar reverse proxies append the immediate client address to
+  // X-Forwarded-For. Reading the right-most value avoids trusting a spoofed
+  // user-supplied left-most entry in the common single-proxy deployment.
+  return normalizeClientIp(forwardedFor?.at(-1)) || "unknown";
 }
 
 export function consumeRateLimit({
