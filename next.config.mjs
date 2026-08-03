@@ -1,18 +1,95 @@
 import { withPayload } from "@payloadcms/next/withPayload";
 
+const ENV_SOURCE_PATTERN = /^(?:https|wss):\/\/[^\s;]+$/;
+
+function readExtraSources(name) {
+  const rawValue = process.env[name]?.trim();
+  if (!rawValue) return [];
+
+  return rawValue
+    .split(/[\s,]+/)
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .filter((value) => {
+      if (!ENV_SOURCE_PATTERN.test(value)) {
+        console.warn(`[security] Ignoring invalid ${name} CSP source: ${value}`);
+        return false;
+      }
+
+      return true;
+    });
+}
+
+function uniqueSources(...groups) {
+  return [...new Set(groups.flat())];
+}
+
+const scriptSources = uniqueSources(
+  [
+    "'self'",
+    "'unsafe-inline'",
+    "'unsafe-eval'",
+    "https://static.cloudflareinsights.com",
+  ],
+  readExtraSources("CSP_SCRIPT_SRC_EXTRA"),
+);
+
+const connectSources = uniqueSources(
+  [
+    "'self'",
+    "https://cloudflareinsights.com",
+    "https://*.cloudflareinsights.com",
+    "https://*.google.com",
+    "https://*.googleapis.com",
+    "https://*.gstatic.com",
+    "https://*.youtube.com",
+    "https://*.youtube-nocookie.com",
+    "https://*.vimeo.com",
+    "https://*.vimeocdn.com",
+    "wss:",
+  ],
+  readExtraSources("CSP_CONNECT_SRC_EXTRA"),
+);
+
+const frameSources = uniqueSources(
+  [
+    "'self'",
+    "https://www.google.com",
+    "https://*.google.com",
+    "https://www.youtube.com",
+    "https://*.youtube.com",
+    "https://www.youtube-nocookie.com",
+    "https://*.youtube-nocookie.com",
+    "https://player.vimeo.com",
+    "https://*.vimeo.com",
+  ],
+  readExtraSources("CSP_FRAME_SRC_EXTRA"),
+);
+
+const imgSources = uniqueSources(
+  ["'self'", "data:", "blob:", "https:"],
+  readExtraSources("CSP_IMG_SRC_EXTRA"),
+);
+
+const mediaSources = uniqueSources(
+  ["'self'", "blob:"],
+  readExtraSources("CSP_MEDIA_SRC_EXTRA"),
+);
+
 const contentSecurityPolicy = [
   "default-src 'self'",
   "base-uri 'self'",
   "object-src 'none'",
   "frame-ancestors 'none'",
   "form-action 'self'",
-  "img-src 'self' data: blob: https:",
-  "media-src 'self' blob:",
+  `img-src ${imgSources.join(" ")}`,
+  `media-src ${mediaSources.join(" ")}`,
   "font-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com",
-  "connect-src 'self' https://cloudflareinsights.com https://*.cloudflareinsights.com wss:",
-  "frame-src 'self' https://www.google.com https://maps.google.com https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com",
+  `script-src ${scriptSources.join(" ")}`,
+  `script-src-elem ${scriptSources.join(" ")}`,
+  `connect-src ${connectSources.join(" ")}`,
+  `frame-src ${frameSources.join(" ")}`,
   "worker-src 'self' blob:",
 ].join("; ");
 
