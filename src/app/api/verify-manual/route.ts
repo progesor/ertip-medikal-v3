@@ -2,7 +2,10 @@ import { createHash, timingSafeEqual } from "node:crypto";
 import configPromise from "@payload-config";
 import { getPayload } from "payload";
 import { NextRequest, NextResponse } from "next/server";
-import { createProtectedDownloadToken } from "@/lib/security/protectedDownloadToken";
+import {
+  createProtectedDownloadToken,
+  fingerprintProtectedAccessCode,
+} from "@/lib/security/protectedDownloadToken";
 import { getRelationId } from "@/lib/security/protectedMedia";
 import {
   consumeRateLimit,
@@ -125,7 +128,7 @@ export async function POST(request: NextRequest) {
       data: {
         productTitle: product.title,
         documentName: protectedDocument.label,
-        accessCode: code,
+        accessCode: fingerprintProtectedAccessCode(code),
         ipAddress,
         deviceInfo: (request.headers.get("user-agent") || "Bilinmiyor").slice(
           0,

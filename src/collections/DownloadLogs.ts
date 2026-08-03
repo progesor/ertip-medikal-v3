@@ -34,7 +34,7 @@ export const DownloadLogs: CollectionConfig = {
     {
       name: "accessCode",
       type: "text",
-      label: "Kullanılan Kod (listede maskeli, detayda açık)",
+      label: "Erişim Kodu Parmak İzi",
       admin: {
         readOnly: true,
         components: {

@@ -144,6 +144,21 @@ const smtpAuth =
     : undefined;
 
 export default buildConfig({
+  serverURL: serverEnv.publicSiteUrl,
+  cors: [serverEnv.publicSiteUrl],
+  csrf: [serverEnv.publicSiteUrl],
+  defaultDepth: 1,
+  maxDepth: 4,
+  graphQL: {
+    disable: true,
+  },
+  telemetry: false,
+  upload: {
+    abortOnLimit: true,
+    limits: {
+      fileSize: 100 * 1024 * 1024,
+    },
+  },
   admin: {
     user: Users.slug,
     dateFormat: "dd.MM.yyyy HH:mm",
