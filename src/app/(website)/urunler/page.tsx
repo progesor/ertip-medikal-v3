@@ -238,9 +238,9 @@ export default async function ProductsPage({ searchParams }: Props) {
         <div className="flex flex-col gap-10 lg:flex-row">
           <aside className="w-full space-y-8 lg:w-1/4">
             <div className="rounded-[var(--radius-2xl)] border border-border/80 bg-surface p-6 shadow-sm shadow-surface-inverse/5">
-              <h3 className="mb-4 flex items-center gap-2 font-bold text-text-main">
+              <h2 className="mb-4 flex items-center gap-2 font-bold text-text-main">
                 <Search className="h-5 w-5 text-primary" /> Ürün / SKU Ara
-              </h3>
+              </h2>
               <form action="/urunler" method="GET" className="relative">
                 {categorySlug && (
                   <input type="hidden" name="category" value={categorySlug} />
@@ -263,9 +263,9 @@ export default async function ProductsPage({ searchParams }: Props) {
             </div>
 
             <div className="sticky top-24 rounded-[var(--radius-2xl)] border border-border/80 bg-surface p-6 shadow-sm shadow-surface-inverse/5">
-              <h3 className="mb-4 flex items-center gap-2 font-bold text-text-main">
+              <h2 className="mb-4 flex items-center gap-2 font-bold text-text-main">
                 <LayoutGrid className="h-5 w-5 text-primary" /> Kategoriler
-              </h3>
+              </h2>
               <div className="space-y-1.5">
                 <Link
                   href={`/urunler${query ? `?q=${encodeURIComponent(query)}` : ""}`}
@@ -374,9 +374,9 @@ export default async function ProductsPage({ searchParams }: Props) {
                 <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-surface-muted text-text-muted">
                   <PackageX className="h-10 w-10" />
                 </div>
-                <h3 className="mb-2 text-2xl font-bold text-text-main">
+                <h2 className="mb-2 text-2xl font-bold text-text-main">
                   Sonuç Bulunamadı
-                </h3>
+                </h2>
                 <p className="mb-8 max-w-md text-text-muted">
                   Aradığınız kriterlere uygun ürün veya SKU kodu sistemimizde
                   bulunmuyor. Farklı kelimelerle aramayı deneyebilirsiniz.
@@ -395,6 +395,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                     >
                       <Link
                         href={`/urunler/${product.slug}`}
+                        prefetch={false}
                         className="relative flex aspect-square items-center justify-center overflow-hidden bg-surface-muted/70 p-6"
                       >
                         <Image
@@ -402,7 +403,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                           alt={product.mainImage?.alt || product.title}
                           fill
                           className="object-contain p-8 mix-blend-multiply transition-transform duration-500 group-hover:scale-110"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                          sizes="(max-width: 639px) calc(100vw - 32px), (max-width: 1023px) calc(50vw - 28px), (max-width: 1279px) calc(37.5vw - 40px), 294px"
                           quality={75}
                         />
                         <div className="absolute right-4 top-4 flex flex-col items-end gap-2">
@@ -423,6 +424,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                         <CardTitle className="line-clamp-2 text-lg font-bold leading-snug">
                           <Link
                             href={`/urunler/${product.slug}`}
+                            prefetch={false}
                             className="text-text-main transition-colors hover:text-primary"
                           >
                             {product.title}
@@ -439,7 +441,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                           className="w-full rounded-xl bg-surface-inverse font-bold text-surface-inverse-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
                           asChild
                         >
-                          <Link href={`/urunler/${product.slug}`}>
+                          <Link href={`/urunler/${product.slug}`} prefetch={false}>
                             Ürünü İncele
                           </Link>
                         </Button>
