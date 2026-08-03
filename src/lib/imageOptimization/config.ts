@@ -40,9 +40,9 @@ export const DEFAULT_IMAGE_OPTIMIZATION_PROFILES: Record<
   ImageOptimizationProfile,
   ImageOptimizationProfileSettings
 > = {
-  thumbnail: { width: 384, quality: 72 },
-  card: { width: 768, quality: 75 },
-  content: { width: 1_440, quality: 80 },
+  thumbnail: { width: 320, quality: 70 },
+  card: { width: 900, quality: 75 },
+  content: { width: 1_600, quality: 80 },
   fullscreen: { width: 2_400, quality: 85 },
 };
 
