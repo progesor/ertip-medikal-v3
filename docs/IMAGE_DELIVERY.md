@@ -26,13 +26,13 @@ The manual optimizer also uses Sharp with `fit: inside` and `withoutEnlargement:
 
 ## Admin settings
 
-The `imageOptimization` global contains four profiles:
+The `imageOptimization` global contains four profiles. The committed schema defaults remain:
 
-| Profile | Default width | Default quality | Typical use |
+| Profile | Schema default width | Schema default quality | Typical use |
 | --- | ---: | ---: | --- |
-| Thumbnail | 384 px | 72 | Logos, avatars and small high-DPR previews |
-| Card | 768 px | 75 | Product, news and catalogue cards |
-| Content | 1440 px | 80 | Galleries, certificates and content images |
+| Thumbnail | 320 px | 70 | Avatars, logos and small previews |
+| Card | 900 px | 75 | Product, news and catalogue cards |
+| Content | 1600 px | 80 | Galleries, certificates and content images |
 | Fullscreen | 2400 px | 85 | Product detail, hero and lightbox images |
 
 Administrators may change every width and quality value. Quality is limited to `40–95`; width is limited to `64–3840` pixels.
@@ -44,7 +44,20 @@ The output format can be:
 
 Changing format, width or quality marks the current configuration as stale. The new settings do not become active until the administrator saves the global and runs **Tümünü Yeniden Oluştur**.
 
-Existing installations keep their saved CMS values when code defaults change. To adopt the balanced `384 / 768 / 1440 / 2400` ladder, enter those widths in **Site Yapılandırması → Görsel Optimizasyonu**, keep WebP unless there is a specific AVIF need, save, and run **Tümünü Yeniden Oluştur** once. Deployment itself does not overwrite the active profile fingerprint.
+### Recommended production ladder
+
+The current PageSpeed catalogue baseline shows common high-DPR card requests around `w=640` and `w=750`. For Ertip Medical production, the recommended saved CMS profile values are therefore:
+
+| Profile | Recommended width | Recommended quality |
+| --- | ---: | ---: |
+| Thumbnail | 384 px | 72 |
+| Card | 768 px | 75 |
+| Content | 1440 px | 80 |
+| Fullscreen | 2400 px | 85 |
+
+This recommendation is intentionally stored as CMS configuration rather than changing Payload schema defaults. That keeps the performance tuning migration-free and avoids modifying database defaults for an operational delivery choice.
+
+To adopt it, enter `384 / 768 / 1440 / 2400` in **Site Yapılandırması → Görsel Optimizasyonu**, keep WebP unless there is a specific AVIF need, save, and run **Tümünü Yeniden Oluştur** once. Deployment itself does not overwrite the active profile fingerprint.
 
 ## Admin component import map
 
