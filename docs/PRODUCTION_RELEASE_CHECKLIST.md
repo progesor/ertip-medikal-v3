@@ -28,7 +28,7 @@ Use this checklist immediately before exposing the final public hostname. A rele
 - [ ] Admin login locks after repeated failed attempts and unlock behavior is verified.
 - [ ] No secret value appears in repository files, Coolify build logs, issues or support notes.
 
-## 4. Network and proxy — Required
+## 4. Network, proxy and trusted embeds — Required
 
 - [ ] Public site is HTTPS-only with a valid certificate.
 - [ ] `NEXT_PUBLIC_SITE_URL` (or `NEXT_PUBLIC_SERVER_URL`) equals the final HTTPS origin.
@@ -36,6 +36,10 @@ Use this checklist immediately before exposing the final public hostname. A rele
 - [ ] Coolify/Traefik overwrites or appends trusted client-IP headers; verify rate-limit logs show the real client IP rather than a proxy address.
 - [ ] Response headers include CSP, HSTS, `X-Content-Type-Options`, frame protection, referrer policy and permissions policy.
 - [ ] `/graphql` is unavailable because the application does not use the public GraphQL API.
+- [ ] Cloudflare Web Analytics loads from `static.cloudflareinsights.com` without a CSP error and can report to the configured Cloudflare analytics endpoint.
+- [ ] The contact-page Google Maps iframe loads without a CSP error.
+- [ ] YouTube privacy-mode and Vimeo embeds load only through the explicitly allowed player origins.
+- [ ] No generic `frame-src https:` wildcard has been introduced.
 
 ## 5. Persistent files — Required
 
@@ -77,6 +81,7 @@ Check desktop and mobile:
 - [ ] `/haberler/[slug]`
 - [ ] `/abonelikten-ayril`
 - [ ] at least two CMS `/[slug]` pages
+- [ ] `/api/site-icon` returns a usable image and the browser no longer requests a missing favicon
 - [ ] mobile navigation, search, cart and CTA
 - [ ] Payload Admin: users, products, pages, quote requests, download logs, media and image optimization
 
