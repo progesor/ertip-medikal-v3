@@ -76,6 +76,18 @@ function validateEmail(value: string) {
   return value;
 }
 
+function validateOptionalAnalyticsToken(value: string | undefined) {
+  if (!value) return undefined;
+
+  if (!/^[A-Za-z0-9_-]{16,128}$/.test(value)) {
+    throw new Error(
+      "CLOUDFLARE_WEB_ANALYTICS_TOKEN contains unsupported characters or length.",
+    );
+  }
+
+  return value;
+}
+
 const isProduction = process.env.NODE_ENV === "production";
 const smtpHost = process.env.SMTP_HOST?.trim();
 const smtpPort = process.env.SMTP_PORT?.trim();
@@ -86,6 +98,8 @@ const smtpFromAddress = process.env.SMTP_FROM_ADDRESS?.trim();
 const configuredPublicUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
   process.env.NEXT_PUBLIC_SERVER_URL?.trim();
+const cloudflareWebAnalyticsToken =
+  process.env.CLOUDFLARE_WEB_ANALYTICS_TOKEN?.trim();
 
 if (Boolean(smtpUser) !== Boolean(smtpPass)) {
   throw new Error("SMTP_USER and SMTP_PASS must be configured together.");
@@ -111,6 +125,9 @@ export const serverEnv = Object.freeze({
   payloadSecret: validateSecret(readRequired("PAYLOAD_SECRET")),
   publicSiteUrl: validatePublicUrl(
     configuredPublicUrl || "http://localhost:3000",
+  ),
+  cloudflareWebAnalyticsToken: validateOptionalAnalyticsToken(
+    cloudflareWebAnalyticsToken,
   ),
   smtp: {
     host: smtpHost || "127.0.0.1",
