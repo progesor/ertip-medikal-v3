@@ -16,7 +16,7 @@ Optimization scope:
 
 1. Disable speculative product-detail prefetch on dense catalogue/showcase cards.
 2. Make `next/image` `sizes` values match the real responsive grid and max-width container.
-3. Adopt a more balanced default derivative ladder: `384 / 768 / 1440 / 2400`.
+3. Recommend a more balanced production derivative ladder: `384 / 768 / 1440 / 2400`.
 4. Route the header logo through the existing image-delivery pipeline instead of bypassing it.
 5. Clear the low-risk heading-order and icon-control accessibility findings found in the same report.
 
@@ -29,4 +29,4 @@ Why `384 / 768 / 1440 / 2400`:
 
 Production safety:
 
-Changing code defaults does not overwrite the saved `imageOptimization` global. After deploy, an administrator can enter `384 / 768 / 1440 / 2400` in **Site Yapılandırması → Görsel Optimizasyonu**, keep the quality values at `72 / 75 / 80 / 85`, save, then run **Tümünü Yeniden Oluştur**. This avoids changing the active image fingerprint during deployment itself.
+The committed Payload schema defaults intentionally remain `320 / 900 / 1600 / 2400`. The recommended ladder is an operational CMS setting, not a schema default change. After deploy, an administrator can enter `384 / 768 / 1440 / 2400` in **Site Yapılandırması → Görsel Optimizasyonu**, keep the quality values at `72 / 75 / 80 / 85`, save, then run **Tümünü Yeniden Oluştur** once. Deployment itself therefore does not change the active image fingerprint or require a database migration.
