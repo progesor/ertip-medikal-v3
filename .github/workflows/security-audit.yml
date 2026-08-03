@@ -47,5 +47,5 @@ jobs:
           cache: pnpm
       - name: Install dependency metadata
         run: pnpm install --frozen-lockfile --ignore-scripts
-      - name: Fail on moderate or higher production advisories
+      - name: Fail on any known production dependency advisory
         run: pnpm security:audit
