@@ -2,6 +2,8 @@
 
 This package tightens the public production boundary without changing the core CMS/page-builder architecture.
 
+The final branch was rebuilt cleanly on top of the merged #24 dependency-security baseline so the auth/API hardening is validated against the exact production dependency tree rather than the original stacked history.
+
 ## Authentication
 
 - Admin authentication is limited to five failed login attempts before a 15-minute lock.
