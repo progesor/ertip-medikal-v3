@@ -30,6 +30,12 @@ test.describe("M8 business-flow hardening", () => {
     expect(response.ok()).toBe(true);
     const headers = response.headers();
     const csp = headers["content-security-policy"];
+    const frameSources = csp
+      .split(";")
+      .map((directive) => directive.trim())
+      .find((directive) => directive.startsWith("frame-src "))
+      ?.split(/\s+/)
+      .slice(1);
 
     expect(csp).toContain("default-src 'self'");
     expect(csp).toContain("frame-ancestors 'none'");
@@ -39,7 +45,7 @@ test.describe("M8 business-flow hardening", () => {
     expect(csp).toContain("https://maps.google.com");
     expect(csp).toContain("https://www.youtube-nocookie.com");
     expect(csp).toContain("https://player.vimeo.com");
-    expect(csp).not.toContain("frame-src 'self' https:");
+    expect(frameSources).not.toContain("https:");
     expect(headers["x-content-type-options"]).toBe("nosniff");
     expect(headers["x-frame-options"]).toBe("DENY");
     expect(headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
