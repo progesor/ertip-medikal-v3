@@ -24,6 +24,27 @@ test.describe("M8 business-flow hardening", () => {
     await expect(dialog).toBeHidden();
   });
 
+  test("public responses carry the security header baseline", async ({ request }) => {
+    const response = await request.get("/");
+
+    expect(response.ok()).toBe(true);
+    const headers = response.headers();
+    expect(headers["content-security-policy"]).toContain("default-src 'self'");
+    expect(headers["content-security-policy"]).toContain("frame-ancestors 'none'");
+    expect(headers["x-content-type-options"]).toBe("nosniff");
+    expect(headers["x-frame-options"]).toBe("DENY");
+    expect(headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
+    expect(headers["permissions-policy"]).toContain("camera=()");
+  });
+
+  test("unused public GraphQL surface is disabled", async ({ request }) => {
+    const response = await request.post("/graphql", {
+      data: { query: "{ __typename }" },
+    });
+
+    expect(response.status()).not.toBe(200);
+  });
+
   test("RFQ endpoint rejects a browser-forged product identity", async ({ request }) => {
     const response = await request.post("/api/public/quote-request", {
       data: {
