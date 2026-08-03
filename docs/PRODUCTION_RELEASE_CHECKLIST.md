@@ -101,4 +101,6 @@ For the first public release, watch Coolify/application logs during and after DN
 - [ ] SMTP notifications are delivered.
 - [ ] Database and media storage usage remain normal.
 
+Validated on PR #29 final CSP/favicon head before merge: CI, production build/migration, Browser E2E, RFQ, SKU, dependency audit and CodeQL all passed.
+
 If a required check fails, keep the current public site / maintenance gate in place, preserve logs, and fix forward before reopening traffic.
