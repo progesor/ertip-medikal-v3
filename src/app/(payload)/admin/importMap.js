@@ -41,6 +41,7 @@ import { AdminNavFooter as AdminNavFooter_db845eae23ef682757f9df5d4893ae70 } fro
 import { default as default_0171ae121c3d9523aafb7bdbec1300c5 } from '../../../components/admin/AdminDashboard'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
+/** @type import('payload').ImportMap */
 export const importMap = {
   "/components/admin/ProductListCells#ProductTitleCell": ProductTitleCell_f39a3ec76b51f65f3faaf8a9a0089e08,
   "/components/admin/MarkdownEditor#MarkdownEditor": MarkdownEditor_0d02660a52a6d77227b43bb8fbabb167,
