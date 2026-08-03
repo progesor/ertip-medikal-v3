@@ -36,10 +36,15 @@ Use this checklist immediately before exposing the final public hostname. A rele
 - [ ] Coolify/Traefik overwrites or appends trusted client-IP headers; verify rate-limit logs show the real client IP rather than a proxy address.
 - [ ] Response headers include CSP, HSTS, `X-Content-Type-Options`, frame protection, referrer policy and permissions policy.
 - [ ] `/graphql` is unavailable because the application does not use the public GraphQL API.
-- [ ] Cloudflare Web Analytics loads from `static.cloudflareinsights.com` without a CSP error and can report to the configured Cloudflare analytics endpoint.
-- [ ] The contact-page Google Maps iframe loads without a CSP error.
-- [ ] YouTube privacy-mode and Vimeo embeds load only through the explicitly allowed player origins.
-- [ ] New external video providers are added to the VideoMediaBlock and CSP together; no generic `frame-src https:` wildcard is introduced.
+- [ ] Disable Cloudflare Web Analytics **automatic beacon injection** before setting `CLOUDFLARE_WEB_ANALYTICS_TOKEN`; the application must load exactly one manual beacon without an `integrity` attribute.
+- [ ] Cloudflare Web Analytics loads from `static.cloudflareinsights.com` without an application CSP error and reports to the configured endpoint.
+- [ ] A browser privacy extension may still block analytics locally; that client-only CORS warning is not an application release failure.
+- [ ] The contact-page Google Maps iframe loads without an application CSP error.
+- [ ] Third-party iframe console messages such as partitioned-cookie notices, `gen_204` probes, and Google `Reporting Header` warnings are treated as provider/browser diagnostics when the map itself works.
+- [ ] YouTube privacy-mode and Vimeo embeds load only through trusted player origins.
+- [ ] New external providers are added through Coolify `CSP_*_SRC_EXTRA` environment variables and a redeploy; no source-code change is required for an origin-only addition.
+- [ ] `CSP_SCRIPT_SRC_EXTRA`, `CSP_CONNECT_SRC_EXTRA`, `CSP_FRAME_SRC_EXTRA`, `CSP_IMG_SRC_EXTRA`, and `CSP_MEDIA_SRC_EXTRA` contain only reviewed HTTPS/WSS origins.
+- [ ] No generic `frame-src https:` wildcard is introduced.
 
 ## 5. Persistent files — Required
 

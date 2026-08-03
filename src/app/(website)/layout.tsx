@@ -1,5 +1,6 @@
 import "@/styles/globals.css";
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import React from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -88,6 +89,18 @@ export default async function RootLayout({
           <FloatingActionButton />
           <Footer />
         </CartProvider>
+
+        {serverEnv.cloudflareWebAnalyticsToken && (
+          <Script
+            id="cloudflare-web-analytics"
+            type="module"
+            src="https://static.cloudflareinsights.com/beacon.min.js"
+            strategy="afterInteractive"
+            data-cf-beacon={JSON.stringify({
+              token: serverEnv.cloudflareWebAnalyticsToken,
+            })}
+          />
+        )}
       </body>
     </html>
   );

@@ -30,21 +30,30 @@ test.describe("M8 business-flow hardening", () => {
     expect(response.ok()).toBe(true);
     const headers = response.headers();
     const csp = headers["content-security-policy"];
-    const frameSources = csp
-      .split(";")
-      .map((directive) => directive.trim())
-      .find((directive) => directive.startsWith("frame-src "))
-      ?.split(/\s+/)
-      .slice(1);
+    const directives = new Map(
+      csp.split(";").map((directive) => {
+        const [name, ...sources] = directive.trim().split(/\s+/);
+        return [name, sources];
+      }),
+    );
+    const frameSources = directives.get("frame-src");
+    const connectSources = directives.get("connect-src");
 
     expect(csp).toContain("default-src 'self'");
     expect(csp).toContain("frame-ancestors 'none'");
-    expect(csp).toContain("https://static.cloudflareinsights.com");
-    expect(csp).toContain("https://cloudflareinsights.com");
-    expect(csp).toContain("https://www.google.com");
-    expect(csp).toContain("https://maps.google.com");
-    expect(csp).toContain("https://www.youtube-nocookie.com");
-    expect(csp).toContain("https://player.vimeo.com");
+    expect(directives.get("script-src")).toContain(
+      "https://static.cloudflareinsights.com",
+    );
+    expect(directives.get("script-src-elem")).toContain(
+      "https://static.cloudflareinsights.com",
+    );
+    expect(connectSources).toContain("https://*.cloudflareinsights.com");
+    expect(connectSources).toContain("https://*.googleapis.com");
+    expect(connectSources).toContain("https://*.gstatic.com");
+    expect(frameSources).toContain("https://*.google.com");
+    expect(frameSources).toContain("https://*.youtube.com");
+    expect(frameSources).toContain("https://*.youtube-nocookie.com");
+    expect(frameSources).toContain("https://*.vimeo.com");
     expect(frameSources).not.toContain("https:");
     expect(headers["x-content-type-options"]).toBe("nosniff");
     expect(headers["x-frame-options"]).toBe("DENY");
