@@ -1,0 +1,39 @@
+name: Rebuild release gate on clean main
+
+on:
+  push:
+    branches:
+      - agent/production-hardening-release-gate-v2
+    paths:
+      - .github/workflows/rebuild-release-gate.yml
+
+permissions:
+  contents: write
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout clean branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Carry forward release-gate files only
+        run: |
+          git fetch origin agent/production-hardening-release-gate
+          git checkout origin/agent/production-hardening-release-gate -- \
+            .github/dependabot.yml \
+            .github/workflows/codeql.yml \
+            .github/workflows/security-audit.yml \
+            docs/PRODUCTION_RELEASE_CHECKLIST.md \
+            package.json \
+            pnpm-lock.yaml \
+            src/components/product/ProductView.tsx \
+            tests/e2e/m8-business-flows.spec.mjs
+          rm .github/workflows/rebuild-release-gate.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "ci(security): rebuild release gate on clean main"
+          git push
