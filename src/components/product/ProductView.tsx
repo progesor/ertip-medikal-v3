@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { Button } from "@/components/ui/button";
@@ -659,7 +660,7 @@ export function ProductView({ product }: any) {
                   {typeof product.description === "string" ? (
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
-                      rehypePlugins={[rehypeRaw]}
+                      rehypePlugins={[rehypeRaw, rehypeSanitize]}
                     >
                       {product.description}
                     </ReactMarkdown>

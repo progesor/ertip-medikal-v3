@@ -22,6 +22,11 @@ export const metadata: Metadata = {
   },
   description:
     "Sağlık sektörüne yön veren yenilikçi medikal cihazlar. Çeyrek asırlık tecrübemizle güvenilir çözüm ortağınız.",
+  icons: {
+    icon: "/api/site-icon",
+    shortcut: "/api/site-icon",
+    apple: "/api/site-icon",
+  },
   openGraph: {
     type: "website",
     locale: "tr_TR",

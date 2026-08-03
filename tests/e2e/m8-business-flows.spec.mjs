@@ -24,6 +24,49 @@ test.describe("M8 business-flow hardening", () => {
     await expect(dialog).toBeHidden();
   });
 
+  test("public responses carry the security header baseline", async ({ request }) => {
+    const response = await request.get("/");
+
+    expect(response.ok()).toBe(true);
+    const headers = response.headers();
+    const csp = headers["content-security-policy"];
+    const frameSources = csp
+      .split(";")
+      .map((directive) => directive.trim())
+      .find((directive) => directive.startsWith("frame-src "))
+      ?.split(/\s+/)
+      .slice(1);
+
+    expect(csp).toContain("default-src 'self'");
+    expect(csp).toContain("frame-ancestors 'none'");
+    expect(csp).toContain("https://static.cloudflareinsights.com");
+    expect(csp).toContain("https://cloudflareinsights.com");
+    expect(csp).toContain("https://www.google.com");
+    expect(csp).toContain("https://maps.google.com");
+    expect(csp).toContain("https://www.youtube-nocookie.com");
+    expect(csp).toContain("https://player.vimeo.com");
+    expect(frameSources).not.toContain("https:");
+    expect(headers["x-content-type-options"]).toBe("nosniff");
+    expect(headers["x-frame-options"]).toBe("DENY");
+    expect(headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
+    expect(headers["permissions-policy"]).toContain("camera=()");
+  });
+
+  test("site icon endpoint always returns usable browser metadata", async ({ request }) => {
+    const response = await request.get("/api/site-icon");
+
+    expect(response.ok()).toBe(true);
+    expect(response.headers()["content-type"]).toMatch(/^image\//);
+  });
+
+  test("unused public GraphQL surface is disabled", async ({ request }) => {
+    const response = await request.post("/graphql", {
+      data: { query: "{ __typename }" },
+    });
+
+    expect(response.status()).not.toBe(200);
+  });
+
   test("RFQ endpoint rejects a browser-forged product identity", async ({ request }) => {
     const response = await request.post("/api/public/quote-request", {
       data: {
