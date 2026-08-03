@@ -37,8 +37,9 @@ export const DownloadLogs: CollectionConfig = {
       label: "Erişim Kodu Parmak İzi",
       admin: {
         readOnly: true,
-        description:
-          "Gerçek erişim kodu kaydedilmez. Aynı kodun kullanımını ilişkilendirmek için HMAC tabanlı kısa bir parmak izi tutulur.",
+        components: {
+          Cell: "/components/admin/DownloadLogCells#MaskedAccessCodeCell",
+        },
       },
     },
     {
