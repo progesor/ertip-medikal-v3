@@ -95,6 +95,7 @@ export async function FeaturedProductsBlock({
               >
                 <Link
                   href={`/urunler/${product.slug}`}
+                  prefetch={false}
                   className="relative aspect-square overflow-hidden bg-surface-muted p-6 flex items-center justify-center"
                 >
                   <Image
@@ -102,7 +103,7 @@ export async function FeaturedProductsBlock({
                     alt={product.title}
                     fill
                     className="object-contain p-6 transition-transform duration-500 group-hover:scale-110 mix-blend-multiply"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    sizes="(max-width: 639px) calc(100vw - 32px), (max-width: 1023px) calc(50vw - 28px), (max-width: 1279px) 25vw, 294px"
                     quality={75}
                   />
                   {/* SKU Rozeti */}
@@ -116,6 +117,7 @@ export async function FeaturedProductsBlock({
                   <CardTitle className="text-lg line-clamp-2 leading-snug font-bold">
                     <Link
                       href={`/urunler/${product.slug}`}
+                      prefetch={false}
                       className="hover:text-primary transition-colors text-text-main"
                     >
                       {product.title}
@@ -136,7 +138,9 @@ export async function FeaturedProductsBlock({
                     className="w-full rounded-xl font-bold bg-primary hover:bg-primary transition-colors"
                     asChild
                   >
-                    <Link href={`/urunler/${product.slug}`}>Ürünü İncele</Link>
+                    <Link href={`/urunler/${product.slug}`} prefetch={false}>
+                      Ürünü İncele
+                    </Link>
                   </Button>
                 </CardFooter>
               </Card>
