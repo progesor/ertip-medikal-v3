@@ -29,8 +29,17 @@ test.describe("M8 business-flow hardening", () => {
 
     expect(response.ok()).toBe(true);
     const headers = response.headers();
-    expect(headers["content-security-policy"]).toContain("default-src 'self'");
-    expect(headers["content-security-policy"]).toContain("frame-ancestors 'none'");
+    const csp = headers["content-security-policy"];
+
+    expect(csp).toContain("default-src 'self'");
+    expect(csp).toContain("frame-ancestors 'none'");
+    expect(csp).toContain("https://static.cloudflareinsights.com");
+    expect(csp).toContain("https://cloudflareinsights.com");
+    expect(csp).toContain("https://www.google.com");
+    expect(csp).toContain("https://maps.google.com");
+    expect(csp).toContain("https://www.youtube-nocookie.com");
+    expect(csp).toContain("https://player.vimeo.com");
+    expect(csp).not.toContain("frame-src 'self' https:");
     expect(headers["x-content-type-options"]).toBe("nosniff");
     expect(headers["x-frame-options"]).toBe("DENY");
     expect(headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
