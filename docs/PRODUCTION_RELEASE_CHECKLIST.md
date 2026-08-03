@@ -39,7 +39,7 @@ Use this checklist immediately before exposing the final public hostname. A rele
 - [ ] Cloudflare Web Analytics loads from `static.cloudflareinsights.com` without a CSP error and can report to the configured Cloudflare analytics endpoint.
 - [ ] The contact-page Google Maps iframe loads without a CSP error.
 - [ ] YouTube privacy-mode and Vimeo embeds load only through the explicitly allowed player origins.
-- [ ] No generic `frame-src https:` wildcard has been introduced.
+- [ ] New external video providers are added to the VideoMediaBlock and CSP together; no generic `frame-src https:` wildcard is introduced.
 
 ## 5. Persistent files — Required
 
