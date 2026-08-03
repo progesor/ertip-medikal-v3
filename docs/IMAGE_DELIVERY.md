@@ -30,9 +30,9 @@ The `imageOptimization` global contains four profiles:
 
 | Profile | Default width | Default quality | Typical use |
 | --- | ---: | ---: | --- |
-| Thumbnail | 320 px | 70 | Avatars, logos and small previews |
-| Card | 900 px | 75 | Product, news and catalogue cards |
-| Content | 1600 px | 80 | Galleries, certificates and content images |
+| Thumbnail | 384 px | 72 | Logos, avatars and small high-DPR previews |
+| Card | 768 px | 75 | Product, news and catalogue cards |
+| Content | 1440 px | 80 | Galleries, certificates and content images |
 | Fullscreen | 2400 px | 85 | Product detail, hero and lightbox images |
 
 Administrators may change every width and quality value. Quality is limited to `40–95`; width is limited to `64–3840` pixels.
@@ -43,6 +43,8 @@ The output format can be:
 - **AVIF**: smaller output in many cases, but more expensive to generate.
 
 Changing format, width or quality marks the current configuration as stale. The new settings do not become active until the administrator saves the global and runs **Tümünü Yeniden Oluştur**.
+
+Existing installations keep their saved CMS values when code defaults change. To adopt the balanced `384 / 768 / 1440 / 2400` ladder, enter those widths in **Site Yapılandırması → Görsel Optimizasyonu**, keep WebP unless there is a specific AVIF need, save, and run **Tümünü Yeniden Oluştur** once. Deployment itself does not overwrite the active profile fingerprint.
 
 ## Admin component import map
 
@@ -143,7 +145,7 @@ After deploying privately:
 2. Test catalogue search, categories, ordering and pagination.
 3. Open a product page and test main, shared and variant images, thumbnails and fullscreen mode.
 4. Verify hero, gallery, news, certificate, team, testimonial, logo, featured-product and related-product images.
-5. Open **Görsel Optimizasyonu**, save the default settings and run **Tümünü Yeniden Oluştur** once for a clean baseline.
+5. Open **Görsel Optimizasyonu**, save the desired settings and run **Tümünü Yeniden Oluştur** once for a clean baseline.
 6. Confirm progress reaches completion and error count is zero, or inspect every reported error.
 7. Reload public pages and confirm image requests use `/api/image-delivery`.
 8. Confirm generated responses use `image/webp` or `image/avif`.
