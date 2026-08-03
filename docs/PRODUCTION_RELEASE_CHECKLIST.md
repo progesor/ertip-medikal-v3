@@ -8,7 +8,7 @@ Use this checklist immediately before exposing the final public hostname. A rele
 - [ ] Build command is `pnpm build:deploy`.
 - [ ] Start command is `pnpm start`.
 - [ ] Latest `main` CI, Browser E2E, RFQ Validation, SKU Engine, Dependency Security Audit and CodeQL checks are green.
-- [ ] `pnpm security:audit` reports no HIGH or CRITICAL production dependency advisory.
+- [ ] `pnpm security:audit` reports no known production dependency advisory at LOW or above.
 - [ ] `pnpm db:migrate:status` reports no pending migration after deployment.
 
 ## 2. Database recovery — Required
