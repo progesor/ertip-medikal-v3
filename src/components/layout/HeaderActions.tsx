@@ -41,6 +41,7 @@ export function HeaderActions({
         />
         <button
           type="submit"
+          aria-label="Ürün ara"
           className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-primary"
         >
           <Search className="w-4 h-4" />
@@ -50,6 +51,11 @@ export function HeaderActions({
       {/* SEPET İKONU (Bildirimli) */}
       <Link
         href="/teklif-sepeti"
+        aria-label={
+          cartItems.length > 0
+            ? `Teklif sepeti (${cartItems.length} ürün)`
+            : "Teklif sepeti"
+        }
         className="relative p-2 text-text-muted hover:text-primary transition-colors"
       >
         <ShoppingCart className="w-6 h-6" />
@@ -62,11 +68,15 @@ export function HeaderActions({
 
       {/* ORJİNAL TEKLİF AL BUTONU */}
       {ctaLabel && ctaHref && (
-      <Link href={ctaHref} className="hidden sm:block">
-        <Button variant="default" size="sm" className="rounded-[var(--radius-2xl)] px-6">
-          {ctaLabel}
-        </Button>
-      </Link>
+        <Link href={ctaHref} className="hidden sm:block">
+          <Button
+            variant="default"
+            size="sm"
+            className="rounded-[var(--radius-2xl)] px-6"
+          >
+            {ctaLabel}
+          </Button>
+        </Link>
       )}
     </div>
   );
