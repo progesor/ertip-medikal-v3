@@ -41,6 +41,7 @@ import { AdminNavFooter as AdminNavFooter_db845eae23ef682757f9df5d4893ae70 } fro
 import { default as default_0171ae121c3d9523aafb7bdbec1300c5 } from '../../../components/admin/AdminDashboard'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
+/** @type import('payload').ImportMap */
 export const importMap = {
   "/components/admin/ProductListCells#ProductTitleCell": ProductTitleCell_f39a3ec76b51f65f3faaf8a9a0089e08,
   "/components/admin/MarkdownEditor#MarkdownEditor": MarkdownEditor_0d02660a52a6d77227b43bb8fbabb167,
@@ -81,7 +82,7 @@ export const importMap = {
   "/components/admin/ImageOptimizationControl#ImageOptimizationControl": ImageOptimizationControl_4a8fdaca49089913df1bffbea4778896,
   "/components/admin/AdminBrand#AdminIcon": AdminIcon_db845eae23ef682757f9df5d4893ae70,
   "/components/admin/AdminBrand#AdminLogo": AdminLogo_db845eae23ef682757f9df5d4893ae70,
-  "/components/admin/AdminBrand#AdminNavFooter": AdminNavFooter_db845eae23ef682757f9df5d4893ae70,
+  "/components/admin/AdminNavFooter": AdminNavFooter_db845eae23ef682757f9df5d4893ae70,
   "/components/admin/AdminDashboard#default": default_0171ae121c3d9523aafb7bdbec1300c5,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }
