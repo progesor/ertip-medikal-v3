@@ -95,13 +95,25 @@ export const Media: CollectionConfig = {
     staticDir: path.resolve(process.cwd(), "media"),
     crop: false,
     focalPoint: false,
+    pasteURL: false,
     imageSizes: [
       { name: "thumbnail", width: 400, withoutEnlargement: true },
       { name: "card", width: 900, withoutEnlargement: true },
       { name: "hero", width: 1920, withoutEnlargement: true },
     ],
     adminThumbnail: "thumbnail",
-    mimeTypes: ["image/*", "video/mp4", "video/webm", "video/ogg", "application/pdf"],
+    mimeTypes: [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/avif",
+      "image/gif",
+      "image/tiff",
+      "video/mp4",
+      "video/webm",
+      "video/ogg",
+      "application/pdf",
+    ],
   },
   fields: [
     {
