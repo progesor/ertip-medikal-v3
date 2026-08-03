@@ -46,6 +46,13 @@ test.describe("M8 business-flow hardening", () => {
     expect(headers["permissions-policy"]).toContain("camera=()");
   });
 
+  test("site icon endpoint always returns usable browser metadata", async ({ request }) => {
+    const response = await request.get("/api/site-icon");
+
+    expect(response.ok()).toBe(true);
+    expect(response.headers()["content-type"]).toMatch(/^image\//);
+  });
+
   test("unused public GraphQL surface is disabled", async ({ request }) => {
     const response = await request.post("/graphql", {
       data: { query: "{ __typename }" },
