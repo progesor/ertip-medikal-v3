@@ -11,6 +11,7 @@ env:
   NODE_VERSION: "24"
   PNPM_VERSION: "10"
   NEXT_TELEMETRY_DISABLED: "1"
+  FORCE_COLOR: "0"
   DATABASE_URI: postgresql://payload:payload@127.0.0.1:5432/ertip_m10
   PAYLOAD_SECRET: ci-only-secret-not-used-outside-github-actions
   NEXT_PUBLIC_SITE_URL: http://localhost:3000
@@ -38,6 +39,10 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
+      mailpit:
+        image: axllent/mailpit:v1.27
+        ports:
+          - 1025:1025
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -56,20 +61,67 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Install expect
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq expect
+
       - name: Apply existing committed migrations
         run: pnpm db:migrate
 
-      - name: Probe interactive localization migration
+      - name: Probe second localization migration decision
         shell: bash
         run: |
+          cat > /tmp/probe.expect <<'EXPECT'
+          set timeout 30
+          log_user 1
+          log_file -a migration-session.log
+          spawn pnpm db:migrate:create m10-multilingual-foundation
+
+          # First ambiguity: _products_v.snapshot is a genuinely new Payload
+          # version snapshot column. Keep the default "create column" choice.
+          expect {
+            -re {created or renamed from another column\?} {
+              send "\r"
+            }
+            timeout {
+              puts "ERROR: first migration decision prompt was not observed"
+              exit 20
+            }
+            eof {
+              puts "ERROR: migration exited before first decision"
+              exit 21
+            }
+          }
+
+          # Stop at the second ambiguity so we can review it before answering.
+          expect {
+            -re {created or renamed from another column\?} {
+              puts "\nPROBE_REACHED_SECOND_DECISION"
+              send "\003"
+              expect eof
+              exit 42
+            }
+            timeout {
+              puts "ERROR: second migration decision prompt was not observed"
+              send "\003"
+              expect eof
+              exit 22
+            }
+            eof {
+              puts "ERROR: migration exited before second decision"
+              exit 23
+            }
+          }
+          EXPECT
+
           set +e
-          timeout 20s script -q -e -c "pnpm db:migrate:create m10-multilingual-foundation" migration-session.log
+          expect /tmp/probe.expect
           status=$?
+          set -e
           echo "--- migration interactive transcript ---"
           cat migration-session.log
           echo "--- end transcript ---"
-          if [[ $status -eq 124 ]]; then
-            echo "Probe timed out after exposing the interactive prompt as expected."
+          if [[ $status -eq 42 ]]; then
+            echo "Second migration decision exposed successfully."
             exit 1
           fi
           exit $status
