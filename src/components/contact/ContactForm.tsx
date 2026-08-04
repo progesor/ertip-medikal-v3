@@ -9,7 +9,12 @@ type ContactResponse = {
   message?: string;
 };
 
-export function ContactForm({ departments }: { departments?: any[] }) {
+type ContactFormProps = {
+  departments?: any[];
+  privacyHref?: string;
+};
+
+export function ContactForm({ departments, privacyHref }: ContactFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +62,11 @@ export function ContactForm({ departments }: { departments?: any[] }) {
 
   if (isSuccess) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-2xl border border-success/25 bg-success/10 p-8 text-center">
+      <div
+        className="flex flex-col items-center justify-center rounded-2xl border border-success/25 bg-success/10 p-8 text-center"
+        role="status"
+        aria-live="polite"
+      >
         <CheckCircle2 className="mb-4 h-16 w-16 text-success" />
         <h3 className="mb-2 text-2xl font-bold text-text-main">
           Mesajınız Alındı!
@@ -94,30 +103,47 @@ export function ContactForm({ departments }: { departments?: any[] }) {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-error/25 bg-error/10 p-4 text-sm font-semibold text-error">
+        <div
+          className="rounded-xl border border-error/25 bg-error/10 p-4 text-sm font-semibold text-error"
+          role="alert"
+        >
           {error}
         </div>
       )}
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div className="space-y-2">
-          <label className="text-sm font-bold text-text-main">Ad Soyad *</label>
+          <label
+            htmlFor="contact-name"
+            className="text-sm font-bold text-text-main"
+          >
+            Ad Soyad *
+          </label>
           <input
+            id="contact-name"
             required
             name="name"
             type="text"
             maxLength={120}
+            autoComplete="name"
             className="w-full rounded-xl border border-border bg-background px-4 py-3 text-text-main outline-none transition-all placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring"
             placeholder="Örn: Dr. Ahmet Yılmaz"
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-bold text-text-main">E-Posta *</label>
+          <label
+            htmlFor="contact-email"
+            className="text-sm font-bold text-text-main"
+          >
+            E-Posta *
+          </label>
           <input
+            id="contact-email"
             required
             name="email"
             type="email"
             maxLength={254}
+            autoComplete="email"
             className="w-full rounded-xl border border-border bg-background px-4 py-3 text-text-main outline-none transition-all placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring"
             placeholder="ornek@klinik.com"
           />
@@ -126,11 +152,18 @@ export function ContactForm({ departments }: { departments?: any[] }) {
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div className="space-y-2">
-          <label className="text-sm font-bold text-text-main">Telefon</label>
+          <label
+            htmlFor="contact-phone"
+            className="text-sm font-bold text-text-main"
+          >
+            Telefon
+          </label>
           <input
+            id="contact-phone"
             name="phone"
             type="tel"
             maxLength={50}
+            autoComplete="tel"
             className="w-full rounded-xl border border-border bg-background px-4 py-3 text-text-main outline-none transition-all placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring"
             placeholder="+90 5XX XXX XX XX"
           />
@@ -138,10 +171,14 @@ export function ContactForm({ departments }: { departments?: any[] }) {
 
         {departments && departments.length > 0 && (
           <div className="space-y-2">
-            <label className="text-sm font-bold text-text-main">
+            <label
+              htmlFor="contact-department"
+              className="text-sm font-bold text-text-main"
+            >
               İlgili Departman
             </label>
             <select
+              id="contact-department"
               name="department"
               className="w-full rounded-xl border border-border bg-background px-4 py-3 text-text-main outline-none transition-all focus:border-primary focus:ring-1 focus:ring-ring"
             >
@@ -157,8 +194,14 @@ export function ContactForm({ departments }: { departments?: any[] }) {
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-bold text-text-main">Mesajınız *</label>
+        <label
+          htmlFor="contact-message"
+          className="text-sm font-bold text-text-main"
+        >
+          Mesajınız *
+        </label>
         <textarea
+          id="contact-message"
           required
           name="message"
           rows={4}
@@ -183,6 +226,19 @@ export function ContactForm({ departments }: { departments?: any[] }) {
           </>
         )}
       </Button>
+
+      {privacyHref && (
+        <p className="text-center text-xs leading-relaxed text-text-muted">
+          Kişisel verilerin işlenmesine ilişkin detaylar için{" "}
+          <a
+            href={privacyHref}
+            className="font-semibold text-primary underline decoration-primary/30 underline-offset-4 transition-colors hover:decoration-primary"
+          >
+            KVKK Aydınlatma Metni
+          </a>
+          ’ni inceleyebilirsiniz.
+        </p>
+      )}
     </form>
   );
 }
