@@ -67,70 +67,66 @@ jobs:
       - name: Apply existing committed migrations
         run: pnpm db:migrate
 
-      - name: Probe second localization migration decision
+      - name: Generate structural all-create migration probe
         shell: bash
         run: |
           cat > /tmp/probe.expect <<'EXPECT'
-          set timeout 30
+          set timeout 90
           log_user 1
           log_file -a migration-session.log
-          spawn pnpm db:migrate:create m10-multilingual-foundation
+          spawn pnpm db:migrate:create m10-multilingual-foundation --force-accept-warning
 
-          # First ambiguity: _products_v.snapshot is a genuinely new Payload
-          # version snapshot column. Keep the default "create column" choice.
+          # This is intentionally a structural probe, not the final production
+          # migration. For every Drizzle create-vs-rename ambiguity, select the
+          # default create option. We will inspect and augment the generated SQL
+          # with explicit Turkish data-copy statements before accepting it.
           expect {
-            -re {created or renamed from another column\?} {
+            -re {created or renamed[^\?]*\?} {
               send "\r"
+              exp_continue
             }
-            timeout {
-              puts "ERROR: first migration decision prompt was not observed"
-              exit 20
+            -re {create or rename[^\?]*\?} {
+              send "\r"
+              exp_continue
             }
-            eof {
-              puts "ERROR: migration exited before first decision"
-              exit 21
-            }
-          }
-
-          # Stop at the second ambiguity so we can review it before answering.
-          expect {
-            -re {created or renamed from another column\?} {
-              puts "\nPROBE_REACHED_SECOND_DECISION"
-              send "\003"
-              expect eof
-              exit 42
-            }
-            timeout {
-              puts "ERROR: second migration decision prompt was not observed"
-              send "\003"
-              expect eof
-              exit 22
+            -re {Do you want to continue\?} {
+              send "y\r"
+              exp_continue
             }
             eof {
-              puts "ERROR: migration exited before second decision"
-              exit 23
+              catch wait result
+              set exitCode [lindex $result 3]
+              exit $exitCode
+            }
+            timeout {
+              puts "ERROR: localization migration probe timed out"
+              send "\003"
+              expect eof
+              exit 24
             }
           }
           EXPECT
 
-          set +e
           expect /tmp/probe.expect
-          status=$?
-          set -e
-          echo "--- migration interactive transcript ---"
-          cat migration-session.log
-          echo "--- end transcript ---"
-          if [[ $status -eq 42 ]]; then
-            echo "Second migration decision exposed successfully."
-            exit 1
-          fi
-          exit $status
+          echo "--- generated migration files ---"
+          git status --short src/migrations
+          echo "--- end generated migration files ---"
 
-      - name: Upload prompt transcript
+      - name: Generate Payload types
+        run: pnpm payload:types
+
+      - name: Generate Payload import map
+        run: pnpm payload:importmap
+
+      - name: Upload generated localization probe
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: m10-localization-migration-prompt
-          path: migration-session.log
+          name: m10-localization-generated-probe
+          path: |
+            migration-session.log
+            src/migrations
+            src/payload-types.ts
+            src/app/(payload)/admin/importMap.js
           if-no-files-found: warn
           retention-days: 7
