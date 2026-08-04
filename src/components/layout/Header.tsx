@@ -122,8 +122,9 @@ export async function Header() {
                   width={180}
                   height={48}
                   className="h-10 w-auto object-contain"
+                  sizes="180px"
+                  quality={75}
                   priority
-                  unoptimized
                 />
               </span>
             ) : (

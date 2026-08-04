@@ -26,9 +26,9 @@ The manual optimizer also uses Sharp with `fit: inside` and `withoutEnlargement:
 
 ## Admin settings
 
-The `imageOptimization` global contains four profiles:
+The `imageOptimization` global contains four profiles. The committed schema defaults remain:
 
-| Profile | Default width | Default quality | Typical use |
+| Profile | Schema default width | Schema default quality | Typical use |
 | --- | ---: | ---: | --- |
 | Thumbnail | 320 px | 70 | Avatars, logos and small previews |
 | Card | 900 px | 75 | Product, news and catalogue cards |
@@ -43,6 +43,21 @@ The output format can be:
 - **AVIF**: smaller output in many cases, but more expensive to generate.
 
 Changing format, width or quality marks the current configuration as stale. The new settings do not become active until the administrator saves the global and runs **Tümünü Yeniden Oluştur**.
+
+### Recommended production ladder
+
+The current PageSpeed catalogue baseline shows common high-DPR card requests around `w=640` and `w=750`. For Ertip Medical production, the recommended saved CMS profile values are therefore:
+
+| Profile | Recommended width | Recommended quality |
+| --- | ---: | ---: |
+| Thumbnail | 384 px | 72 |
+| Card | 768 px | 75 |
+| Content | 1440 px | 80 |
+| Fullscreen | 2400 px | 85 |
+
+This recommendation is intentionally stored as CMS configuration rather than changing Payload schema defaults. That keeps the performance tuning migration-free and avoids modifying database defaults for an operational delivery choice.
+
+To adopt it, enter `384 / 768 / 1440 / 2400` in **Site Yapılandırması → Görsel Optimizasyonu**, keep WebP unless there is a specific AVIF need, save, and run **Tümünü Yeniden Oluştur** once. Deployment itself does not overwrite the active profile fingerprint.
 
 ## Admin component import map
 
@@ -143,7 +158,7 @@ After deploying privately:
 2. Test catalogue search, categories, ordering and pagination.
 3. Open a product page and test main, shared and variant images, thumbnails and fullscreen mode.
 4. Verify hero, gallery, news, certificate, team, testimonial, logo, featured-product and related-product images.
-5. Open **Görsel Optimizasyonu**, save the default settings and run **Tümünü Yeniden Oluştur** once for a clean baseline.
+5. Open **Görsel Optimizasyonu**, save the desired settings and run **Tümünü Yeniden Oluştur** once for a clean baseline.
 6. Confirm progress reaches completion and error count is zero, or inspect every reported error.
 7. Reload public pages and confirm image requests use `/api/image-delivery`.
 8. Confirm generated responses use `image/webp` or `image/avif`.
