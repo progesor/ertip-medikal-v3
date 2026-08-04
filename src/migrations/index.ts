@@ -7,6 +7,7 @@ import * as migration_20260731_075754_m9_page_builder_foundations from './202607
 import * as migration_20260731_101005_m9_content_block_polish from './20260731_101005_m9_content_block_polish';
 import * as migration_20260731_113512_m9_new_content_blocks from './20260731_113512_m9_new_content_blocks';
 import * as migration_20260803_060000_redact_download_access_codes from './20260803_060000_redact_download_access_codes';
+import * as migration_20260804_133553_m10_multilingual_foundation from './20260804_133553_m10_multilingual_foundation';
 
 export const migrations = [
   {
@@ -53,5 +54,10 @@ export const migrations = [
     up: migration_20260803_060000_redact_download_access_codes.up,
     down: migration_20260803_060000_redact_download_access_codes.down,
     name: '20260803_060000_redact_download_access_codes',
+  },
+  {
+    up: migration_20260804_133553_m10_multilingual_foundation.up,
+    down: migration_20260804_133553_m10_multilingual_foundation.down,
+    name: '20260804_133553_m10_multilingual_foundation'
   },
 ];

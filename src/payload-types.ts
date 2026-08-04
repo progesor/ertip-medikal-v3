@@ -104,7 +104,7 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
-  fallbackLocale: null;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('tr' | 'en') | ('tr' | 'en')[];
   globals: {
     'site-settings': SiteSetting;
     'main-menu': MainMenu;
@@ -119,7 +119,7 @@ export interface Config {
     themeSettings: ThemeSettingsSelect<false> | ThemeSettingsSelect<true>;
     imageOptimization: ImageOptimizationSelect<false> | ImageOptimizationSelect<true>;
   };
-  locale: null;
+  locale: 'tr' | 'en';
   widgets: {
     collections: CollectionsWidget;
   };
