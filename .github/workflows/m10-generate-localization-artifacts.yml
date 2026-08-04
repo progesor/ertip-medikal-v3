@@ -1,0 +1,88 @@
+name: M10 Generate Localization Artifacts
+
+on:
+  push:
+    branches:
+      - agent/m10-multilingual-foundation
+
+permissions:
+  contents: write
+
+env:
+  NODE_VERSION: "24"
+  PNPM_VERSION: "10"
+  NEXT_TELEMETRY_DISABLED: "1"
+  DATABASE_URI: postgresql://payload:payload@127.0.0.1:5432/ertip_m10
+  PAYLOAD_SECRET: ci-only-secret-not-used-outside-github-actions
+  NEXT_PUBLIC_SITE_URL: http://localhost:3000
+  SMTP_HOST: 127.0.0.1
+  SMTP_PORT: "1025"
+  SMTP_USER: ci
+  SMTP_PASS: ci
+  SMTP_FROM_NAME: Ertip Medikal M10
+  SMTP_FROM_ADDRESS: ci@example.invalid
+
+jobs:
+  generate:
+    if: github.event.head_commit.message != 'chore(m10): generate localization artifacts'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: payload
+          POSTGRES_PASSWORD: payload
+          POSTGRES_DB: ertip_m10
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U payload -d ertip_m10"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/m10-multilingual-foundation
+          fetch-depth: 0
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Apply existing committed migrations
+        run: pnpm db:migrate
+
+      - name: Generate localization migration
+        run: pnpm db:migrate:create m10-multilingual-foundation
+
+      - name: Generate Payload types
+        run: pnpm payload:types
+
+      - name: Generate Payload import map
+        run: pnpm payload:importmap
+
+      - name: Commit generated artifacts
+        shell: bash
+        run: |
+          if git diff --quiet -- src/migrations src/payload-types.ts 'src/app/(payload)/admin/importMap.js'; then
+            echo "No generated localization artifacts changed."
+            exit 1
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/migrations src/payload-types.ts 'src/app/(payload)/admin/importMap.js'
+          git commit -m "chore(m10): generate localization artifacts"
+          git push origin HEAD:agent/m10-multilingual-foundation
