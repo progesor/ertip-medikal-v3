@@ -30,6 +30,11 @@ import { ImageOptimizationSettings } from "@/globals/ImageOptimizationSettings";
 import { invalidateProtectedMediaCache } from "@/lib/security/protectedMedia";
 import { imageOptimizationEndpoints } from "@/lib/imageOptimization/endpoints";
 import { serverEnv } from "@/lib/config/env";
+import { payloadLocalization } from "@/lib/i18n/config";
+import {
+  withLocalizedCollectionFields,
+  withLocalizedGlobalFields,
+} from "@/lib/i18n/payloadLocalization";
 import {
   adminsOnly,
   contentManagers,
@@ -87,10 +92,45 @@ const MediaWithRBAC: CollectionConfig = {
   },
 };
 
+const LocalizedProducts = withLocalizedCollectionFields(Products, [
+  "title",
+  "shortDescription",
+  "description",
+  "specs",
+  "meta",
+  "slug",
+]);
+
+const LocalizedCategories = withLocalizedCollectionFields(Categories, [
+  "title",
+  "description",
+  "slug",
+]);
+
+const LocalizedNews = withLocalizedCollectionFields(News, [
+  "title",
+  "excerpt",
+  "content",
+  "meta",
+  "slug",
+]);
+
+const LocalizedPages = withLocalizedCollectionFields(Pages, [
+  "title",
+  "layout",
+  "meta",
+  "slug",
+]);
+
+const LocalizedNewsCategories = withLocalizedCollectionFields(NewsCategories, [
+  "title",
+  "slug",
+]);
+
 const ProductsWithProtectedPublicApi: CollectionConfig = {
-  ...Products,
+  ...LocalizedProducts,
   access: {
-    ...Products.access,
+    ...LocalizedProducts.access,
     create: contentManagers,
     // The website uses Payload's server-side Local API. Anonymous REST/GraphQL
     // reads stay closed until protected fields have dedicated field access.
@@ -99,16 +139,16 @@ const ProductsWithProtectedPublicApi: CollectionConfig = {
     delete: adminsOnly,
   },
   hooks: {
-    ...Products.hooks,
+    ...LocalizedProducts.hooks,
     afterChange: [
-      ...(Products.hooks?.afterChange ?? []),
+      ...(LocalizedProducts.hooks?.afterChange ?? []),
       ({ doc }) => {
         invalidateProtectedMediaCache();
         return doc;
       },
     ],
     afterDelete: [
-      ...(Products.hooks?.afterDelete ?? []),
+      ...(LocalizedProducts.hooks?.afterDelete ?? []),
       ({ doc }) => {
         invalidateProtectedMediaCache();
         return doc;
@@ -117,11 +157,21 @@ const ProductsWithProtectedPublicApi: CollectionConfig = {
   },
 };
 
+const LocalizedSiteSettings = withLocalizedGlobalFields(SiteSettings, [
+  "header",
+  "floatingAction",
+  "footer",
+]);
+const LocalizedMainMenu = withLocalizedGlobalFields(MainMenu, ["items"]);
+
 const SiteSettingsWithRBAC = withGlobalUpdateAccess(
-  SiteSettings,
+  LocalizedSiteSettings,
   contentManagers,
 );
-const MainMenuWithRBAC = withGlobalUpdateAccess(MainMenu, contentManagers);
+const MainMenuWithRBAC = withGlobalUpdateAccess(
+  LocalizedMainMenu,
+  contentManagers,
+);
 const EmailSettingsWithRBAC: GlobalConfig = {
   ...EmailSettings,
   access: {
@@ -149,6 +199,7 @@ export default buildConfig({
   csrf: [serverEnv.publicSiteUrl],
   defaultDepth: 1,
   maxDepth: 4,
+  localization: payloadLocalization,
   graphQL: {
     disable: true,
   },
@@ -179,11 +230,11 @@ export default buildConfig({
     Users,
     MediaWithRBAC,
     ProductsWithProtectedPublicApi,
-    withContentAccess(Categories),
+    withContentAccess(LocalizedCategories),
     withAdminAccess(Inquiries),
-    withContentAccess(News),
-    withContentAccess(Pages),
-    withContentAccess(NewsCategories),
+    withContentAccess(LocalizedNews),
+    withContentAccess(LocalizedPages),
+    withContentAccess(LocalizedNewsCategories),
     withAdminAccess(QuoteRequests),
     DownloadLogs,
     withAdminAccess(Subscribers),
