@@ -1,12 +1,11 @@
-name: M10 Generate Localization Artifacts
+name: M10 Localization Migration Probe
 
 on:
-  push:
-    branches:
-      - agent/m10-multilingual-foundation
+  pull_request:
+    branches: [main]
 
 permissions:
-  contents: write
+  contents: read
 
 env:
   NODE_VERSION: "24"
@@ -23,8 +22,7 @@ env:
   SMTP_FROM_ADDRESS: ci@example.invalid
 
 jobs:
-  generate:
-    if: github.event.head_commit.message != 'chore(m10): generate localization artifacts'
+  probe:
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -41,11 +39,8 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     steps:
-      - name: Checkout branch
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: agent/m10-multilingual-foundation
-          fetch-depth: 0
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
@@ -64,25 +59,26 @@ jobs:
       - name: Apply existing committed migrations
         run: pnpm db:migrate
 
-      - name: Generate localization migration
-        run: pnpm db:migrate:create m10-multilingual-foundation
-
-      - name: Generate Payload types
-        run: pnpm payload:types
-
-      - name: Generate Payload import map
-        run: pnpm payload:importmap
-
-      - name: Commit generated artifacts
+      - name: Probe interactive localization migration
         shell: bash
         run: |
-          if git diff --quiet -- src/migrations src/payload-types.ts 'src/app/(payload)/admin/importMap.js'; then
-            echo "No generated localization artifacts changed."
+          set +e
+          timeout 20s script -q -e -c "pnpm db:migrate:create m10-multilingual-foundation" migration-session.log
+          status=$?
+          echo "--- migration interactive transcript ---"
+          cat migration-session.log
+          echo "--- end transcript ---"
+          if [[ $status -eq 124 ]]; then
+            echo "Probe timed out after exposing the interactive prompt as expected."
             exit 1
           fi
+          exit $status
 
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/migrations src/payload-types.ts 'src/app/(payload)/admin/importMap.js'
-          git commit -m "chore(m10): generate localization artifacts"
-          git push origin HEAD:agent/m10-multilingual-foundation
+      - name: Upload prompt transcript
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m10-localization-migration-prompt
+          path: migration-session.log
+          if-no-files-found: warn
+          retention-days: 7
