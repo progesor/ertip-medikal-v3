@@ -1,11 +1,11 @@
-name: M10 Localization Migration Probe
+name: M10 Localization Migration Builder
 
 on:
   pull_request:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 env:
   NODE_VERSION: "24"
@@ -23,7 +23,8 @@ env:
   SMTP_FROM_ADDRESS: ci@example.invalid
 
 jobs:
-  probe:
+  build-and-verify:
+    if: github.event.pull_request.head.ref == 'agent/m10-multilingual-foundation'
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -44,8 +45,11 @@ jobs:
         ports:
           - 1025:1025
     steps:
-      - name: Checkout
+      - name: Checkout branch
         uses: actions/checkout@v4
+        with:
+          ref: agent/m10-multilingual-foundation
+          fetch-depth: 0
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
@@ -61,25 +65,140 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install expect
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq expect
+      - name: Install migration probe tools
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq expect postgresql-client
 
       - name: Apply existing committed migrations
         run: pnpm db:migrate
 
-      - name: Generate structural all-create migration probe
+      - name: Seed representative Turkish legacy content
         shell: bash
         run: |
-          cat > /tmp/probe.expect <<'EXPECT'
+          psql "$DATABASE_URI" -v ON_ERROR_STOP=1 <<'SQL'
+          INSERT INTO "media" ("alt", "filename", "mime_type")
+          VALUES ('M10 seed media', 'm10-seed.jpg', 'image/jpeg');
+
+          INSERT INTO "products" (
+            "title", "short_description", "description", "main_image_id",
+            "meta_title", "meta_description", "meta_image_id", "meta_keywords",
+            "sku", "slug", "_status"
+          ) VALUES (
+            'Türkçe Ürün', 'Türkçe kısa açıklama', '# Türkçe açıklama', 1,
+            'Türkçe Ürün SEO', 'Türkçe ürün SEO açıklaması', 1, 'türkçe,ürün',
+            'M10-SKU', 'turkce-urun', 'published'
+          );
+
+          INSERT INTO "products_specs" ("_order", "_parent_id", "id", "key", "value")
+          VALUES (1, 1, 'm10-spec', 'Malzeme', 'Paslanmaz Çelik');
+
+          INSERT INTO "_products_v" (
+            "parent_id", "version_title", "version_short_description",
+            "version_description", "version_meta_title", "version_meta_description",
+            "version_meta_image_id", "version_meta_keywords", "version_sku",
+            "version_slug", "version__status", "latest"
+          ) VALUES (
+            1, 'Türkçe Ürün Sürümü', 'Türkçe sürüm özeti', '# Türkçe sürüm açıklaması',
+            'Türkçe Sürüm SEO', 'Türkçe sürüm SEO açıklaması', 1, 'sürüm,türkçe',
+            'M10-SKU', 'turkce-urun', 'published', true
+          );
+
+          INSERT INTO "_products_v_version_specs" ("_order", "_parent_id", "key", "value", "_uuid")
+          VALUES (1, 1, 'Malzeme', 'Paslanmaz Çelik', 'm10-version-spec');
+
+          INSERT INTO "categories" ("title", "slug", "description")
+          VALUES ('Türkçe Kategori', 'turkce-kategori', 'Türkçe kategori açıklaması');
+
+          INSERT INTO "news_categories" ("title", "slug")
+          VALUES ('Türkçe Haber Kategorisi', 'turkce-haber-kategorisi');
+
+          INSERT INTO "news" (
+            "title", "excerpt", "content", "image_id", "meta_title",
+            "meta_description", "meta_image_id", "meta_keywords", "category_id",
+            "published_date", "slug", "_status"
+          ) VALUES (
+            'Türkçe Haber', 'Türkçe haber özeti', '{"root":{"type":"root","children":[]}}'::jsonb,
+            1, 'Türkçe Haber SEO', 'Türkçe haber SEO açıklaması', 1, 'haber,türkçe',
+            1, now(), 'turkce-haber', 'published'
+          );
+
+          INSERT INTO "_news_v" (
+            "parent_id", "version_title", "version_excerpt", "version_content",
+            "version_image_id", "version_meta_title", "version_meta_description",
+            "version_meta_image_id", "version_meta_keywords", "version_category_id",
+            "version_published_date", "version_slug", "version__status", "latest"
+          ) VALUES (
+            1, 'Türkçe Haber Sürümü', 'Türkçe haber sürüm özeti',
+            '{"root":{"type":"root","children":[]}}'::jsonb, 1,
+            'Türkçe Haber Sürüm SEO', 'Türkçe haber sürüm SEO açıklaması', 1,
+            'haber,sürüm', 1, now(), 'turkce-haber', 'published', true
+          );
+
+          INSERT INTO "pages" (
+            "title", "meta_title", "meta_description", "meta_image_id",
+            "meta_keywords", "slug", "_status"
+          ) VALUES (
+            'Türkçe Sayfa', 'Türkçe Sayfa SEO', 'Türkçe sayfa SEO açıklaması', 1,
+            'sayfa,türkçe', 'turkce-sayfa', 'published'
+          );
+
+          INSERT INTO "pages_blocks_content" (
+            "_order", "_parent_id", "_path", "id", "content", "block_name"
+          ) VALUES (
+            1, 1, 'layout', 'm10-page-content',
+            '{"root":{"type":"root","children":[]}}'::jsonb, 'Türkçe İçerik'
+          );
+
+          INSERT INTO "_pages_v" (
+            "parent_id", "version_title", "version_meta_title", "version_meta_description",
+            "version_meta_image_id", "version_meta_keywords", "version_slug",
+            "version__status", "latest"
+          ) VALUES (
+            1, 'Türkçe Sayfa Sürümü', 'Türkçe Sayfa Sürüm SEO',
+            'Türkçe sayfa sürüm SEO açıklaması', 1, 'sayfa,sürüm',
+            'turkce-sayfa', 'published', true
+          );
+
+          INSERT INTO "_pages_v_blocks_content" (
+            "_order", "_parent_id", "_path", "content", "_uuid", "block_name"
+          ) VALUES (
+            1, 1, 'version_layout', '{"root":{"type":"root","children":[]}}'::jsonb,
+            'm10-version-page-content', 'Türkçe Sürüm İçeriği'
+          );
+
+          INSERT INTO "site_settings" (
+            "general_site_logo_id", "header_header_company_name", "header_header_tagline",
+            "header_header_cta_label", "header_header_cta_href", "floating_action_label",
+            "floating_action_helper_text", "floating_action_phone_number",
+            "floating_action_message", "footer_copyright"
+          ) VALUES (
+            1, 'Ertip Medikal TR', 'Türkçe Slogan', 'Bize Ulaşın', '/iletisim',
+            'WhatsApp ile İletişim', 'Size nasıl yardımcı olabiliriz?', '905551112233',
+            'Merhaba, ürünleriniz hakkında bilgi almak istiyorum.',
+            '© 2026 Ertip Medikal. Tüm Hakları Saklıdır.'
+          );
+
+          INSERT INTO "site_settings_blocks_text_column" (
+            "_order", "_parent_id", "_path", "id", "show_logo", "text", "block_name"
+          ) VALUES (1, 1, 'footer.columns', 'm10-footer-text', true, 'Türkçe footer açıklaması', 'Footer');
+
+          INSERT INTO "site_settings_footer_bottom_links" (
+            "_order", "_parent_id", "id", "label", "url"
+          ) VALUES (1, 1, 'm10-footer-link', 'Gizlilik', '/gizlilik');
+
+          INSERT INTO "main_menu" DEFAULT VALUES;
+          INSERT INTO "main_menu_items" (
+            "_order", "_parent_id", "id", "label", "type", "url"
+          ) VALUES (1, 1, 'm10-menu-item', 'Ürünler', 'custom', '/urunler');
+          SQL
+
+      - name: Generate structural localization migration
+        shell: bash
+        run: |
+          cat > /tmp/generate.expect <<'EXPECT'
           set timeout 90
           log_user 1
           log_file -a migration-session.log
           spawn pnpm db:migrate:create m10-multilingual-foundation --force-accept-warning
-
-          # This is intentionally a structural probe, not the final production
-          # migration. For every Drizzle create-vs-rename ambiguity, select the
-          # default create option. We will inspect and augment the generated SQL
-          # with explicit Turkish data-copy statements before accepting it.
           expect {
             -re {created or renamed[^\?]*\?} {
               send "\r"
@@ -99,18 +218,199 @@ jobs:
               exit $exitCode
             }
             timeout {
-              puts "ERROR: localization migration probe timed out"
+              puts "ERROR: localization migration generation timed out"
               send "\003"
               expect eof
               exit 24
             }
           }
           EXPECT
+          expect /tmp/generate.expect
 
-          expect /tmp/probe.expect
-          echo "--- generated migration files ---"
-          git status --short src/migrations
-          echo "--- end generated migration files ---"
+      - name: Add Turkish data-preservation layer
+        shell: bash
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          import re
+
+          migrations = sorted(Path('src/migrations').glob('*_m10_multilingual_foundation.ts'))
+          if len(migrations) != 1:
+              raise SystemExit(f'Expected one M10 migration, found {len(migrations)}')
+
+          path = migrations[0]
+          source = path.read_text()
+
+          altered_locale_tables = re.findall(
+              r'ALTER TABLE "([^"]+)" ADD COLUMN "_locale" "_locales" NOT NULL;',
+              source,
+          )
+          if len(altered_locale_tables) < 70:
+              raise SystemExit(
+                  f'Unexpected localized child-table count: {len(altered_locale_tables)}'
+              )
+
+          # Existing rows cannot accept a new NOT NULL column until they have
+          # explicitly been assigned to the legacy Turkish locale.
+          source = source.replace(
+              'ADD COLUMN "_locale" "_locales" NOT NULL;',
+              'ADD COLUMN "_locale" "_locales";',
+          )
+
+          locale_sources = {
+              'products_locales': 'products',
+              '_products_v_locales': '_products_v',
+              'categories_locales': 'categories',
+              'news_locales': 'news',
+              '_news_v_locales': '_news_v',
+              'pages_locales': 'pages',
+              '_pages_v_locales': '_pages_v',
+              'news_categories_locales': 'news_categories',
+              'site_settings_locales': 'site_settings',
+          }
+
+          copy_statements = []
+          for locale_table, legacy_table in locale_sources.items():
+              match = re.search(
+                  rf'CREATE TABLE "{re.escape(locale_table)}" \((.*?)\n  \);',
+                  source,
+                  re.S,
+              )
+              if not match:
+                  raise SystemExit(f'Could not parse {locale_table}')
+
+              columns = re.findall(r'^\s*"([^"]+)"\s+', match.group(1), re.M)
+              content_columns = [
+                  column
+                  for column in columns
+                  if column not in {'id', '_locale', '_parent_id'}
+              ]
+              quoted_columns = ', '.join(f'"{column}"' for column in content_columns)
+              select_columns = ', '.join(f'"{column}"' for column in content_columns)
+              copy_statements.append(
+                  f'''INSERT INTO "{locale_table}" ({quoted_columns}, "_locale", "_parent_id")\n'''
+                  f'''SELECT {select_columns}, 'tr'::"_locales", "id" FROM "{legacy_table}";'''
+              )
+
+          child_locale_statements = []
+          for table in altered_locale_tables:
+              child_locale_statements.extend([
+                  f'''UPDATE "{table}" SET "_locale" = 'tr'::"_locales" WHERE "_locale" IS NULL;''',
+                  f'''ALTER TABLE "{table}" ALTER COLUMN "_locale" SET NOT NULL;''',
+              ])
+
+          relationship_locale_statements = [
+              '''UPDATE "pages_rels" SET "locale" = 'tr'::"_locales" WHERE "locale" IS NULL;''',
+              '''UPDATE "_pages_v_rels" SET "locale" = 'tr'::"_locales" WHERE "locale" IS NULL;''',
+          ]
+
+          preservation = '\n  -- M10 data preservation: all legacy content is Turkish.\n  '
+          preservation += '\n  '.join(
+              copy_statements + child_locale_statements + relationship_locale_statements
+          )
+          preservation += '\n  '
+
+          marker = 'ALTER TABLE "products" DROP COLUMN "title";'
+          if source.count(marker) != 1:
+              raise SystemExit('Unexpected product drop marker count')
+          source = source.replace(marker, preservation + marker, 1)
+
+          # A downgrade after editors create English rows cannot safely collapse
+          # two locales back into one schema. Production policy already forbids
+          # migrate:down; make that boundary explicit instead of silently losing data.
+          down_marker = 'export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {'
+          down_index = source.find(down_marker)
+          if down_index < 0:
+              raise SystemExit('Down migration marker not found')
+          source = source[:down_index] + '''export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {\n  throw new Error(\n    "M10 multilingual localization is intentionally irreversible. Restore the pre-migration PostgreSQL backup instead of running migrate:down.",\n  )\n}\n'''
+
+          path.write_text(source)
+          print(f'Patched {path} with Turkish preservation for {len(altered_locale_tables)} child tables.')
+          PY
+
+      - name: Apply safe localization migration to seeded legacy database
+        run: pnpm db:migrate
+
+      - name: Verify Turkish content survived localization
+        shell: bash
+        run: |
+          psql "$DATABASE_URI" -v ON_ERROR_STOP=1 <<'SQL'
+          DO $$
+          BEGIN
+            IF (SELECT "title" FROM "products_locales" WHERE "_parent_id" = 1 AND "_locale" = 'tr') IS DISTINCT FROM 'Türkçe Ürün' THEN
+              RAISE EXCEPTION 'Product Turkish title was not preserved';
+            END IF;
+            IF (SELECT "short_description" FROM "products_locales" WHERE "_parent_id" = 1 AND "_locale" = 'tr') IS DISTINCT FROM 'Türkçe kısa açıklama' THEN
+              RAISE EXCEPTION 'Product Turkish short description was not preserved';
+            END IF;
+            IF (SELECT "slug" FROM "products_locales" WHERE "_parent_id" = 1 AND "_locale" = 'tr') IS DISTINCT FROM 'turkce-urun' THEN
+              RAISE EXCEPTION 'Product Turkish slug was not preserved';
+            END IF;
+            IF (SELECT "sku" FROM "products" WHERE "id" = 1) IS DISTINCT FROM 'M10-SKU' THEN
+              RAISE EXCEPTION 'Shared product SKU changed';
+            END IF;
+            IF (SELECT "_locale"::text FROM "products_specs" WHERE "id" = 'm10-spec') IS DISTINCT FROM 'tr' THEN
+              RAISE EXCEPTION 'Product specs were not assigned to Turkish';
+            END IF;
+            IF (SELECT "version_title" FROM "_products_v_locales" WHERE "_parent_id" = 1 AND "_locale" = 'tr') IS DISTINCT FROM 'Türkçe Ürün Sürümü' THEN
+              RAISE EXCEPTION 'Product version Turkish title was not preserved';
+            END IF;
+            IF (SELECT "_locale"::text FROM "_products_v_version_specs" WHERE "_parent_id" = 1 LIMIT 1) IS DISTINCT FROM 'tr' THEN
+              RAISE EXCEPTION 'Product version specs were not assigned to Turkish';
+            END IF;
+            IF (SELECT "title" FROM "categories_locales" WHERE "_parent_id" = 1 AND "_locale" = 'tr') IS DISTINCT FROM 'Türkçe Kategori' THEN
+              RAISE EXCEPTION 'Category Turkish content was not preserved';
+            END IF;
+            IF (SELECT "title" FROM "news_locales" WHERE "_parent_id" = 1 AND "_locale" = 'tr') IS DISTINCT FROM 'Türkçe Haber' THEN
+              RAISE EXCEPTION 'News Turkish content was not preserved';
+            END IF;
+            IF (SELECT "version_title" FROM "_news_v_locales" WHERE "_parent_id" = 1 AND "_locale" = 'tr') IS DISTINCT FROM 'Türkçe Haber Sürümü' THEN
+              RAISE EXCEPTION 'News version Turkish content was not preserved';
+            END IF;
+            IF (SELECT "title" FROM "pages_locales" WHERE "_parent_id" = 1 AND "_locale" = 'tr') IS DISTINCT FROM 'Türkçe Sayfa' THEN
+              RAISE EXCEPTION 'Page Turkish content was not preserved';
+            END IF;
+            IF (SELECT "_locale"::text FROM "pages_blocks_content" WHERE "id" = 'm10-page-content') IS DISTINCT FROM 'tr' THEN
+              RAISE EXCEPTION 'Page Builder content was not assigned to Turkish';
+            END IF;
+            IF (SELECT "version_title" FROM "_pages_v_locales" WHERE "_parent_id" = 1 AND "_locale" = 'tr') IS DISTINCT FROM 'Türkçe Sayfa Sürümü' THEN
+              RAISE EXCEPTION 'Page version Turkish content was not preserved';
+            END IF;
+            IF (SELECT "_locale"::text FROM "_pages_v_blocks_content" WHERE "_parent_id" = 1 LIMIT 1) IS DISTINCT FROM 'tr' THEN
+              RAISE EXCEPTION 'Page version blocks were not assigned to Turkish';
+            END IF;
+            IF (SELECT "title" FROM "news_categories_locales" WHERE "_parent_id" = 1 AND "_locale" = 'tr') IS DISTINCT FROM 'Türkçe Haber Kategorisi' THEN
+              RAISE EXCEPTION 'News category Turkish content was not preserved';
+            END IF;
+            IF (SELECT "header_header_company_name" FROM "site_settings_locales" WHERE "_parent_id" = 1 AND "_locale" = 'tr') IS DISTINCT FROM 'Ertip Medikal TR' THEN
+              RAISE EXCEPTION 'Site settings Turkish content was not preserved';
+            END IF;
+            IF (SELECT "_locale"::text FROM "site_settings_blocks_text_column" WHERE "id" = 'm10-footer-text') IS DISTINCT FROM 'tr' THEN
+              RAISE EXCEPTION 'Footer block was not assigned to Turkish';
+            END IF;
+            IF (SELECT "_locale"::text FROM "site_settings_footer_bottom_links" WHERE "id" = 'm10-footer-link') IS DISTINCT FROM 'tr' THEN
+              RAISE EXCEPTION 'Footer link was not assigned to Turkish';
+            END IF;
+            IF (SELECT "_locale"::text FROM "main_menu_items" WHERE "id" = 'm10-menu-item') IS DISTINCT FROM 'tr' THEN
+              RAISE EXCEPTION 'Main menu item was not assigned to Turkish';
+            END IF;
+            IF EXISTS (SELECT 1 FROM "products_locales" WHERE "_locale" = 'en') THEN
+              RAISE EXCEPTION 'English product locale was incorrectly pre-populated';
+            END IF;
+            IF EXISTS (SELECT 1 FROM "pages_locales" WHERE "_locale" = 'en') THEN
+              RAISE EXCEPTION 'English page locale was incorrectly pre-populated';
+            END IF;
+            IF EXISTS (
+              SELECT 1 FROM information_schema.columns
+              WHERE table_schema = 'public' AND table_name = 'products' AND column_name = 'title'
+            ) THEN
+              RAISE EXCEPTION 'Legacy product title column still exists after localization';
+            END IF;
+          END $$;
+          SQL
+
+      - name: Verify migration status
+        run: pnpm db:migrate:status
 
       - name: Generate Payload types
         run: pnpm payload:types
@@ -118,11 +418,24 @@ jobs:
       - name: Generate Payload import map
         run: pnpm payload:importmap
 
-      - name: Upload generated localization probe
+      - name: Commit safe generated artifacts
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/migrations src/payload-types.ts 'src/app/(payload)/admin/importMap.js'
+          if git diff --cached --quiet; then
+            echo 'No generated localization artifacts changed.'
+            exit 0
+          fi
+          git commit -m 'chore(m10): generate safe localization artifacts'
+          git push origin HEAD:agent/m10-multilingual-foundation
+
+      - name: Upload verified localization artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: m10-localization-generated-probe
+          name: m10-localization-verified-artifacts
           path: |
             migration-session.log
             src/migrations
