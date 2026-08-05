@@ -85,7 +85,7 @@ export function LanguageSwitcher({
   const isResolving = !isSourcePath && !hasCurrentClientResolution;
   const alternateLocale = isSourcePath
     ? { href: targetHref, available }
-    : hasCurrentClientResolution
+    : clientResolution?.pathname === pathname
       ? clientResolution
       : { href: "", available: false };
 
