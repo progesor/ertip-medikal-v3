@@ -16,11 +16,6 @@ import {
   useUiDictionary,
 } from "@/providers/SiteLocaleProvider";
 
-type ApiResponse = {
-  success?: boolean;
-  message?: string;
-};
-
 type Status = "idle" | "loading" | "success" | "error";
 
 export function UnsubscribeClient({ token }: { token?: string }) {
@@ -46,7 +41,6 @@ export function UnsubscribeClient({ token }: { token?: string }) {
           website: formData.get("website"),
         }),
       });
-      const result = (await response.json()) as ApiResponse;
 
       if (!response.ok) {
         setStatus("error");
@@ -75,7 +69,6 @@ export function UnsubscribeClient({ token }: { token?: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token }),
       });
-      const result = (await response.json()) as ApiResponse;
 
       if (!response.ok) {
         setStatus("error");
