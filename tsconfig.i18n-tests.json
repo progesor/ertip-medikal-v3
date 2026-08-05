@@ -8,10 +8,17 @@
     "skipLibCheck": true,
     "outDir": ".tmp/i18n-tests",
     "rootDir": ".",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
     "types": ["node"]
   },
   "include": [
+    "src/lib/i18n/config.ts",
     "src/lib/i18n/localeBootstrap.ts",
+    "src/lib/i18n/newsletterDictionary.ts",
+    "src/lib/i18n/uiDictionary.ts",
     "tests/i18n/**/*.ts"
   ]
 }
