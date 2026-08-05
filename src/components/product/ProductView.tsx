@@ -379,6 +379,7 @@ export function ProductView({ product }: any) {
       id: String(product.id),
       title: product.title,
       slug: product.slug,
+      localizedIdentity: product.cartLocalizedIdentity,
       variant: currentVariant?.title || dictionary.product.defaultVariant,
       sku: currentVariant?.sku || product.sku,
       ...(currentVariant?.combinationKey
