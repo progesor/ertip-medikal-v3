@@ -4,7 +4,7 @@
 
 Introduce explicit English and Turkish public URL spaces without duplicating the existing application route tree or weakening Payload localization boundaries.
 
-M10.2 also establishes a practical translation workflow: Turkish remains the source locale for authoring new records, while missing English localized content is initialized from Turkish so editors can translate only the fields that need to differ.
+M10.2 also establishes a practical translation workflow: Turkish remains the source locale for most editorial authoring, while an explicit admin tool can initialize missing English localized content from Turkish so editors can focus on the text that actually needs translation.
 
 Full translation of application-owned fixed UI strings is intentionally handled in M10.3.
 
@@ -70,15 +70,17 @@ This includes:
 - Main Menu;
 - localized Site Settings groups.
 
-The public website therefore never depends on implicit fallback. English content exists as English locale data even when its initial value was copied from Turkish.
+The public website therefore never depends on implicit fallback. English content exists as English locale data even when its initial value was intentionally copied from Turkish.
 
 Where a listing depends on a localized slug, only records with a slug in the requested locale are surfaced.
 
-## English locale bootstrap
+## Admin-driven English locale bootstrap
 
-M10.1 safely moved the pre-existing single-language content into Turkish locale rows. M10.2 adds an explicit English bootstrap step to avoid empty Page Builder and product editing experiences.
+M10.1 safely moved the pre-existing single-language content into Turkish locale rows. Early M10.2 testing showed that empty English locale rows are inconvenient for editors because Page Builder structures and localized product fields otherwise have to be recreated manually.
 
-Migration `20260805_105000_m10_2_bootstrap_english_content` initializes only missing English localized values from Turkish for:
+M10.2 therefore adds an explicit **Eksik İngilizce İçeriği Türkçeden Doldur** control to the Payload Admin dashboard.
+
+The tool is Owner/Admin only and fills only missing English localized values from Turkish for:
 
 - Products;
 - Categories;
@@ -88,23 +90,17 @@ Migration `20260805_105000_m10_2_bootstrap_english_content` initializes only mis
 - Main Menu;
 - localized Site Settings header, floating action and footer groups.
 
-The migration never overwrites an English field that already contains content. Existing translations therefore remain authoritative.
+The tool is intentionally idempotent and can be run again whenever new Turkish content is added:
 
-Localized arrays and Page Builder block structures receive fresh row IDs while their content, media/relationship references and structure are copied. Shared product data such as SKU identity, variants, logistics and media relationships remains shared exactly as defined by M10.1.
+- an English field that already contains content is never overwritten;
+- existing translations remain authoritative;
+- empty English slugs are initialized from the Turkish slug and can then be changed independently;
+- localized Page Builder / array rows receive fresh IDs before insertion;
+- shared product identity such as SKU-driving data, variants, media and logistics remains shared exactly as defined by M10.1.
 
-The initial English slug is copied from Turkish when English has no slug. Editors can later change the English slug independently.
+This is an explicit editorial action, not a deployment migration and not a hidden synchronization hook. `build:deploy` therefore never performs bulk editorial copying automatically.
 
-### New records
-
-When a new localized collection record is created in Turkish, an after-create hook initializes its missing English localized fields from the just-created Turkish record. This applies to Products, Categories, News, Pages and News Categories.
-
-This is intentionally a one-time bootstrap, not continuous synchronization:
-
-- later English translations are never overwritten by Turkish edits;
-- intentionally different English Page Builder structures remain possible;
-- existing English content is never reset when Turkish content changes.
-
-Payload's own Copy-to-Locale workflow remains available for cases where an editor deliberately wants to replace a locale with another locale's current content.
+Payload's own per-record Copy-to-Locale workflow remains available for cases where an editor deliberately wants to replace a locale with another locale's current content.
 
 ## Language switching
 
@@ -158,7 +154,7 @@ Before M10.2 closes:
 - [x] public localized Payload queries do not use implicit fallback.
 - [x] language switch uses the same record ID and target localized slug.
 - [x] shared layout navigation is rebuilt immediately after locale switching.
-- [x] missing English fields bootstrap from Turkish without overwriting existing English content.
+- [x] locale-bootstrap policy tests verify missing values copy without overwriting existing English values.
 - [x] Page Builder bootstrap strips reused localized row IDs before insertion.
-- [ ] verify the bootstrap migration against the project's populated local/test database before merge.
-- [ ] final TypeScript, ESLint, production build and browser/RFQ/security workflows pass after the bootstrap changes.
+- [ ] run the Admin English-bootstrap tool against the populated local production snapshot and verify Pages/Page Builder, Products, Main Menu and Site Settings.
+- [ ] final TypeScript, ESLint, production build and browser/RFQ/security workflows pass after the Admin tool changes.
