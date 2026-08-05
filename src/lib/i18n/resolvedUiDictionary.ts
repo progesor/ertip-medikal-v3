@@ -1,5 +1,3 @@
-import "server-only";
-
 import type { SiteLocale } from "@/lib/i18n/config";
 import {
   getUiDictionary,
