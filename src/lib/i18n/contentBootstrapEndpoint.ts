@@ -84,7 +84,9 @@ async function runEnglishContentBootstrap(req: PayloadRequest) {
     });
 
     for (const rawDoc of result.docs) {
-      const doc = rawDoc as Record<string, unknown> & { id: number | string };
+      const doc = rawDoc as unknown as Record<string, unknown> & {
+        id: number | string;
+      };
       summary.scanned += 1;
 
       try {
