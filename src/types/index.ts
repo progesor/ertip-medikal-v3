@@ -1,12 +1,19 @@
+import type { SiteLocale } from "@/lib/i18n/config";
+
 export type BreadcrumbItem = {
   label: string;
   href?: string;
 };
 
+export type CartLocalizedIdentity = Partial<
+  Record<SiteLocale, { title: string; slug: string }>
+>;
+
 export type CartItem = {
   id: string;
   title: string;
   slug: string;
+  localizedIdentity?: CartLocalizedIdentity;
   variant: string;
   sku: string;
   combinationKey?: string;
