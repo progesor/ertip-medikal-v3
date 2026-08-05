@@ -6,15 +6,45 @@ import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays, ArrowRight, SlidersHorizontal } from "lucide-react";
+import type { SiteLocale } from "@/lib/i18n/config";
+import { getNewsPath } from "@/lib/i18n/routing";
 
-export function NewsGridClient({ initialNews, categories, showFilters }: any) {
+type NewsGridClientProps = {
+  initialNews: any[];
+  categories: any[];
+  showFilters?: boolean;
+  locale: SiteLocale;
+};
+
+export function NewsGridClient({
+  initialNews,
+  categories,
+  showFilters,
+  locale,
+}: NewsGridClientProps) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const labels =
+    locale === "en"
+      ? {
+          filter: "Filter:",
+          all: "All",
+          empty: "No news was found in this category.",
+          clear: "Clear Filters",
+          read: "Read News",
+        }
+      : {
+          filter: "Filtrele:",
+          all: "Tümü",
+          empty: "Bu kategoriye ait bir haber bulunamadı.",
+          clear: "Filtreleri Temizle",
+          read: "Haberi Oku",
+        };
 
   const filteredNews = activeCategory
     ? initialNews.filter((item: any) => {
         const categoryId =
           typeof item.category === "object" ? item.category?.id : item.category;
-        return categoryId === activeCategory;
+        return String(categoryId) === activeCategory;
       })
     : initialNews;
 
@@ -23,7 +53,7 @@ export function NewsGridClient({ initialNews, categories, showFilters }: any) {
       {showFilters && categories?.length > 0 && (
         <div className="flex flex-wrap items-center justify-center gap-3 mb-12 bg-surface-muted p-4 rounded-3xl border border-border">
           <span className="text-sm font-semibold text-text-muted mr-2 flex items-center gap-2">
-            <SlidersHorizontal className="w-4 h-4" /> Filtrele:
+            <SlidersHorizontal className="w-4 h-4" /> {labels.filter}
           </span>
           <button
             type="button"
@@ -34,15 +64,15 @@ export function NewsGridClient({ initialNews, categories, showFilters }: any) {
                 : "bg-surface text-text-muted hover:bg-surface-muted border border-border"
             }`}
           >
-            Tümü
+            {labels.all}
           </button>
           {categories.map((category: any) => (
             <button
               type="button"
               key={category.id}
-              onClick={() => setActiveCategory(category.id)}
+              onClick={() => setActiveCategory(String(category.id))}
               className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
-                activeCategory === category.id
+                activeCategory === String(category.id)
                   ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-105"
                   : "bg-surface text-text-muted hover:bg-surface-muted border border-border"
               }`}
@@ -56,14 +86,14 @@ export function NewsGridClient({ initialNews, categories, showFilters }: any) {
       {filteredNews.length === 0 ? (
         <div className="text-center py-24 bg-surface-muted rounded-3xl border border-dashed border-border">
           <p className="text-xl text-text-muted font-medium mb-4">
-            Bu kategoriye ait bir haber bulunamadı.
+            {labels.empty}
           </p>
           <button
             type="button"
             onClick={() => setActiveCategory(null)}
             className="text-primary hover:underline font-bold"
           >
-            Filtreleri Temizle
+            {labels.clear}
           </button>
         </div>
       ) : (
@@ -75,13 +105,14 @@ export function NewsGridClient({ initialNews, categories, showFilters }: any) {
                 : "/placeholder.jpg";
             const formattedDate = new Date(
               item.publishedDate,
-            ).toLocaleDateString("tr-TR", {
+            ).toLocaleDateString(locale === "en" ? "en-US" : "tr-TR", {
               year: "numeric",
               month: "long",
               day: "numeric",
             });
             const categoryTitle =
               typeof item.category === "object" ? item.category?.title : null;
+            const newsHref = getNewsPath(locale, item.slug || String(item.id));
 
             return (
               <Card
@@ -89,7 +120,7 @@ export function NewsGridClient({ initialNews, categories, showFilters }: any) {
                 className="group overflow-hidden rounded-2xl border-0 bg-surface shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-500 flex flex-col"
               >
                 <Link
-                  href={`/haberler/${item.slug || item.id}`}
+                  href={newsHref}
                   className="relative block aspect-[16/9] overflow-hidden"
                 >
                   <Image
@@ -116,9 +147,7 @@ export function NewsGridClient({ initialNews, categories, showFilters }: any) {
                     <time>{formattedDate}</time>
                   </div>
                   <h3 className="text-xl font-black mb-4 line-clamp-2 leading-snug group-hover:text-primary transition-colors">
-                    <Link href={`/haberler/${item.slug || item.id}`}>
-                      {item.title}
-                    </Link>
+                    <Link href={newsHref}>{item.title}</Link>
                   </h3>
                   {item.excerpt && (
                     <p className="text-text-muted line-clamp-2 mb-8 text-base leading-relaxed flex-grow">
@@ -126,10 +155,10 @@ export function NewsGridClient({ initialNews, categories, showFilters }: any) {
                     </p>
                   )}
                   <Link
-                    href={`/haberler/${item.slug || item.id}`}
+                    href={newsHref}
                     className="inline-flex items-center text-primary font-black text-sm group/btn mt-auto uppercase tracking-wide"
                   >
-                    Haberi Oku
+                    {labels.read}
                     <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover/btn:translate-x-1" />
                   </Link>
                 </CardContent>
