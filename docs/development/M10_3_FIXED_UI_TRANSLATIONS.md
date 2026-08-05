@@ -37,6 +37,16 @@ Client components receive locale from the same server-resolved request context u
 
 This ensures `/en/...` consistently renders English application UI and `/tr/...` consistently renders Turkish application UI.
 
+### Persistent-layout language switching
+
+The public Header lives in a shared Next.js layout. A client-side navigation can therefore move from the initial page to another public route without rebuilding the Server Component header. A language-switch target calculated only during the first server render would become stale and could send the user back to the first page they opened.
+
+`LanguageSwitcher` now follows the browser's current public pathname. The first server-rendered page reuses the already-resolved alternate URL. After a client-side route change, the switcher requests `/api/public/alternate-locale` for the **current** pathname before enabling the target-language link.
+
+The resolver reuses `resolveAlternateLocaleHref`, so system routes map directly while products, news items and CMS pages resolve the opposite locale's slug from the same Payload record ID. During resolution the switcher is temporarily disabled rather than exposing a stale href.
+
+This keeps language changes on the same logical page even when EN/TR slugs differ.
+
 ## Product UI
 
 Product editorial fields (`title`, `shortDescription`, `description`, `specs`) continue to come from Payload in the active locale.
@@ -108,6 +118,7 @@ Focused dictionaries are also compiled by the normal TypeScript/production-build
 
 ## Deliberately deferred
 
+- optional admin-managed overrides for selected application-owned UI copy; typed dictionaries should remain the fallback rather than moving every system/accessibility string into CMS;
 - multilingual canonical / `hreflang` / `x-default` metadata;
 - multilingual sitemap and robots work;
 - translating shared SKU-driving attributes/values;
@@ -118,17 +129,18 @@ Focused dictionaries are also compiled by the normal TypeScript/production-build
 Before M10.3 closes:
 
 - [x] TypeScript passes.
-- [x] ESLint passes.
+- [x] ESLint passes before the final language-switch regression patch.
 - [x] `test:i18n` passes including dictionary parity.
-- [x] production build passes.
+- [x] production build passes before the final language-switch regression patch.
 - [x] `/en/quote-cart` displays English empty/form states in Browser E2E.
 - [x] `/tr/teklif-sepeti` preserves Turkish empty/form states in Browser E2E.
 - [x] `/en/unsubscribe` displays English interaction copy in Browser E2E.
 - [x] `/tr/abonelikten-ayril` preserves Turkish interaction copy in Browser E2E.
+- [x] Browser E2E includes a persistent-layout regression: enter `/tr`, navigate client-side to quote cart, then switch to `/en/quote-cart` rather than returning to the initial page.
 - [x] RFQ regression validation passes.
-- [x] CodeQL passes.
-- [ ] final current-head CI and Browser E2E remain green after documentation closeout.
-- [ ] populated local smoke test confirms product-detail/Page Builder presentation if desired before merge.
+- [x] CodeQL passes before the final language-switch regression patch.
+- [ ] final current-head TypeScript / ESLint / build / Browser E2E / RFQ / CodeQL remain green.
+- [ ] populated local smoke test confirms product-detail language switching with real localized product slugs if desired before merge.
 
 ## Merge policy
 
