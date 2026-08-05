@@ -21,7 +21,15 @@ Primary surfaces use `uiDictionary.ts`:
 - contact form;
 - unsubscribe flow.
 
-The Page Builder newsletter block keeps its small interaction-state dictionary in `newsletterDictionary.ts`; its title, description and configured button text remain localized CMS fields.
+Smaller Page Builder interaction surfaces use focused dictionaries:
+
+- `newsletterDictionary.ts` for newsletter form state;
+- `galleryBlockDictionary.ts` for gallery/lightbox controls;
+- `certificateDictionary.ts` for certificate viewer labels and fallback copy.
+
+Location Block is a Server Component and resolves a small EN/TR label set directly from the request locale, avoiding unnecessary client JavaScript.
+
+Editorial titles, descriptions, captions, certificate names, location details and configured button text remain localized CMS fields.
 
 ## Locale boundary
 
@@ -46,6 +54,14 @@ Application-owned labels now include:
 
 SKU identity and SKU-driving attribute/value data stay shared exactly as defined by M10.1. M10.3 translates presentation chrome without changing SKU semantics.
 
+### Cross-locale quote-cart identity
+
+The quote cart stays shared across language switches because it represents the same requested products and SKU identities. Each newly added item can also carry the product's localized `title + slug` presentation map for both locales.
+
+The current locale uses that presentation identity for the visible product title and detail-page link. This prevents a product added in Turkish from linking to a Turkish slug while the user is later browsing the English cart, especially after editors make EN and TR slugs different.
+
+Legacy browser carts without the presentation map remain valid and fall back to their stored title/slug.
+
 ## Quote cart / RFQ
 
 The quote cart uses the current locale from `SiteLocaleProvider`, including its catalog/product links and all form text.
@@ -60,7 +76,7 @@ Translated states include:
 - generic client-side failure states;
 - successful request confirmation.
 
-RFQ payload semantics are unchanged.
+RFQ payload semantics are unchanged. The server still receives product ID, SKU/combination identity and quantity rather than trusting localized presentation strings.
 
 ## Contact and newsletter flows
 
@@ -68,13 +84,27 @@ The contact form translates labels, placeholders, success/error states and priva
 
 The newsletter Page Builder block translates only application-owned interaction states. CMS-provided block copy remains independently editable per locale.
 
+## Page Builder interaction audit
+
+M10.3 also audits Page Builder components that already receive localized CMS content but had fixed Turkish interaction chrome.
+
+Covered surfaces include:
+
+- Gallery lightbox fallback alt text, helper text, viewer title and previous/next/close labels;
+- Certificate Grid trust badge, viewer controls, fallback scope copy, PDF action and save guidance;
+- Location Block map fallback, map frame title, primary-location badge and external-map action.
+
+Hero Slider, News Grid and Video Media already carried explicit locale-aware fixed labels from M10.2 and remain unchanged.
+
 ## Unsubscribe flow
 
 The unsubscribe request and confirmation UI, metadata title, loading/error states and return-home route are locale-aware. Public API contracts and token handling are unchanged.
 
 ## Typed parity gate
 
-`tests/i18n/uiDictionary.types.ts` is compiled by `test:i18n` and enforces bidirectional structural parity between English and Turkish dictionaries. Adding a key to only one locale therefore fails the i18n TypeScript gate.
+`tests/i18n/uiDictionary.types.ts` is compiled by `test:i18n` and enforces bidirectional structural parity between the main English and Turkish dictionaries. Adding a key to only one locale therefore fails the i18n TypeScript gate.
+
+Focused dictionaries are also compiled by the normal TypeScript/production-build gates.
 
 ## Deliberately deferred
 
@@ -87,16 +117,18 @@ The unsubscribe request and confirmation UI, metadata title, loading/error state
 
 Before M10.3 closes:
 
-- [ ] TypeScript passes.
-- [ ] ESLint passes.
-- [ ] `test:i18n` passes including dictionary parity.
-- [ ] production build passes.
-- [ ] `/en/quote-cart` displays English empty/form states.
-- [ ] `/tr/teklif-sepeti` preserves Turkish empty/form states.
-- [ ] `/en/unsubscribe` displays English interaction copy.
-- [ ] `/tr/abonelikten-ayril` preserves Turkish interaction copy.
-- [ ] product-detail tabs/actions are English under `/en` and Turkish under `/tr` when localized product data exists.
-- [ ] existing RFQ, SKU and security regression workflows remain green.
+- [x] TypeScript passes.
+- [x] ESLint passes.
+- [x] `test:i18n` passes including dictionary parity.
+- [x] production build passes.
+- [x] `/en/quote-cart` displays English empty/form states in Browser E2E.
+- [x] `/tr/teklif-sepeti` preserves Turkish empty/form states in Browser E2E.
+- [x] `/en/unsubscribe` displays English interaction copy in Browser E2E.
+- [x] `/tr/abonelikten-ayril` preserves Turkish interaction copy in Browser E2E.
+- [x] RFQ regression validation passes.
+- [x] CodeQL passes.
+- [ ] final current-head CI and Browser E2E remain green after documentation closeout.
+- [ ] populated local smoke test confirms product-detail/Page Builder presentation if desired before merge.
 
 ## Merge policy
 
