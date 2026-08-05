@@ -35,6 +35,20 @@ test.describe("M8 business-flow hardening", () => {
     await expect(page.getByRole("link", { name: "Türkçeye geç" })).toBeVisible();
   });
 
+  test("locale switch follows the current route after client navigation", async ({ page }) => {
+    await page.goto("/tr");
+
+    await page.getByRole("link", { name: "Teklif sepeti" }).click();
+    await expect(page).toHaveURL(/\/tr\/teklif-sepeti$/);
+
+    const switchToEnglish = page.getByRole("link", { name: "Switch to English" });
+    await expect(switchToEnglish).toBeVisible();
+    await switchToEnglish.click();
+
+    await expect(page).toHaveURL(/\/en\/quote-cart$/);
+    await expect(page.getByRole("heading", { name: "Quote Cart" })).toBeVisible();
+  });
+
   test("public locale routing canonicalizes legacy and translated system routes", async ({
     page,
   }) => {
