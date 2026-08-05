@@ -1,8 +1,7 @@
-import type { CollectionAfterChangeHook, PayloadRequest } from "payload";
+import type { PayloadRequest } from "payload";
 
 const SOURCE_LOCALE = "tr" as const;
 const TARGET_LOCALE = "en" as const;
-const BOOTSTRAP_CONTEXT_KEY = "skipEnglishLocaleBootstrap";
 
 type BootstrapDocument = Record<string, unknown> & {
   id?: number | string;
@@ -137,10 +136,6 @@ export async function bootstrapCollectionEnglishLocale({
     depth: 0,
     overrideAccess: true,
     req,
-    context: {
-      ...(req.context ?? {}),
-      [BOOTSTRAP_CONTEXT_KEY]: true,
-    },
   });
 
   return true;
@@ -183,36 +178,7 @@ export async function bootstrapGlobalEnglishLocale({
     depth: 0,
     overrideAccess: true,
     req,
-    context: {
-      ...(req.context ?? {}),
-      [BOOTSTRAP_CONTEXT_KEY]: true,
-    },
   });
 
   return true;
-}
-
-export function createEnglishBootstrapAfterCreateHook(
-  spec: LocaleBootstrapSpec,
-): CollectionAfterChangeHook {
-  return async ({ collection, context, doc, operation, req }) => {
-    if (operation !== "create" || context?.[BOOTSTRAP_CONTEXT_KEY]) {
-      return doc;
-    }
-
-    const activeLocale = req.locale || SOURCE_LOCALE;
-    if (activeLocale !== SOURCE_LOCALE || doc.id === undefined) {
-      return doc;
-    }
-
-    await bootstrapCollectionEnglishLocale({
-      req,
-      collection: collection.slug,
-      id: doc.id,
-      spec,
-      sourceDoc: doc as BootstrapDocument,
-    });
-
-    return doc;
-  };
 }
