@@ -13,6 +13,7 @@ import {
 } from "@/lib/i18n/routing";
 
 const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
+const INTERNAL_REWRITE_HEADER = "x-ertip-internal-rewrite";
 
 const bypassPrefixes = [
   "/admin",
@@ -31,7 +32,11 @@ const bypassExactPaths = new Set([
 
 function shouldBypass(pathname: string) {
   if (bypassExactPaths.has(pathname)) return true;
-  if (bypassPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) {
+  if (
+    bypassPrefixes.some(
+      (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+    )
+  ) {
     return true;
   }
 
@@ -73,6 +78,14 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // A localized public URL is rewritten to one of the existing internal app
+  // routes. If Next.js evaluates Proxy again for that rewritten request, do not
+  // feed the internal path back into legacy/public canonicalization. The marker
+  // is routing-only; it is not an authorization or security boundary.
+  if (request.headers.get(INTERNAL_REWRITE_HEADER) === "1") {
+    return NextResponse.next();
+  }
+
   const localizedRoute = parseLocalizedPublicPath(pathname);
 
   if (localizedRoute) {
@@ -88,6 +101,7 @@ export function proxy(request: NextRequest) {
     }
 
     const requestHeaders = new Headers(request.headers);
+    requestHeaders.set(INTERNAL_REWRITE_HEADER, "1");
     requestHeaders.set(localeRequestHeader, localizedRoute.locale);
     requestHeaders.set(publicPathRequestHeader, pathname);
 
@@ -107,7 +121,9 @@ export function proxy(request: NextRequest) {
   if (pathname === "/") {
     const locale =
       getSavedLocale(request) ||
-      getPreferredLocaleFromAcceptLanguage(request.headers.get("accept-language"));
+      getPreferredLocaleFromAcceptLanguage(
+        request.headers.get("accept-language"),
+      );
 
     return redirectToLocalizedPath(request, locale, "/");
   }
