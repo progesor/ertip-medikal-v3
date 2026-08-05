@@ -3,6 +3,7 @@ import configPromise from "@payload-config";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { RenderBlocks } from "@/components/blocks/RenderBlocks";
+import { getRequestLocale } from "@/lib/i18n/requestLocale";
 
 export const dynamic = "force-dynamic";
 
@@ -13,22 +14,29 @@ type Args = {
 };
 
 export async function generateMetadata({ params }: Args): Promise<Metadata> {
-  const { slug } = await params;
+  const [{ slug }, locale] = await Promise.all([params, getRequestLocale()]);
   const payload = await getPayload({ config: configPromise });
 
   const { docs } = await payload.find({
     collection: "pages",
+    locale,
+    fallbackLocale: false,
     where: { slug: { equals: slug }, _status: { equals: "published" } },
     limit: 1,
   });
 
   const page = docs[0];
-  if (!page) return { title: "Sayfa Bulunamadı" };
+  if (!page) {
+    return { title: locale === "en" ? "Page Not Found" : "Sayfa Bulunamadı" };
+  }
 
   const manualMeta = page.meta || {};
   const finalTitle = manualMeta.title || page.title;
   const finalDesc =
-    manualMeta.description || `Ertip Medikal kurumsal bilgi: ${page.title}.`;
+    manualMeta.description ||
+    (locale === "en"
+      ? `Ertip Medical corporate information: ${page.title}.`
+      : `Ertip Medikal kurumsal bilgi: ${page.title}.`);
   const ogImage =
     typeof manualMeta.image === "object" && manualMeta.image?.url
       ? manualMeta.image.url
@@ -48,11 +56,13 @@ export async function generateMetadata({ params }: Args): Promise<Metadata> {
 }
 
 export default async function DynamicPage({ params }: Args) {
-  const { slug } = await params;
+  const [{ slug }, locale] = await Promise.all([params, getRequestLocale()]);
   const payload = await getPayload({ config: configPromise });
 
   const { docs } = await payload.find({
     collection: "pages",
+    locale,
+    fallbackLocale: false,
     where: {
       slug: { equals: slug },
       _status: { equals: "published" },
