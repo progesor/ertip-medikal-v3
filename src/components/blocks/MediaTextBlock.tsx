@@ -3,6 +3,8 @@ import Link from "next/link";
 import { ArrowRight, Quote } from "lucide-react";
 import { RichText } from "@payloadcms/richtext-lexical/react";
 import { Button } from "@/components/ui/button";
+import { getRequestLocale } from "@/lib/i18n/requestLocale";
+import { localizeInternalHref } from "@/lib/i18n/routing";
 
 type MediaValue =
   | number
@@ -99,7 +101,7 @@ const fixedAspectRatios = {
 const richTextClasses =
   "space-y-5 text-base leading-8 md:text-lg [&_a]:font-semibold [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4 [&_h2]:pt-3 [&_h2]:text-2xl [&_h2]:font-bold [&_h3]:pt-3 [&_h3]:text-xl [&_h3]:font-bold [&_li]:mb-2 [&_ol]:ml-5 [&_ol]:list-decimal [&_p]:leading-8 [&_ul]:ml-5 [&_ul]:list-disc";
 
-export function MediaTextBlock({
+export async function MediaTextBlock({
   eyebrow,
   title,
   content,
@@ -117,6 +119,7 @@ export function MediaTextBlock({
   buttonText,
   buttonLink,
 }: MediaTextBlockProps) {
+  const locale = await getRequestLocale();
   const media = typeof image === "object" && image ? image : null;
   const imageUrl = media?.url || null;
   const resolvedTheme = theme || "light";
@@ -210,7 +213,7 @@ export function MediaTextBlock({
             className="h-12 rounded-[var(--radius-2xl)] px-7 font-bold"
             asChild
           >
-            <Link href={buttonLink}>
+            <Link href={localizeInternalHref(buttonLink, locale)}>
               {buttonText}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
