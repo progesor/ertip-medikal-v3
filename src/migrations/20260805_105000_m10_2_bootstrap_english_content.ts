@@ -13,6 +13,10 @@ type GlobalBootstrap = LocaleBootstrapSpec & {
   slug: string
 }
 
+type BootstrapSourceDocument = Record<string, unknown> & {
+  id: number | string
+}
+
 const collectionBootstraps: CollectionBootstrap[] = [
   {
     slug: 'products',
@@ -63,14 +67,15 @@ export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
       overrideAccess: true,
       req,
     })
+    const docs = result.docs as unknown as BootstrapSourceDocument[]
 
-    for (const doc of result.docs) {
+    for (const doc of docs) {
       await bootstrapCollectionEnglishLocale({
         req,
         collection: bootstrap.slug,
         id: doc.id,
         spec: bootstrap,
-        sourceDoc: doc as Record<string, unknown> & { id: number | string },
+        sourceDoc: doc,
       })
     }
   }
