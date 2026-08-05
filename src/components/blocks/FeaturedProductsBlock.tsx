@@ -12,45 +12,69 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
+import { getRequestLocale } from "@/lib/i18n/requestLocale";
+import { getProductsPath } from "@/lib/i18n/routing";
 
 export async function FeaturedProductsBlock({
   title,
   selectionType,
   selectedProducts,
 }: any) {
-  let productsToDisplay = [];
-  const payload = await getPayload({ config: configPromise });
+  let productsToDisplay: any[] = [];
+  const [payload, locale] = await Promise.all([
+    getPayload({ config: configPromise }),
+    getRequestLocale(),
+  ]);
+  const labels =
+    locale === "en"
+      ? {
+          fallbackTitle: "Featured Products",
+          catalog: "Explore Full Catalog",
+          inspect: "View Product",
+        }
+      : {
+          fallbackTitle: "Öne Çıkan Ürünler",
+          catalog: "Tüm Kataloğu İncele",
+          inspect: "Ürünü İncele",
+        };
 
-  // 1. SENARYO: Yıldızlı / Öne Çıkan Ürünleri Getir (YENİ)
   if (selectionType === "featured") {
     const { docs } = await payload.find({
       collection: "products",
+      locale,
+      fallbackLocale: false,
       where: {
         _status: { equals: "published" },
         isFeatured: { equals: true },
+        slug: { exists: true },
       },
-      sort: "-updatedAt", // En son güncellenen (yıldızlanan) en üstte çıkar
+      sort: "-updatedAt",
       limit: 4,
       depth: 1,
     });
     productsToDisplay = docs;
-  }
-  // 2. SENARYO: En Son Eklenenler
-  else if (selectionType === "latest") {
+  } else if (selectionType === "latest") {
     const { docs } = await payload.find({
       collection: "products",
-      where: { _status: { equals: "published" } },
+      locale,
+      fallbackLocale: false,
+      where: {
+        _status: { equals: "published" },
+        slug: { exists: true },
+      },
       sort: "-createdAt",
       limit: 4,
       depth: 1,
     });
     productsToDisplay = docs;
-  }
-  // 3. SENARYO: Manuel Seçim
-  else {
+  } else {
     productsToDisplay =
       selectedProducts?.filter(
-        (p: any) => typeof p === "object" && p._status === "published",
+        (product: any) =>
+          typeof product === "object" &&
+          product._status === "published" &&
+          typeof product.slug === "string" &&
+          product.slug.trim(),
       ) || [];
   }
 
@@ -59,14 +83,10 @@ export async function FeaturedProductsBlock({
   return (
     <section className="py-24 bg-surface-muted/50 border-t border-border">
       <div className="container mx-auto px-4 max-w-7xl">
-        {/* Üst Kısım: Başlık ve Tümünü Gör Butonu */}
         <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
           <div className="max-w-2xl">
-            {/*<div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary font-bold text-sm mb-4">*/}
-            {/*    <Star className="w-4 h-4 fill-primary" /> Vitrin*/}
-            {/*</div>*/}
             <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-text-main mb-4">
-              {title || "Öne Çıkan Ürünler"}
+              {title || labels.fallbackTitle}
             </h2>
           </div>
           <Button
@@ -74,19 +94,19 @@ export async function FeaturedProductsBlock({
             className="rounded-xl font-bold bg-background"
             asChild
           >
-            <Link href="/urunler">
-              Tüm Kataloğu İncele <ArrowRight className="ml-2 w-4 h-4" />
+            <Link href={getProductsPath(locale)}>
+              {labels.catalog} <ArrowRight className="ml-2 w-4 h-4" />
             </Link>
           </Button>
         </div>
 
-        {/* Ürün Kartları */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {productsToDisplay.map((product: any) => {
             const imageUrl =
               typeof product.mainImage === "object" && product.mainImage?.url
                 ? product.mainImage.url
                 : "/placeholder.jpg";
+            const productHref = getProductsPath(locale, product.slug);
 
             return (
               <Card
@@ -94,7 +114,7 @@ export async function FeaturedProductsBlock({
                 className="group overflow-hidden rounded-2xl border-border shadow-sm hover:shadow-xl hover:border-primary/20 transition-all duration-300 flex flex-col bg-surface"
               >
                 <Link
-                  href={`/urunler/${product.slug}`}
+                  href={productHref}
                   prefetch={false}
                   className="relative aspect-square overflow-hidden bg-surface-muted p-6 flex items-center justify-center"
                 >
@@ -106,7 +126,6 @@ export async function FeaturedProductsBlock({
                     sizes="(max-width: 639px) calc(100vw - 32px), (max-width: 1023px) calc(50vw - 28px), (max-width: 1279px) 25vw, 294px"
                     quality={75}
                   />
-                  {/* SKU Rozeti */}
                   {product.sku && (
                     <div className="absolute top-4 right-4 bg-surface text-text-muted text-[10px] px-2.5 py-1 rounded-md font-mono font-bold shadow-sm border border-border">
                       {product.sku}
@@ -116,7 +135,7 @@ export async function FeaturedProductsBlock({
                 <CardHeader className="pt-6 pb-2">
                   <CardTitle className="text-lg line-clamp-2 leading-snug font-bold">
                     <Link
-                      href={`/urunler/${product.slug}`}
+                      href={productHref}
                       prefetch={false}
                       className="hover:text-primary transition-colors text-text-main"
                     >
@@ -138,8 +157,8 @@ export async function FeaturedProductsBlock({
                     className="w-full rounded-xl font-bold bg-primary hover:bg-primary transition-colors"
                     asChild
                   >
-                    <Link href={`/urunler/${product.slug}`} prefetch={false}>
-                      Ürünü İncele
+                    <Link href={productHref} prefetch={false}>
+                      {labels.inspect}
                     </Link>
                   </Button>
                 </CardFooter>
