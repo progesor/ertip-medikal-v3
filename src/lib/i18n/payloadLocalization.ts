@@ -1,5 +1,4 @@
 import type { CollectionConfig, Field, GlobalConfig } from "payload";
-import { createEnglishBootstrapAfterCreateHook } from "@/lib/i18n/localeBootstrap";
 
 function localizeFields(fields: Field[], fieldNames: ReadonlySet<string>): Field[] {
   return fields.map((field) => {
@@ -43,11 +42,6 @@ function localizeFields(fields: Field[], fieldNames: ReadonlySet<string>): Field
   });
 }
 
-function fieldsThatNeedFreshRowIds(fieldNames: readonly string[]) {
-  const localizedRowFields = new Set(["layout", "specs"]);
-  return fieldNames.filter((fieldName) => localizedRowFields.has(fieldName));
-}
-
 export function withLocalizedCollectionFields(
   collection: CollectionConfig,
   fieldNames: readonly string[],
@@ -55,16 +49,6 @@ export function withLocalizedCollectionFields(
   return {
     ...collection,
     fields: localizeFields(collection.fields, new Set(fieldNames)),
-    hooks: {
-      ...collection.hooks,
-      afterChange: [
-        ...(collection.hooks?.afterChange ?? []),
-        createEnglishBootstrapAfterCreateHook({
-          fields: fieldNames,
-          stripNestedIds: fieldsThatNeedFreshRowIds(fieldNames),
-        }),
-      ],
-    },
   };
 }
 
