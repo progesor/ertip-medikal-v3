@@ -8,6 +8,8 @@ import {
   SectionShell,
   type SectionOptions,
 } from "@/components/blocks/SectionShell";
+import { getRequestLocale } from "@/lib/i18n/requestLocale";
+import { localizeInternalHref } from "@/lib/i18n/routing";
 
 type MediaValue =
   | number
@@ -112,7 +114,7 @@ const ratioClasses = {
   "9:16": "mx-auto aspect-[9/16] max-w-md",
 } as const;
 
-export function VideoMediaBlock({
+export async function VideoMediaBlock({
   eyebrow,
   title,
   subtitle,
@@ -135,6 +137,7 @@ export function VideoMediaBlock({
   buttonLink,
   section,
 }: VideoMediaBlockProps) {
+  const locale = await getRequestLocale();
   const video = getMedia(videoFile);
   const posterMedia = getMedia(poster);
   const resolvedSource = sourceType || "external";
@@ -161,6 +164,8 @@ export function VideoMediaBlock({
       content ||
       (buttonText && buttonLink),
   );
+  const fallbackVideoLabel =
+    locale === "en" ? "Ertip Medical video content" : "Ertip Medikal video içeriği";
 
   if (!hasPlayableMedia && !hasText) return null;
 
@@ -178,7 +183,7 @@ export function VideoMediaBlock({
         {resolvedSource === "external" && embedUrl ? (
           <iframe
             src={embedUrl}
-            title={title || caption || "Ertip Medikal video içeriği"}
+            title={title || caption || fallbackVideoLabel}
             className="absolute inset-0 h-full w-full"
             loading="lazy"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -196,15 +201,15 @@ export function VideoMediaBlock({
             loop={Boolean(loop)}
             playsInline
             preload="metadata"
-            aria-label={
-              video.alt || title || "Ertip Medikal video içeriği"
-            }
+            aria-label={video.alt || title || fallbackVideoLabel}
           />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-surface-muted text-text-muted">
             <Video className="h-12 w-12" />
             <p className="px-6 text-center font-semibold">
-              Geçerli bir YouTube/Vimeo bağlantısı veya video dosyası seçin.
+              {locale === "en"
+                ? "Select a valid YouTube/Vimeo URL or video file."
+                : "Geçerli bir YouTube/Vimeo bağlantısı veya video dosyası seçin."}
             </p>
           </div>
         )}
@@ -238,7 +243,7 @@ export function VideoMediaBlock({
           size="lg"
           className="mt-8 rounded-[var(--radius-xl)] font-bold"
         >
-          <Link href={buttonLink}>
+          <Link href={localizeInternalHref(buttonLink, locale)}>
             {buttonText}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
