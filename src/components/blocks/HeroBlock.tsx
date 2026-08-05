@@ -4,6 +4,8 @@ import { ChevronRight, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SectionShell, type SectionOptions } from "@/components/blocks/SectionShell";
 import { cn } from "@/lib/utils";
+import { getRequestLocale } from "@/lib/i18n/requestLocale";
+import { getHomePath, localizeInternalHref } from "@/lib/i18n/routing";
 
 type MediaValue =
   | number
@@ -135,7 +137,7 @@ function getButtonPresentation(
   };
 }
 
-export function HeroBlock({
+export async function HeroBlock({
   eyebrow,
   heading,
   subheading,
@@ -154,6 +156,7 @@ export function HeroBlock({
   pageSlug,
   isHome,
 }: HeroBlockProps) {
+  const locale = await getRequestLocale();
   const desktopMedia = getMedia(backgroundImage);
   const mobileMedia = getMedia(mobileBackgroundImage);
   const desktopUrl = desktopMedia?.url || null;
@@ -239,14 +242,14 @@ export function HeroBlock({
                   "mb-7 flex max-w-full items-center gap-2 overflow-x-auto whitespace-nowrap text-sm font-medium",
                   classes.breadcrumb,
                 )}
-                aria-label="Sayfa yolu"
+                aria-label={locale === "en" ? "Breadcrumb" : "Sayfa yolu"}
               >
                 <Link
-                  href="/"
+                  href={getHomePath(locale)}
                   className="flex items-center gap-1.5 transition-opacity hover:opacity-100"
                 >
                   <Home className="h-4 w-4" />
-                  Anasayfa
+                  {locale === "en" ? "Home" : "Anasayfa"}
                 </Link>
                 <ChevronRight className="h-4 w-4 shrink-0" />
                 <span className="truncate font-bold" aria-current="page">
@@ -302,7 +305,9 @@ export function HeroBlock({
                       )}
                       asChild
                     >
-                      <Link href={button.link}>{button.label}</Link>
+                      <Link href={localizeInternalHref(button.link, locale)}>
+                        {button.label}
+                      </Link>
                     </Button>
                   );
                 })}
