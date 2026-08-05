@@ -155,10 +155,33 @@ export default async function ProductDetailPage({ params }: Args) {
     relatedProducts = sameCategoryProducts;
   }
 
+  const alternateLocale = locale === "en" ? "tr" : "en";
+  const alternateProduct = await payload
+    .findByID({
+      collection: "products",
+      id: product.id,
+      locale: alternateLocale,
+      fallbackLocale: false,
+      depth: 0,
+    })
+    .catch(() => null);
+  const cartLocalizedIdentity = {
+    [locale]: { title: product.title, slug: product.slug },
+    ...(alternateProduct?.title && alternateProduct?.slug
+      ? {
+          [alternateLocale]: {
+            title: alternateProduct.title,
+            slug: alternateProduct.slug,
+          },
+        }
+      : {}),
+  };
+
   // ProductView is a client component, so this object is serialized to the browser.
   // Protected file relationships and access codes are intentionally excluded.
   const productForClient = {
     ...product,
+    cartLocalizedIdentity,
     protectedDocs:
       product.protectedDocs?.map((document) => ({
         id: document.id,
