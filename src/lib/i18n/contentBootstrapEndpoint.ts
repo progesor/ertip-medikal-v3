@@ -5,6 +5,7 @@ import {
   bootstrapGlobalEnglishLocale,
   type LocaleBootstrapSpec,
 } from "@/lib/i18n/localeBootstrap";
+import { uiTextOverrideEndpoint } from "@/lib/i18n/uiTextOverrideEndpoint";
 
 type CollectionBootstrap = LocaleBootstrapSpec & {
   slug: "products" | "categories" | "news" | "pages" | "news-categories";
@@ -166,4 +167,7 @@ const bootstrapEnglishContentEndpoint: Endpoint = {
   },
 };
 
-export const i18nContentEndpoints: Endpoint[] = [bootstrapEnglishContentEndpoint];
+export const i18nContentEndpoints: Endpoint[] = [
+  bootstrapEnglishContentEndpoint,
+  uiTextOverrideEndpoint,
+];
