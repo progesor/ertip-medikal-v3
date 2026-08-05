@@ -8,7 +8,6 @@ import * as migration_20260731_101005_m9_content_block_polish from './20260731_1
 import * as migration_20260731_113512_m9_new_content_blocks from './20260731_113512_m9_new_content_blocks';
 import * as migration_20260803_060000_redact_download_access_codes from './20260803_060000_redact_download_access_codes';
 import * as migration_20260804_133553_m10_multilingual_foundation from './20260804_133553_m10_multilingual_foundation';
-import * as migration_20260805_105000_m10_2_bootstrap_english_content from './20260805_105000_m10_2_bootstrap_english_content';
 
 export const migrations = [
   {
@@ -60,10 +59,5 @@ export const migrations = [
     up: migration_20260804_133553_m10_multilingual_foundation.up,
     down: migration_20260804_133553_m10_multilingual_foundation.down,
     name: '20260804_133553_m10_multilingual_foundation',
-  },
-  {
-    up: migration_20260805_105000_m10_2_bootstrap_english_content.up,
-    down: migration_20260805_105000_m10_2_bootstrap_english_content.down,
-    name: '20260805_105000_m10_2_bootstrap_english_content',
   },
 ];
