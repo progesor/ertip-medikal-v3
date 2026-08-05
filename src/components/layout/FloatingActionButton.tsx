@@ -8,6 +8,9 @@ import {
   Phone,
   Send,
 } from "lucide-react";
+import { getRequestLocale } from "@/lib/i18n/requestLocale";
+import { localizeInternalHref } from "@/lib/i18n/routing";
+import type { SiteLocale } from "@/lib/i18n/config";
 
 type FloatingActionType = "whatsapp" | "phone" | "email" | "custom";
 type FloatingActionPosition = "bottom-right" | "bottom-left";
@@ -32,7 +35,7 @@ function normalizeCustomUrl(value: string) {
   return "";
 }
 
-function buildFloatingActionHref(settings: any) {
+function buildFloatingActionHref(settings: any, locale: SiteLocale) {
   const type = (settings?.type || "whatsapp") as FloatingActionType;
   const phoneNumber = String(settings?.phoneNumber || "").replace(/\D/g, "");
   const message = String(settings?.message || "");
@@ -60,7 +63,10 @@ function buildFloatingActionHref(settings: any) {
   }
 
   if (type === "custom") {
-    return normalizeCustomUrl(customUrl);
+    const normalized = normalizeCustomUrl(customUrl);
+    return normalized.startsWith("/")
+      ? localizeInternalHref(normalized, locale)
+      : normalized;
   }
 
   return "";
@@ -87,7 +93,14 @@ function getFloatingActionIcon(
   return <ExternalLink className="h-5 w-5" />;
 }
 
-function getDefaultLabel(type: FloatingActionType) {
+function getDefaultLabel(type: FloatingActionType, locale: SiteLocale) {
+  if (locale === "en") {
+    if (type === "whatsapp") return "Contact via WhatsApp";
+    if (type === "phone") return "Call Now";
+    if (type === "email") return "Send Email";
+    return "Contact Us";
+  }
+
   if (type === "whatsapp") return "WhatsApp ile İletişim";
   if (type === "phone") return "Hemen Ara";
   if (type === "email") return "E-posta Gönder";
@@ -105,9 +118,14 @@ function isExternalHref(href: string) {
 }
 
 export async function FloatingActionButton() {
-  const payload = await getPayload({ config: configPromise });
+  const [payload, locale] = await Promise.all([
+    getPayload({ config: configPromise }),
+    getRequestLocale(),
+  ]);
   const siteSettings = await payload.findGlobal({
     slug: "site-settings",
+    locale,
+    fallbackLocale: false,
     depth: 1,
   });
   const floatingAction = (siteSettings as any)?.floatingAction || {};
@@ -126,7 +144,7 @@ export async function FloatingActionButton() {
   const showIcon = floatingAction.showIcon !== false;
   const showMotion = floatingAction.showPulse !== false;
   const showHelperText = floatingAction.showHelperText === true;
-  const href = buildFloatingActionHref(floatingAction);
+  const href = buildFloatingActionHref(floatingAction, locale);
 
   if (!href) {
     return null;
@@ -134,9 +152,12 @@ export async function FloatingActionButton() {
 
   const isWhatsapp = type === "whatsapp";
   const isWhatsappStyle = isWhatsapp && styleMode === "whatsapp";
-  const label = floatingAction.label || getDefaultLabel(type);
+  const label = floatingAction.label || getDefaultLabel(type, locale);
   const helperText =
-    floatingAction.helperText || "Size nasıl yardımcı olabiliriz?";
+    floatingAction.helperText ||
+    (locale === "en"
+      ? "How can we help you?"
+      : "Size nasıl yardımcı olabiliriz?");
   const openInNewTab = floatingAction.openInNewTab !== false;
   const positionClass =
     position === "bottom-left" ? "left-4 sm:left-6" : "right-4 sm:right-6";
@@ -198,7 +219,9 @@ export async function FloatingActionButton() {
             <span className="block text-text-main">{helperText}</span>
             {isWhatsapp && (
               <span className="mt-0.5 block text-[11px] font-medium text-text-muted">
-                WhatsApp üzerinden hızlı dönüş alın.
+                {locale === "en"
+                  ? "Get a quick response via WhatsApp."
+                  : "WhatsApp üzerinden hızlı dönüş alın."}
               </span>
             )}
           </div>
@@ -236,7 +259,9 @@ export async function FloatingActionButton() {
               <span>{label}</span>
               {isWhatsapp && appearance === "chat-bubble" && (
                 <span className="mt-0.5 hidden text-[10px] font-semibold opacity-80 sm:inline">
-                  Mesaj göndermek için tıklayın
+                  {locale === "en"
+                    ? "Click to send a message"
+                    : "Mesaj göndermek için tıklayın"}
                 </span>
               )}
             </span>
