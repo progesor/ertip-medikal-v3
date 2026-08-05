@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Languages } from "lucide-react";
 import type { SiteLocale } from "@/lib/i18n/config";
 
@@ -35,8 +34,12 @@ export function LanguageSwitcher({
     );
   }
 
+  // Locale switching intentionally uses a native document navigation instead
+  // of Next's client-side Link. The public locale is carried in request headers
+  // by proxy.ts and shared Server Component layouts (header/menu/footer) must
+  // be reconstructed for the new locale in the same navigation.
   return (
-    <Link
+    <a
       href={targetHref}
       aria-label={ariaLabel}
       title={ariaLabel}
@@ -44,6 +47,6 @@ export function LanguageSwitcher({
     >
       <Languages className="h-4 w-4" aria-hidden="true" />
       {targetLabel}
-    </Link>
+    </a>
   );
 }
