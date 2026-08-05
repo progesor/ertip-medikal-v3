@@ -7,6 +7,12 @@ import {
   MobileHeaderMenu,
   type MobileHeaderNavItem,
 } from "@/components/layout/MobileHeaderMenu";
+import { getRequestLocale } from "@/lib/i18n/requestLocale";
+import {
+  getHomePath,
+  localizeInternalHref,
+} from "@/lib/i18n/routing";
+import type { SiteLocale } from "@/lib/i18n/config";
 
 type HeaderLogoVariant = "auto" | "default" | "white" | "symbol";
 type HeaderLayout = "default" | "compact" | "brand";
@@ -36,7 +42,10 @@ function getHeaderLogoUrl(general: any, variant: HeaderLogoVariant) {
   return defaultLogo || symbolLogo || whiteLogo;
 }
 
-function resolveMenuItems(items: unknown): MobileHeaderNavItem[] {
+function resolveMenuItems(
+  items: unknown,
+  locale: SiteLocale,
+): MobileHeaderNavItem[] {
   if (!Array.isArray(items)) return [];
 
   return items.flatMap((rawItem) => {
@@ -48,7 +57,9 @@ function resolveMenuItems(items: unknown): MobileHeaderNavItem[] {
 
     if (item.type === "custom" && typeof item.url === "string") {
       const href = item.url.trim();
-      return href ? [{ label, href }] : [];
+      return href
+        ? [{ label, href: localizeInternalHref(href, locale) }]
+        : [];
     }
 
     if (
@@ -59,7 +70,7 @@ function resolveMenuItems(items: unknown): MobileHeaderNavItem[] {
       typeof (item.reference as { slug?: unknown }).slug === "string"
     ) {
       const slug = (item.reference as { slug: string }).slug.trim();
-      return slug ? [{ label, href: `/${slug}` }] : [];
+      return slug ? [{ label, href: `/${locale}/${slug}` }] : [];
     }
 
     return [];
@@ -67,20 +78,27 @@ function resolveMenuItems(items: unknown): MobileHeaderNavItem[] {
 }
 
 export async function Header() {
-  const payload = await getPayload({ config: configPromise });
+  const [payload, locale] = await Promise.all([
+    getPayload({ config: configPromise }),
+    getRequestLocale(),
+  ]);
 
   const [mainMenu, siteSettings] = await Promise.all([
     payload.findGlobal({
       slug: "main-menu",
+      locale,
+      fallbackLocale: false,
       depth: 1,
     }),
     payload.findGlobal({
       slug: "site-settings",
+      locale,
+      fallbackLocale: false,
       depth: 2,
     }),
   ]);
 
-  const navItems = resolveMenuItems(mainMenu?.items);
+  const navItems = resolveMenuItems(mainMenu?.items, locale);
   const headerSettings = (siteSettings as any)?.header || {};
   const generalSettings = (siteSettings as any)?.general || {};
 
@@ -93,8 +111,13 @@ export async function Header() {
     "auto") as HeaderLogoVariant;
   const headerLayout = (headerSettings.headerLayout ||
     "default") as HeaderLayout;
-  const ctaLabel = headerSettings.headerCtaLabel || "Bize Ulaşın";
-  const ctaHref = headerSettings.headerCtaHref || "/iletisim";
+  const ctaLabel =
+    headerSettings.headerCtaLabel ||
+    (locale === "en" ? "Contact Us" : "Bize Ulaşın");
+  const ctaHref = localizeInternalHref(
+    headerSettings.headerCtaHref || "/iletisim",
+    locale,
+  );
   const logoUrl = showLogo
     ? getHeaderLogoUrl(generalSettings, logoVariant)
     : "";
@@ -113,7 +136,10 @@ export async function Header() {
         }`}
       >
         <div className="flex min-w-0 shrink items-center gap-2">
-          <Link href="/" className="flex min-w-0 items-center gap-3">
+          <Link
+            href={getHomePath(locale)}
+            className="flex min-w-0 items-center gap-3"
+          >
             {logoUrl ? (
               <span className="relative block h-10 w-auto min-w-28 overflow-hidden">
                 <Image
@@ -155,7 +181,7 @@ export async function Header() {
         </div>
 
         <nav
-          aria-label="Ana menü"
+          aria-label={locale === "en" ? "Main menu" : "Ana menü"}
           className="hidden items-center gap-1 rounded-[var(--radius-xl)] border border-border/70 bg-surface/80 p-1 text-sm font-semibold shadow-sm shadow-surface-inverse/5 md:flex"
         >
           {navItems.map((item) => (
@@ -170,8 +196,13 @@ export async function Header() {
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
-          <HeaderActions ctaLabel={ctaLabel} ctaHref={ctaHref} />
+          <HeaderActions
+            locale={locale}
+            ctaLabel={ctaLabel}
+            ctaHref={ctaHref}
+          />
           <MobileHeaderMenu
+            locale={locale}
             navItems={navItems}
             ctaLabel={ctaLabel}
             ctaHref={ctaHref}
