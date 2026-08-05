@@ -6,6 +6,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import type { Metadata } from "next";
 import { CartProvider } from "@/providers/CartProvider";
+import { SiteLocaleProvider } from "@/providers/SiteLocaleProvider";
 import { FloatingActionButton } from "@/components/layout/FloatingActionButton";
 
 import { getPayload } from "payload";
@@ -106,12 +107,14 @@ export default async function RootLayout({
       >
         <style dangerouslySetInnerHTML={{ __html: themeStyleString }} />
 
-        <CartProvider>
-          <Header />
-          <main className="flex-1 flex flex-col">{children}</main>
-          <FloatingActionButton />
-          <Footer />
-        </CartProvider>
+        <SiteLocaleProvider locale={locale}>
+          <CartProvider>
+            <Header />
+            <main className="flex-1 flex flex-col">{children}</main>
+            <FloatingActionButton />
+            <Footer />
+          </CartProvider>
+        </SiteLocaleProvider>
 
         {serverEnv.cloudflareWebAnalyticsToken && (
           <Script
