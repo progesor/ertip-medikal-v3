@@ -1,8 +1,8 @@
-import type { SiteLocale } from "@/lib/i18n/config";
+import type { SiteLocale } from "./config";
 import {
   getUiDictionary,
   type UiDictionary,
-} from "@/lib/i18n/uiDictionary";
+} from "./uiDictionary";
 
 type UiDictionarySection = keyof UiDictionary;
 
