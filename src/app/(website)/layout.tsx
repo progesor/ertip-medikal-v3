@@ -14,6 +14,7 @@ import configPromise from "@payload-config";
 import { themePalettes, radiusConfig } from "@/lib/themeConfig";
 import { serverEnv } from "@/lib/config/env";
 import { getRequestLocale } from "@/lib/i18n/requestLocale";
+import { getResolvedUiDictionary } from "@/lib/i18n/resolvedUiDictionary";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -77,12 +78,12 @@ export default async function RootLayout({
     getRequestLocale(),
   ]);
 
-  let themeSettings;
-  try {
-    themeSettings = await payload.findGlobal({ slug: "themeSettings" });
-  } catch {
-    themeSettings = { colorPalette: "dark-luxury", borderRadius: "modern" };
-  }
+  const [themeSettings, uiDictionary] = await Promise.all([
+    payload
+      .findGlobal({ slug: "themeSettings" })
+      .catch(() => ({ colorPalette: "dark-luxury", borderRadius: "modern" })),
+    getResolvedUiDictionary(locale),
+  ]);
 
   const currentPalette =
     themePalettes[
@@ -107,7 +108,7 @@ export default async function RootLayout({
       >
         <style dangerouslySetInnerHTML={{ __html: themeStyleString }} />
 
-        <SiteLocaleProvider locale={locale}>
+        <SiteLocaleProvider locale={locale} dictionary={uiDictionary}>
           <CartProvider>
             <Header />
             <main className="flex-1 flex flex-col">{children}</main>
