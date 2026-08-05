@@ -27,7 +27,7 @@ export type UiTextOverrideSection = {
   fields: readonly UiTextOverrideField[];
 };
 
-export const uiTextOverrideSections = [
+export const uiTextOverrideSections: readonly UiTextOverrideSection[] = [
   {
     id: "cart",
     label: "Sepet Bildirimi",
@@ -145,7 +145,7 @@ export const uiTextOverrideSections = [
       { key: "unsubscribe.metadataTitle", label: "Tarayıcı / SEO sayfa başlığı" },
     ],
   },
-] as const satisfies readonly UiTextOverrideSection[];
+];
 
 const allowedKeys = new Set<UiTextOverrideKey>(
   uiTextOverrideSections.flatMap((section) => section.fields.map((field) => field.key)),
