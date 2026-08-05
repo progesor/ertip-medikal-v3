@@ -10,6 +10,11 @@ import {
   MailX,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getHomePath } from "@/lib/i18n/routing";
+import {
+  useSiteLocale,
+  useUiDictionary,
+} from "@/providers/SiteLocaleProvider";
 
 type ApiResponse = {
   success?: boolean;
@@ -19,6 +24,8 @@ type ApiResponse = {
 type Status = "idle" | "loading" | "success" | "error";
 
 export function UnsubscribeClient({ token }: { token?: string }) {
+  const locale = useSiteLocale();
+  const dictionary = useUiDictionary();
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState("");
 
@@ -43,19 +50,16 @@ export function UnsubscribeClient({ token }: { token?: string }) {
 
       if (!response.ok) {
         setStatus("error");
-        setMessage(result.message || "İşlem tamamlanamadı. Lütfen tekrar deneyin.");
+        setMessage(dictionary.unsubscribe.requestError);
         return;
       }
 
       setStatus("success");
-      setMessage(
-        result.message ||
-          "Adres abonelik listemizde bulunuyorsa doğrulama bağlantısı gönderildi.",
-      );
+      setMessage(dictionary.unsubscribe.requestSuccess);
       form.reset();
     } catch {
       setStatus("error");
-      setMessage("Bağlantı hatası yaşandı. Lütfen tekrar deneyin.");
+      setMessage(dictionary.unsubscribe.connectionError);
     }
   };
 
@@ -75,17 +79,15 @@ export function UnsubscribeClient({ token }: { token?: string }) {
 
       if (!response.ok) {
         setStatus("error");
-        setMessage(result.message || "İşlem tamamlanamadı.");
+        setMessage(dictionary.unsubscribe.confirmationError);
         return;
       }
 
       setStatus("success");
-      setMessage(
-        result.message || "E-bülten aboneliğiniz başarıyla iptal edildi.",
-      );
+      setMessage(dictionary.unsubscribe.confirmationSuccess);
     } catch {
       setStatus("error");
-      setMessage("Bağlantı hatası yaşandı. Lütfen tekrar deneyin.");
+      setMessage(dictionary.unsubscribe.connectionError);
     }
   };
 
@@ -112,11 +114,11 @@ export function UnsubscribeClient({ token }: { token?: string }) {
         <h1 className="text-2xl md:text-3xl font-black text-text-main mb-4">
           {isComplete
             ? isConfirmation
-              ? "Abonelik İptal Edildi"
-              : "E-Postanızı Kontrol Edin"
+              ? dictionary.unsubscribe.cancelledTitle
+              : dictionary.unsubscribe.checkEmailTitle
             : isConfirmation
-              ? "Abonelik İptal Onayı"
-              : "Abonelikten Ayrıl"}
+              ? dictionary.unsubscribe.confirmationTitle
+              : dictionary.unsubscribe.title}
         </h1>
 
         {message ? (
@@ -135,8 +137,8 @@ export function UnsubscribeClient({ token }: { token?: string }) {
         ) : (
           <p className="text-text-muted mb-8 leading-relaxed">
             {isConfirmation
-              ? "E-bülten aboneliğinizi iptal etmek için işlemi onaylayın."
-              : "Güvenli iptal bağlantısını almak için e-posta adresinizi girin."}
+              ? dictionary.unsubscribe.confirmationDescription
+              : dictionary.unsubscribe.requestDescription}
           </p>
         )}
 
@@ -148,7 +150,9 @@ export function UnsubscribeClient({ token }: { token?: string }) {
             disabled={status === "loading"}
             className="w-full h-14 rounded-[var(--radius-xl)] font-bold"
           >
-            {status === "loading" ? "İşleniyor..." : "Aboneliğimi İptal Et"}
+            {status === "loading"
+              ? dictionary.common.processing
+              : dictionary.unsubscribe.cancelSubscription}
           </Button>
         ) : null}
 
@@ -172,7 +176,7 @@ export function UnsubscribeClient({ token }: { token?: string }) {
               name="email"
               required
               autoComplete="email"
-              placeholder="E-posta adresiniz..."
+              placeholder={dictionary.unsubscribe.emailPlaceholder}
               className="w-full px-4 py-3 rounded-[var(--radius)] border border-input bg-background focus:border-primary focus:ring-2 focus:ring-ring/30 outline-none transition-all text-text-main placeholder:text-text-muted/50"
             />
             <Button
@@ -181,16 +185,19 @@ export function UnsubscribeClient({ token }: { token?: string }) {
               disabled={status === "loading"}
               className="w-full h-14 rounded-[var(--radius-xl)] font-bold"
             >
-              {status === "loading" ? "Gönderiliyor..." : "İptal Bağlantısı Gönder"}
+              {status === "loading"
+                ? dictionary.common.sending
+                : dictionary.unsubscribe.sendLink}
             </Button>
           </form>
         ) : null}
 
         <Link
-          href="/"
+          href={getHomePath(locale)}
           className="inline-flex items-center justify-center mt-6 text-sm font-semibold text-text-muted hover:text-primary transition-colors"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" /> Anasayfaya Dön
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          {dictionary.unsubscribe.backHome}
         </Link>
       </div>
     </div>
