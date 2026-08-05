@@ -1,7 +1,7 @@
 import { getPayload } from "payload";
 import configPromise from "@payload-config";
 import { notFound } from "next/navigation";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronRight } from "lucide-react";
@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 
 import { ProductView } from "@/components/product/ProductView";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+import { getRequestLocale } from "@/lib/i18n/requestLocale";
+import { getProductsPath } from "@/lib/i18n/routing";
 
 type Args = {
   params: Promise<{
@@ -17,24 +19,30 @@ type Args = {
 };
 
 export async function generateMetadata({ params }: Args): Promise<Metadata> {
-  const { slug } = await params;
+  const [{ slug }, locale] = await Promise.all([params, getRequestLocale()]);
   const payload = await getPayload({ config: configPromise });
 
   const { docs } = await payload.find({
     collection: "products",
+    locale,
+    fallbackLocale: false,
     where: { slug: { equals: slug }, _status: { equals: "published" } },
     limit: 1,
   });
 
   const product = docs[0];
-  if (!product) return { title: "Ürün Bulunamadı" };
+  if (!product) {
+    return { title: locale === "en" ? "Product Not Found" : "Ürün Bulunamadı" };
+  }
 
   const manualMeta = product.meta || {};
   const finalTitle = manualMeta.title || product.title;
   const finalDesc =
     manualMeta.description ||
     product.shortDescription ||
-    `${product.title} hakkında detaylı teknik özellikler ve ürün görselleri.`;
+    (locale === "en"
+      ? `Detailed technical specifications and product images for ${product.title}.`
+      : `${product.title} hakkında detaylı teknik özellikler ve ürün görselleri.`);
   const ogImage =
     typeof manualMeta.image === "object" && manualMeta.image?.url
       ? manualMeta.image.url
@@ -56,11 +64,13 @@ export async function generateMetadata({ params }: Args): Promise<Metadata> {
 }
 
 export default async function ProductDetailPage({ params }: Args) {
-  const { slug } = await params;
+  const [{ slug }, locale] = await Promise.all([params, getRequestLocale()]);
   const payload = await getPayload({ config: configPromise });
 
   const { docs } = await payload.find({
     collection: "products",
+    locale,
+    fallbackLocale: false,
     where: {
       slug: { equals: slug },
       _status: { equals: "published" },
@@ -75,24 +85,51 @@ export default async function ProductDetailPage({ params }: Args) {
     return notFound();
   }
 
+  const labels =
+    locale === "en"
+      ? {
+          catalog: "Product Catalog",
+          category: "Category",
+          relatedTitle: "You May Also Like",
+          relatedDescription:
+            "Explore other medical solutions with similar features.",
+          allCatalog: "View Full Catalog",
+          inspect: "View Details",
+        }
+      : {
+          catalog: "Ürün Kataloğu",
+          category: "Kategori",
+          relatedTitle: "İlginizi Çekebilir",
+          relatedDescription:
+            "Bu ürünle benzer özelliklere sahip diğer medikal çözümlerimiz.",
+          allCatalog: "Tüm Kataloğu Gör",
+          inspect: "Detaylı İncele",
+        };
+  const catalogPath = getProductsPath(locale);
   const primaryCategory = product.category?.[0];
   const breadcrumbItems = [
-    { label: "Ürün Kataloğu", href: "/urunler" },
+    { label: labels.catalog, href: catalogPath },
     ...(primaryCategory
       ? [
           {
             label:
               typeof primaryCategory === "object"
                 ? primaryCategory.title
-                : "Kategori",
-            href: `/urunler?category=${typeof primaryCategory === "object" ? primaryCategory.slug : ""}`,
+                : labels.category,
+            href: `${catalogPath}?category=${
+              typeof primaryCategory === "object" ? primaryCategory.slug : ""
+            }`,
           },
         ]
       : []),
     { label: product.title },
   ];
 
-  let relatedProducts = product.relatedProducts || [];
+  let relatedProducts = (product.relatedProducts || []).filter(
+    (relatedProduct: any) =>
+      typeof relatedProduct !== "object" ||
+      (relatedProduct.slug && relatedProduct.title),
+  );
 
   if (
     relatedProducts.length === 0 &&
@@ -105,9 +142,12 @@ export default async function ProductDetailPage({ params }: Args) {
         : product.category[0];
     const { docs: sameCategoryProducts } = await payload.find({
       collection: "products",
+      locale,
+      fallbackLocale: false,
       where: {
         category: { in: [catId] },
         id: { not_equals: product.id },
+        slug: { exists: true },
         _status: { equals: "published" },
       },
       limit: 4,
@@ -115,8 +155,8 @@ export default async function ProductDetailPage({ params }: Args) {
     relatedProducts = sameCategoryProducts;
   }
 
-  // ProductView bir client component olduğu için bu nesne tarayıcıya serialize edilir.
-  // Korumalı dosya ilişkileri ve erişim kodları client payload'ına dahil edilmez.
+  // ProductView is a client component, so this object is serialized to the browser.
+  // Protected file relationships and access codes are intentionally excluded.
   const productForClient = {
     ...product,
     protectedDocs:
@@ -140,23 +180,25 @@ export default async function ProductDetailPage({ params }: Args) {
             <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
               <div>
                 <h2 className="text-3xl font-black text-text-main mb-2">
-                  İlginizi Çekebilir
+                  {labels.relatedTitle}
                 </h2>
-                <p className="text-text-muted">
-                  Bu ürünle benzer özelliklere sahip diğer medikal çözümlerimiz.
-                </p>
+                <p className="text-text-muted">{labels.relatedDescription}</p>
               </div>
               <Button
                 variant="outline"
                 className="font-bold shrink-0 border-border text-text-main hover:bg-surface-muted"
                 asChild
               >
-                <Link href="/urunler">Tüm Kataloğu Gör</Link>
+                <Link href={catalogPath}>{labels.allCatalog}</Link>
               </Button>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {relatedProducts.map((relatedProduct: any) => {
+                if (typeof relatedProduct !== "object" || !relatedProduct.slug) {
+                  return null;
+                }
+
                 const relatedImageUrl =
                   typeof relatedProduct.mainImage === "object" &&
                   relatedProduct.mainImage?.url
@@ -166,7 +208,7 @@ export default async function ProductDetailPage({ params }: Args) {
                 return (
                   <Link
                     key={relatedProduct.id}
-                    href={`/urunler/${relatedProduct.slug}`}
+                    href={getProductsPath(locale, relatedProduct.slug)}
                     className="group bg-surface rounded-3xl p-6 border border-border shadow-sm hover:shadow-xl hover:border-primary/40 transition-all duration-300 flex flex-col"
                   >
                     <div className="relative aspect-square mb-6 bg-surface-muted/50 rounded-2xl p-4 flex items-center justify-center overflow-hidden">
@@ -186,7 +228,7 @@ export default async function ProductDetailPage({ params }: Args) {
                       {relatedProduct.shortDescription}
                     </p>
                     <div className="text-primary text-xs font-bold flex items-center gap-1 uppercase tracking-wider mt-auto">
-                      Detaylı İncele{" "}
+                      {labels.inspect}{" "}
                       <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                     </div>
                   </Link>
