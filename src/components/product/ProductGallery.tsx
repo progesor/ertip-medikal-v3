@@ -9,6 +9,7 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useUiDictionary } from "@/providers/SiteLocaleProvider";
 
 type ProductGalleryImage = {
   url: string;
@@ -22,6 +23,7 @@ type ProductGalleryProps = {
 };
 
 export function ProductGallery({ images, productTitle }: ProductGalleryProps) {
+  const dictionary = useUiDictionary();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
 
@@ -82,7 +84,7 @@ export function ProductGallery({ images, productTitle }: ProductGalleryProps) {
   if (!safeImages.length || !currentImage) {
     return (
       <div className="flex aspect-square items-center justify-center rounded-[var(--radius-2xl)] border border-border bg-surface-muted text-text-muted">
-        Görsel Yok
+        {dictionary.gallery.noImage}
       </div>
     );
   }
@@ -95,7 +97,7 @@ export function ProductGallery({ images, productTitle }: ProductGalleryProps) {
             type="button"
             onClick={() => setIsFullscreenOpen(true)}
             className="absolute right-4 top-4 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full border border-border/80 bg-surface/90 text-text-muted shadow-sm backdrop-blur transition hover:border-primary hover:text-primary"
-            aria-label="Görseli büyüt"
+            aria-label={dictionary.gallery.expand}
           >
             <Expand className="h-4 w-4" />
           </button>
@@ -106,7 +108,7 @@ export function ProductGallery({ images, productTitle }: ProductGalleryProps) {
                 type="button"
                 onClick={goToPrevious}
                 className="absolute left-4 top-1/2 z-20 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border/80 bg-surface/90 text-text-muted opacity-0 shadow-sm backdrop-blur transition hover:border-primary hover:text-primary group-hover:opacity-100 focus:opacity-100"
-                aria-label="Önceki görsel"
+                aria-label={dictionary.gallery.previous}
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
@@ -115,7 +117,7 @@ export function ProductGallery({ images, productTitle }: ProductGalleryProps) {
                 type="button"
                 onClick={goToNext}
                 className="absolute right-4 top-1/2 z-20 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-border/80 bg-surface/90 text-text-muted opacity-0 shadow-sm backdrop-blur transition hover:border-primary hover:text-primary group-hover:opacity-100 focus:opacity-100"
-                aria-label="Sonraki görsel"
+                aria-label={dictionary.gallery.next}
               >
                 <ChevronRight className="h-5 w-5" />
               </button>
@@ -124,7 +126,7 @@ export function ProductGallery({ images, productTitle }: ProductGalleryProps) {
 
           <Image
             src={currentImage.url}
-            alt={currentImage.alt || productTitle || "Ürün görseli"}
+            alt={currentImage.alt || productTitle || dictionary.gallery.productImage}
             fill
             className="object-contain p-4 transition duration-300 group-hover:scale-[1.02]"
             sizes="(max-width: 1024px) 100vw, 50vw"
@@ -152,11 +154,15 @@ export function ProductGallery({ images, productTitle }: ProductGalleryProps) {
                     ? "border-2 border-primary ring-2 ring-primary/20"
                     : "border border-border hover:border-primary/60",
                 )}
-                aria-label={`${index + 1}. ürün görselini göster`}
+                aria-label={`${index + 1}. ${dictionary.gallery.showImageSuffix}`}
               >
                 <Image
                   src={image.thumbnailUrl || image.url}
-                  alt={image.alt || productTitle || "Ürün küçük görseli"}
+                  alt={
+                    image.alt ||
+                    productTitle ||
+                    dictionary.gallery.productThumbnail
+                  }
                   fill
                   className="object-contain p-2"
                   sizes="(max-width: 640px) 25vw, 160px"
@@ -173,7 +179,7 @@ export function ProductGallery({ images, productTitle }: ProductGalleryProps) {
           <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 pb-4">
             <div className="min-w-0">
               <p className="truncate text-sm font-bold text-surface-inverse-foreground">
-                {productTitle || "Ürün Görseli"}
+                {productTitle || dictionary.gallery.productImageTitle}
               </p>
               {hasMultipleImages && (
                 <p className="text-xs text-surface-inverse-foreground/60">
@@ -186,7 +192,7 @@ export function ProductGallery({ images, productTitle }: ProductGalleryProps) {
               type="button"
               onClick={() => setIsFullscreenOpen(false)}
               className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-surface-inverse-foreground/15 bg-surface-inverse-foreground/10 text-surface-inverse-foreground transition hover:bg-surface-inverse-foreground hover:text-surface-inverse"
-              aria-label="Görseli kapat"
+              aria-label={dictionary.gallery.close}
             >
               <X className="h-5 w-5" />
             </button>
@@ -199,7 +205,7 @@ export function ProductGallery({ images, productTitle }: ProductGalleryProps) {
                   type="button"
                   onClick={goToPrevious}
                   className="absolute left-4 top-1/2 z-20 inline-flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-surface-inverse-foreground/15 bg-surface-inverse-foreground/10 text-surface-inverse-foreground backdrop-blur transition hover:bg-surface-inverse-foreground hover:text-surface-inverse"
-                  aria-label="Önceki görsel"
+                  aria-label={dictionary.gallery.previous}
                 >
                   <ChevronLeft className="h-6 w-6" />
                 </button>
@@ -208,7 +214,7 @@ export function ProductGallery({ images, productTitle }: ProductGalleryProps) {
                   type="button"
                   onClick={goToNext}
                   className="absolute right-4 top-1/2 z-20 inline-flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-surface-inverse-foreground/15 bg-surface-inverse-foreground/10 text-surface-inverse-foreground backdrop-blur transition hover:bg-surface-inverse-foreground hover:text-surface-inverse"
-                  aria-label="Sonraki görsel"
+                  aria-label={dictionary.gallery.next}
                 >
                   <ChevronRight className="h-6 w-6" />
                 </button>
@@ -217,7 +223,7 @@ export function ProductGallery({ images, productTitle }: ProductGalleryProps) {
 
             <Image
               src={currentImage.url}
-              alt={currentImage.alt || productTitle || "Ürün görseli"}
+              alt={currentImage.alt || productTitle || dictionary.gallery.productImage}
               fill
               className="object-contain p-4 md:p-8"
               sizes="100vw"
@@ -238,11 +244,15 @@ export function ProductGallery({ images, productTitle }: ProductGalleryProps) {
                       ? "border-2 border-primary"
                       : "border border-surface-inverse-foreground/15 opacity-70 hover:opacity-100",
                   )}
-                  aria-label={`${index + 1}. görsele geç`}
+                  aria-label={`${index + 1}. ${dictionary.gallery.switchImageSuffix}`}
                 >
                   <Image
                     src={image.thumbnailUrl || image.url}
-                    alt={image.alt || productTitle || "Ürün küçük görseli"}
+                    alt={
+                      image.alt ||
+                      productTitle ||
+                      dictionary.gallery.productThumbnail
+                    }
                     fill
                     className="object-contain p-1"
                     sizes="64px"

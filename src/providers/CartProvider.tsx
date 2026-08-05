@@ -5,7 +5,16 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle2, ShoppingBag, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import type { CartContextType, CartItem } from "@/types";
+import type {
+  CartContextType,
+  CartItem,
+  CartLocalizedIdentity,
+} from "@/types";
+import { getQuoteCartPath } from "@/lib/i18n/routing";
+import {
+  useSiteLocale,
+  useUiDictionary,
+} from "@/providers/SiteLocaleProvider";
 
 const CART_STORAGE_KEY = "quote_cart";
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -14,6 +23,30 @@ function getCartIdentity(
   item: Pick<CartItem, "id" | "sku" | "combinationKey">,
 ) {
   return `${item.id}::${item.combinationKey || item.sku || "standard"}`;
+}
+
+function readLocalizedIdentity(value: unknown): CartLocalizedIdentity | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+
+  const source = value as Record<string, unknown>;
+  const localizedIdentity: CartLocalizedIdentity = {};
+
+  for (const locale of ["en", "tr"] as const) {
+    const candidate = source[locale];
+    if (!candidate || typeof candidate !== "object" || Array.isArray(candidate)) {
+      continue;
+    }
+
+    const localized = candidate as Record<string, unknown>;
+    if (typeof localized.title === "string" && typeof localized.slug === "string") {
+      localizedIdentity[locale] = {
+        title: localized.title,
+        slug: localized.slug,
+      };
+    }
+  }
+
+  return Object.keys(localizedIdentity).length > 0 ? localizedIdentity : undefined;
 }
 
 function readStoredCart(): CartItem[] {
@@ -47,12 +80,14 @@ function readStoredCart(): CartItem[] {
         typeof item.combinationKey === "string"
           ? item.combinationKey.trim()
           : "";
+      const localizedIdentity = readLocalizedIdentity(item.localizedIdentity);
 
       return [
         {
           id: String(item.id),
           title: item.title,
           slug: item.slug,
+          ...(localizedIdentity ? { localizedIdentity } : {}),
           variant: item.variant,
           sku: item.sku,
           ...(combinationKey ? { combinationKey } : {}),
@@ -62,7 +97,7 @@ function readStoredCart(): CartItem[] {
       ];
     });
   } catch (error) {
-    console.error("Sepet okuma hatası", error);
+    console.error("Cart read error", error);
     return [];
   }
 }
@@ -72,6 +107,8 @@ function persistCart(cartItems: CartItem[]) {
 }
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const locale = useSiteLocale();
+  const dictionary = useUiDictionary();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [toast, setToast] = useState<{ show: boolean; item: CartItem | null }>({
     show: false,
@@ -100,7 +137,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         existingItemIndex >= 0
           ? previousCart.map((cartItem, index) =>
               index === existingItemIndex
-                ? { ...cartItem, quantity: cartItem.quantity + 1 }
+                ? {
+                    ...cartItem,
+                    title: item.title,
+                    slug: item.slug,
+                    localizedIdentity: {
+                      ...cartItem.localizedIdentity,
+                      ...item.localizedIdentity,
+                    },
+                    quantity: cartItem.quantity + 1,
+                  }
                 : cartItem,
             )
           : [...previousCart, { ...item, quantity: 1 }];
@@ -138,6 +184,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem(CART_STORAGE_KEY);
   };
 
+  const toastTitle = toast.item?.localizedIdentity?.[locale]?.title || toast.item?.title;
+
   return (
     <CartContext.Provider
       value={{
@@ -161,7 +209,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             <div className="relative h-16 w-16 shrink-0 rounded-[var(--radius-xl)] border border-border bg-surface-muted p-1">
               <Image
                 src={toast.item.image || "/placeholder.jpg"}
-                alt="Ürün"
+                alt={dictionary.cart.productAlt}
                 fill
                 className="object-contain"
                 unoptimized
@@ -169,20 +217,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             </div>
             <div className="flex-1">
               <p className="mb-1 flex items-center gap-1 text-xs font-bold text-success">
-                <CheckCircle2 className="h-4 w-4" /> Teklif Listesine Eklendi
+                <CheckCircle2 className="h-4 w-4" /> {dictionary.cart.added}
               </p>
               <p className="line-clamp-1 text-sm font-bold text-card-foreground">
-                {toast.item.title}
+                {toastTitle}
               </p>
               <p className="mt-0.5 font-mono text-xs text-muted-foreground">
                 {toast.item.sku}
               </p>
             </div>
             <Link
-              href="/teklif-sepeti"
+              href={getQuoteCartPath(locale)}
               onClick={() => setToast({ show: false, item: null })}
               className="rounded-[var(--radius)] bg-primary/10 p-3 text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
-              aria-label="Teklif sepetine git"
+              aria-label={dictionary.cart.goToCart}
             >
               <ShoppingBag className="h-5 w-5" />
             </Link>
@@ -190,7 +238,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
               type="button"
               onClick={() => setToast({ show: false, item: null })}
               className="absolute -right-2 -top-2 rounded-full border border-border bg-card p-1 text-muted-foreground shadow-sm transition-colors hover:text-foreground"
-              aria-label="Bildirimi kapat"
+              aria-label={dictionary.cart.closeNotification}
             >
               <X className="h-3 w-3" />
             </button>

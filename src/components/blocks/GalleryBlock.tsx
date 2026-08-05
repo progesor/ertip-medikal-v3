@@ -20,6 +20,8 @@ import {
   SectionShell,
   type SectionOptions,
 } from "@/components/blocks/SectionShell";
+import { getGalleryBlockDictionary } from "@/lib/i18n/galleryBlockDictionary";
+import { useSiteLocale } from "@/providers/SiteLocaleProvider";
 
 type GalleryLayout = "mosaic" | "grid" | "masonry" | "featured";
 type ImageRatio = "auto" | "landscape" | "wide" | "square" | "portrait";
@@ -52,14 +54,14 @@ const imageRatioClasses: Record<ImageRatio, string> = {
   portrait: "aspect-[3/4] h-full",
 };
 
-function prepareImages(images?: GalleryImage[] | null) {
+function prepareImages(images: GalleryImage[] | null | undefined, fallbackAlt: string) {
   if (!images) return [];
 
   return images.reduce<PreparedImage[]>((acc, item) => {
     if (typeof item.image === "object" && item.image?.url) {
       acc.push({
         url: item.image.url,
-        alt: item.image.alt || item.title || "Galeri görseli",
+        alt: item.image.alt || item.title || fallbackAlt,
         width: item.image.width || 1200,
         height: item.image.height || 900,
         title: item.title,
@@ -79,6 +81,7 @@ function GalleryItem({
   priority = false,
   enableLightbox,
   showCaptions,
+  enlargeSuffix,
 }: {
   image: PreparedImage;
   index: number;
@@ -88,6 +91,7 @@ function GalleryItem({
   priority?: boolean;
   enableLightbox: boolean;
   showCaptions: boolean;
+  enlargeSuffix: string;
 }) {
   const hasCaption = showCaptions && (image.title || image.description);
 
@@ -146,7 +150,7 @@ function GalleryItem({
       type="button"
       className={sharedClassName}
       onClick={(event) => onSelect(index, event.currentTarget)}
-      aria-label={`${image.title || image.alt} görselini büyüt`}
+      aria-label={`${image.title || image.alt} ${enlargeSuffix}`}
     >
       {content}
     </button>
@@ -160,6 +164,7 @@ function GalleryGrid({
   imageRatio,
   enableLightbox,
   showCaptions,
+  enlargeSuffix,
 }: {
   images: PreparedImage[];
   onSelect: (index: number, trigger: HTMLElement) => void;
@@ -167,6 +172,7 @@ function GalleryGrid({
   imageRatio: ImageRatio;
   enableLightbox: boolean;
   showCaptions: boolean;
+  enlargeSuffix: string;
 }) {
   const ratioClass = imageRatioClasses[imageRatio];
 
@@ -184,6 +190,7 @@ function GalleryGrid({
             priority
             enableLightbox={enableLightbox}
             showCaptions={showCaptions}
+            enlargeSuffix={enlargeSuffix}
           />
         </div>
       );
@@ -200,6 +207,7 @@ function GalleryGrid({
             priority
             enableLightbox={enableLightbox}
             showCaptions={showCaptions}
+            enlargeSuffix={enlargeSuffix}
           />
         )}
 
@@ -214,6 +222,7 @@ function GalleryGrid({
               priority={index < 2}
               enableLightbox={enableLightbox}
               showCaptions={showCaptions}
+              enlargeSuffix={enlargeSuffix}
             />
           ))}
         </div>
@@ -234,6 +243,7 @@ function GalleryGrid({
             priority={index < 3}
             enableLightbox={enableLightbox}
             showCaptions={showCaptions}
+            enlargeSuffix={enlargeSuffix}
           />
         ))}
       </div>
@@ -262,6 +272,7 @@ function GalleryGrid({
               priority={index < 3}
               enableLightbox={enableLightbox}
               showCaptions={showCaptions}
+              enlargeSuffix={enlargeSuffix}
             />
           );
         })}
@@ -282,6 +293,7 @@ function GalleryGrid({
           priority={index < 3}
           enableLightbox={enableLightbox}
           showCaptions={showCaptions}
+          enlargeSuffix={enlargeSuffix}
         />
       ))}
     </div>
@@ -311,7 +323,12 @@ export function GalleryBlock({
   showCaptions?: boolean | null;
   section?: SectionOptions | null;
 }) {
-  const preparedImages = useMemo(() => prepareImages(images), [images]);
+  const locale = useSiteLocale();
+  const dictionary = getGalleryBlockDictionary(locale);
+  const preparedImages = useMemo(
+    () => prepareImages(images, dictionary.imageFallback),
+    [dictionary.imageFallback, images],
+  );
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -428,7 +445,7 @@ export function GalleryBlock({
 
         {lightboxEnabled && alignment !== "center" && (
           <p className="shrink-0 text-sm font-medium text-current opacity-65">
-            Görselleri büyütmek için seçin
+            {dictionary.selectToEnlarge}
           </p>
         )}
       </div>
@@ -440,6 +457,7 @@ export function GalleryBlock({
         imageRatio={resolvedRatio}
         enableLightbox={lightboxEnabled}
         showCaptions={captionsEnabled}
+        enlargeSuffix={dictionary.enlargeSuffix}
       />
 
       {currentImage && selectedIndex !== null && (
@@ -447,7 +465,7 @@ export function GalleryBlock({
           ref={modalRef}
           role="dialog"
           aria-modal="true"
-          aria-label="Galeri görüntüleyici"
+          aria-label={dictionary.viewer}
           className="fixed inset-0 z-[100] flex items-center justify-center bg-surface-inverse/95 p-4 text-surface-inverse-foreground backdrop-blur-md md:p-8"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) closeLightbox();
@@ -472,7 +490,7 @@ export function GalleryBlock({
             type="button"
             className="absolute right-4 top-4 z-[103] flex h-12 w-12 items-center justify-center rounded-full bg-background/10 text-current transition-colors hover:bg-background/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current md:right-8 md:top-8"
             onClick={closeLightbox}
-            aria-label="Galeriyi kapat"
+            aria-label={dictionary.close}
           >
             <X className="h-7 w-7" />
           </button>
@@ -483,7 +501,7 @@ export function GalleryBlock({
                 type="button"
                 className="absolute left-3 top-1/2 z-[102] flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-background/10 text-current transition-colors hover:bg-background/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current md:left-8 md:h-14 md:w-14"
                 onClick={showPrevious}
-                aria-label="Önceki görsel"
+                aria-label={dictionary.previous}
               >
                 <ChevronLeft className="h-7 w-7" />
               </button>
@@ -492,7 +510,7 @@ export function GalleryBlock({
                 type="button"
                 className="absolute right-3 top-1/2 z-[102] flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-background/10 text-current transition-colors hover:bg-background/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current md:right-8 md:h-14 md:w-14"
                 onClick={showNext}
-                aria-label="Sonraki görsel"
+                aria-label={dictionary.next}
               >
                 <ChevronRight className="h-7 w-7" />
               </button>

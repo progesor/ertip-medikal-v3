@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { CheckCircle2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useUiDictionary } from "@/providers/SiteLocaleProvider";
 
 type ContactResponse = {
   success?: boolean;
@@ -15,6 +16,7 @@ type ContactFormProps = {
 };
 
 export function ContactForm({ departments, privacyHref }: ContactFormProps) {
+  const dictionary = useUiDictionary();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +31,7 @@ export function ContactForm({ departments, privacyHref }: ContactFormProps) {
     const selectedDepartment = formData.get("department");
     const rawMessage = formData.get("message");
     const finalMessage = selectedDepartment
-      ? `[İlgili Departman: ${selectedDepartment}]\n\n${rawMessage}`
+      ? `[${dictionary.contact.departmentPrefix}: ${selectedDepartment}]\n\n${rawMessage}`
       : rawMessage;
 
     try {
@@ -50,11 +52,11 @@ export function ContactForm({ departments, privacyHref }: ContactFormProps) {
         setIsSuccess(true);
         form.reset();
       } else {
-        setError(data.message || "Bir hata oluştu. Lütfen tekrar deneyin.");
+        setError(dictionary.contact.error);
       }
     } catch (submissionError) {
       console.error("Form submission error:", submissionError);
-      setError("Bağlantı hatası yaşandı. Lütfen internetinizi kontrol edin.");
+      setError(dictionary.contact.connectionError);
     } finally {
       setIsSubmitting(false);
     }
@@ -69,18 +71,17 @@ export function ContactForm({ departments, privacyHref }: ContactFormProps) {
       >
         <CheckCircle2 className="mb-4 h-16 w-16 text-success" />
         <h3 className="mb-2 text-2xl font-bold text-text-main">
-          Mesajınız Alındı!
+          {dictionary.contact.successTitle}
         </h3>
         <p className="mb-6 text-text-muted">
-          Talebiniz ilgili departmanımıza başarıyla iletildi. En kısa sürede
-          sizinle iletişime geçeceğiz.
+          {dictionary.contact.successDescription}
         </p>
         <Button
           variant="outline"
           onClick={() => setIsSuccess(false)}
           className="border-border font-bold text-text-main"
         >
-          Yeni Mesaj Gönder
+          {dictionary.contact.newMessage}
         </Button>
       </div>
     );
@@ -117,7 +118,7 @@ export function ContactForm({ departments, privacyHref }: ContactFormProps) {
             htmlFor="contact-name"
             className="text-sm font-bold text-text-main"
           >
-            Ad Soyad *
+            {dictionary.contact.name}
           </label>
           <input
             id="contact-name"
@@ -127,7 +128,7 @@ export function ContactForm({ departments, privacyHref }: ContactFormProps) {
             maxLength={120}
             autoComplete="name"
             className="w-full rounded-xl border border-border bg-background px-4 py-3 text-text-main outline-none transition-all placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring"
-            placeholder="Örn: Dr. Ahmet Yılmaz"
+            placeholder={dictionary.contact.namePlaceholder}
           />
         </div>
         <div className="space-y-2">
@@ -135,7 +136,7 @@ export function ContactForm({ departments, privacyHref }: ContactFormProps) {
             htmlFor="contact-email"
             className="text-sm font-bold text-text-main"
           >
-            E-Posta *
+            {dictionary.contact.email}
           </label>
           <input
             id="contact-email"
@@ -145,7 +146,7 @@ export function ContactForm({ departments, privacyHref }: ContactFormProps) {
             maxLength={254}
             autoComplete="email"
             className="w-full rounded-xl border border-border bg-background px-4 py-3 text-text-main outline-none transition-all placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring"
-            placeholder="ornek@klinik.com"
+            placeholder={dictionary.contact.emailPlaceholder}
           />
         </div>
       </div>
@@ -156,7 +157,7 @@ export function ContactForm({ departments, privacyHref }: ContactFormProps) {
             htmlFor="contact-phone"
             className="text-sm font-bold text-text-main"
           >
-            Telefon
+            {dictionary.contact.phone}
           </label>
           <input
             id="contact-phone"
@@ -165,7 +166,7 @@ export function ContactForm({ departments, privacyHref }: ContactFormProps) {
             maxLength={50}
             autoComplete="tel"
             className="w-full rounded-xl border border-border bg-background px-4 py-3 text-text-main outline-none transition-all placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring"
-            placeholder="+90 5XX XXX XX XX"
+            placeholder={dictionary.contact.phonePlaceholder}
           />
         </div>
 
@@ -175,14 +176,14 @@ export function ContactForm({ departments, privacyHref }: ContactFormProps) {
               htmlFor="contact-department"
               className="text-sm font-bold text-text-main"
             >
-              İlgili Departman
+              {dictionary.contact.department}
             </label>
             <select
               id="contact-department"
               name="department"
               className="w-full rounded-xl border border-border bg-background px-4 py-3 text-text-main outline-none transition-all focus:border-primary focus:ring-1 focus:ring-ring"
             >
-              <option value="">Genel / Diğer</option>
+              <option value="">{dictionary.contact.generalDepartment}</option>
               {departments.map((department: any, index: number) => (
                 <option key={department.id || index} value={department.label}>
                   {department.label}
@@ -198,7 +199,7 @@ export function ContactForm({ departments, privacyHref }: ContactFormProps) {
           htmlFor="contact-message"
           className="text-sm font-bold text-text-main"
         >
-          Mesajınız *
+          {dictionary.contact.message}
         </label>
         <textarea
           id="contact-message"
@@ -208,7 +209,7 @@ export function ContactForm({ departments, privacyHref }: ContactFormProps) {
           minLength={5}
           maxLength={5_000}
           className="w-full resize-none rounded-xl border border-border bg-background px-4 py-3 text-text-main outline-none transition-all placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring"
-          placeholder="Talebinizi detaylıca buraya yazabilirsiniz..."
+          placeholder={dictionary.contact.messagePlaceholder}
         />
       </div>
 
@@ -218,10 +219,10 @@ export function ContactForm({ departments, privacyHref }: ContactFormProps) {
         className="group h-14 w-full rounded-xl text-lg font-bold"
       >
         {isSubmitting ? (
-          "Gönderiliyor..."
+          dictionary.contact.submitting
         ) : (
           <>
-            Mesajı Gönder
+            {dictionary.contact.submit}
             <Send className="ml-2 h-5 w-5 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
           </>
         )}
@@ -229,14 +230,14 @@ export function ContactForm({ departments, privacyHref }: ContactFormProps) {
 
       {privacyHref && (
         <p className="text-center text-xs leading-relaxed text-text-muted">
-          Kişisel verilerin işlenmesine ilişkin detaylar için{" "}
+          {dictionary.contact.privacyPrefix}{" "}
           <a
             href={privacyHref}
             className="font-semibold text-primary underline decoration-primary/30 underline-offset-4 transition-colors hover:decoration-primary"
           >
-            KVKK Aydınlatma Metni
+            {dictionary.contact.privacyLink}
           </a>
-          ’ni inceleyebilirsiniz.
+          {dictionary.contact.privacySuffix}
         </p>
       )}
     </form>

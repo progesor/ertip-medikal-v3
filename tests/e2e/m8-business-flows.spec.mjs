@@ -35,6 +35,20 @@ test.describe("M8 business-flow hardening", () => {
     await expect(page.getByRole("link", { name: "Türkçeye geç" })).toBeVisible();
   });
 
+  test("locale switch follows the current route after client navigation", async ({ page }) => {
+    await page.goto("/tr");
+
+    await page.getByRole("link", { name: "Teklif sepeti" }).click();
+    await expect(page).toHaveURL(/\/tr\/teklif-sepeti$/);
+
+    const switchToEnglish = page.getByRole("link", { name: "Switch to English" });
+    await expect(switchToEnglish).toBeVisible();
+    await switchToEnglish.click();
+
+    await expect(page).toHaveURL(/\/en\/quote-cart$/);
+    await expect(page.getByRole("heading", { name: "Quote Cart" })).toBeVisible();
+  });
+
   test("public locale routing canonicalizes legacy and translated system routes", async ({
     page,
   }) => {
@@ -46,6 +60,28 @@ test.describe("M8 business-flow hardening", () => {
 
     await page.goto("/tr/products");
     await expect(page).toHaveURL(/\/tr\/urunler$/);
+  });
+
+  test("fixed application UI follows the public locale", async ({ page }) => {
+    await page.goto("/en/quote-cart");
+    await expect(page.getByRole("heading", { name: "Quote Cart" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Your List Is Empty" })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Browse Products/ })).toBeVisible();
+
+    await page.goto("/tr/teklif-sepeti");
+    await expect(page.getByRole("heading", { name: "Teklif Sepeti" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Listeniz Şimdilik Boş" })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Ürünleri İncele/ })).toBeVisible();
+
+    await page.goto("/en/unsubscribe");
+    await expect(page.getByRole("heading", { name: "Unsubscribe" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Send Unsubscribe Link" })).toBeVisible();
+    await expect(page.getByPlaceholder("Your email address...")).toBeVisible();
+
+    await page.goto("/tr/abonelikten-ayril");
+    await expect(page.getByRole("heading", { name: "Abonelikten Ayrıl" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "İptal Bağlantısı Gönder" })).toBeVisible();
+    await expect(page.getByPlaceholder("E-posta adresiniz...")).toBeVisible();
   });
 
   test("public responses carry the security header baseline", async ({ request }) => {

@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Certificate } from "@/types";
+import { getCertificateDictionary } from "@/lib/i18n/certificateDictionary";
+import { useSiteLocale } from "@/providers/SiteLocaleProvider";
 
 export function CertificateGridBlock({
   title,
@@ -23,6 +25,8 @@ export function CertificateGridBlock({
   title?: string;
   certificates: Certificate[];
 }) {
+  const locale = useSiteLocale();
+  const dictionary = getCertificateDictionary(locale);
   const [selectedCertIndex, setSelectedCertIndex] = useState<number | null>(null);
 
   if (!certificates || certificates.length === 0) return null;
@@ -52,10 +56,10 @@ export function CertificateGridBlock({
       <div className="container mx-auto px-4 max-w-[1400px]">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/5 border border-primary/10 text-primary font-bold text-sm mb-6 shadow-sm">
-            <CheckCircle2 className="w-5 h-5" /> Kurumsal Güven
+            <CheckCircle2 className="w-5 h-5" /> {dictionary.trustBadge}
           </div>
           <h2 className="text-4xl md:text-5xl font-black text-text-main mb-4 tracking-tight">
-            {title || "Sertifikalarımız"}
+            {title || dictionary.defaultTitle}
           </h2>
         </div>
 
@@ -113,7 +117,7 @@ export function CertificateGridBlock({
                 type="button"
                 onClick={showPrev}
                 className="p-3 md:p-4 bg-surface/90 hover:bg-primary hover:text-primary-foreground rounded-2xl shadow-xl transition-all text-text-main"
-                aria-label="Önceki sertifika"
+                aria-label={dictionary.previous}
               >
                 <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
               </button>
@@ -121,7 +125,7 @@ export function CertificateGridBlock({
                 type="button"
                 onClick={showNext}
                 className="p-3 md:p-4 bg-surface/90 hover:bg-primary hover:text-primary-foreground rounded-2xl shadow-xl transition-all text-text-main"
-                aria-label="Sonraki sertifika"
+                aria-label={dictionary.next}
               >
                 <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
               </button>
@@ -129,7 +133,7 @@ export function CertificateGridBlock({
                 type="button"
                 onClick={() => setSelectedCertIndex(null)}
                 className="p-3 md:p-4 bg-error/10 text-error hover:bg-error hover:text-error-foreground rounded-2xl shadow-xl transition-all"
-                aria-label="Sertifika görüntüleyicisini kapat"
+                aria-label={dictionary.close}
               >
                 <X className="w-5 h-5 md:w-6 md:h-6" />
               </button>
@@ -159,7 +163,7 @@ export function CertificateGridBlock({
             <div className="w-full lg:w-1/3 p-8 md:p-14 flex flex-col bg-surface overflow-y-auto">
               <div className="mb-auto">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface-muted border border-border text-text-muted font-bold text-xs mb-8 uppercase tracking-widest">
-                  <FileText className="w-4 h-4 text-primary" /> Resmi Belge
+                  <FileText className="w-4 h-4 text-primary" /> {dictionary.officialDocument}
                 </div>
 
                 <h2 className="text-3xl md:text-4xl font-black text-text-main mb-6 leading-tight">
@@ -177,11 +181,10 @@ export function CertificateGridBlock({
 
                 <div className="space-y-4">
                   <h4 className="font-bold text-text-main text-base uppercase tracking-tight">
-                    Kapsam Detayları
+                    {dictionary.scopeDetails}
                   </h4>
                   <p className="text-text-muted leading-relaxed text-base">
-                    {currentCert.description ||
-                      "Bu sertifika, Ertıp Medikal'in global standartlara, kalite kontrol süreçlerine ve medikal üretim yönetmeliklerine olan tam uygunluğunu tescillemektedir."}
+                    {currentCert.description || dictionary.defaultDescription}
                   </p>
                 </div>
               </div>
@@ -198,20 +201,17 @@ export function CertificateGridBlock({
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        <Download className="w-6 h-6 mr-3" /> PDF Olarak Görüntüle
+                        <Download className="w-6 h-6 mr-3" /> {dictionary.viewPdf}
                       </a>
                     </Button>
                     <p className="text-xs text-text-muted text-center flex justify-center items-center gap-1.5 leading-tight">
-                      <Info className="w-4 h-4" /> Cihazınıza kaydetmek için
-                      butona sağ tıklayıp &quot;Farklı Kaydet&quot; seçeneğini
-                      kullanabilirsiniz.
+                      <Info className="w-4 h-4" /> {dictionary.saveHint}
                     </p>
                   </div>
                 ) : (
                   <div className="bg-surface-muted p-5 rounded-2xl border border-border text-center">
                     <p className="text-xs text-text-muted font-semibold leading-relaxed">
-                      Bu belgenin ıslak imzalı orijinal nüshası merkez ofisimizde
-                      muhafaza edilmektedir.
+                      {dictionary.originalStored}
                     </p>
                   </div>
                 )}

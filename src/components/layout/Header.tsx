@@ -209,6 +209,7 @@ export async function Header() {
         <div className="ml-auto flex items-center gap-2">
           <LanguageSwitcher
             currentLocale={locale}
+            sourcePathname={publicPathname}
             targetHref={alternateLocale.href}
             available={alternateLocale.available}
           />
