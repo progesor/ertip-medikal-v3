@@ -4,6 +4,8 @@ import { ArrowRight, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SectionShell, type SectionOptions } from "@/components/blocks/SectionShell";
 import { cn } from "@/lib/utils";
+import { getRequestLocale } from "@/lib/i18n/requestLocale";
+import { localizeInternalHref } from "@/lib/i18n/routing";
 
 type MediaValue =
   | number
@@ -94,7 +96,7 @@ function getButtonPresentation(
   };
 }
 
-export function CTABlock({
+export async function CTABlock({
   eyebrow,
   title,
   description,
@@ -108,6 +110,7 @@ export function CTABlock({
   buttonLink,
   section,
 }: CTABlockProps) {
+  const locale = await getRequestLocale();
   const media = getMedia(backgroundImage);
   const imageUrl = media?.url || null;
   const resolvedTheme = theme || "primary";
@@ -236,7 +239,7 @@ export function CTABlock({
                     )}
                     asChild
                   >
-                    <Link href={button.link}>
+                    <Link href={localizeInternalHref(button.link, locale)}>
                       {button.label}
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
