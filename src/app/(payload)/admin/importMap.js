@@ -39,6 +39,7 @@ import { AdminIcon as AdminIcon_db845eae23ef682757f9df5d4893ae70 } from '../../.
 import { AdminLogo as AdminLogo_db845eae23ef682757f9df5d4893ae70 } from '../../../components/admin/AdminBrand'
 import { AdminNavFooter as AdminNavFooter_db845eae23ef682757f9df5d4893ae70 } from '../../../components/admin/AdminBrand'
 import { default as default_0171ae121c3d9523aafb7bdbec1300c5 } from '../../../components/admin/AdminDashboard'
+import { EnglishContentBootstrapControl as EnglishContentBootstrapControl_12b5097f7980ec875f31629c0313de31 } from '../../../components/admin/EnglishContentBootstrapControl'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -84,5 +85,6 @@ export const importMap = {
   "/components/admin/AdminBrand#AdminLogo": AdminLogo_db845eae23ef682757f9df5d4893ae70,
   "/components/admin/AdminBrand#AdminNavFooter": AdminNavFooter_db845eae23ef682757f9df5d4893ae70,
   "/components/admin/AdminDashboard#default": default_0171ae121c3d9523aafb7bdbec1300c5,
+  "/components/admin/EnglishContentBootstrapControl#EnglishContentBootstrapControl": EnglishContentBootstrapControl_12b5097f7980ec875f31629c0313de31,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }
