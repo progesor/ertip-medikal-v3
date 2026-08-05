@@ -1,5 +1,3 @@
-import "server-only";
-
 import { Pool } from "pg";
 import type { SiteLocale } from "@/lib/i18n/config";
 import { serverEnv } from "@/lib/config/env";
