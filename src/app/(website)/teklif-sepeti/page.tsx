@@ -141,7 +141,10 @@ export default function QuoteCartPage() {
 
               <div className="divide-y divide-border overflow-hidden rounded-[var(--radius-2xl)] border border-border/80 bg-surface shadow-sm shadow-surface-inverse/5">
                 {cartItems.map((item, index) => {
-                  const productHref = getProductsPath(locale, item.slug);
+                  const localizedIdentity = item.localizedIdentity?.[locale];
+                  const itemTitle = localizedIdentity?.title || item.title;
+                  const itemSlug = localizedIdentity?.slug || item.slug;
+                  const productHref = getProductsPath(locale, itemSlug);
 
                   return (
                     <div
@@ -154,7 +157,7 @@ export default function QuoteCartPage() {
                       >
                         <Image
                           src={item.image || "/placeholder.jpg"}
-                          alt={item.title}
+                          alt={itemTitle}
                           fill
                           className="object-contain mix-blend-multiply"
                           unoptimized
@@ -164,7 +167,7 @@ export default function QuoteCartPage() {
                       <div className="flex-1 text-center sm:text-left">
                         <Link href={productHref} className="group/title">
                           <h4 className="text-lg font-bold text-text-main transition-colors group-hover/title:text-primary">
-                            {item.title}
+                            {itemTitle}
                           </h4>
                         </Link>
                         <p className="mt-1 text-sm text-text-muted">{item.variant}</p>
@@ -180,7 +183,7 @@ export default function QuoteCartPage() {
                             updateQuantity(index, (item.quantity || 1) - 1)
                           }
                           className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface text-text-muted shadow-sm transition-all hover:text-primary"
-                          aria-label={`${item.title} ${dictionary.quote.decreaseQuantitySuffix}`}
+                          aria-label={`${itemTitle} ${dictionary.quote.decreaseQuantitySuffix}`}
                         >
                           <Minus className="h-4 w-4" />
                         </button>
@@ -193,7 +196,7 @@ export default function QuoteCartPage() {
                             updateQuantity(index, (item.quantity || 1) + 1)
                           }
                           className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface text-text-muted shadow-sm transition-all hover:text-primary"
-                          aria-label={`${item.title} ${dictionary.quote.increaseQuantitySuffix}`}
+                          aria-label={`${itemTitle} ${dictionary.quote.increaseQuantitySuffix}`}
                         >
                           <Plus className="h-4 w-4" />
                         </button>
@@ -203,7 +206,7 @@ export default function QuoteCartPage() {
                         type="button"
                         onClick={() => removeFromCart(index)}
                         className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-error/60 transition-all hover:bg-error hover:text-error-foreground"
-                        aria-label={`${item.title} ${dictionary.quote.removeProductSuffix}`}
+                        aria-label={`${itemTitle} ${dictionary.quote.removeProductSuffix}`}
                       >
                         <Trash2 className="h-5 w-5" />
                       </button>
