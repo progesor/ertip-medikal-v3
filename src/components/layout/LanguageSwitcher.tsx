@@ -6,6 +6,7 @@ import { Languages } from "lucide-react";
 import type { SiteLocale } from "@/lib/i18n/config";
 
 type AlternateLocaleState = {
+  pathname: string;
   href: string;
   available: boolean;
 };
@@ -36,22 +37,13 @@ export function LanguageSwitcher({
     targetLocale === "en"
       ? "Resolving English page..."
       : "Türkçe sayfa hazırlanıyor...";
-  const [alternateLocale, setAlternateLocale] = useState<AlternateLocaleState>({
-    href: targetHref,
-    available,
-  });
-  const [isResolving, setIsResolving] = useState(false);
+  const [clientResolution, setClientResolution] =
+    useState<AlternateLocaleState | null>(null);
 
   useEffect(() => {
-    if (pathname === sourcePathname) {
-      setAlternateLocale({ href: targetHref, available });
-      setIsResolving(false);
-      return;
-    }
+    if (pathname === sourcePathname) return;
 
     const controller = new AbortController();
-    setIsResolving(true);
-    setAlternateLocale({ href: "", available: false });
 
     void fetch(
       `/api/public/alternate-locale?pathname=${encodeURIComponent(pathname)}`,
@@ -72,20 +64,30 @@ export function LanguageSwitcher({
         }
 
         if (!controller.signal.aborted) {
-          setAlternateLocale({ href, available: resolvedAvailable });
+          setClientResolution({
+            pathname,
+            href,
+            available: resolvedAvailable,
+          });
         }
       })
       .catch((error: unknown) => {
         if (controller.signal.aborted) return;
         console.error("Alternate locale resolution error", error);
-        setAlternateLocale({ href: "", available: false });
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setIsResolving(false);
+        setClientResolution({ pathname, href: "", available: false });
       });
 
     return () => controller.abort();
-  }, [available, pathname, sourcePathname, targetHref]);
+  }, [pathname, sourcePathname]);
+
+  const isSourcePath = pathname === sourcePathname;
+  const hasCurrentClientResolution = clientResolution?.pathname === pathname;
+  const isResolving = !isSourcePath && !hasCurrentClientResolution;
+  const alternateLocale = isSourcePath
+    ? { href: targetHref, available }
+    : hasCurrentClientResolution
+      ? clientResolution
+      : { href: "", available: false };
 
   if (isResolving || !alternateLocale.available) {
     return (
