@@ -6,6 +6,11 @@ import { CheckCircle2, ShoppingBag, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import type { CartContextType, CartItem } from "@/types";
+import { getQuoteCartPath } from "@/lib/i18n/routing";
+import {
+  useSiteLocale,
+  useUiDictionary,
+} from "@/providers/SiteLocaleProvider";
 
 const CART_STORAGE_KEY = "quote_cart";
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -62,7 +67,7 @@ function readStoredCart(): CartItem[] {
       ];
     });
   } catch (error) {
-    console.error("Sepet okuma hatası", error);
+    console.error("Cart read error", error);
     return [];
   }
 }
@@ -72,6 +77,8 @@ function persistCart(cartItems: CartItem[]) {
 }
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const locale = useSiteLocale();
+  const dictionary = useUiDictionary();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [toast, setToast] = useState<{ show: boolean; item: CartItem | null }>({
     show: false,
@@ -161,7 +168,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             <div className="relative h-16 w-16 shrink-0 rounded-[var(--radius-xl)] border border-border bg-surface-muted p-1">
               <Image
                 src={toast.item.image || "/placeholder.jpg"}
-                alt="Ürün"
+                alt={dictionary.cart.productAlt}
                 fill
                 className="object-contain"
                 unoptimized
@@ -169,7 +176,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             </div>
             <div className="flex-1">
               <p className="mb-1 flex items-center gap-1 text-xs font-bold text-success">
-                <CheckCircle2 className="h-4 w-4" /> Teklif Listesine Eklendi
+                <CheckCircle2 className="h-4 w-4" /> {dictionary.cart.added}
               </p>
               <p className="line-clamp-1 text-sm font-bold text-card-foreground">
                 {toast.item.title}
@@ -179,10 +186,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
               </p>
             </div>
             <Link
-              href="/teklif-sepeti"
+              href={getQuoteCartPath(locale)}
               onClick={() => setToast({ show: false, item: null })}
               className="rounded-[var(--radius)] bg-primary/10 p-3 text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
-              aria-label="Teklif sepetine git"
+              aria-label={dictionary.cart.goToCart}
             >
               <ShoppingBag className="h-5 w-5" />
             </Link>
@@ -190,7 +197,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
               type="button"
               onClick={() => setToast({ show: false, item: null })}
               className="absolute -right-2 -top-2 rounded-full border border-border bg-card p-1 text-muted-foreground shadow-sm transition-colors hover:text-foreground"
-              aria-label="Bildirimi kapat"
+              aria-label={dictionary.cart.closeNotification}
             >
               <X className="h-3 w-3" />
             </button>
