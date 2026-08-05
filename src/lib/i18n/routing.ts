@@ -29,6 +29,14 @@ const routeSegments = {
   unsubscribe: { en: "unsubscribe", tr: "abonelikten-ayril" },
 } as const satisfies Record<string, Record<SiteLocale, string>>;
 
+function safeDecodeURIComponent(value: string) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
 function splitPathAndSuffix(href: string) {
   const queryIndex = href.indexOf("?");
   const hashIndex = href.indexOf("#");
@@ -111,12 +119,13 @@ export function parseLocalizedPublicPath(
 
   if (productSegments.includes(first as (typeof productSegments)[number])) {
     if (second) {
-      const slug = decodeURIComponent(rest.slice(1).join("/"));
+      const rawSlug = rest.slice(1).join("/");
+      const slug = safeDecodeURIComponent(rawSlug);
       return {
         locale,
         kind: "product",
         slug,
-        internalPath: `/urunler/${rest.slice(1).join("/")}`,
+        internalPath: `/urunler/${rawSlug}`,
         publicPath: getProductsPath(locale, slug),
       };
     }
@@ -131,12 +140,13 @@ export function parseLocalizedPublicPath(
 
   if (newsSegments.includes(first as (typeof newsSegments)[number])) {
     if (second) {
-      const slug = decodeURIComponent(rest.slice(1).join("/"));
+      const rawSlug = rest.slice(1).join("/");
+      const slug = safeDecodeURIComponent(rawSlug);
       return {
         locale,
         kind: "news-item",
         slug,
-        internalPath: `/haberler/${rest.slice(1).join("/")}`,
+        internalPath: `/haberler/${rawSlug}`,
         publicPath: getNewsPath(locale, slug),
       };
     }
@@ -169,7 +179,7 @@ export function parseLocalizedPublicPath(
     };
   }
 
-  const slug = decodeURIComponent(rest.join("/"));
+  const slug = safeDecodeURIComponent(rest.join("/"));
   return {
     locale,
     kind: "page",
@@ -189,12 +199,18 @@ export function toLocalizedPublicPath(
 
   if (normalized === "/urunler") return getProductsPath(locale);
   if (normalized.startsWith("/urunler/")) {
-    return getProductsPath(locale, decodeURIComponent(normalized.slice(10)));
+    return getProductsPath(
+      locale,
+      safeDecodeURIComponent(normalized.slice("/urunler/".length)),
+    );
   }
 
   if (normalized === "/haberler") return getNewsPath(locale);
   if (normalized.startsWith("/haberler/")) {
-    return getNewsPath(locale, decodeURIComponent(normalized.slice(10)));
+    return getNewsPath(
+      locale,
+      safeDecodeURIComponent(normalized.slice("/haberler/".length)),
+    );
   }
 
   if (normalized === "/teklif-sepeti") return getQuoteCartPath(locale);
