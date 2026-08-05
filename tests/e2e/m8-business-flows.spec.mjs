@@ -24,6 +24,17 @@ test.describe("M8 business-flow hardening", () => {
     await expect(dialog).toBeHidden();
   });
 
+  test("locale switch rebuilds shared navigation in the target language", async ({ page }) => {
+    await page.goto("/tr/urunler");
+    await expect(page.getByRole("button", { name: "Mobil menüyü aç" })).toBeVisible();
+
+    await page.getByRole("link", { name: "Switch to English" }).click();
+
+    await expect(page).toHaveURL(/\/en\/products$/);
+    await expect(page.getByRole("button", { name: "Open mobile menu" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Türkçeye geç" })).toBeVisible();
+  });
+
   test("public locale routing canonicalizes legacy and translated system routes", async ({
     page,
   }) => {
