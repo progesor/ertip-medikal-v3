@@ -24,6 +24,7 @@ import { ProductGallery } from "@/components/product/ProductGallery";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCart } from "@/providers/CartProvider";
+import { useUiDictionary } from "@/providers/SiteLocaleProvider";
 
 type LogisticsMode = "sidebar" | "wide";
 
@@ -82,6 +83,8 @@ function getInitialSelectedAttributes(product: any) {
 }
 
 function NetDimensions({ mode, product }: LogisticsProps) {
+  const dictionary = useUiDictionary();
+
   if (!product.width && !product.height && !product.depth && !product.weight) {
     return null;
   }
@@ -90,12 +93,15 @@ function NetDimensions({ mode, product }: LogisticsProps) {
     return (
       <div className="space-y-4 rounded-2xl border border-border bg-surface-muted p-6">
         <h4 className="flex items-center gap-2 text-md font-bold text-text-main">
-          <Ruler className="h-4 w-4 text-primary" /> Net Ürün Boyutları
+          <Ruler className="h-4 w-4 text-primary" />
+          {dictionary.product.netDimensions}
         </h4>
         <ul className="space-y-2 text-sm">
           {(product.width || product.height || product.depth) && (
             <li className="flex justify-between border-b border-border pb-2">
-              <span className="text-text-muted">Ölçüler (G-Y-D):</span>
+              <span className="text-text-muted">
+                {dictionary.product.dimensionsShort}
+              </span>
               <strong className="text-text-main">
                 {product.width || "-"}x{product.height || "-"}x
                 {product.depth || "-"} mm
@@ -104,7 +110,9 @@ function NetDimensions({ mode, product }: LogisticsProps) {
           )}
           {product.weight && (
             <li className="flex justify-between pt-1">
-              <span className="text-text-muted">Net Ağırlık:</span>
+              <span className="text-text-muted">
+                {dictionary.product.netWeight}
+              </span>
               <strong className="text-text-main">{product.weight} gr</strong>
             </li>
           )}
@@ -114,17 +122,21 @@ function NetDimensions({ mode, product }: LogisticsProps) {
   }
 
   const dimensions = [
-    { label: "Genişlik", value: product.width, unit: "mm" },
-    { label: "Yükseklik", value: product.height, unit: "mm" },
-    { label: "Derinlik", value: product.depth, unit: "mm" },
-    { label: "Net Ağırlık", value: product.weight, unit: "gr" },
+    { label: dictionary.product.width, value: product.width, unit: "mm" },
+    { label: dictionary.product.height, value: product.height, unit: "mm" },
+    { label: dictionary.product.depth, value: product.depth, unit: "mm" },
+    {
+      label: dictionary.product.netWeightShort,
+      value: product.weight,
+      unit: "gr",
+    },
   ];
 
   return (
     <div className="space-y-4">
       <h3 className="flex items-center gap-2 text-xl font-bold text-text-main">
-        <span className="h-6 w-1.5 rounded-full bg-primary" /> Ürün Boyut ve
-        Ağırlığı (Net)
+        <span className="h-6 w-1.5 rounded-full bg-primary" />
+        {dictionary.product.dimensionsAndWeight}
       </h3>
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         {dimensions.map(
@@ -152,6 +164,8 @@ function NetDimensions({ mode, product }: LogisticsProps) {
 }
 
 function PackagingTable({ mode, product }: LogisticsProps) {
+  const dictionary = useUiDictionary();
+
   if (!Array.isArray(product.packaging) || product.packaging.length === 0) {
     return null;
   }
@@ -160,7 +174,8 @@ function PackagingTable({ mode, product }: LogisticsProps) {
     return (
       <div className="space-y-4 rounded-2xl border border-border bg-surface-muted p-6">
         <h4 className="flex items-center gap-2 text-md font-bold text-text-main">
-          <PackageOpen className="h-4 w-4 text-primary" /> Lojistik Bilgisi
+          <PackageOpen className="h-4 w-4 text-primary" />
+          {dictionary.product.logisticsInfo}
         </h4>
         <div className="space-y-3">
           {product.packaging.map((packaging: any, index: number) => (
@@ -170,14 +185,16 @@ function PackagingTable({ mode, product }: LogisticsProps) {
             >
               <p className="mb-1 font-bold text-text-muted">
                 {packaging.packageLabel}{" "}
-                <span className="text-primary">({packaging.quantity} Adet)</span>
+                <span className="text-primary">
+                  ({packaging.quantity} {dictionary.product.quantityUnit})
+                </span>
               </p>
               <p className="text-xs text-text-muted">
-                Boyut: {packaging.p_width}x{packaging.p_height}x
-                {packaging.p_depth} cm
+                {dictionary.product.size}: {packaging.p_width}x
+                {packaging.p_height}x{packaging.p_depth} cm
               </p>
               <p className="mt-0.5 text-xs text-text-muted">
-                Brüt Ağırlık:{" "}
+                {dictionary.product.grossWeight}:{" "}
                 <strong className="text-text-muted">
                   {packaging.grossWeight} kg
                 </strong>
@@ -192,24 +209,24 @@ function PackagingTable({ mode, product }: LogisticsProps) {
   return (
     <div className="mt-10 space-y-4">
       <h3 className="flex items-center gap-2 text-xl font-bold text-text-main">
-        <span className="h-6 w-1.5 rounded-full bg-primary" /> Lojistik ve
-        Ambalaj Bilgileri
+        <span className="h-6 w-1.5 rounded-full bg-primary" />
+        {dictionary.product.logisticsAndPackaging}
       </h3>
       <div className="overflow-hidden rounded-2xl border border-border shadow-sm">
         <table className="w-full border-collapse text-left text-sm">
           <thead className="border-b border-border bg-surface-muted">
             <tr>
               <th className="px-6 py-4 font-bold text-text-main">
-                Paketleme Formu
+                {dictionary.product.packagingForm}
               </th>
               <th className="px-6 py-4 font-bold text-text-main">
-                İçerik Adedi
+                {dictionary.product.packageQuantity}
               </th>
               <th className="px-6 py-4 font-bold text-text-main">
-                Ölçüler (cm)
+                {dictionary.product.dimensionsCm}
               </th>
               <th className="px-6 py-4 font-bold text-text-main">
-                Brüt Ağırlık
+                {dictionary.product.grossWeight}
               </th>
             </tr>
           </thead>
@@ -223,7 +240,7 @@ function PackagingTable({ mode, product }: LogisticsProps) {
                   {packaging.packageLabel}
                 </td>
                 <td className="px-6 py-4 text-text-muted">
-                  {packaging.quantity} Adet
+                  {packaging.quantity} {dictionary.product.quantityUnit}
                 </td>
                 <td className="px-6 py-4 font-mono text-text-muted">
                   {packaging.p_width}x{packaging.p_height}x{packaging.p_depth}
@@ -242,6 +259,7 @@ function PackagingTable({ mode, product }: LogisticsProps) {
 
 export function ProductView({ product }: any) {
   const { addToCart } = useCart();
+  const dictionary = useUiDictionary();
   const searchParams = useSearchParams();
   const [selectedAttrs, setSelectedAttrs] = useState<Record<string, string>>(
     () => getInitialSelectedAttributes(product),
@@ -320,7 +338,7 @@ export function ProductView({ product }: any) {
   const verifyDocument = useCallback(
     async (docLabel: string, code: string) => {
       if (!code.trim()) {
-        setVerifyError("Lütfen erişim kodunu girin.");
+        setVerifyError(dictionary.product.accessCodeRequired);
         return;
       }
 
@@ -344,18 +362,16 @@ export function ProductView({ product }: any) {
           return;
         }
 
-        setVerifyError(data.message || "Geçersiz kod.");
+        setVerifyError(dictionary.product.invalidCode);
         window.setTimeout(() => setVerifyError(null), 5000);
       } catch {
-        setVerifyError(
-          "Doğrulama servisine ulaşılamadı. Lütfen internet bağlantınızı kontrol edin.",
-        );
+        setVerifyError(dictionary.product.verificationUnavailable);
         window.setTimeout(() => setVerifyError(null), 5000);
       } finally {
         setIsVerifying(false);
       }
     },
-    [product.id],
+    [dictionary.product, product.id],
   );
 
   const handleAddToCart = () => {
@@ -363,7 +379,7 @@ export function ProductView({ product }: any) {
       id: String(product.id),
       title: product.title,
       slug: product.slug,
-      variant: currentVariant?.title || "Standart",
+      variant: currentVariant?.title || dictionary.product.defaultVariant,
       sku: currentVariant?.sku || product.sku,
       ...(currentVariant?.combinationKey
         ? { combinationKey: currentVariant.combinationKey }
@@ -460,8 +476,7 @@ export function ProductView({ product }: any) {
               </h3>
               <p className="flex items-center gap-1.5 text-[10px] italic text-text-muted md:text-xs">
                 <Info className="h-3 w-3 text-text-muted" />
-                Dosyayı cihazınıza kaydetmek için İndir butonuna sağ tıklayıp
-                “Bağlantıyı farklı kaydet” seçeneğini kullanabilirsiniz.
+                {dictionary.product.saveDocumentHint}
               </p>
             </div>
 
@@ -472,14 +487,15 @@ export function ProductView({ product }: any) {
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 rounded-2xl bg-primary/10 px-5 py-2.5 text-sm font-bold text-primary shadow-sm transition-all hover:bg-primary hover:text-primary-foreground"
               >
-                <Download className="h-4 w-4" /> İndir / Yeni Sekmede Aç
+                <Download className="h-4 w-4" />
+                {dictionary.product.downloadOrOpen}
               </a>
               <button
                 type="button"
                 onClick={() => setVerifiedDoc(null)}
                 className="rounded-2xl bg-error/10 p-2.5 text-error transition-all hover:bg-error hover:text-error-foreground"
-                title="Kapat"
-                aria-label="Belge görüntüleyicisini kapat"
+                title={dictionary.common.close}
+                aria-label={dictionary.product.closeViewer}
               >
                 <X className="h-6 w-6" />
               </button>
@@ -508,14 +524,16 @@ export function ProductView({ product }: any) {
               <AlertCircle className="h-5 w-5" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-bold text-text-main">Erişim Reddedildi</p>
+              <p className="text-sm font-bold text-text-main">
+                {dictionary.product.accessDenied}
+              </p>
               <p className="text-xs text-text-muted">{verifyError}</p>
             </div>
             <button
               type="button"
               onClick={() => setVerifyError(null)}
               className="p-1 text-text-muted hover:text-text-main"
-              aria-label="Hata bildirimini kapat"
+              aria-label={dictionary.product.closeError}
             >
               <X className="h-4 w-4" />
             </button>
@@ -545,11 +563,12 @@ export function ProductView({ product }: any) {
             </h1>
             <div className="flex items-center gap-4">
               <span className="rounded-full border border-border/70 bg-surface-muted px-3 py-1 font-mono text-xs font-bold text-text-muted">
-                SKU: {currentVariant?.sku || product.sku || "Belirtilmedi"}
+                SKU: {currentVariant?.sku || product.sku || dictionary.common.notSpecified}
               </span>
               {product.isOriginalErtipProduct !== false && (
                 <span className="flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm font-bold text-primary">
-                  <Award className="h-4 w-4" /> Orijinal Ertip Ürünü
+                  <Award className="h-4 w-4" />
+                  {dictionary.product.originalErtipProduct}
                 </span>
               )}
             </div>
@@ -572,7 +591,7 @@ export function ProductView({ product }: any) {
                 return (
                   <div key={attribute.id || index} className="space-y-3">
                     <p className="text-sm font-bold uppercase tracking-wider text-text-main">
-                      {attribute.name} Seçimi
+                      {attribute.name} {dictionary.product.selectionSuffix}
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {values.map((value) => (
@@ -607,7 +626,8 @@ export function ProductView({ product }: any) {
               className="h-16 flex-1 rounded-[var(--radius-xl)] px-10 text-lg font-bold"
               onClick={handleAddToCart}
             >
-              <ShoppingCart className="mr-2 h-6 w-6" /> Teklif Sepetine Ekle
+              <ShoppingCart className="mr-2 h-6 w-6" />
+              {dictionary.product.addToQuoteCart}
             </Button>
           </div>
         </div>
@@ -619,7 +639,7 @@ export function ProductView({ product }: any) {
             value="description"
             className="rounded-none border-b-2 border-transparent px-6 py-4 text-base font-bold data-[state=active]:border-primary data-[state=active]:bg-transparent md:px-8 md:text-lg"
           >
-            Açıklama
+            {dictionary.product.descriptionTab}
           </TabsTrigger>
 
           {Array.isArray(product.variants) && product.variants.length > 0 && (
@@ -627,7 +647,7 @@ export function ProductView({ product }: any) {
               value="variants"
               className="rounded-none border-b-2 border-transparent px-6 py-4 text-base font-bold data-[state=active]:border-primary data-[state=active]:bg-transparent md:px-8 md:text-lg"
             >
-              Tüm Modeller (SKU)
+              {dictionary.product.variantsTab}
             </TabsTrigger>
           )}
 
@@ -636,7 +656,8 @@ export function ProductView({ product }: any) {
               value="video"
               className="flex items-center gap-2 rounded-none border-b-2 border-transparent px-6 py-4 text-base font-bold data-[state=active]:border-primary data-[state=active]:bg-transparent md:px-8 md:text-lg"
             >
-              <PlayCircle className="h-5 w-5" /> Tanıtım Videosu
+              <PlayCircle className="h-5 w-5" />
+              {dictionary.product.videoTab}
             </TabsTrigger>
           )}
 
@@ -647,7 +668,8 @@ export function ProductView({ product }: any) {
               value="docs"
               className="flex items-center gap-2 rounded-none border-b-2 border-transparent px-6 py-4 text-base font-bold data-[state=active]:border-primary data-[state=active]:bg-transparent md:px-8 md:text-lg"
             >
-              <FileText className="h-5 w-5" /> Dokümanlar
+              <FileText className="h-5 w-5" />
+              {dictionary.product.documentsTab}
             </TabsTrigger>
           )}
         </TabsList>
@@ -666,16 +688,13 @@ export function ProductView({ product }: any) {
                     </ReactMarkdown>
                   ) : (
                     <div className="rounded-xl border border-warning/25 bg-warning/10 p-4 text-warning">
-                      ⚠️ Bu ürünün açıklaması eski formatta (Lexical) kayıtlı
-                      kalmış. Lütfen Admin panelinden bu ürünü düzenleyip
-                      açıklamasını HTML/Markdown olarak yeniden yapıştırıp
-                      kaydedin.
+                      {dictionary.product.legacyDescriptionWarning}
                     </div>
                   )}
                 </div>
               ) : (
                 <p className="italic text-text-muted">
-                  Bu ürün için detaylı bir açıklama girilmemiştir.
+                  {dictionary.product.noDescription}
                 </p>
               )}
 
@@ -692,7 +711,8 @@ export function ProductView({ product }: any) {
               {Array.isArray(product.specs) && product.specs.length > 0 && (
                 <div className="space-y-6 rounded-2xl border border-border bg-surface-muted p-8">
                   <h4 className="flex items-center gap-2 text-lg font-bold">
-                    <Info className="h-5 w-5 text-primary" /> Temel Özellikler
+                    <Info className="h-5 w-5 text-primary" />
+                    {dictionary.product.keyFeatures}
                   </h4>
                   <ul className="space-y-4 text-sm">
                     {product.specs.map((spec: any, index: number) => (
@@ -728,12 +748,14 @@ export function ProductView({ product }: any) {
                 <thead className="border-b border-border bg-surface-muted">
                   <tr>
                     <th className="px-6 py-4 font-bold text-text-main">
-                      Varyant Modeli
+                      {dictionary.product.variantModel}
                     </th>
                     <th className="px-6 py-4 font-bold text-text-main">
-                      Ürün Kodu (SKU)
+                      {dictionary.product.skuCode}
                     </th>
-                    <th className="px-6 py-4 font-bold text-text-main">Durum</th>
+                    <th className="px-6 py-4 font-bold text-text-main">
+                      {dictionary.product.status}
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -752,10 +774,13 @@ export function ProductView({ product }: any) {
                       </td>
                       <td className="px-6 py-4 text-sm">
                         {variant.isActive === false ? (
-                          <span className="font-bold text-text-muted">Pasif</span>
+                          <span className="font-bold text-text-muted">
+                            {dictionary.product.inactive}
+                          </span>
                         ) : (
                           <span className="flex items-center gap-1 font-bold text-success">
-                            <Check className="h-4 w-4" /> Stokta Var
+                            <Check className="h-4 w-4" />
+                            {dictionary.product.inStock}
                           </span>
                         )}
                       </td>
@@ -775,7 +800,7 @@ export function ProductView({ product }: any) {
                   width="100%"
                   height="100%"
                   src={`https://www.youtube.com/embed/${videoId}?rel=0`}
-                  title={`${product.title} Tanıtım Videosu`}
+                  title={`${product.title} ${dictionary.product.promoVideoSuffix}`}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                   className="h-full w-full"
@@ -789,7 +814,8 @@ export function ProductView({ product }: any) {
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
             <div className="space-y-4">
               <h3 className="flex items-center gap-2 font-bold italic text-text-main">
-                <Info className="h-5 w-5 text-primary" /> Tanıtım Materyalleri
+                <Info className="h-5 w-5 text-primary" />
+                {dictionary.product.promotionalMaterials}
               </h3>
               {product.publicDocs?.map((document: any, index: number) => {
                 const fileUrl =
@@ -813,7 +839,7 @@ export function ProductView({ product }: any) {
                       variant="ghost"
                       className="group-hover:text-primary"
                     >
-                      İndir
+                      {dictionary.common.download}
                     </Button>
                   </a>
                 );
@@ -822,8 +848,8 @@ export function ProductView({ product }: any) {
 
             <div className="space-y-4">
               <h3 className="flex items-center gap-2 font-bold italic text-text-main">
-                <Award className="h-5 w-5 text-primary" /> Teknik Dokümantasyon
-                (MDR)
+                <Award className="h-5 w-5 text-primary" />
+                {dictionary.product.technicalDocumentation}
               </h3>
               {product.protectedDocs?.map((document: any, index: number) => (
                 <div
@@ -837,7 +863,7 @@ export function ProductView({ product }: any) {
                     <input
                       type="text"
                       value={manualCode}
-                      placeholder="Erişim Kodu / Seri No"
+                      placeholder={dictionary.product.accessCodePlaceholder}
                       className="flex-1 rounded-xl border border-border bg-background px-3 py-2 text-sm text-text-main outline-none placeholder:text-text-muted/50 focus:border-primary focus:ring-1 focus:ring-ring"
                       onChange={(event) => setManualCode(event.target.value)}
                     />
@@ -848,11 +874,11 @@ export function ProductView({ product }: any) {
                       }
                       disabled={isVerifying || !manualCode.trim()}
                     >
-                      {isVerifying ? "..." : "Eriş"}
+                      {isVerifying ? "..." : dictionary.product.access}
                     </Button>
                   </div>
                   <p className="mt-2 text-[10px] italic text-text-muted">
-                    * Bu belgeye erişiminiz kayıt altına alınmaktadır.
+                    {dictionary.product.accessLogged}
                   </p>
                 </div>
               ))}
