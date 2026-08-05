@@ -7,11 +7,16 @@ import {
   MobileHeaderMenu,
   type MobileHeaderNavItem,
 } from "@/components/layout/MobileHeaderMenu";
-import { getRequestLocale } from "@/lib/i18n/requestLocale";
+import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
+import {
+  getPublicPathname,
+  getRequestLocale,
+} from "@/lib/i18n/requestLocale";
 import {
   getHomePath,
   localizeInternalHref,
 } from "@/lib/i18n/routing";
+import { resolveAlternateLocaleHref } from "@/lib/i18n/alternateLocale";
 import type { SiteLocale } from "@/lib/i18n/config";
 
 type HeaderLogoVariant = "auto" | "default" | "white" | "symbol";
@@ -78,12 +83,13 @@ function resolveMenuItems(
 }
 
 export async function Header() {
-  const [payload, locale] = await Promise.all([
+  const [payload, locale, publicPathname] = await Promise.all([
     getPayload({ config: configPromise }),
     getRequestLocale(),
+    getPublicPathname(),
   ]);
 
-  const [mainMenu, siteSettings] = await Promise.all([
+  const [mainMenu, siteSettings, alternateLocale] = await Promise.all([
     payload.findGlobal({
       slug: "main-menu",
       locale,
@@ -95,6 +101,11 @@ export async function Header() {
       locale,
       fallbackLocale: false,
       depth: 2,
+    }),
+    resolveAlternateLocaleHref({
+      payload,
+      currentLocale: locale,
+      publicPathname,
     }),
   ]);
 
@@ -196,6 +207,11 @@ export async function Header() {
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
+          <LanguageSwitcher
+            currentLocale={locale}
+            targetHref={alternateLocale.href}
+            available={alternateLocale.available}
+          />
           <HeaderActions
             locale={locale}
             ctaLabel={ctaLabel}
