@@ -1,13 +1,20 @@
 import type { Metadata } from "next";
 import { UnsubscribeClient } from "@/components/newsletter/UnsubscribeClient";
+import { getRequestLocale } from "@/lib/i18n/requestLocale";
+import { getUiDictionary } from "@/lib/i18n/uiDictionary";
 
-export const metadata: Metadata = {
-  title: "Abonelikten Ayrıl | Ertip Medikal",
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getRequestLocale();
+  const dictionary = getUiDictionary(locale);
+
+  return {
+    title: dictionary.unsubscribe.metadataTitle,
+    robots: {
+      index: false,
+      follow: false,
+    },
+  };
+}
 
 type Props = {
   searchParams: Promise<{
