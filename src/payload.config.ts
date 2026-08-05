@@ -29,6 +29,7 @@ import { ThemeSettings } from "@/globals/ThemeSettings";
 import { ImageOptimizationSettings } from "@/globals/ImageOptimizationSettings";
 import { invalidateProtectedMediaCache } from "@/lib/security/protectedMedia";
 import { imageOptimizationEndpoints } from "@/lib/imageOptimization/endpoints";
+import { i18nContentEndpoints } from "@/lib/i18n/contentBootstrapEndpoint";
 import { serverEnv } from "@/lib/config/env";
 import { payloadLocalization } from "@/lib/i18n/config";
 import {
@@ -217,7 +218,10 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
     components: {
-      beforeDashboard: ["/components/admin/AdminDashboard#default"],
+      beforeDashboard: [
+        "/components/admin/AdminDashboard#default",
+        "/components/admin/EnglishContentBootstrapControl#EnglishContentBootstrapControl",
+      ],
       afterNavLinks: ["/components/admin/AdminBrand#AdminNavFooter"],
       graphics: {
         Icon: "/components/admin/AdminBrand#AdminIcon",
@@ -225,7 +229,7 @@ export default buildConfig({
       },
     },
   },
-  endpoints: imageOptimizationEndpoints,
+  endpoints: [...imageOptimizationEndpoints, ...i18nContentEndpoints],
   collections: [
     Users,
     MediaWithRBAC,

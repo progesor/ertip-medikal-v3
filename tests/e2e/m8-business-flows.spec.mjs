@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test.describe("M8 business-flow hardening", () => {
   test("mobile navigation opens, searches, and closes accessibly", async ({ page }) => {
-    await page.goto("/urunler");
+    await page.goto("/tr/urunler");
 
     const openButton = page.getByRole("button", { name: "Mobil menüyü aç" });
     await expect(openButton).toBeVisible();
@@ -15,13 +15,37 @@ test.describe("M8 business-flow hardening", () => {
     const search = page.getByRole("searchbox", { name: "Ürün veya SKU ara" });
     await search.fill("punch test");
     await search.press("Enter");
-    await expect(page).toHaveURL(/\/urunler\?q=punch%20test$/);
+    await expect(page).toHaveURL(/\/tr\/urunler\?q=punch%20test$/);
     await expect(dialog).toBeHidden();
 
     await page.getByRole("button", { name: "Mobil menüyü aç" }).click();
     await expect(dialog).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(dialog).toBeHidden();
+  });
+
+  test("locale switch rebuilds shared navigation in the target language", async ({ page }) => {
+    await page.goto("/tr/urunler");
+    await expect(page.getByRole("button", { name: "Mobil menüyü aç" })).toBeVisible();
+
+    await page.getByRole("link", { name: "Switch to English" }).click();
+
+    await expect(page).toHaveURL(/\/en\/products$/);
+    await expect(page.getByRole("button", { name: "Open mobile menu" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Türkçeye geç" })).toBeVisible();
+  });
+
+  test("public locale routing canonicalizes legacy and translated system routes", async ({
+    page,
+  }) => {
+    await page.goto("/urunler");
+    await expect(page).toHaveURL(/\/tr\/urunler$/);
+
+    await page.goto("/en/urunler");
+    await expect(page).toHaveURL(/\/en\/products$/);
+
+    await page.goto("/tr/products");
+    await expect(page).toHaveURL(/\/tr\/urunler$/);
   });
 
   test("public responses carry the security header baseline", async ({ request }) => {

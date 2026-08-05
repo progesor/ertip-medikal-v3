@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   ArrowRight,
   Minus,
@@ -13,6 +14,11 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/providers/CartProvider";
+import { payloadDefaultLocale } from "@/lib/i18n/config";
+import {
+  getProductsPath,
+  parseLocalizedPublicPath,
+} from "@/lib/i18n/routing";
 
 type QuoteResponse = {
   success?: boolean;
@@ -21,6 +27,10 @@ type QuoteResponse = {
 
 export default function QuoteCartPage() {
   const { cartItems, removeFromCart, updateQuantity, clearCart } = useCart();
+  const pathname = usePathname();
+  const locale =
+    parseLocalizedPublicPath(pathname)?.locale || payloadDefaultLocale;
+  const catalogPath = getProductsPath(locale);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -88,7 +98,7 @@ export default function QuoteCartPage() {
             sizinle iletişime geçeceğiz.
           </p>
           <Button asChild size="lg" className="h-14 rounded-xl px-8 font-bold">
-            <Link href="/urunler">Kataloğa Geri Dön</Link>
+            <Link href={catalogPath}>Kataloğa Geri Dön</Link>
           </Button>
         </div>
       </div>
@@ -122,7 +132,7 @@ export default function QuoteCartPage() {
               size="lg"
               className="h-14 rounded-2xl px-8 font-bold"
             >
-              <Link href="/urunler">
+              <Link href={catalogPath}>
                 Ürünleri İncele <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
@@ -138,72 +148,76 @@ export default function QuoteCartPage() {
               </h2>
 
               <div className="divide-y divide-border overflow-hidden rounded-[var(--radius-2xl)] border border-border/80 bg-surface shadow-sm shadow-surface-inverse/5">
-                {cartItems.map((item, index) => (
-                  <div
-                    key={`${item.id}-${item.variant}-${index}`}
-                    className="group flex flex-col items-center gap-6 p-6 transition-colors hover:bg-surface-muted sm:flex-row"
-                  >
-                    <Link
-                      href={`/urunler/${item.slug}`}
-                      className="relative h-24 w-24 shrink-0 rounded-[var(--radius-xl)] bg-surface-muted/70 p-2 transition-opacity hover:opacity-80"
-                    >
-                      <Image
-                        src={item.image || "/placeholder.jpg"}
-                        alt={item.title}
-                        fill
-                        className="object-contain mix-blend-multiply"
-                        unoptimized
-                      />
-                    </Link>
+                {cartItems.map((item, index) => {
+                  const productHref = getProductsPath(locale, item.slug);
 
-                    <div className="flex-1 text-center sm:text-left">
-                      <Link href={`/urunler/${item.slug}`} className="group/title">
-                        <h4 className="text-lg font-bold text-text-main transition-colors group-hover/title:text-primary">
-                          {item.title}
-                        </h4>
+                  return (
+                    <div
+                      key={`${item.id}-${item.variant}-${index}`}
+                      className="group flex flex-col items-center gap-6 p-6 transition-colors hover:bg-surface-muted sm:flex-row"
+                    >
+                      <Link
+                        href={productHref}
+                        className="relative h-24 w-24 shrink-0 rounded-[var(--radius-xl)] bg-surface-muted/70 p-2 transition-opacity hover:opacity-80"
+                      >
+                        <Image
+                          src={item.image || "/placeholder.jpg"}
+                          alt={item.title}
+                          fill
+                          className="object-contain mix-blend-multiply"
+                          unoptimized
+                        />
                       </Link>
-                      <p className="mt-1 text-sm text-text-muted">{item.variant}</p>
-                      <span className="mt-2 inline-block rounded-full border border-border bg-surface-muted px-3 py-1 font-mono text-xs font-bold text-text-muted">
-                        SKU: {item.sku}
-                      </span>
-                    </div>
 
-                    <div className="flex items-center gap-3 rounded-[var(--radius)] border border-border bg-surface-muted p-1.5">
+                      <div className="flex-1 text-center sm:text-left">
+                        <Link href={productHref} className="group/title">
+                          <h4 className="text-lg font-bold text-text-main transition-colors group-hover/title:text-primary">
+                            {item.title}
+                          </h4>
+                        </Link>
+                        <p className="mt-1 text-sm text-text-muted">{item.variant}</p>
+                        <span className="mt-2 inline-block rounded-full border border-border bg-surface-muted px-3 py-1 font-mono text-xs font-bold text-text-muted">
+                          SKU: {item.sku}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-3 rounded-[var(--radius)] border border-border bg-surface-muted p-1.5">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            updateQuantity(index, (item.quantity || 1) - 1)
+                          }
+                          className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface text-text-muted shadow-sm transition-all hover:text-primary"
+                          aria-label={`${item.title} miktarını azalt`}
+                        >
+                          <Minus className="h-4 w-4" />
+                        </button>
+                        <span className="w-8 text-center font-bold text-text-main">
+                          {item.quantity || 1}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            updateQuantity(index, (item.quantity || 1) + 1)
+                          }
+                          className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface text-text-muted shadow-sm transition-all hover:text-primary"
+                          aria-label={`${item.title} miktarını artır`}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </button>
+                      </div>
+
                       <button
                         type="button"
-                        onClick={() =>
-                          updateQuantity(index, (item.quantity || 1) - 1)
-                        }
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface text-text-muted shadow-sm transition-all hover:text-primary"
-                        aria-label={`${item.title} miktarını azalt`}
+                        onClick={() => removeFromCart(index)}
+                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-error/60 transition-all hover:bg-error hover:text-error-foreground"
+                        aria-label={`${item.title} ürününü teklif sepetinden kaldır`}
                       >
-                        <Minus className="h-4 w-4" />
-                      </button>
-                      <span className="w-8 text-center font-bold text-text-main">
-                        {item.quantity || 1}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          updateQuantity(index, (item.quantity || 1) + 1)
-                        }
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface text-text-muted shadow-sm transition-all hover:text-primary"
-                        aria-label={`${item.title} miktarını artır`}
-                      >
-                        <Plus className="h-4 w-4" />
+                        <Trash2 className="h-5 w-5" />
                       </button>
                     </div>
-
-                    <button
-                      type="button"
-                      onClick={() => removeFromCart(index)}
-                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-error/60 transition-all hover:bg-error hover:text-error-foreground"
-                      aria-label={`${item.title} ürününü teklif sepetinden kaldır`}
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 

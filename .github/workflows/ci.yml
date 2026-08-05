@@ -83,6 +83,9 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+      - name: Validate locale bootstrap policy
+        run: pnpm test:i18n
+
       - name: Lint
         run: pnpm lint
 

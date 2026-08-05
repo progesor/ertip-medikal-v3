@@ -21,14 +21,26 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { Metadata } from "next";
+import { getRequestLocale } from "@/lib/i18n/requestLocale";
+import { getProductsPath } from "@/lib/i18n/routing";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Ürünlerimiz",
-  description:
-    "Ertip Medikal yenilikçi cihaz kataloğu. Saç ekim motorları, iğnesiz anestezi cihazları ve tüm medikal çözümlerimiz.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getRequestLocale();
+
+  return locale === "en"
+    ? {
+        title: "Products",
+        description:
+          "Explore Ertip Medical's medical device catalog, professional instruments and innovative clinical solutions.",
+      }
+    : {
+        title: "Ürünlerimiz",
+        description:
+          "Ertip Medikal yenilikçi cihaz kataloğu. Saç ekim motorları, iğnesiz anestezi cihazları ve tüm medikal çözümlerimiz.",
+      };
+}
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -37,11 +49,7 @@ type Props = {
 type ProductSortMode = "newest" | "oldest" | "manual";
 
 function getRelationshipId(value: unknown) {
-  if (
-    typeof value === "object" &&
-    value !== null &&
-    "id" in value
-  ) {
+  if (typeof value === "object" && value !== null && "id" in value) {
     return String((value as { id: string | number }).id);
   }
 
@@ -89,8 +97,61 @@ function getProductImageUrl(product: any) {
 }
 
 export default async function ProductsPage({ searchParams }: Props) {
-  const payload = await getPayload({ config: configPromise });
-  const params = await searchParams;
+  const [payload, params, locale] = await Promise.all([
+    getPayload({ config: configPromise }),
+    searchParams,
+    getRequestLocale(),
+  ]);
+
+  const labels =
+    locale === "en"
+      ? {
+          heading: "Product Catalog",
+          intro: "Find the medical device you need quickly.",
+          searchHeading: "Search Product / SKU",
+          searchPlaceholder: "e.g. 110-0625 or FUE...",
+          searchAria: "Search products",
+          categories: "Categories",
+          allProducts: "All Products",
+          foundPrefix: "Found",
+          foundSuffix: "products.",
+          page: "Page",
+          searchChip: "Search",
+          categoryChip: "Category",
+          clearAll: "Clear All",
+          emptyTitle: "No Results Found",
+          emptyDescription:
+            "No product or SKU matches your criteria. Try a different search term or browse the full catalog.",
+          showCatalog: "Show Full Catalog",
+          inspect: "View Product",
+          model: "Model",
+          previous: "Previous page",
+          next: "Next page",
+        }
+      : {
+          heading: "Ürün Kataloğu",
+          intro: "İhtiyacınız olan medikal cihazı hızlıca bulun.",
+          searchHeading: "Ürün / SKU Ara",
+          searchPlaceholder: "Örn: 110-0625 veya FUE...",
+          searchAria: "Ürün ara",
+          categories: "Kategoriler",
+          allProducts: "Tüm Ürünler",
+          foundPrefix: "Toplam",
+          foundSuffix: "ürün bulundu.",
+          page: "Sayfa",
+          searchChip: "Arama",
+          categoryChip: "Kategori",
+          clearAll: "Tümünü Temizle",
+          emptyTitle: "Sonuç Bulunamadı",
+          emptyDescription:
+            "Aradığınız kriterlere uygun ürün veya SKU kodu sistemimizde bulunmuyor. Farklı kelimelerle aramayı deneyebilirsiniz.",
+          showCatalog: "Tüm Kataloğu Göster",
+          inspect: "Ürünü İncele",
+          model: "Model",
+          previous: "Önceki sayfa",
+          next: "Sonraki sayfa",
+        };
+  const catalogPath = getProductsPath(locale);
 
   const query = typeof params.q === "string" ? params.q.trim() : "";
   const categorySlug =
@@ -104,11 +165,16 @@ export default async function ProductsPage({ searchParams }: Props) {
   const [{ docs: categories }, siteSettings] = await Promise.all([
     payload.find({
       collection: "categories",
+      locale,
+      fallbackLocale: false,
+      where: { slug: { exists: true } },
       limit: 100,
       depth: 0,
     }),
     payload.findGlobal({
       slug: "site-settings",
+      locale,
+      fallbackLocale: false,
       depth: 0,
     }),
   ]);
@@ -136,7 +202,10 @@ export default async function ProductsPage({ searchParams }: Props) {
     });
   }
 
-  const whereClause: any = { _status: { equals: "published" } };
+  const whereClause: any = {
+    _status: { equals: "published" },
+    slug: { exists: true },
+  };
 
   if (query) {
     whereClause.or = [
@@ -178,6 +247,8 @@ export default async function ProductsPage({ searchParams }: Props) {
   if (effectiveSortMode === "manual") {
     const result = await payload.find({
       collection: "products",
+      locale,
+      fallbackLocale: false,
       where: whereClause,
       sort: "-createdAt",
       pagination: false,
@@ -197,6 +268,8 @@ export default async function ProductsPage({ searchParams }: Props) {
   } else {
     const result = await payload.find({
       collection: "products",
+      locale,
+      fallbackLocale: false,
       where: whereClause,
       sort: effectiveSortMode === "oldest" ? "createdAt" : "-createdAt",
       limit: pageSize,
@@ -213,12 +286,17 @@ export default async function ProductsPage({ searchParams }: Props) {
     totalDocs = result.totalDocs;
   }
 
+  const buildCatalogUrl = (urlParams: URLSearchParams) => {
+    const queryString = urlParams.toString();
+    return queryString ? `${catalogPath}?${queryString}` : catalogPath;
+  };
+
   const buildPageUrl = (pageNumber: number) => {
     const urlParams = new URLSearchParams();
     if (query) urlParams.set("q", query);
     if (categorySlug) urlParams.set("category", categorySlug);
     urlParams.set("page", pageNumber.toString());
-    return `/urunler?${urlParams.toString()}`;
+    return buildCatalogUrl(urlParams);
   };
 
   return (
@@ -226,11 +304,9 @@ export default async function ProductsPage({ searchParams }: Props) {
       <div className="mb-8 py-2">
         <div className="container mx-auto max-w-7xl px-4 text-center">
           <h1 className="mb-2 text-3xl font-bold text-text-main">
-            Ürün Kataloğu
+            {labels.heading}
           </h1>
-          <p className="text-text-muted">
-            İhtiyacınız olan medikal cihazı hızlıca bulun.
-          </p>
+          <p className="text-text-muted">{labels.intro}</p>
         </div>
       </div>
 
@@ -239,9 +315,9 @@ export default async function ProductsPage({ searchParams }: Props) {
           <aside className="w-full space-y-8 lg:w-1/4">
             <div className="rounded-[var(--radius-2xl)] border border-border/80 bg-surface p-6 shadow-sm shadow-surface-inverse/5">
               <h2 className="mb-4 flex items-center gap-2 font-bold text-text-main">
-                <Search className="h-5 w-5 text-primary" /> Ürün / SKU Ara
+                <Search className="h-5 w-5 text-primary" /> {labels.searchHeading}
               </h2>
-              <form action="/urunler" method="GET" className="relative">
+              <form action={catalogPath} method="GET" className="relative">
                 {categorySlug && (
                   <input type="hidden" name="category" value={categorySlug} />
                 )}
@@ -249,13 +325,13 @@ export default async function ProductsPage({ searchParams }: Props) {
                   type="text"
                   name="q"
                   defaultValue={query}
-                  placeholder="Örn: 110-0625 veya FUE..."
+                  placeholder={labels.searchPlaceholder}
                   className="w-full rounded-[var(--radius)] border border-input bg-background py-3 pl-4 pr-12 text-sm font-medium text-text-main outline-none transition-all placeholder:text-text-muted/50 focus:border-primary focus:ring-2 focus:ring-ring/30"
                 />
                 <button
                   type="submit"
                   className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg bg-primary p-1.5 text-primary-foreground transition-colors hover:bg-primary/90"
-                  aria-label="Ürün ara"
+                  aria-label={labels.searchAria}
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>
@@ -264,18 +340,18 @@ export default async function ProductsPage({ searchParams }: Props) {
 
             <div className="sticky top-24 rounded-[var(--radius-2xl)] border border-border/80 bg-surface p-6 shadow-sm shadow-surface-inverse/5">
               <h2 className="mb-4 flex items-center gap-2 font-bold text-text-main">
-                <LayoutGrid className="h-5 w-5 text-primary" /> Kategoriler
+                <LayoutGrid className="h-5 w-5 text-primary" /> {labels.categories}
               </h2>
               <div className="space-y-1.5">
                 <Link
-                  href={`/urunler${query ? `?q=${encodeURIComponent(query)}` : ""}`}
+                  href={`${catalogPath}${query ? `?q=${encodeURIComponent(query)}` : ""}`}
                   className={`block rounded-xl px-4 py-3 text-sm font-bold transition-all ${
                     !categorySlug
                       ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
                       : "text-text-muted hover:bg-surface-muted hover:text-text-main"
                   }`}
                 >
-                  Tüm Ürünler
+                  {labels.allProducts}
                 </Link>
 
                 {parentCategories.map((parent: any) => {
@@ -289,7 +365,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                   return (
                     <div key={parent.id} className="pt-1">
                       <Link
-                        href={`/urunler?category=${encodeURIComponent(parent.slug)}${query ? `&q=${encodeURIComponent(query)}` : ""}`}
+                        href={`${catalogPath}?category=${encodeURIComponent(parent.slug)}${query ? `&q=${encodeURIComponent(query)}` : ""}`}
                         className={`block rounded-xl px-4 py-3 text-sm font-bold transition-all ${
                           isParentActive
                             ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
@@ -309,7 +385,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                             return (
                               <Link
                                 key={child.id}
-                                href={`/urunler?category=${encodeURIComponent(child.slug)}${query ? `&q=${encodeURIComponent(query)}` : ""}`}
+                                href={`${catalogPath}?category=${encodeURIComponent(child.slug)}${query ? `&q=${encodeURIComponent(query)}` : ""}`}
                                 className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
                                   isCurrentChild
                                     ? "bg-primary/10 font-bold text-primary"
@@ -337,33 +413,35 @@ export default async function ProductsPage({ searchParams }: Props) {
           <main className="w-full lg:w-3/4">
             <div className="mb-6 flex flex-col justify-between gap-4 rounded-[var(--radius-xl)] border border-border/80 bg-surface p-4 shadow-sm shadow-surface-inverse/5 sm:flex-row sm:items-center">
               <p className="text-sm font-medium text-text-muted">
-                Toplam <strong className="text-base text-text-main">{totalDocs}</strong>{" "}
-                ürün bulundu. (Sayfa {currentPage}/{totalPages || 1})
+                {labels.foundPrefix}{" "}
+                <strong className="text-base text-text-main">{totalDocs}</strong>{" "}
+                {labels.foundSuffix} ({labels.page} {currentPage}/{totalPages || 1})
               </p>
 
               {(query || categorySlug) && (
                 <div className="flex flex-wrap gap-2">
                   {query && (
                     <Link
-                      href={`/urunler${categorySlug ? `?category=${encodeURIComponent(categorySlug)}` : ""}`}
+                      href={`${catalogPath}${categorySlug ? `?category=${encodeURIComponent(categorySlug)}` : ""}`}
                       className="inline-flex items-center gap-1.5 rounded-lg bg-surface-muted px-3 py-1.5 text-xs font-bold text-text-main transition-colors hover:bg-error/10 hover:text-error"
                     >
-                      Arama: &quot;{query}&quot; <X className="h-3.5 w-3.5" />
+                      {labels.searchChip}: &quot;{query}&quot; <X className="h-3.5 w-3.5" />
                     </Link>
                   )}
                   {categorySlug && activeCategory && (
                     <Link
-                      href={`/urunler${query ? `?q=${encodeURIComponent(query)}` : ""}`}
+                      href={`${catalogPath}${query ? `?q=${encodeURIComponent(query)}` : ""}`}
                       className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary transition-colors hover:bg-error/10 hover:text-error"
                     >
-                      Kategori: {activeCategory.title} <X className="h-3.5 w-3.5" />
+                      {labels.categoryChip}: {activeCategory.title}{" "}
+                      <X className="h-3.5 w-3.5" />
                     </Link>
                   )}
                   <Link
-                    href="/urunler"
+                    href={catalogPath}
                     className="ml-2 inline-flex items-center gap-1.5 px-2 py-1.5 text-xs font-bold text-text-muted underline transition-colors hover:text-text-main"
                   >
-                    Tümünü Temizle
+                    {labels.clearAll}
                   </Link>
                 </div>
               )}
@@ -375,79 +453,81 @@ export default async function ProductsPage({ searchParams }: Props) {
                   <PackageX className="h-10 w-10" />
                 </div>
                 <h2 className="mb-2 text-2xl font-bold text-text-main">
-                  Sonuç Bulunamadı
+                  {labels.emptyTitle}
                 </h2>
                 <p className="mb-8 max-w-md text-text-muted">
-                  Aradığınız kriterlere uygun ürün veya SKU kodu sistemimizde
-                  bulunmuyor. Farklı kelimelerle aramayı deneyebilirsiniz.
+                  {labels.emptyDescription}
                 </p>
                 <Button asChild size="lg" className="rounded-xl font-bold">
-                  <Link href="/urunler">Tüm Kataloğu Göster</Link>
+                  <Link href={catalogPath}>{labels.showCatalog}</Link>
                 </Button>
               </div>
             ) : (
               <>
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                  {products.map((product: any) => (
-                    <Card
-                      key={product.id}
-                      className="group flex flex-col overflow-hidden rounded-[var(--radius-2xl)] border-border/80 bg-surface shadow-sm shadow-surface-inverse/5 transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10"
-                    >
-                      <Link
-                        href={`/urunler/${product.slug}`}
-                        prefetch={false}
-                        className="relative flex aspect-square items-center justify-center overflow-hidden bg-surface-muted/70 p-6"
+                  {products.map((product: any) => {
+                    const productPath = getProductsPath(locale, product.slug);
+                    return (
+                      <Card
+                        key={product.id}
+                        className="group flex flex-col overflow-hidden rounded-[var(--radius-2xl)] border-border/80 bg-surface shadow-sm shadow-surface-inverse/5 transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10"
                       >
-                        <Image
-                          src={getProductImageUrl(product)}
-                          alt={product.mainImage?.alt || product.title}
-                          fill
-                          className="object-contain p-8 mix-blend-multiply transition-transform duration-500 group-hover:scale-110"
-                          sizes="(max-width: 639px) calc(100vw - 32px), (max-width: 1023px) calc(50vw - 28px), (max-width: 1279px) calc(37.5vw - 40px), 294px"
-                          quality={75}
-                        />
-                        <div className="absolute right-4 top-4 flex flex-col items-end gap-2">
-                          {product.sku && (
-                            <span className="rounded-md border border-border bg-surface px-2.5 py-1 font-mono text-[10px] font-bold text-text-muted shadow-sm">
-                              {product.sku}
-                            </span>
-                          )}
-                          {Array.isArray(product.variants) &&
-                            product.variants.length > 0 && (
-                              <span className="rounded-md bg-primary/10 px-2.5 py-1 text-[10px] font-bold text-primary shadow-sm">
-                                {product.variants.length} Model
+                        <Link
+                          href={productPath}
+                          prefetch={false}
+                          className="relative flex aspect-square items-center justify-center overflow-hidden bg-surface-muted/70 p-6"
+                        >
+                          <Image
+                            src={getProductImageUrl(product)}
+                            alt={product.mainImage?.alt || product.title}
+                            fill
+                            className="object-contain p-8 mix-blend-multiply transition-transform duration-500 group-hover:scale-110"
+                            sizes="(max-width: 639px) calc(100vw - 32px), (max-width: 1023px) calc(50vw - 28px), (max-width: 1279px) calc(37.5vw - 40px), 294px"
+                            quality={75}
+                          />
+                          <div className="absolute right-4 top-4 flex flex-col items-end gap-2">
+                            {product.sku && (
+                              <span className="rounded-md border border-border bg-surface px-2.5 py-1 font-mono text-[10px] font-bold text-text-muted shadow-sm">
+                                {product.sku}
                               </span>
                             )}
-                        </div>
-                      </Link>
-                      <CardHeader className="pb-2 pt-6">
-                        <CardTitle className="line-clamp-2 text-lg font-bold leading-snug">
-                          <Link
-                            href={`/urunler/${product.slug}`}
-                            prefetch={false}
-                            className="text-text-main transition-colors hover:text-primary"
+                            {Array.isArray(product.variants) &&
+                              product.variants.length > 0 && (
+                                <span className="rounded-md bg-primary/10 px-2.5 py-1 text-[10px] font-bold text-primary shadow-sm">
+                                  {product.variants.length} {labels.model}
+                                </span>
+                              )}
+                          </div>
+                        </Link>
+                        <CardHeader className="pb-2 pt-6">
+                          <CardTitle className="line-clamp-2 text-lg font-bold leading-snug">
+                            <Link
+                              href={productPath}
+                              prefetch={false}
+                              className="text-text-main transition-colors hover:text-primary"
+                            >
+                              {product.title}
+                            </Link>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex-1 pb-4">
+                          <p className="line-clamp-2 text-sm leading-relaxed text-text-muted">
+                            {product.shortDescription}
+                          </p>
+                        </CardContent>
+                        <CardFooter className="px-6 pb-6 pt-0">
+                          <Button
+                            className="w-full rounded-xl bg-surface-inverse font-bold text-surface-inverse-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
+                            asChild
                           >
-                            {product.title}
-                          </Link>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="flex-1 pb-4">
-                        <p className="line-clamp-2 text-sm leading-relaxed text-text-muted">
-                          {product.shortDescription}
-                        </p>
-                      </CardContent>
-                      <CardFooter className="px-6 pb-6 pt-0">
-                        <Button
-                          className="w-full rounded-xl bg-surface-inverse font-bold text-surface-inverse-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
-                          asChild
-                        >
-                          <Link href={`/urunler/${product.slug}`} prefetch={false}>
-                            Ürünü İncele
-                          </Link>
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  ))}
+                            <Link href={productPath} prefetch={false}>
+                              {labels.inspect}
+                            </Link>
+                          </Button>
+                        </CardFooter>
+                      </Card>
+                    );
+                  })}
                 </div>
 
                 {totalPages > 1 && (
@@ -456,7 +536,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                       <Link
                         href={buildPageUrl(prevPage)}
                         className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface text-text-muted shadow-sm transition-all hover:border-primary hover:bg-primary/5 hover:text-primary"
-                        aria-label="Önceki sayfa"
+                        aria-label={labels.previous}
                       >
                         <ChevronLeft className="h-5 w-5" />
                       </Link>
@@ -488,7 +568,7 @@ export default async function ProductsPage({ searchParams }: Props) {
                       <Link
                         href={buildPageUrl(nextPage)}
                         className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface text-text-muted shadow-sm transition-all hover:border-primary hover:bg-primary/5 hover:text-primary"
-                        aria-label="Sonraki sayfa"
+                        aria-label={labels.next}
                       >
                         <ChevronRight className="h-5 w-5" />
                       </Link>

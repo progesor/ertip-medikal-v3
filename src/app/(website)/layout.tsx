@@ -4,7 +4,7 @@ import Script from "next/script";
 import React from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { CartProvider } from "@/providers/CartProvider";
 import { FloatingActionButton } from "@/components/layout/FloatingActionButton";
 
@@ -12,46 +12,69 @@ import { getPayload } from "payload";
 import configPromise from "@payload-config";
 import { themePalettes, radiusConfig } from "@/lib/themeConfig";
 import { serverEnv } from "@/lib/config/env";
+import { getRequestLocale } from "@/lib/i18n/requestLocale";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(serverEnv.publicSiteUrl),
-  title: {
-    default: "Ertip Medikal | Yenilikçi Medikal Çözümler",
-    template: "%s | Ertip Medikal",
+const shellMetadata = {
+  en: {
+    title: "Ertip Medical | Innovative Medical Solutions",
+    description:
+      "Innovative medical devices and professional solutions backed by Ertip Medical's long-standing industry experience.",
+    openGraphLocale: "en_US",
   },
-  description:
-    "Sağlık sektörüne yön veren yenilikçi medikal cihazlar. Çeyrek asırlık tecrübemizle güvenilir çözüm ortağınız.",
-  icons: {
-    icon: "/api/site-icon",
-    shortcut: "/api/site-icon",
-    apple: "/api/site-icon",
+  tr: {
+    title: "Ertip Medikal | Yenilikçi Medikal Çözümler",
+    description:
+      "Sağlık sektörüne yön veren yenilikçi medikal cihazlar. Çeyrek asırlık tecrübemizle güvenilir çözüm ortağınız.",
+    openGraphLocale: "tr_TR",
   },
-  openGraph: {
-    type: "website",
-    locale: "tr_TR",
-    siteName: "Ertip Medikal",
-    images: [
-      {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Ertip Medikal Kurumsal",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-  },
-};
+} as const;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getRequestLocale();
+  const localized = shellMetadata[locale];
+
+  return {
+    metadataBase: new URL(serverEnv.publicSiteUrl),
+    title: {
+      default: localized.title,
+      template: "%s | Ertip Medikal",
+    },
+    description: localized.description,
+    icons: {
+      icon: "/api/site-icon",
+      shortcut: "/api/site-icon",
+      apple: "/api/site-icon",
+    },
+    openGraph: {
+      type: "website",
+      locale: localized.openGraphLocale,
+      siteName: "Ertip Medikal",
+      images: [
+        {
+          url: "/og-image.jpg",
+          width: 1200,
+          height: 630,
+          alt: "Ertip Medikal",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+    },
+  };
+}
 
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const payload = await getPayload({ config: configPromise });
+  const [payload, locale] = await Promise.all([
+    getPayload({ config: configPromise }),
+    getRequestLocale(),
+  ]);
 
   let themeSettings;
   try {
@@ -77,7 +100,7 @@ export default async function RootLayout({
   `;
 
   return (
-    <html lang="tr" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body
         className={`${inter.className} min-h-screen bg-background text-foreground antialiased flex flex-col`}
       >

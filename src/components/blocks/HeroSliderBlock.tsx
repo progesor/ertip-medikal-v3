@@ -3,13 +3,21 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { payloadDefaultLocale } from "@/lib/i18n/config";
+import {
+  localizeInternalHref,
+  parseLocalizedPublicPath,
+} from "@/lib/i18n/routing";
 
 export function HeroSliderBlock({ slides }: any) {
   const [current, setCurrent] = useState(0);
+  const pathname = usePathname();
+  const locale =
+    parseLocalizedPublicPath(pathname)?.locale || payloadDefaultLocale;
 
-  // Otomatik Kaydırma
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrent((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
@@ -30,7 +38,6 @@ export function HeroSliderBlock({ slides }: any) {
             key={index}
             className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === current ? "opacity-100 z-10" : "opacity-0 z-0"}`}
           >
-            {/* Arkaplan Resmi */}
             {imageUrl ? (
               <Image
                 src={imageUrl}
@@ -42,17 +49,14 @@ export function HeroSliderBlock({ slides }: any) {
                 preload={index === 0}
               />
             ) : (
-              // Resim yoksa şık bir kurumsal gradyan
               <div className="absolute inset-0 bg-gradient-to-br from-surface-inverse via-primary/20 to-surface-inverse" />
             )}
 
-            {/* Karartma Overlay */}
             <div
               className="absolute inset-0 bg-surface-inverse"
               style={{ opacity: parseFloat(slide.overlayOpacity || "0.4") }}
             />
 
-            {/* İçerik */}
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="container mx-auto px-4 text-center text-surface-inverse-foreground space-y-6">
                 <h1 className="text-4xl md:text-7xl font-black tracking-tight animate-in fade-in slide-in-from-bottom-8 duration-700">
@@ -70,7 +74,9 @@ export function HeroSliderBlock({ slides }: any) {
                       className="rounded-full px-10 h-14 text-lg font-bold"
                       asChild
                     >
-                      <Link href={slide.buttonLink}>{slide.buttonText}</Link>
+                      <Link href={localizeInternalHref(slide.buttonLink, locale)}>
+                        {slide.buttonText}
+                      </Link>
                     </Button>
                   </div>
                 )}
@@ -80,8 +86,9 @@ export function HeroSliderBlock({ slides }: any) {
         );
       })}
 
-      {/* Navigasyon Okları */}
       <button
+        type="button"
+        aria-label={locale === "en" ? "Previous slide" : "Önceki slayt"}
         onClick={() =>
           setCurrent(current === 0 ? slides.length - 1 : current - 1)
         }
@@ -90,6 +97,8 @@ export function HeroSliderBlock({ slides }: any) {
         <ChevronLeft className="w-8 h-8" />
       </button>
       <button
+        type="button"
+        aria-label={locale === "en" ? "Next slide" : "Sonraki slayt"}
         onClick={() =>
           setCurrent(current === slides.length - 1 ? 0 : current + 1)
         }
@@ -98,10 +107,13 @@ export function HeroSliderBlock({ slides }: any) {
         <ChevronRight className="w-8 h-8" />
       </button>
 
-      {/* Slider Noktaları */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-3">
         {slides.map((_: any, i: number) => (
           <button
+            type="button"
+            aria-label={
+              locale === "en" ? `Go to slide ${i + 1}` : `${i + 1}. slayta git`
+            }
             key={i}
             onClick={() => setCurrent(i)}
             className={`w-3 h-3 rounded-full transition-all ${i === current ? "bg-primary w-8" : "bg-surface-inverse-foreground/30"}`}

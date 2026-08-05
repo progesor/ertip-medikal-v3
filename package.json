@@ -19,6 +19,7 @@
     "typecheck": "tsc --noEmit",
     "test:sku": "rimraf .tmp/sku-tests && tsc -p tsconfig.sku-tests.json && node -e \"require('node:fs').writeFileSync('.tmp/sku-tests/package.json', '{\\\"type\\\":\\\"commonjs\\\"}\\n')\" && node --test .tmp/sku-tests/tests/sku-engine/legacyPunch.test.js .tmp/sku-tests/tests/sku-engine/generateLegacyVariants.test.js .tmp/sku-tests/tests/sku-engine/configurableRules.test.js && rimraf .tmp/sku-tests",
     "test:quote": "rimraf .tmp/quote-tests && tsc -p tsconfig.quote-tests.json && node -e \"require('node:fs').writeFileSync('.tmp/quote-tests/package.json', '{\\\"type\\\":\\\"commonjs\\\"}\\n')\" && node --test .tmp/quote-tests/tests/quote/resolveQuoteItems.test.js && rimraf .tmp/quote-tests",
+    "test:i18n": "rimraf .tmp/i18n-tests && tsc -p tsconfig.i18n-tests.json && node -e \"require('node:fs').writeFileSync('.tmp/i18n-tests/package.json', '{\\\"type\\\":\\\"commonjs\\\"}\\n')\" && node --test .tmp/i18n-tests/tests/i18n/localeBootstrap.test.js && rimraf .tmp/i18n-tests",
     "test:e2e": "playwright test",
     "security:audit": "pnpm audit --prod --audit-level low",
     "format": "prettier --write \"src/**/*.{ts,tsx,md,json,css}\"",

@@ -6,6 +6,11 @@ import { useRouter } from "next/navigation";
 import { Menu, Search, ShoppingCart, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/providers/CartProvider";
+import type { SiteLocale } from "@/lib/i18n/config";
+import {
+  getProductsPath,
+  getQuoteCartPath,
+} from "@/lib/i18n/routing";
 
 export type MobileHeaderNavItem = {
   label: string;
@@ -13,12 +18,14 @@ export type MobileHeaderNavItem = {
 };
 
 type MobileHeaderMenuProps = {
+  locale: SiteLocale;
   navItems: MobileHeaderNavItem[];
   ctaLabel?: string;
   ctaHref?: string;
 };
 
 export function MobileHeaderMenu({
+  locale,
   navItems,
   ctaLabel,
   ctaHref,
@@ -28,6 +35,28 @@ export function MobileHeaderMenu({
   const panelId = useId();
   const router = useRouter();
   const { cartItems } = useCart();
+  const labels =
+    locale === "en"
+      ? {
+          open: "Open mobile menu",
+          close: "Close mobile menu",
+          navigation: "Mobile navigation",
+          search: "Search product or SKU",
+          searchPlaceholder: "Search product or SKU...",
+          submitSearch: "Search",
+          mainMenu: "Mobile main menu",
+          cart: "Quote Cart",
+        }
+      : {
+          open: "Mobil menüyü aç",
+          close: "Mobil menüyü kapat",
+          navigation: "Mobil navigasyon",
+          search: "Ürün veya SKU ara",
+          searchPlaceholder: "Ürün veya SKU Ara...",
+          submitSearch: "Ara",
+          mainMenu: "Mobil ana menü",
+          cart: "Teklif Sepeti",
+        };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -54,7 +83,7 @@ export function MobileHeaderMenu({
     if (!query) return;
 
     closeMenu();
-    router.push(`/urunler?q=${encodeURIComponent(query)}`);
+    router.push(`${getProductsPath(locale)}?q=${encodeURIComponent(query)}`);
   };
 
   return (
@@ -64,7 +93,7 @@ export function MobileHeaderMenu({
         onClick={() => setIsOpen((current) => !current)}
         aria-expanded={isOpen}
         aria-controls={panelId}
-        aria-label={isOpen ? "Mobil menüyü kapat" : "Mobil menüyü aç"}
+        aria-label={isOpen ? labels.close : labels.open}
         className="flex h-10 w-10 items-center justify-center rounded-[var(--radius)] border border-border bg-surface text-text-main shadow-sm transition-colors hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -74,7 +103,7 @@ export function MobileHeaderMenu({
         <>
           <button
             type="button"
-            aria-label="Mobil menüyü kapat"
+            aria-label={labels.close}
             onClick={closeMenu}
             className="fixed inset-0 z-30 bg-surface-inverse/35 backdrop-blur-sm md:hidden"
           />
@@ -83,32 +112,32 @@ export function MobileHeaderMenu({
             id={panelId}
             role="dialog"
             aria-modal="true"
-            aria-label="Mobil navigasyon"
+            aria-label={labels.navigation}
             className="fixed inset-x-0 top-[4.5rem] z-40 max-h-[calc(100dvh-4.5rem)] overflow-y-auto border-b border-border bg-background p-4 shadow-2xl shadow-surface-inverse/15 md:hidden"
           >
             <div className="mx-auto flex w-full max-w-7xl flex-col gap-4">
               <form onSubmit={handleSearch} className="relative">
                 <label htmlFor={`${panelId}-search`} className="sr-only">
-                  Ürün veya SKU ara
+                  {labels.search}
                 </label>
                 <input
                   id={`${panelId}-search`}
                   type="search"
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
-                  placeholder="Ürün veya SKU Ara..."
+                  placeholder={labels.searchPlaceholder}
                   className="w-full rounded-[var(--radius-xl)] border border-border bg-surface-muted py-3 pl-4 pr-12 text-sm text-text-main outline-none transition-all placeholder:text-text-muted/60 focus:border-primary focus:ring-1 focus:ring-ring"
                 />
                 <button
                   type="submit"
-                  aria-label="Ara"
+                  aria-label={labels.submitSearch}
                   className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-[var(--radius)] text-text-muted transition-colors hover:bg-primary/10 hover:text-primary"
                 >
                   <Search className="h-4 w-4" />
                 </button>
               </form>
 
-              <nav aria-label="Mobil ana menü" className="grid gap-2">
+              <nav aria-label={labels.mainMenu} className="grid gap-2">
                 {navItems.map((item) => (
                   <Link
                     key={`${item.label}-${item.href}`}
@@ -122,12 +151,12 @@ export function MobileHeaderMenu({
               </nav>
 
               <Link
-                href="/teklif-sepeti"
+                href={getQuoteCartPath(locale)}
                 onClick={closeMenu}
                 className="flex items-center justify-between rounded-[var(--radius-xl)] border border-border bg-surface-muted px-4 py-3 font-bold text-text-main transition-colors hover:border-primary/30 hover:text-primary"
               >
                 <span className="flex items-center gap-2">
-                  <ShoppingCart className="h-5 w-5" /> Teklif Sepeti
+                  <ShoppingCart className="h-5 w-5" /> {labels.cart}
                 </span>
                 <span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-primary px-2 text-xs text-primary-foreground">
                   {cartItems.length}

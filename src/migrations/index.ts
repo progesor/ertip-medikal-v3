@@ -58,6 +58,6 @@ export const migrations = [
   {
     up: migration_20260804_133553_m10_multilingual_foundation.up,
     down: migration_20260804_133553_m10_multilingual_foundation.down,
-    name: '20260804_133553_m10_multilingual_foundation'
+    name: '20260804_133553_m10_multilingual_foundation',
   },
 ];

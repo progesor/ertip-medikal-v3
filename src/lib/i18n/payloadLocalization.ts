@@ -2,7 +2,11 @@ import type { CollectionConfig, Field, GlobalConfig } from "payload";
 
 function localizeFields(fields: Field[], fieldNames: ReadonlySet<string>): Field[] {
   return fields.map((field) => {
-    if ("name" in field && typeof field.name === "string" && fieldNames.has(field.name)) {
+    if (
+      "name" in field &&
+      typeof field.name === "string" &&
+      fieldNames.has(field.name)
+    ) {
       return { ...field, localized: true };
     }
 
