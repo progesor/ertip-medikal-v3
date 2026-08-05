@@ -36,14 +36,15 @@ export function LanguageSwitcher({
     targetLocale === "en"
       ? "Resolving English page..."
       : "Türkçe sayfa hazırlanıyor...";
-  const initialState: AlternateLocaleState = { href: targetHref, available };
-  const [alternateLocale, setAlternateLocale] =
-    useState<AlternateLocaleState>(initialState);
+  const [alternateLocale, setAlternateLocale] = useState<AlternateLocaleState>({
+    href: targetHref,
+    available,
+  });
   const [isResolving, setIsResolving] = useState(false);
 
   useEffect(() => {
     if (pathname === sourcePathname) {
-      setAlternateLocale(initialState);
+      setAlternateLocale({ href: targetHref, available });
       setIsResolving(false);
       return;
     }
