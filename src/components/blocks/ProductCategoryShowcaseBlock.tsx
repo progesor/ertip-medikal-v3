@@ -9,6 +9,8 @@ import {
   SectionShell,
   type SectionOptions,
 } from "@/components/blocks/SectionShell";
+import { getRequestLocale } from "@/lib/i18n/requestLocale";
+import { getProductsPath } from "@/lib/i18n/routing";
 
 type CategoryRelation =
   | number
@@ -79,20 +81,36 @@ export async function ProductCategoryShowcaseBlock({
   showDescription = true,
   showProductCount = true,
   includeChildProducts = true,
-  emptyStateText = "Henüz gösterilecek kategori bulunmuyor.",
+  emptyStateText,
   section,
 }: ProductCategoryShowcaseProps) {
-  const payload = await getPayload({ config: configPromise });
+  const [payload, locale] = await Promise.all([
+    getPayload({ config: configPromise }),
+    getRequestLocale(),
+  ]);
+  const resolvedEmptyStateText =
+    emptyStateText ||
+    (locale === "en"
+      ? "There are no categories to display yet."
+      : "Henüz gösterilecek kategori bulunmuyor.");
   const [{ docs: allCategories }, productResult] = await Promise.all([
     payload.find({
       collection: "categories",
+      locale,
+      fallbackLocale: false,
+      where: { slug: { exists: true } },
       pagination: false,
       depth: 1,
       sort: "title",
     }),
     payload.find({
       collection: "products",
-      where: { _status: { equals: "published" } },
+      locale,
+      fallbackLocale: false,
+      where: {
+        _status: { equals: "published" },
+        slug: { exists: true },
+      },
       pagination: false,
       depth: 0,
       select: { category: true, variants: true },
@@ -117,9 +135,6 @@ export async function ProductCategoryShowcaseBlock({
       ? selectedIds.map((id) => byId.get(id)).filter(Boolean)
       : allCategories.filter((category) => !relationId(category.parent));
 
-  // Products can belong to multiple categories. Keep a per-category map keyed
-  // by product ID so a product assigned to both a parent and one of its child
-  // categories is still counted only once when descendant totals are combined.
   const productsByCategory = new Map<string, Map<string, number>>();
 
   for (const product of productResult.docs) {
@@ -186,7 +201,7 @@ export async function ProductCategoryShowcaseBlock({
 
       {categories.length === 0 ? (
         <div className="rounded-[var(--radius-2xl)] border border-dashed border-border p-10 text-center text-current opacity-70">
-          {emptyStateText}
+          {resolvedEmptyStateText}
         </div>
       ) : (
         <div className={cn("grid gap-6", columnClasses[resolvedColumns])}>
@@ -196,16 +211,20 @@ export async function ProductCategoryShowcaseBlock({
             const productCount = countForCategory(String(category.id));
             const featured = resolvedLayout === "featured" && index === 0;
             const compact = resolvedLayout === "compact";
-            const href = `/urunler?category=${encodeURIComponent(category.slug)}`;
+            const href = `${getProductsPath(locale)}?category=${encodeURIComponent(category.slug)}`;
 
             const countLabel = (
               <>
                 <Package className="h-4 w-4" />
-                <span>{productCount.products} ürün</span>
+                <span>
+                  {productCount.products} {locale === "en" ? "products" : "ürün"}
+                </span>
                 {productCount.variants > 0 && (
                   <>
                     <span aria-hidden="true">•</span>
-                    <span>{productCount.variants} varyant</span>
+                    <span>
+                      {productCount.variants} {locale === "en" ? "variants" : "varyant"}
+                    </span>
                   </>
                 )}
               </>
@@ -225,7 +244,7 @@ export async function ProductCategoryShowcaseBlock({
                     "border-border/40 bg-surface-inverse shadow-lg shadow-surface-inverse/10 hover:-translate-y-1 hover:shadow-xl",
                 )}
               >
-                <div className={cn("relative overflow-hidden", ratioClasses[resolvedRatio], compact && "max-h-52") }>
+                <div className={cn("relative overflow-hidden", ratioClasses[resolvedRatio], compact && "max-h-52")}>
                   {image ? (
                     <Image
                       src={image.url!}
@@ -267,7 +286,7 @@ export async function ProductCategoryShowcaseBlock({
                 </div>
 
                 {resolvedCardStyle !== "overlay" && (
-                  <div className={cn(compact ? "p-5" : "p-6 md:p-7") }>
+                  <div className={cn(compact ? "p-5" : "p-6 md:p-7")}>
                     <div className="flex items-start justify-between gap-4">
                       <h3 className="text-xl font-black text-current md:text-2xl">
                         {category.title}
