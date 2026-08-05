@@ -4,7 +4,9 @@
 
 Introduce explicit English and Turkish public URL spaces without duplicating the existing application route tree or weakening Payload localization boundaries.
 
-M10.2 is a routing and data-isolation package. Full translation of application-owned fixed UI strings is intentionally handled in M10.3.
+M10.2 also establishes a practical translation workflow: Turkish remains the source locale for authoring new records, while missing English localized content is initialized from Turkish so editors can translate only the fields that need to differ.
+
+Full translation of application-owned fixed UI strings is intentionally handled in M10.3.
 
 ## Public URL contract
 
@@ -68,21 +70,41 @@ This includes:
 - Main Menu;
 - localized Site Settings groups.
 
-English pages must never silently borrow Turkish field values.
+The public website therefore never depends on implicit fallback. English content exists as English locale data even when its initial value was copied from Turkish.
 
 Where a listing depends on a localized slug, only records with a slug in the requested locale are surfaced.
 
-## Existing-data transition
+## English locale bootstrap
 
-M10.1 migrated the existing production editorial data into Turkish locale rows only. It intentionally did not fabricate English translations.
+M10.1 safely moved the pre-existing single-language content into Turkish locale rows. M10.2 adds an explicit English bootstrap step to avoid empty Page Builder and product editing experiences.
 
-Therefore immediately after M10.2:
+Migration `20260805_105000_m10_2_bootstrap_english_content` initializes only missing English localized values from Turkish for:
 
-- Turkish content continues to work under `/tr/...`;
-- `/en` is a valid public locale namespace;
-- untranslated English records do not silently display Turkish content;
-- the English homepage redirects to the complete Turkish homepage until an English `home` locale is authored;
-- record-level language switching is disabled when the same logical record has no target-locale slug yet.
+- Products;
+- Categories;
+- News;
+- Pages, including the complete Page Builder layout;
+- News Categories;
+- Main Menu;
+- localized Site Settings header, floating action and footer groups.
+
+The migration never overwrites an English field that already contains content. Existing translations therefore remain authoritative.
+
+Localized arrays and Page Builder block structures receive fresh row IDs while their content, media/relationship references and structure are copied. Shared product data such as SKU identity, variants, logistics and media relationships remains shared exactly as defined by M10.1.
+
+The initial English slug is copied from Turkish when English has no slug. Editors can later change the English slug independently.
+
+### New records
+
+When a new localized collection record is created in Turkish, an after-create hook initializes its missing English localized fields from the just-created Turkish record. This applies to Products, Categories, News, Pages and News Categories.
+
+This is intentionally a one-time bootstrap, not continuous synchronization:
+
+- later English translations are never overwritten by Turkish edits;
+- intentionally different English Page Builder structures remain possible;
+- existing English content is never reset when Turkish content changes.
+
+Payload's own Copy-to-Locale workflow remains available for cases where an editor deliberately wants to replace a locale with another locale's current content.
 
 ## Language switching
 
@@ -99,11 +121,13 @@ This allows Turkish and English slugs to differ safely.
 
 System routes such as catalog, news listing and quote cart map directly between their translated route segments.
 
+Locale switching uses a full document navigation intentionally. The locale context is injected by Proxy request headers and shared Server Component layouts such as Header/Main Menu/Footer must be reconstructed in the same navigation. This prevents the target page body changing language while shared navigation remains stale until a manual browser refresh.
+
 ## Page Builder links
 
 Application-rendered internal links are normalized through locale-aware route helpers where M10.2 touches them. External `http(s)`, `mailto:`, `tel:` and fragment links are preserved unchanged.
 
-Key Page Builder navigation surfaces covered by M10.2 include Hero, CTA, Media/Text, Hero Slider, Featured Products, Product Category Showcase and News Feed.
+Key Page Builder navigation surfaces covered by M10.2 include Hero, CTA, Media/Text, Hero Slider, Featured Products, Product Category Showcase, News Feed and Video Media.
 
 ## Deliberately deferred to M10.3
 
@@ -124,14 +148,17 @@ Canonical URLs, `hreflang`, multilingual sitemap generation, robots policy and `
 
 Before M10.2 closes:
 
-- [ ] `/` negotiates locale using cookie → Accept-Language → English default.
-- [ ] `/en/products` rewrites to the existing product catalog with English locale context.
-- [ ] `/tr/urunler` rewrites to the existing catalog with Turkish locale context.
-- [ ] `/en/urunler` canonicalizes to `/en/products`.
-- [ ] legacy `/urunler` redirects to `/tr/urunler`.
-- [ ] `/en/news` and `/tr/haberler` resolve the news listing.
-- [ ] admin/API/static assets bypass locale routing.
-- [ ] public localized Payload queries do not use implicit fallback.
-- [ ] language switch uses the same record ID and target localized slug.
-- [ ] missing target translations do not produce mixed-language content.
-- [ ] TypeScript, ESLint, production build and browser/RFQ/security workflows pass.
+- [x] `/` negotiates locale using cookie → Accept-Language → English default.
+- [x] `/en/products` rewrites to the existing product catalog with English locale context.
+- [x] `/tr/urunler` rewrites to the existing catalog with Turkish locale context.
+- [x] `/en/urunler` canonicalizes to `/en/products`.
+- [x] legacy `/urunler` redirects to `/tr/urunler`.
+- [x] `/en/news` and `/tr/haberler` resolve the news listing.
+- [x] admin/API/static assets bypass locale routing.
+- [x] public localized Payload queries do not use implicit fallback.
+- [x] language switch uses the same record ID and target localized slug.
+- [x] shared layout navigation is rebuilt immediately after locale switching.
+- [x] missing English fields bootstrap from Turkish without overwriting existing English content.
+- [x] Page Builder bootstrap strips reused localized row IDs before insertion.
+- [ ] verify the bootstrap migration against the project's populated local/test database before merge.
+- [ ] final TypeScript, ESLint, production build and browser/RFQ/security workflows pass after the bootstrap changes.
