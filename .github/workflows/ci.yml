@@ -198,9 +198,11 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-      - name: Build with diagnostic fallback
+      - name: Build with database intentionally unavailable
         id: production-build
         shell: bash
+        env:
+          DATABASE_URI: postgresql://payload:payload@db-build-must-not-connect.invalid:5432/ertip_ci
         run: |
           set +e
           set -o pipefail
