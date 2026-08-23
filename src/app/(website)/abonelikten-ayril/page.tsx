@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { UnsubscribeClient } from "@/components/newsletter/UnsubscribeClient";
 import { getRequestLocale } from "@/lib/i18n/requestLocale";
-import { getUiDictionary } from "@/lib/i18n/uiDictionary";
+import { getResolvedUiDictionary } from "@/lib/i18n/resolvedUiDictionary";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getRequestLocale();
-  const dictionary = getUiDictionary(locale);
+  const dictionary = await getResolvedUiDictionary(locale);
 
   return {
     title: dictionary.unsubscribe.metadataTitle,
