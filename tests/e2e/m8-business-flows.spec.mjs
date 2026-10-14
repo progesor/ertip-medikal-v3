@@ -1,6 +1,24 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("M8 business-flow hardening", () => {
+  test("rewritten locale routes hydrate without client errors", async ({ page }) => {
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+
+    for (const route of ["/tr/urunler", "/en/products"]) {
+      await page.goto(route);
+      const menuName = route.startsWith("/en")
+        ? "Open mobile menu"
+        : "Mobil menüyü aç";
+      // Opening the menu verifies hydration and its event handlers completed.
+      await page.getByRole("button", { name: menuName }).click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await page.keyboard.press("Escape");
+    }
+
+    expect(errors).toEqual([]);
+  });
+
   test("mobile navigation opens, searches, and closes accessibly", async ({ page }) => {
     await page.goto("/tr/urunler");
 

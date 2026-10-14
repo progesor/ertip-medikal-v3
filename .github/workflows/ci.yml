@@ -15,8 +15,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: "24"
-  PNPM_VERSION: "10"
+  NODE_VERSION: "24.21.0"
+  PNPM_VERSION: "10.34.7"
   NEXT_TELEMETRY_DISABLED: "1"
   DATABASE_URI: postgresql://payload:payload@127.0.0.1:5432/ertip_ci
   PAYLOAD_SECRET: ci-only-secret-not-used-outside-github-actions

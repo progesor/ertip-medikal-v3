@@ -12,6 +12,7 @@ on:
       - "tsconfig.sku-tests.json"
       - "package.json"
       - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
       - ".github/workflows/sku-engine.yml"
   push:
     branches: [main]
@@ -24,6 +25,7 @@ on:
       - "tsconfig.sku-tests.json"
       - "package.json"
       - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
       - ".github/workflows/sku-engine.yml"
   workflow_dispatch:
 
@@ -45,12 +47,12 @@ jobs:
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: "10"
+          version: "10.34.7"
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "24"
+          node-version: "24.21.0"
           cache: pnpm
 
       - name: Install dependencies
