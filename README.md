@@ -16,10 +16,10 @@ Proje yalnızca tanıtım sitesi değildir. Ürün katalog yönetimi, varyant/SK
 
 | Katman | Teknoloji |
 | --- | --- |
-| Framework | Next.js 16.2.3, App Router |
-| CMS | Payload CMS 3.79.1 |
+| Framework | Next.js 16.3.8, App Router |
+| CMS | Payload CMS 3.90.2 |
 | Veritabanı | PostgreSQL, `@payloadcms/db-postgres` |
-| UI | React 19 RC, Tailwind CSS, Shadcn tarzı UI primitives |
+| UI | React 19.2.8, Tailwind CSS 3, Shadcn tarzı UI primitives |
 | İkonlar | Lucide React |
 | Animasyon | Framer Motion |
 | Zengin metin | Payload Lexical, `react-markdown`, `md-editor-rt` |
@@ -28,6 +28,12 @@ Proje yalnızca tanıtım sitesi değildir. Ürün katalog yönetimi, varyant/SK
 | Yardımcı araçlar | Drizzle Kit, Sharp, ESLint, TypeScript |
 
 ## CI Doğrulaması
+
+Yerel ve Coolify kurulumlarında `packageManager` alanındaki **pnpm 10.34.7**
+sürümünü ve `pnpm install --frozen-lockfile` komutunu kullanın. Güvenlik
+override ayarları `pnpm-workspace.yaml` içindedir. Üretim kurulumu, migration
+ve kalan geliştirme bağımlılığı bulgusu için
+[14 Ekim 2026 yükseltme notlarına](docs/development/SECURITY_UPGRADE_2026-10-14.md) bakın.
 
 GitHub Actions her pull request ve `main` güncellemesinde aşağıdaki kontrolleri çalıştırır:
 

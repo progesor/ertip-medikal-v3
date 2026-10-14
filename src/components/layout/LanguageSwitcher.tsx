@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { Languages } from "lucide-react";
 import type { SiteLocale } from "@/lib/i18n/config";
@@ -18,13 +18,25 @@ type LanguageSwitcherProps = {
   available: boolean;
 };
 
+const subscribeToHydration = () => () => {};
+const clientSnapshot = () => true;
+const serverSnapshot = () => false;
+
 export function LanguageSwitcher({
   currentLocale,
   sourcePathname,
   targetHref,
   available,
 }: LanguageSwitcherProps) {
-  const pathname = usePathname() || sourcePathname;
+  const clientPathname = usePathname();
+  const hydrated = useSyncExternalStore(
+    subscribeToHydration,
+    clientSnapshot,
+    serverSnapshot,
+  );
+  // Proxy rewrites expose different paths during SSR and in the browser.
+  // Keep the server-provided link for hydration, then track client navigation.
+  const pathname = (hydrated && clientPathname) || sourcePathname;
   const targetLocale: SiteLocale = currentLocale === "en" ? "tr" : "en";
   const targetLabel = targetLocale.toUpperCase();
   const ariaLabel =

@@ -72,10 +72,10 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [payload, locale] = await Promise.all([
-    getPayload({ config: configPromise }),
-    getRequestLocale(),
-  ]);
+  // Resolve request headers before opening a database connection: build-time
+  // prerendering must stop here when no incoming request is available.
+  const locale = await getRequestLocale();
+  const payload = await getPayload({ config: configPromise });
 
   let themeSettings;
   try {

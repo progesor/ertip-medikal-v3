@@ -1,7 +1,27 @@
 packages:
-  - "."
+  - '.'
 
-allowBuilds:
-  esbuild: true
-  sharp: true
-  unrs-resolver: true
+# Keep security overrides effective with both pnpm 10 and newer launchers.
+overrides:
+  'dompurify': '3.4.17'
+  'esbuild': '0.28.2'
+  'fast-uri': '3.1.8'
+  'immutable@<5': '4.3.9'
+  'js-yaml': '4.3.2'
+  'linkify-it': '5.0.2'
+  'markdown-it': '14.3.2'
+  'postcss': '8.5.30'
+  'sharp': '0.35.5'
+  'ws': '8.22.0'
+  # Payload still requests Nodemailer 9; security fixes require 10.0.6+.
+  # SMTP compatibility is verified through the Payload adapter (see upgrade notes).
+  '@payloadcms/email-nodemailer>nodemailer': '10.1.1'
+  'postcss-selector-parser': '7.1.6'
+  'payload>undici': '7.29.1'
+  # Remove the old Sass -> Chokidar 3 -> vulnerable braces production chain.
+  '@payloadcms/next>sass': '1.105.1'
+
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+  - unrs-resolver

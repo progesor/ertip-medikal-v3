@@ -6,12 +6,14 @@ on:
     paths:
       - "package.json"
       - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
       - ".github/workflows/security-audit.yml"
   push:
     branches: [main]
     paths:
       - "package.json"
       - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
       - ".github/workflows/security-audit.yml"
   schedule:
     - cron: "41 2 * * 1"
@@ -25,8 +27,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: "24"
-  PNPM_VERSION: "10"
+  NODE_VERSION: "24.21.0"
+  PNPM_VERSION: "10.34.7"
 
 jobs:
   audit:
