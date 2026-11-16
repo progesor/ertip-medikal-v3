@@ -1,6 +1,12 @@
-import type { CollectionConfig } from "payload";
+import type { CollectionConfig, TextFieldSingleValidation } from "payload";
 import { metaFields } from "@/fields/meta";
 import { slugField } from "@/fields/slug";
+
+const validateVariantSku: TextFieldSingleValidation = (value, { siblingData }) => {
+  const row = siblingData as { combinationKey?: string };
+  return Boolean(value?.trim() || row?.combinationKey?.trim()) ||
+    "Varyant için bir SKU veya kombinasyon kimliği gereklidir.";
+};
 
 // Matematiksel Kombinasyon (Kartezyen Çarpım) Hesaplayıcı
 function getCombinations(arrays: string[][]): string[][] {
@@ -357,7 +363,7 @@ export const Products: CollectionConfig = {
                   name: "sku",
                   type: "text",
                   label: "Varyant SKU (Barkod)",
-                  required: true,
+                  validate: validateVariantSku,
                 },
                 {
                   name: "price",

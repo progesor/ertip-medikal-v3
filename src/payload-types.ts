@@ -328,7 +328,7 @@ export interface Product {
     | {
         combinationKey?: string | null;
         title: string;
-        sku: string;
+        sku?: string | null;
         price?: string | null;
         /**
          * Bu varyant seçildiğinde ürün galerisinde gösterilecek görseller. Boş bırakılırsa ürünün ana görselleri kullanılır.

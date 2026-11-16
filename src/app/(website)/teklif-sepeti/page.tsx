@@ -171,9 +171,11 @@ export default function QuoteCartPage() {
                           </h4>
                         </Link>
                         <p className="mt-1 text-sm text-text-muted">{item.variant}</p>
-                        <span className="mt-2 inline-block rounded-full border border-border bg-surface-muted px-3 py-1 font-mono text-xs font-bold text-text-muted">
-                          SKU: {item.sku}
-                        </span>
+                        {item.sku && (
+                          <span className="mt-2 inline-block rounded-full border border-border bg-surface-muted px-3 py-1 font-mono text-xs font-bold text-text-muted">
+                            SKU: {item.sku}
+                          </span>
+                        )}
                       </div>
 
                       <div className="flex items-center gap-3 rounded-[var(--radius)] border border-border bg-surface-muted p-1.5">

@@ -116,6 +116,19 @@ test("rejects an unknown stable combination instead of falling back", async () =
   assert.equal(result.ok, false);
 });
 
+test("keeps uncoded variants separate by their stored combination keys", async () => {
+  const variants = ["3 motor", "4 motor"].map(title => ({
+    title, combinationKey: title, sku: null,
+  }));
+  const loader = createLoader([{ id: 96, title: "LUXURY", sku: "L-11", variants }]);
+  const result = await resolveQuoteItems(variants.map(v => ({
+    productId: 96, combinationKey: v.combinationKey, sku: "client-sku", quantity: 1,
+  })), loader);
+  assert.deepEqual(result, { ok: true, items: variants.map(v => ({
+    productTitle: "LUXURY", variantInfo: v.title, sku: "", quantity: 1,
+  })) });
+});
+
 test("resolves standard products from database values", async () => {
   const result = await resolveQuoteItems(
     [

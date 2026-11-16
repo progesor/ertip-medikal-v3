@@ -165,7 +165,9 @@ export async function resolveQuoteItems(
 
       const variantTitle = readTrimmedString(variant.title, 200);
       const variantSku = readTrimmedString(variant.sku, 120);
-      if (!variantTitle || !variantSku) return productUnavailable(position);
+      if (!variantTitle || (!variantSku && !requestItem.combinationKey)) {
+        return productUnavailable(position);
+      }
 
       const stableCombinationKey = readTrimmedString(
         variant.combinationKey,

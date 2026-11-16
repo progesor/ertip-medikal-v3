@@ -257,6 +257,7 @@ export function ProductView({ product }: any) {
     return matches.length === 1 ? matches[0].variant : undefined;
   }, [attributes, options, selectedAttrs]);
   const hasCompleteVariantSelection = Boolean(currentVariant);
+  const selectedSku = (options.length ? currentVariant?.sku : product.sku) || "";
   const canAddToCart = options.length === 0 || (hasCompleteVariantSelection && currentVariant.isActive !== false);
 
   const mediaVariant = useMemo(() => {
@@ -271,10 +272,7 @@ export function ProductView({ product }: any) {
 
     if (product.inheritVariantImagesFromPrevious === false) return null;
 
-    const currentIndex = product.variants?.findIndex(
-      (variant: any) =>
-        variant.id === currentVariant.id || variant.sku === currentVariant.sku,
-    );
+    const currentIndex = product.variants.indexOf(currentVariant);
 
     if (currentIndex === undefined || currentIndex <= 0) return null;
 
@@ -343,7 +341,7 @@ export function ProductView({ product }: any) {
       slug: product.slug,
       localizedIdentity: product.cartLocalizedIdentity,
       variant: currentVariant?.title || dictionary.product.defaultVariant,
-      sku: currentVariant?.sku || product.sku,
+      sku: selectedSku,
       ...(currentVariant?.combinationKey
         ? { combinationKey: currentVariant.combinationKey }
         : {}),
@@ -526,7 +524,7 @@ export function ProductView({ product }: any) {
             </h1>
             <div className="flex items-center gap-4">
               <span className="rounded-full border border-border/70 bg-surface-muted px-3 py-1 font-mono text-xs font-bold text-text-muted">
-                SKU: {currentVariant?.sku || product.sku || dictionary.common.notSpecified}
+                SKU: {selectedSku || dictionary.common.notSpecified}
               </span>
               {product.isOriginalErtipProduct !== false && (
                 <span className="flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm font-bold text-primary">
@@ -727,7 +725,7 @@ export function ProductView({ product }: any) {
                     <tr
                       key={variant.id || index}
                       className={`transition-colors hover:bg-surface-muted/50 ${
-                        currentVariant?.sku === variant.sku ? "bg-primary/5" : ""
+                        currentVariant === variant ? "bg-primary/5" : ""
                       }`}
                     >
                       <td className="px-6 py-4 text-sm font-medium text-text-muted">
