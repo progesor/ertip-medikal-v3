@@ -195,7 +195,7 @@ export default async function ProductDetailPage({ params }: Args) {
         <Breadcrumbs items={breadcrumbItems} />
       </div>
 
-      <ProductView product={productForClient} />
+      <ProductView key={product.slug} product={productForClient} />
 
       {relatedProducts.length > 0 && (
         <section className="border-t border-border mt-16 pt-20 bg-surface-muted/30">

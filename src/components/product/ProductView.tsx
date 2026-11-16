@@ -26,6 +26,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCart } from "@/providers/CartProvider";
 import { useUiDictionary } from "@/providers/SiteLocaleProvider";
 
+import { parseLegacyAttributes } from "@/lib/sku-engine/legacyPunch";
+import { getVariantSelection } from "@/lib/sku-engine/storefrontSelection";
+
 type LogisticsMode = "sidebar" | "wide";
 
 type LogisticsProps = {
@@ -47,39 +50,6 @@ function getYouTubeId(url: string) {
   const match = url.match(expression);
 
   return match && match[2].length === 11 ? match[2] : null;
-}
-
-function getInitialSelectedAttributes(product: any) {
-  if (!Array.isArray(product.attributes)) return {};
-
-  const firstVariantTitle = String(product.variants?.[0]?.title || "");
-
-  return product.attributes.reduce(
-    (selected: Record<string, string>, attribute: any) => {
-      if (!attribute?.name || typeof attribute.values !== "string") {
-        return selected;
-      }
-
-      const values = attribute.values
-        .split("-")
-        .map((value: string) => value.trim())
-        .filter(Boolean);
-      const matchingValue = [...values]
-        .sort((first, second) => second.length - first.length)
-        .find(
-          (value) =>
-            firstVariantTitle.includes(`${value} mm ${attribute.name}`) ||
-            firstVariantTitle.includes(value),
-        );
-
-      if (matchingValue || values[0]) {
-        selected[attribute.name] = matchingValue || values[0];
-      }
-
-      return selected;
-    },
-    {},
-  );
 }
 
 function NetDimensions({ mode, product }: LogisticsProps) {
@@ -261,8 +231,13 @@ export function ProductView({ product }: any) {
   const { addToCart } = useCart();
   const dictionary = useUiDictionary();
   const searchParams = useSearchParams();
+  const attributes = useMemo(() => parseLegacyAttributes(product.attributes), [product.attributes]);
+  const options = useMemo(() => (product.variants ?? []).map((variant: any) => ({
+    variant,
+    selection: getVariantSelection(attributes, variant),
+  })), [attributes, product.variants]);
   const [selectedAttrs, setSelectedAttrs] = useState<Record<string, string>>(
-    () => getInitialSelectedAttributes(product),
+    () => options[0]?.selection ?? {},
   );
   const [manualCode, setManualCode] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
@@ -275,27 +250,14 @@ export function ProductView({ product }: any) {
   const activeTab = searchParams.get("tab") || "description";
 
   const currentVariant = useMemo(() => {
-    if (!Array.isArray(product.variants) || product.variants.length === 0) {
-      return null;
-    }
-
-    return product.variants.find((variant: any) =>
-      Object.values(selectedAttrs).every((value) =>
-        variant.title.includes(value),
-      ),
+    if (!attributes.length) return options[0]?.variant;
+    const matches = options.filter(({ selection }: { selection: Record<string, string> }) =>
+      attributes.every(({ name }) => selectedAttrs[name] && selection[name] === selectedAttrs[name]),
     );
-  }, [product.variants, selectedAttrs]);
-
-  const hasCompleteVariantSelection = useMemo(() => {
-    if (!Array.isArray(product.attributes) || product.attributes.length === 0) {
-      return Boolean(currentVariant);
-    }
-
-    return product.attributes.every(
-      (attribute: any) =>
-        attribute?.name && Boolean(selectedAttrs[attribute.name]),
-    );
-  }, [currentVariant, product.attributes, selectedAttrs]);
+    return matches.length === 1 ? matches[0].variant : undefined;
+  }, [attributes, options, selectedAttrs]);
+  const hasCompleteVariantSelection = Boolean(currentVariant);
+  const canAddToCart = options.length === 0 || (hasCompleteVariantSelection && currentVariant.isActive !== false);
 
   const mediaVariant = useMemo(() => {
     if (!hasCompleteVariantSelection || !currentVariant) return null;
@@ -625,6 +587,7 @@ export function ProductView({ product }: any) {
             <Button
               size="lg"
               className="h-16 flex-1 rounded-[var(--radius-xl)] px-10 text-lg font-bold"
+              disabled={!canAddToCart}
               onClick={handleAddToCart}
             >
               <ShoppingCart className="mr-2 h-6 w-6" />
