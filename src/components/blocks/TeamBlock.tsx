@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Linkedin, UserRound } from "lucide-react";
+import { UserRound } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 type TeamMember = {
@@ -86,7 +86,7 @@ function TeamCard({
                 className="mx-auto inline-flex h-11 w-11 items-center justify-center rounded-full bg-surface-muted text-text-muted shadow-sm transition-colors duration-300 hover:bg-info hover:text-info-foreground md:mx-0"
                 aria-label={`${member.name || "Ekip üyesi"} LinkedIn profili`}
               >
-                <Linkedin className="h-5 w-5" />
+                <span aria-hidden="true" className="text-xl font-bold leading-none">in</span>
               </Link>
             )}
           </CardContent>
@@ -115,7 +115,7 @@ function TeamCard({
             className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-surface-muted text-text-muted shadow-sm transition-colors duration-300 hover:bg-info hover:text-info-foreground"
             aria-label={`${member.name || "Ekip üyesi"} LinkedIn profili`}
           >
-            <Linkedin className="h-5 w-5" />
+            <span aria-hidden="true" className="text-xl font-bold leading-none">in</span>
           </Link>
         )}
       </CardContent>

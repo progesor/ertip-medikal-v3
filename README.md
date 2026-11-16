@@ -31,9 +31,7 @@ Proje yalnızca tanıtım sitesi değildir. Ürün katalog yönetimi, varyant/SK
 
 Yerel ve Coolify kurulumlarında `packageManager` alanındaki **pnpm 10.34.9**
 sürümünü ve `pnpm install --frozen-lockfile` komutunu kullanın. Güvenlik
-override ayarları `pnpm-workspace.yaml` içindedir. Üretim kurulumu, migration
-ve kalan geliştirme bağımlılığı bulgusu için
-[14 Ekim 2026 yükseltme notlarına](docs/development/SECURITY_UPGRADE_2026-10-14.md) bakın.
+override ayarları `pnpm-workspace.yaml` içindedir. Node.js sürümü .node-version dosyasında sabitlenmiştir. Coolify ve geri yükleme kontrolleri için [yayına alma listesini](docs/PRODUCTION_RELEASE_CHECKLIST.md) kullanın.
 
 GitHub Actions her pull request ve `main` güncellemesinde aşağıdaki kontrolleri çalıştırır:
 

@@ -3,6 +3,8 @@ packages:
 
 # Keep security overrides effective with both pnpm 10 and newer launchers.
 overrides:
+  # Upstream 4.3.1 lacks the prototype-poisoning fix (GHSA-gcqx-w48m-w2h4).
+  'payload>deepmerge': 'npm:@shivammathur/deepmerge@4.3.2'
   'dompurify': '3.4.18'
   'esbuild': '0.28.2'
   'fast-uri': '3.1.9'
@@ -24,6 +26,3 @@ onlyBuiltDependencies:
   - esbuild
   - sharp
   - unrs-resolver
-
-patchedDependencies:
-  deepmerge@4.3.1: patches/deepmerge@4.3.1.patch
