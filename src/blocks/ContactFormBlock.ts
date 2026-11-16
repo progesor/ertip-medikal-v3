@@ -16,7 +16,12 @@ export const ContactFormBlock: Block = {
             name: "departments",
             type: "array",
             label: "İletişim Konuları / Departmanlar",
-            admin: { description: "Kullanıcının formda seçebileceği departmanları belirleyin." },
+            admin: {
+                components: {
+                    RowLabel: "/components/admin/AdminArrayRowLabel#AdminArrayRowLabel",
+                },
+                description: "Kullanıcının formda seçebileceği departmanları belirleyin.",
+            },
             fields: [{ name: "label", type: "text", label: "Departman Adı (Örn: Teknik Servis, İhracat)" }],
         },
         {

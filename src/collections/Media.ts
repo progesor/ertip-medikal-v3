@@ -117,6 +117,15 @@ export const Media: CollectionConfig = {
   },
   fields: [
     {
+      name: "editOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+        },
+      },
+    },
+    {
       name: "alt",
       type: "text",
       required: true,

@@ -66,6 +66,15 @@ export const Users: CollectionConfig = {
   },
   fields: [
     {
+      name: "editOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+        },
+      },
+    },
+    {
       name: "role",
       type: "select",
       required: true,

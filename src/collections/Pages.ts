@@ -31,9 +31,23 @@ export const Pages: CollectionConfig = {
     useAsTitle: "title",
     group: "İçerik Yönetimi",
     defaultColumns: ["title", "slug", "updatedAt"],
+    components: {
+      beforeListTable: [
+        "/components/admin/CollectionViewControls#CollectionViewControls",
+      ],
+    },
   },
   versions: { drafts: true },
   fields: [
+    {
+      name: "editOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+        },
+      },
+    },
     {
       type: "tabs",
       tabs: [
@@ -45,6 +59,15 @@ export const Pages: CollectionConfig = {
               type: "text",
               required: true,
               label: "Sayfa Başlığı",
+            },
+            {
+              name: "pageBuilderStudio",
+              type: "ui",
+              admin: {
+                components: {
+                  Field: "/components/admin/PageBuilderStudio#PageBuilderStudio",
+                },
+              },
             },
             {
               name: "layout",

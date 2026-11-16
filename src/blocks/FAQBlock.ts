@@ -14,6 +14,12 @@ export const FAQBlock: Block = {
       name: "questions",
       type: "array",
       label: "Sorular ve Cevaplar",
+      admin: {
+        initCollapsed: true,
+        components: {
+          RowLabel: "/components/admin/AdminArrayRowLabel#AdminArrayRowLabel",
+        },
+      },
       fields: [
         { name: "question", type: "text", label: "Soru", required: true },
         { name: "answer", type: "textarea", label: "Cevap", required: true },

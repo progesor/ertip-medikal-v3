@@ -6,6 +6,15 @@ export const NewsCategories: CollectionConfig = {
   admin: { useAsTitle: "title", group: "İçerik Yönetimi" },
   fields: [
     {
+      name: "editOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+        },
+      },
+    },
+    {
       name: "title",
       type: "text",
       required: true,
