@@ -3,6 +3,8 @@ packages:
 
 # Keep security overrides effective with both pnpm 10 and newer launchers.
 overrides:
+  '@modelcontextprotocol/sdk': '1.32.2'
+  '@payloadcms/plugin-mcp>zod': '4.6.7'
   # Upstream 4.3.1 lacks the prototype-poisoning fix (GHSA-gcqx-w48m-w2h4).
   'payload>deepmerge': 'npm:@shivammathur/deepmerge@4.3.2'
   'dompurify': '3.4.18'

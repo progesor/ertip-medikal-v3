@@ -95,6 +95,8 @@ function buildPunchDiameterToken(
 ): string {
   const diameterMeasurement = parsePunchMeasurement(diameter);
   if (!diameterMeasurement) return diameter.replace(/\./g, "");
+  // The catalogue uses 10 for a 1 mm diameter, including when entered as "1".
+  if (diameterMeasurement.numericValue === 1) return "10";
 
   if (
     lengthMeasurement.isInteger &&

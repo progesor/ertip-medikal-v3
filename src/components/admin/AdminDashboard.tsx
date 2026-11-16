@@ -50,6 +50,7 @@ function getProductImage(product: Record<string, any>) {
 }
 
 export default async function AdminDashboard({ payload, user }: ServerProps) {
+  if (user?.collection !== "users") return null;
   const [
     products,
     categories,

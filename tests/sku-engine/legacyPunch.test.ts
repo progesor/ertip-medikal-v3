@@ -142,6 +142,15 @@ test("matches the canonical 55-entry Ertip Punch SKU matrix", () => {
   }
 });
 
+test("keeps the 1 mm diameter code distinct from 1.2 mm across catalogue lengths", () => {
+  for (const diameter of ["1", "1.0", "1.00"]) {
+    for (const row of canonicalPunchMatrix) {
+      assert.equal(buildLegacyPunchSkuCode(attributes, [diameter, row.length]), row.expected[8]);
+    }
+  }
+  assert.equal(buildLegacyPunchSkuCode(attributes, ["1.2", "5"]), "125");
+});
+
 test("keeps leading diameter zero for one-decimal sub-1 diameters with integer lengths", () => {
   assert.equal(buildLegacyPunchSkuCode(attributes, ["0.6", "20"]), "0620");
   assert.equal(buildLegacyPunchSkuCode(attributes, ["0.65", "20"]), "6520");

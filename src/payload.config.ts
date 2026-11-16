@@ -4,6 +4,7 @@ import {
   type GlobalConfig,
 } from "payload";
 import { postgresAdapter } from "@payloadcms/db-postgres";
+import { mcpPlugin } from "@payloadcms/plugin-mcp";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import sharp from "sharp";
 import path from "path";
@@ -205,6 +206,15 @@ export default buildConfig({
     disable: true,
   },
   telemetry: false,
+  plugins: [
+    mcpPlugin({
+      collections: {
+        products: { enabled: { find: true, create: true, update: true, delete: false } },
+        categories: { enabled: { find: true, create: true, update: true, delete: false } },
+      },
+      overrideApiKeyCollection: withAdminAccess,
+    }),
+  ],
   upload: {
     abortOnLimit: true,
     limits: {
