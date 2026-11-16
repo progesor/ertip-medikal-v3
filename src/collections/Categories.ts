@@ -10,6 +10,15 @@ export const Categories: CollectionConfig = {
       "Katalog kategorilerini ve kategori bazlı ürün sırasını yönetin.",
   },
   fields: [
+    {
+      name: "editOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+        },
+      },
+    },
     { name: "title", type: "text", required: true, label: "Kategori Adı" },
     {
       name: "slug",

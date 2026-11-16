@@ -126,6 +126,34 @@ export const Products: CollectionConfig = {
   },
   fields: [
     {
+      name: "productOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/ProductEditOverview#ProductEditOverview",
+        },
+      },
+    },
+    {
+      name: "productArrayEnhancer",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/ProductArrayEnhancer#ProductArrayEnhancer",
+        },
+      },
+    },
+    {
+      name: "productWorkspaceStudio",
+      type: "ui",
+      admin: {
+        components: {
+          Field:
+            "/components/admin/ProductWorkspaceStudio#ProductWorkspaceStudio",
+        },
+      },
+    },
+    {
       type: "tabs",
       tabs: [
         {

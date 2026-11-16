@@ -118,6 +118,12 @@ export const HeroBlock: Block = {
       type: "array",
       maxRows: 2,
       labels: { singular: "Buton", plural: "Butonlar" },
+      admin: {
+        initCollapsed: true,
+        components: {
+          RowLabel: "/components/admin/AdminArrayRowLabel#AdminArrayRowLabel",
+        },
+      },
       fields: [
         { name: "label", type: "text", required: true, label: "Buton Metni" },
         { name: "link", type: "text", required: true, label: "Bağlantı" },

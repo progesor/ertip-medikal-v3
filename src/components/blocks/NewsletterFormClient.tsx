@@ -1,0 +1,114 @@
+"use client";
+
+import React, { useState } from "react";
+import { AlertCircle, CheckCircle2, Send } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { getNewsletterDictionary } from "@/lib/i18n/newsletterDictionary";
+import { useSiteLocale } from "@/providers/SiteLocaleProvider";
+
+type NewsletterResponse = {
+  success?: boolean;
+  message?: string;
+};
+
+export function NewsletterFormClient({ buttonText }: { buttonText?: string | null }) {
+  const locale = useSiteLocale();
+  const dictionary = getNewsletterDictionary(locale);
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setStatus("loading");
+    setErrorMessage("");
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch("/api/public/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.get("email"),
+          website: formData.get("website"),
+        }),
+      });
+      const data = (await response.json()) as NewsletterResponse;
+
+      if (response.ok && data.success) {
+        setStatus("success");
+        form.reset();
+        window.setTimeout(() => setStatus("idle"), 4_000);
+      } else {
+        setStatus("error");
+        setErrorMessage(dictionary.error);
+      }
+    } catch {
+      setStatus("error");
+      setErrorMessage(dictionary.connectionError);
+    }
+  };
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="relative mx-auto flex max-w-lg flex-col gap-4 sm:flex-row"
+    >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-[10000px] top-auto h-px w-px overflow-hidden"
+      >
+        <label htmlFor="newsletter-website">Website</label>
+        <input
+          id="newsletter-website"
+          name="website"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+        />
+      </div>
+
+      <div className="relative w-full">
+        <Input
+          name="email"
+          type="email"
+          maxLength={254}
+          placeholder={dictionary.emailPlaceholder}
+          required
+          disabled={status === "loading" || status === "success"}
+          className="h-14 w-full rounded-full border-background/20 bg-background/10 px-6 text-lg text-primary-foreground placeholder:text-primary-foreground/50 focus-visible:ring-ring"
+        />
+        {status === "error" && (
+          <p className="absolute -bottom-7 left-4 flex items-center text-sm text-error-foreground">
+            <AlertCircle className="mr-1 h-3 w-3" /> {errorMessage}
+          </p>
+        )}
+      </div>
+
+      <Button
+        type="submit"
+        size="lg"
+        disabled={status === "loading" || status === "success"}
+        className="h-14 w-full rounded-full bg-background px-8 text-md font-bold text-foreground transition-all duration-300 hover:bg-surface-muted sm:w-auto"
+      >
+        {status === "loading" ? (
+          dictionary.subscribing
+        ) : status === "success" ? (
+          <>
+            <CheckCircle2 className="mr-2 h-5 w-5 text-success" />
+            {dictionary.success}
+          </>
+        ) : (
+          <>
+            {buttonText || dictionary.defaultButton}
+            <Send className="ml-2 h-5 w-5" />
+          </>
+        )}
+      </Button>
+    </form>
+  );
+}

@@ -15,6 +15,11 @@ export const QuoteRequests: CollectionConfig = {
     useAsTitle: "customerName",
     group: "Müşteri İletişimi",
     defaultColumns: ["customerName", "company", "createdAt", "status"],
+    components: {
+      beforeListTable: [
+        "/components/admin/CollectionViewControls#CollectionViewControls",
+      ],
+    },
   },
   access: {
     // Anonymous submissions go through /api/public/quote-request.
@@ -24,6 +29,15 @@ export const QuoteRequests: CollectionConfig = {
     delete: ({ req: { user } }) => Boolean(user),
   },
   fields: [
+    {
+      name: "editOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+        },
+      },
+    },
     {
       type: "row",
       fields: [
@@ -84,6 +98,11 @@ export const QuoteRequests: CollectionConfig = {
       type: "array",
       label: "Talep Edilen Ürünler",
       required: true,
+      admin: {
+        components: {
+          RowLabel: "/components/admin/AdminArrayRowLabel#AdminArrayRowLabel",
+        },
+      },
       fields: [
         { name: "productTitle", type: "text", label: "Ürün Adı" },
         { name: "variantInfo", type: "text", label: "Seçilen Model / Varyant" },

@@ -4,7 +4,7 @@ Use this checklist immediately before exposing the final public hostname. A rele
 
 ## 1. Runtime and build — Required
 
-- [ ] Coolify runtime uses a Node.js LTS version allowed by `package.json` (Node 24 preferred; Node 22 supported).
+- [ ] Coolify runtime uses a Node.js LTS version allowed by `package.json` (Node 26.13.1 is pinned in .node-version; Node 24.22.3 or later in the 24.x line is also supported).
 - [ ] Build command is `pnpm build:deploy`.
 - [ ] Start command is `pnpm start`.
 - [ ] Latest `main` CI, Browser E2E, RFQ Validation, SKU Engine, Dependency Security Audit and CodeQL checks are green.

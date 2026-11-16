@@ -18,6 +18,11 @@ export const LogoSliderBlock: Block = {
       type: "array",
       label: "Logolar ve Sertifikalar",
       minRows: 3,
+      admin: {
+        components: {
+          RowLabel: "/components/admin/AdminArrayRowLabel#AdminArrayRowLabel",
+        },
+      },
       fields: [
         {
           name: "logo",

@@ -11,9 +11,23 @@ export const MainMenu: GlobalConfig = {
   },
   fields: [
     {
+      name: "editOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+        },
+      },
+    },
+    {
       name: "items",
       type: "array",
       label: "Menü Linkleri",
+      admin: {
+        components: {
+          RowLabel: "/components/admin/AdminArrayRowLabel#AdminArrayRowLabel",
+        },
+      },
       labels: {
         singular: "Link",
         plural: "Linkler",

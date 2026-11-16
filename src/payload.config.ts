@@ -218,6 +218,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
     components: {
+      actions: ["/components/admin/AdminSurfaceEnhancer#AdminSurfaceEnhancer"],
       beforeDashboard: [
         "/components/admin/AdminDashboard#default",
         "/components/admin/EnglishContentBootstrapControl#EnglishContentBootstrapControl",

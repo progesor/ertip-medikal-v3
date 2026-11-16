@@ -9,6 +9,12 @@ export const HeroSliderBlock: Block = {
       type: "array",
       label: "Slaytlar",
       minRows: 1,
+      admin: {
+        initCollapsed: true,
+        components: {
+          RowLabel: "/components/admin/AdminArrayRowLabel#AdminArrayRowLabel",
+        },
+      },
       fields: [
         {
           name: "image",

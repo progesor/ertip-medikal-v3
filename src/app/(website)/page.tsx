@@ -1,3 +1,5 @@
+import { cache } from "react";
+import type { SiteLocale } from "@/lib/i18n/config";
 import { getPayload } from "payload";
 import configPromise from "@payload-config";
 import type { Metadata } from "next";
@@ -21,27 +23,8 @@ const homeMetadata = {
   },
 } as const;
 
-export async function generateMetadata(): Promise<Metadata> {
-  const locale = await getRequestLocale();
-  const localized = homeMetadata[locale];
-
-  return {
-    title: { absolute: localized.title },
-    description: localized.description,
-    openGraph: {
-      title: localized.title,
-      description: localized.description,
-      type: "website",
-    },
-  };
-}
-
-export default async function HomePage() {
-  const [payload, locale] = await Promise.all([
-    getPayload({ config: configPromise }),
-    getRequestLocale(),
-  ]);
-
+const loadHomePage = cache(async (locale: SiteLocale) => {
+  const payload = await getPayload({ config: configPromise });
   const { docs } = await payload.find({
     collection: "pages",
     locale,
@@ -51,7 +34,32 @@ export default async function HomePage() {
     depth: 2,
   });
 
-  const homePage = docs[0];
+  return docs[0];
+});
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getRequestLocale();
+  const page = await loadHomePage(locale);
+  const title = page?.meta?.title || page?.title || homeMetadata[locale].title;
+  const description = page?.meta?.description || homeMetadata[locale].description;
+  const image = page?.meta?.image;
+
+  return {
+    title: { absolute: title },
+    keywords: page?.meta?.keywords || undefined,
+    description,
+    openGraph: {
+      title,
+      ...(typeof image === "object" && image?.url ? { images: [image.url] } : {}),
+      description,
+      type: "website",
+    },
+  };
+}
+
+export default async function HomePage() {
+  const locale = await getRequestLocale();
+  const homePage = await loadHomePage(locale);
 
   // M10.1 intentionally created only Turkish locale rows. Until the English
   // homepage is authored, keep public traffic on a complete locale instead of

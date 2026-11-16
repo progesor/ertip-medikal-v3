@@ -1,16 +1,15 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "CommonJS",
-    "moduleResolution": "Node",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "outDir": ".tmp/i18n-tests",
+    "noEmit": true,
     "rootDir": ".",
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
     "types": ["node"]
   },
@@ -19,6 +18,7 @@
     "src/lib/i18n/localeBootstrap.ts",
     "src/lib/i18n/newsletterDictionary.ts",
     "src/lib/i18n/uiDictionary.ts",
+    "src/lib/i18n/uiTextOverrides.ts",
     "tests/i18n/**/*.ts"
   ]
 }

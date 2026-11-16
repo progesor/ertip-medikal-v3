@@ -11,6 +11,11 @@ export const Inquiries: CollectionConfig = {
     useAsTitle: "name",
     group: "Müşteri İletişimi",
     defaultColumns: ["name", "email", "status", "createdAt"],
+    components: {
+      beforeListTable: [
+        "/components/admin/CollectionViewControls#CollectionViewControls",
+      ],
+    },
   },
   access: {
     // Anonymous submissions go through /api/public/contact, where validation,
@@ -21,6 +26,15 @@ export const Inquiries: CollectionConfig = {
     delete: ({ req: { user } }) => Boolean(user),
   },
   fields: [
+    {
+      name: "editOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+        },
+      },
+    },
     {
       name: "status",
       type: "select",

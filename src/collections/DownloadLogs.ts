@@ -10,6 +10,11 @@ export const DownloadLogs: CollectionConfig = {
     useAsTitle: "accessCode",
     group: "Uyumluluk ve Kayıtlar",
     defaultColumns: ["productTitle", "accessCode", "ipAddress", "createdAt"],
+    components: {
+      beforeListTable: [
+        "/components/admin/CollectionViewControls#CollectionViewControls",
+      ],
+    },
   },
   access: {
     // Log records are written only through trusted server-side Local API calls.
@@ -19,6 +24,15 @@ export const DownloadLogs: CollectionConfig = {
     delete: isAdmin,
   },
   fields: [
+    {
+      name: "editOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+        },
+      },
+    },
     {
       name: "productTitle",
       type: "text",
