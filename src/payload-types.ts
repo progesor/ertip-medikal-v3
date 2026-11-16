@@ -1295,6 +1295,12 @@ export interface PayloadMcpApiKey {
      */
     update?: boolean | null;
   };
+  'payload-mcp-tool'?: {
+    /**
+     * Bir ürün fotoğrafını medya kütüphanesine yükler. Ürün veya varyantta kullanılabilecek medya kimliğini döndürür.
+     */
+    uploadProductImage?: boolean | null;
+  };
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
@@ -2303,6 +2309,11 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         find?: T;
         create?: T;
         update?: T;
+      };
+  'payload-mcp-tool'?:
+    | T
+    | {
+        uploadProductImage?: T;
       };
   updatedAt?: T;
   createdAt?: T;

@@ -12,6 +12,7 @@ import * as migration_20260805_130000_m10_ui_text_overrides from './20260805_130
 import * as migration_20261014_063557_security_auth_fields from './20261014_063557_security_auth_fields';
 import * as migration_20261116_072908_locale_parent_indexes from './20261116_072908_locale_parent_indexes';
 import * as migration_20261116_090430_catalog_mcp from './20261116_090430_catalog_mcp';
+import * as migration_20261116_121118_catalog_image_upload from './20261116_121118_catalog_image_upload';
 
 export const migrations = [
   {
@@ -82,6 +83,11 @@ export const migrations = [
   {
     up: migration_20261116_090430_catalog_mcp.up,
     down: migration_20261116_090430_catalog_mcp.down,
-    name: '20261116_090430_catalog_mcp'
+    name: '20261116_090430_catalog_mcp',
+  },
+  {
+    up: migration_20261116_121118_catalog_image_upload.up,
+    down: migration_20261116_121118_catalog_image_upload.down,
+    name: '20261116_121118_catalog_image_upload'
   },
 ];

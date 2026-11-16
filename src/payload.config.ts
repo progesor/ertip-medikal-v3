@@ -1,10 +1,12 @@
 import {
   buildConfig,
+  flattenAllFields,
   type CollectionConfig,
   type GlobalConfig,
 } from "payload";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { mcpPlugin } from "@payloadcms/plugin-mcp";
+import { uploadProductImage } from "@/lib/catalog/uploadProductImage";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import sharp from "sharp";
 import path from "path";
@@ -212,7 +214,18 @@ export default buildConfig({
         products: { enabled: { find: true, create: true, update: true, delete: false } },
         categories: { enabled: { find: true, create: true, update: true, delete: false } },
       },
-      overrideApiKeyCollection: withAdminAccess,
+      mcp: { tools: [uploadProductImage] },
+      overrideApiKeyCollection: (collection) => {
+        // Custom tools default to enabled in the plugin. Make image uploads opt-in per key.
+        const group = flattenAllFields({ fields: collection.fields })
+          .find((field) => field.name === "payload-mcp-tool");
+        const permission = group?.type === "group" && group.fields.find(
+          (field) => field.type === "checkbox" && field.name === uploadProductImage.name,
+        );
+        if (!permission || permission.type !== "checkbox") throw new Error("Missing MCP image upload permission");
+        permission.defaultValue = false;
+        return withAdminAccess(collection);
+      },
     }),
   ],
   upload: {
