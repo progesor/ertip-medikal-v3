@@ -101,7 +101,6 @@ export async function ProductCategoryShowcaseBlock({
       where: { slug: { exists: true } },
       pagination: false,
       depth: 1,
-      sort: "title",
     }),
     payload.find({
       collection: "products",

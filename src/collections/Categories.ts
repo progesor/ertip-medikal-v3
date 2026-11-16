@@ -2,9 +2,11 @@ import type { CollectionConfig } from "payload";
 
 export const Categories: CollectionConfig = {
   slug: "categories",
+  defaultSort: ["displayOrder", "id"],
   labels: { singular: "Kategori", plural: "Kategoriler" },
   admin: {
     useAsTitle: "title",
+    defaultColumns: ["title", "parent", "displayOrder"],
     group: "Ürün Yönetimi",
     description:
       "Katalog kategorilerini ve kategori bazlı ürün sırasını yönetin.",
@@ -20,6 +22,19 @@ export const Categories: CollectionConfig = {
       },
     },
     { name: "title", type: "text", required: true, label: "Kategori Adı" },
+    {
+      name: "displayOrder",
+      type: "number",
+      label: "Kategori sırası",
+      defaultValue: 1000,
+      required: true,
+      min: 0,
+      admin: {
+        position: "sidebar",
+        step: 1,
+        description: "Aynı düzeyde küçük sayı önce görünür. Araya kategori eklemek için 10, 20, 30 gibi aralıklı sayılar kullanabilirsiniz.",
+      },
+    },
     {
       name: "slug",
       type: "text",
@@ -71,7 +86,7 @@ export const Categories: CollectionConfig = {
         condition: (_, siblingData) =>
           siblingData?.productSortMode === "manual",
         description:
-          "Ürünleri görünmesini istediğiniz sırayla seçin. Listede olmayan kategori ürünleri bu listenin ardından en yeni ürün önce olacak şekilde gösterilir.",
+          "Seçili ürünleri sürükleyerek sıralayın. İlk ürün kategorinin başında görünür. Yeni eklenen ürünler seçili listenin ardından gösterilir.",
       },
     },
   ],

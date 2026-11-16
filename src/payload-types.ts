@@ -432,6 +432,10 @@ export interface Product {
 export interface Category {
   id: number;
   title: string;
+  /**
+   * Aynı düzeyde küçük sayı önce görünür. Araya kategori eklemek için 10, 20, 30 gibi aralıklı sayılar kullanabilirsiniz.
+   */
+  displayOrder: number;
   slug: string;
   parent?: (number | null) | Category;
   description?: string | null;
@@ -441,7 +445,7 @@ export interface Category {
    */
   productSortMode?: ('inherit' | 'newest' | 'oldest' | 'manual') | null;
   /**
-   * Ürünleri görünmesini istediğiniz sırayla seçin. Listede olmayan kategori ürünleri bu listenin ardından en yeni ürün önce olacak şekilde gösterilir.
+   * Seçili ürünleri sürükleyerek sıralayın. İlk ürün kategorinin başında görünür. Yeni eklenen ürünler seçili listenin ardından gösterilir.
    */
   manualProductOrder?: (number | Product)[] | null;
   updatedAt: string;
@@ -1629,6 +1633,7 @@ export interface ProductsSelect<T extends boolean = true> {
  */
 export interface CategoriesSelect<T extends boolean = true> {
   title?: T;
+  displayOrder?: T;
   slug?: T;
   parent?: T;
   description?: T;

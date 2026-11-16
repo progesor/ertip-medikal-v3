@@ -168,7 +168,7 @@ export default async function ProductsPage({ searchParams }: Props) {
       locale,
       fallbackLocale: false,
       where: { slug: { exists: true } },
-      limit: 100,
+      pagination: false,
       depth: 0,
     }),
     payload.findGlobal({
@@ -252,7 +252,8 @@ export default async function ProductsPage({ searchParams }: Props) {
       where: whereClause,
       sort: "-createdAt",
       pagination: false,
-      depth: 1,
+      depth: 0,
+      select: { createdAt: true },
     });
 
     const orderedProducts = sortProductsManually(result.docs, manualOrder);
@@ -260,7 +261,19 @@ export default async function ProductsPage({ searchParams }: Props) {
     totalPages = Math.ceil(totalDocs / pageSize);
 
     const startIndex = (currentPage - 1) * pageSize;
-    products = orderedProducts.slice(startIndex, startIndex + pageSize);
+    const pageIds = orderedProducts.slice(startIndex, startIndex + pageSize).map(({ id }) => id);
+    if (pageIds.length) {
+      const page = await payload.find({
+        collection: "products",
+        locale,
+        fallbackLocale: false,
+        where: { and: [whereClause, { id: { in: pageIds } }] },
+        limit: pageSize,
+        depth: 1,
+        select: { title: true, slug: true, mainImage: true, sku: true, variants: true, shortDescription: true },
+      });
+      products = sortProductsManually(page.docs, pageIds);
+    }
     hasPrevPage = currentPage > 1;
     hasNextPage = currentPage < totalPages;
     prevPage = hasPrevPage ? currentPage - 1 : null;
