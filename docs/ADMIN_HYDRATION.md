@@ -7,8 +7,8 @@ The Payload Admin Panel runs inside the Next.js App Router and must keep its Rea
 The repository pins:
 
 ```text
-react: 19.2.8
-react-dom: 19.2.8
+react: 19.3.1
+react-dom: 19.3.1
 ```
 
 The previous project bootstrap used a May 2024 React 19 release candidate. That prerelease runtime predates stable React 19 and the React 19.2 SSR/hydration behavior used by Next.js 16.

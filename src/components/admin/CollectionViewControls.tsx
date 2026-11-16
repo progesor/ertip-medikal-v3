@@ -1,8 +1,9 @@
 "use client";
 
 import { Grid2X2, LayoutGrid, List, Rows3, Table2 } from "lucide-react";
+import { usePathname } from "next/navigation";
 import type { ComponentType } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 
 type ViewMode = "table" | "list" | "cards" | "grid" | "compact";
 
@@ -44,15 +45,6 @@ const viewModes: Array<{
   },
 ];
 
-const getCollectionSlug = () => {
-  if (typeof window === "undefined") return "collection";
-
-  const [, slug] =
-    window.location.pathname.match(/\/admin\/collections\/([^/?#]+)/) || [];
-
-  return slug || "collection";
-};
-
 const getEffectiveMode = (selectedMode: ViewMode) => {
   if (typeof window === "undefined") return selectedMode;
   if (window.innerWidth <= 900 && selectedMode !== "table") return "table";
@@ -79,29 +71,27 @@ const normalizeHeading = (text: string) =>
     return label.length > 30 ? `${label.slice(0, 27)}...` : label;
   };
 
+function subscribeToMode(update: () => void) {
+  window.addEventListener("storage", update);
+  window.addEventListener("ertip-view-mode", update);
+  return () => {
+    window.removeEventListener("storage", update);
+    window.removeEventListener("ertip-view-mode", update);
+  };
+}
+
 export function CollectionViewControls() {
-  const [collectionSlug, setCollectionSlug] = useState("collection");
-  const [mode, setMode] = useState<ViewMode>("table");
+  const pathname = usePathname();
+  const collectionSlug = pathname.split("/collections/")[1]?.split("/")[0] || "collection";
+  const storageKey = `ertip-admin-view:${collectionSlug}`;
+  const readMode = useCallback((): ViewMode => {
+    const saved = window.localStorage.getItem(storageKey);
+    return viewModes.find((item) => item.value === saved)?.value || "table";
+  }, [storageKey]);
+  const mode = useSyncExternalStore(subscribeToMode, readMode, () => "table" as const);
   const [viewportMode, setViewportMode] = useState<ViewMode>("table");
   const [rowCount, setRowCount] = useState(0);
 
-  const storageKey = useMemo(
-    () => `ertip-admin-view:${collectionSlug}`,
-    [collectionSlug],
-  );
-
-  useEffect(() => {
-    const slug = getCollectionSlug();
-    setCollectionSlug(slug);
-
-    const savedMode = window.localStorage.getItem(
-      `ertip-admin-view:${slug}`,
-    ) as ViewMode | null;
-
-    if (savedMode && viewModes.some((item) => item.value === savedMode)) {
-      setMode(savedMode);
-    }
-  }, []);
 
   useEffect(() => {
     const syncMode = () => setViewportMode(getEffectiveMode(mode));
@@ -115,12 +105,11 @@ export function CollectionViewControls() {
 
   useEffect(() => {
     document.documentElement.dataset.ertipCollectionView = viewportMode;
-    window.localStorage.setItem(storageKey, mode);
 
     return () => {
       delete document.documentElement.dataset.ertipCollectionView;
     };
-  }, [mode, storageKey, viewportMode]);
+  }, [viewportMode]);
 
   useEffect(() => {
     let frame = 0;
@@ -200,7 +189,10 @@ export function CollectionViewControls() {
               aria-pressed={isActive}
               className="ertip-collection-tools__button"
               key={item.value}
-              onClick={() => setMode(item.value)}
+              onClick={() => {
+                window.localStorage.setItem(storageKey, item.value);
+                window.dispatchEvent(new Event("ertip-view-mode"));
+              }}
               title={item.description}
               type="button"
             >

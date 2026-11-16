@@ -10,6 +10,7 @@ import * as migration_20260803_060000_redact_download_access_codes from './20260
 import * as migration_20260804_133553_m10_multilingual_foundation from './20260804_133553_m10_multilingual_foundation';
 import * as migration_20260805_130000_m10_ui_text_overrides from './20260805_130000_m10_ui_text_overrides';
 import * as migration_20261014_063557_security_auth_fields from './20261014_063557_security_auth_fields';
+import * as migration_20261116_072908_locale_parent_indexes from './20261116_072908_locale_parent_indexes';
 
 export const migrations = [
   {
@@ -70,6 +71,11 @@ export const migrations = [
   {
     up: migration_20261014_063557_security_auth_fields.up,
     down: migration_20261014_063557_security_auth_fields.down,
-    name: '20261014_063557_security_auth_fields'
+    name: '20261014_063557_security_auth_fields',
+  },
+  {
+    up: migration_20261116_072908_locale_parent_indexes.up,
+    down: migration_20261116_072908_locale_parent_indexes.down,
+    name: '20261116_072908_locale_parent_indexes'
   },
 ];
