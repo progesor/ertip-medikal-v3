@@ -3,23 +3,23 @@ packages:
 
 # Keep security overrides effective with both pnpm 10 and newer launchers.
 overrides:
-  'dompurify': '3.4.17'
+  'dompurify': '3.4.18'
   'esbuild': '0.28.2'
-  'fast-uri': '3.1.8'
+  'fast-uri': '3.1.9'
   'immutable@<5': '4.3.9'
   'js-yaml': '4.3.2'
   'linkify-it': '5.0.2'
-  'markdown-it': '14.3.2'
-  'postcss': '8.5.30'
+  'markdown-it': '14.3.3'
+  'postcss': '8.5.33'
   'sharp': '0.35.5'
-  'ws': '8.22.0'
+  'ws': '8.23.0'
   # Payload still requests Nodemailer 9; security fixes require 10.0.6+.
   # SMTP compatibility is verified through the Payload adapter (see upgrade notes).
-  '@payloadcms/email-nodemailer>nodemailer': '10.1.1'
-  'postcss-selector-parser': '7.1.6'
-  'payload>undici': '7.29.1'
+  '@payloadcms/email-nodemailer>nodemailer': '10.6.0'
+  'postcss-selector-parser': '7.2.1'
+  'payload>undici': '7.30.2'
   # Remove the old Sass -> Chokidar 3 -> vulnerable braces production chain.
-  '@payloadcms/next>sass': '1.105.1'
+  '@payloadcms/next>sass': '1.108.2'
 
 onlyBuiltDependencies:
   - esbuild
