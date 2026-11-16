@@ -80,6 +80,9 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+      - name: Verify patched Payload merge behavior
+        run: node --test tests/security/deepMerge.test.mjs
+
       - name: Typecheck
         run: pnpm typecheck
 

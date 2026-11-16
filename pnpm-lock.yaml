@@ -21,6 +21,11 @@ overrides:
   payload>undici: 7.30.2
   '@payloadcms/next>sass': 1.108.2
 
+patchedDependencies:
+  deepmerge@4.3.1:
+    hash: ca7c2865ee1af4ace4f61bebb1f6a0cef4fab5e832a4263beaafa8fda96a293a
+    path: patches/deepmerge@4.3.1.patch
+
 importers:
 
   .:
@@ -6728,7 +6733,7 @@ snapshots:
 
   deep-is@0.1.4: {}
 
-  deepmerge@4.3.1: {}
+  deepmerge@4.3.1(patch_hash=ca7c2865ee1af4ace4f61bebb1f6a0cef4fab5e832a4263beaafa8fda96a293a): {}
 
   define-data-property@1.1.4:
     dependencies:
@@ -8511,7 +8516,7 @@ snapshots:
       console-table-printer: 2.12.1
       croner: 10.0.1
       dataloader: 2.2.3
-      deepmerge: 4.3.1
+      deepmerge: 4.3.1(patch_hash=ca7c2865ee1af4ace4f61bebb1f6a0cef4fab5e832a4263beaafa8fda96a293a)
       file-type: 21.3.4
       get-tsconfig: 4.8.1
       graphql: 16.15.0
