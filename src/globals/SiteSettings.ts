@@ -171,6 +171,7 @@ export const SiteSettings: GlobalConfig = {
     },
     {
       name: "productCatalog",
+      admin: { hidden: true },
       label: "Ürün Kataloğu Ayarları",
       type: "group",
       fields: [

@@ -13,6 +13,7 @@ import { VariantRowLabel as VariantRowLabel_ec41670ca22349b6e293b43001df200d } f
 import { PackagingRowLabel as PackagingRowLabel_ec41670ca22349b6e293b43001df200d } from '../../../components/admin/ArrayRowLabels'
 import { DocumentRowLabel as DocumentRowLabel_ec41670ca22349b6e293b43001df200d } from '../../../components/admin/ArrayRowLabels'
 import { AccessCodeRowLabel as AccessCodeRowLabel_ec41670ca22349b6e293b43001df200d } from '../../../components/admin/ArrayRowLabels'
+import { ProductCategoryFilter as ProductCategoryFilter_9e86ddf401c1cc38c05945e913026966 } from '../../../components/admin/ProductCategoryFilter'
 import { CollectionViewControls as CollectionViewControls_6f31e140d2db6ec622024d66c8318545 } from '../../../components/admin/CollectionViewControls'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { RscEntryLexicalField as RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -68,6 +69,7 @@ export const importMap = {
   "/components/admin/ArrayRowLabels#PackagingRowLabel": PackagingRowLabel_ec41670ca22349b6e293b43001df200d,
   "/components/admin/ArrayRowLabels#DocumentRowLabel": DocumentRowLabel_ec41670ca22349b6e293b43001df200d,
   "/components/admin/ArrayRowLabels#AccessCodeRowLabel": AccessCodeRowLabel_ec41670ca22349b6e293b43001df200d,
+  "/components/admin/ProductCategoryFilter#ProductCategoryFilter": ProductCategoryFilter_9e86ddf401c1cc38c05945e913026966,
   "/components/admin/CollectionViewControls#CollectionViewControls": CollectionViewControls_6f31e140d2db6ec622024d66c8318545,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,

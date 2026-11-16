@@ -21,12 +21,17 @@ function getCombinations(arrays: string[][]): string[][] {
 
 export const Products: CollectionConfig = {
   slug: "products",
+  orderable: true,
+  defaultSort: "_order",
   labels: { singular: "Ürün", plural: "Ürünler" },
   admin: {
     useAsTitle: "title",
     group: "Ürün Yönetimi",
     description:
-      "Ürün kataloğunu, görselleri, teknik özellikleri ve varyantları yönetin.",
+      "Ürünleri soldaki tutamaçtan sürükleyerek katalog sırasını değiştirin. Kategori filtresi aynı sırayı o kategorideki ürünlerle gösterir.",
+    components: {
+      beforeListTable: ["/components/admin/ProductCategoryFilter#ProductCategoryFilter"],
+    },
     defaultColumns: [
       "title",
       "category",
@@ -38,12 +43,28 @@ export const Products: CollectionConfig = {
     listSearchableFields: ["title", "sku", "shortDescription"],
     pagination: {
       defaultLimit: 20,
-      limits: [10, 20, 50, 100],
+      limits: [10, 20, 50, 100, 250],
     },
   },
   versions: { drafts: true },
   // --- AKILLI SKU VE VARYANT MOTORU (HOOK) ---
   hooks: {
+    afterChange: [
+      async ({ doc, req }) => {
+        // Payload moves the draft when an editor has unpublished changes.
+        // Apply just its rank to the published row in the same transaction.
+        if (doc._status === "draft" && doc._order && req.pathname?.endsWith("/reorder")) {
+          await req.payload.db.updateMany({
+            collection: "products",
+            where: { and: [{ id: { equals: doc.id } }, { _status: { equals: "published" } }] },
+            data: { _order: doc._order },
+            returning: false,
+            req,
+          });
+        }
+        return doc;
+      },
+    ],
     beforeChange: [
       ({ data }) => {
         if (

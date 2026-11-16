@@ -9,7 +9,7 @@ export const Categories: CollectionConfig = {
     defaultColumns: ["title", "parent", "displayOrder"],
     group: "Ürün Yönetimi",
     description:
-      "Katalog kategorilerini ve kategori bazlı ürün sırasını yönetin.",
+      "Katalog kategorilerini ve kategori sırasını yönetin.",
   },
   fields: [
     {
@@ -71,10 +71,7 @@ export const Categories: CollectionConfig = {
         { label: "İlk Eklenen Önce", value: "oldest" },
         { label: "Manuel Sıralama", value: "manual" },
       ],
-      admin: {
-        description:
-          "Bu kategori açıldığında ürünlerin hangi sırayla gösterileceğini belirler.",
-      },
+      admin: { hidden: true },
     },
     {
       name: "manualProductOrder",
@@ -82,12 +79,7 @@ export const Categories: CollectionConfig = {
       relationTo: "products",
       hasMany: true,
       label: "Kategoriye Özel Manuel Ürün Sırası",
-      admin: {
-        condition: (_, siblingData) =>
-          siblingData?.productSortMode === "manual",
-        description:
-          "Seçili ürünleri sürükleyerek sıralayın. İlk ürün kategorinin başında görünür. Yeni eklenen ürünler seçili listenin ardından gösterilir.",
-      },
+      admin: { hidden: true },
     },
   ],
 };

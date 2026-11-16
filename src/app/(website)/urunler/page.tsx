@@ -46,44 +46,6 @@ type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-type ProductSortMode = "newest" | "oldest" | "manual";
-
-function getRelationshipId(value: unknown) {
-  if (typeof value === "object" && value !== null && "id" in value) {
-    return String((value as { id: string | number }).id);
-  }
-
-  if (typeof value === "string" || typeof value === "number") {
-    return String(value);
-  }
-
-  return "";
-}
-
-function sortProductsManually(products: any[], manualOrder: unknown[]) {
-  const manualRanks = new Map(
-    manualOrder
-      .map((item, index) => [getRelationshipId(item), index] as const)
-      .filter(([id]) => Boolean(id)),
-  );
-
-  return [...products].sort((first, second) => {
-    const firstRank = manualRanks.get(String(first.id));
-    const secondRank = manualRanks.get(String(second.id));
-
-    if (firstRank !== undefined && secondRank !== undefined) {
-      return firstRank - secondRank;
-    }
-    if (firstRank !== undefined) return -1;
-    if (secondRank !== undefined) return 1;
-
-    return (
-      new Date(second.createdAt).getTime() -
-      new Date(first.createdAt).getTime()
-    );
-  });
-}
-
 function getProductImageUrl(product: any) {
   if (typeof product.mainImage !== "object" || !product.mainImage) {
     return "/placeholder.jpg";
@@ -162,22 +124,15 @@ export default async function ProductsPage({ searchParams }: Props) {
     Number.isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
   const pageSize = 12;
 
-  const [{ docs: categories }, siteSettings] = await Promise.all([
-    payload.find({
-      collection: "categories",
-      locale,
-      fallbackLocale: false,
-      where: { slug: { exists: true } },
-      pagination: false,
-      depth: 0,
-    }),
-    payload.findGlobal({
-      slug: "site-settings",
-      locale,
-      fallbackLocale: false,
-      depth: 0,
-    }),
-  ]);
+  const { docs: categories } = await payload.find({
+    collection: "categories",
+    locale,
+    fallbackLocale: false,
+    where: { slug: { exists: true } },
+    pagination: false,
+    depth: 0,
+    select: { title: true, slug: true, parent: true },
+  });
 
   const parentCategories = categories.filter((category: any) => !category.parent);
   const getChildren = (parentId: string | number) =>
@@ -220,84 +175,18 @@ export default async function ProductsPage({ searchParams }: Props) {
     whereClause.category = { in: categoryIds };
   }
 
-  const catalogSettings = siteSettings.productCatalog;
-  const globalSortMode = (catalogSettings?.defaultSortMode ||
-    "newest") as ProductSortMode;
-  const categorySortMode = activeCategory?.productSortMode;
-  const effectiveSortMode = (
-    categorySortMode && categorySortMode !== "inherit"
-      ? categorySortMode
-      : globalSortMode
-  ) as ProductSortMode;
-  const manualOrder =
-    effectiveSortMode === "manual"
-      ? categorySortMode === "manual"
-        ? activeCategory?.manualProductOrder || []
-        : catalogSettings?.manualProductOrder || []
-      : [];
-
-  let products: any[] = [];
-  let totalPages = 0;
-  let hasPrevPage = false;
-  let hasNextPage = false;
-  let prevPage: number | null = null;
-  let nextPage: number | null = null;
-  let totalDocs = 0;
-
-  if (effectiveSortMode === "manual") {
-    const result = await payload.find({
+  const { docs: products, totalPages, totalDocs, hasPrevPage, hasNextPage, prevPage, nextPage } =
+    await payload.find({
       collection: "products",
       locale,
       fallbackLocale: false,
       where: whereClause,
-      sort: "-createdAt",
-      pagination: false,
-      depth: 0,
-      select: { createdAt: true },
-    });
-
-    const orderedProducts = sortProductsManually(result.docs, manualOrder);
-    totalDocs = orderedProducts.length;
-    totalPages = Math.ceil(totalDocs / pageSize);
-
-    const startIndex = (currentPage - 1) * pageSize;
-    const pageIds = orderedProducts.slice(startIndex, startIndex + pageSize).map(({ id }) => id);
-    if (pageIds.length) {
-      const page = await payload.find({
-        collection: "products",
-        locale,
-        fallbackLocale: false,
-        where: { and: [whereClause, { id: { in: pageIds } }] },
-        limit: pageSize,
-        depth: 1,
-        select: { title: true, slug: true, mainImage: true, sku: true, variants: true, shortDescription: true },
-      });
-      products = sortProductsManually(page.docs, pageIds);
-    }
-    hasPrevPage = currentPage > 1;
-    hasNextPage = currentPage < totalPages;
-    prevPage = hasPrevPage ? currentPage - 1 : null;
-    nextPage = hasNextPage ? currentPage + 1 : null;
-  } else {
-    const result = await payload.find({
-      collection: "products",
-      locale,
-      fallbackLocale: false,
-      where: whereClause,
-      sort: effectiveSortMode === "oldest" ? "createdAt" : "-createdAt",
+      sort: ["_order", "id"],
       limit: pageSize,
       page: currentPage,
       depth: 1,
+      select: { title: true, slug: true, mainImage: true, sku: true, variants: true, shortDescription: true },
     });
-
-    products = result.docs;
-    totalPages = result.totalPages;
-    hasPrevPage = result.hasPrevPage;
-    hasNextPage = result.hasNextPage;
-    prevPage = result.prevPage ?? null;
-    nextPage = result.nextPage ?? null;
-    totalDocs = result.totalDocs;
-  }
 
   const buildCatalogUrl = (urlParams: URLSearchParams) => {
     const queryString = urlParams.toString();

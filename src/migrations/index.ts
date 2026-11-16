@@ -14,6 +14,7 @@ import * as migration_20261116_072908_locale_parent_indexes from './20261116_072
 import * as migration_20261116_090430_catalog_mcp from './20261116_090430_catalog_mcp';
 import * as migration_20261116_121118_catalog_image_upload from './20261116_121118_catalog_image_upload';
 import * as migration_20261116_133315_category_display_order from './20261116_133315_category_display_order';
+import * as migration_20261116_134731_product_catalog_order from './20261116_134731_product_catalog_order';
 
 export const migrations = [
   {
@@ -94,6 +95,11 @@ export const migrations = [
   {
     up: migration_20261116_133315_category_display_order.up,
     down: migration_20261116_133315_category_display_order.down,
-    name: '20261116_133315_category_display_order'
+    name: '20261116_133315_category_display_order',
+  },
+  {
+    up: migration_20261116_134731_product_catalog_order.up,
+    down: migration_20261116_134731_product_catalog_order.down,
+    name: '20261116_134731_product_catalog_order'
   },
 ];

@@ -249,13 +249,14 @@ export interface Media {
   };
 }
 /**
- * Ürün kataloğunu, görselleri, teknik özellikleri ve varyantları yönetin.
+ * Ürünleri soldaki tutamaçtan sürükleyerek katalog sırasını değiştirin. Kategori filtresi aynı sırayı o kategorideki ürünlerle gösterir.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products".
  */
 export interface Product {
   id: number;
+  _order?: string | null;
   title: string;
   shortDescription?: string | null;
   /**
@@ -424,7 +425,7 @@ export interface Product {
   _status?: ('draft' | 'published') | null;
 }
 /**
- * Katalog kategorilerini ve kategori bazlı ürün sırasını yönetin.
+ * Katalog kategorilerini ve kategori sırasını yönetin.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories".
@@ -440,13 +441,7 @@ export interface Category {
   parent?: (number | null) | Category;
   description?: string | null;
   image?: (number | null) | Media;
-  /**
-   * Bu kategori açıldığında ürünlerin hangi sırayla gösterileceğini belirler.
-   */
   productSortMode?: ('inherit' | 'newest' | 'oldest' | 'manual') | null;
-  /**
-   * Seçili ürünleri sürükleyerek sıralayın. İlk ürün kategorinin başında görünür. Yeni eklenen ürünler seçili listenin ardından gösterilir.
-   */
   manualProductOrder?: (number | Product)[] | null;
   updatedAt: string;
   createdAt: string;
@@ -1521,6 +1516,7 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "products_select".
  */
 export interface ProductsSelect<T extends boolean = true> {
+  _order?: T;
   title?: T;
   shortDescription?: T;
   description?: T;
