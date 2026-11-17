@@ -7,6 +7,12 @@ import { pipeline } from "node:stream/promises";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { isAdmin } from "@/access/roles";
+import {
+  addChunk,
+  beginUpload,
+  finishUpload,
+  uploadFailure,
+} from "@/lib/backup/upload";
 import { scheduleBackup } from "@/lib/backup/schedule";
 import {
   completedArchive,
@@ -97,6 +103,23 @@ export async function POST(request: Request) {
   const denied = await authorize(request);
   if (denied) return denied;
   const body = await request.json().catch(() => null);
+  if (body?.action === "beginUpload" || body?.action === "finishUpload") {
+    try {
+      const result =
+        body.action === "beginUpload"
+          ? await beginUpload(body.size)
+          : await finishUpload(body.id, (file) =>
+              scheduleBackup("import", file),
+            );
+      return Response.json(result, {
+        status: body.action === "beginUpload" ? 201 : 202,
+        headers,
+      });
+    } catch (error) {
+      const failure = uploadFailure(error);
+      return reply(failure.message, failure.status);
+    }
+  }
   if (body?.action === "create" && kinds.includes(body.kind))
     return Response.json(await scheduleBackup("create", body.kind, body.kind), {
       status: 202,
@@ -115,6 +138,21 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   const denied = await authorize(request);
   if (denied) return denied;
+  const upload = request.headers.get("x-upload-id");
+  if (upload !== null) {
+    try {
+      const offset = request.headers.get("x-upload-offset");
+      const result = await addChunk(
+        upload,
+        offset === null ? NaN : Number(offset),
+        request.body,
+      );
+      return Response.json(result, { headers });
+    } catch (error) {
+      const failure = uploadFailure(error);
+      return reply(failure.message, failure.status);
+    }
+  }
   if (!request.body) return reply("Paket seçin.", 400);
   const limit = Number(process.env.BACKUP_UPLOAD_MAX_BYTES || 16 * 1024 ** 3);
   if (!Number.isSafeInteger(limit) || limit <= 0)

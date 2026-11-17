@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { backupAction, uploadBackup } from "@/lib/backup/uploadClient";
 import { Archive, Database, Images, Download, Upload } from "lucide-react";
 
 const scopes = {
@@ -51,6 +52,7 @@ const activity = {
 export function BackupControls() {
   const [items, setItems] = useState<Item[] | null>(null);
   const [error, setError] = useState("");
+  const [progress, setProgress] = useState<number | null>(null);
   const [sending, setSending] = useState(false);
   const [selected, setSelected] = useState<Item | null>(null);
   const input = useRef<HTMLInputElement>(null);
@@ -74,24 +76,18 @@ export function BackupControls() {
     setSending(true);
     setError("");
     try {
-      const file = body instanceof File;
-      const response = await fetch(api, {
-        method: file ? "PUT" : "POST",
-        headers: {
-          "x-ertip-backup": "1",
-          "Content-Type": file
-            ? "application/octet-stream"
-            : "application/json",
-        },
-        body: file ? body : JSON.stringify(body),
-      });
-      if (!response.ok)
-        throw Error((await response.json()).message || "İşlem başlatılamadı.");
+      if (body instanceof File) {
+        setProgress(0);
+        await uploadBackup(body, setProgress);
+      } else {
+        await backupAction(body);
+      }
       setSelected(null);
       await refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Bağlantıyı kontrol edin.");
     } finally {
+      setProgress(null);
       setSending(false);
       if (input.current) input.current.value = "";
     }
@@ -155,7 +151,15 @@ export function BackupControls() {
             {error}
           </p>
         )}
-        {sending && <p role="status">İstek iletiliyor…</p>}
+        {sending && (
+          <p role="status">
+            {progress === null
+              ? "İstek iletiliyor…"
+              : progress === 100
+                ? "Paket doğrulamaya alınıyor…"
+                : "Paket yükleniyor · %" + progress}
+          </p>
+        )}
         {selected?.kind && (
           <div
             role="alert"
@@ -203,7 +207,7 @@ export function BackupControls() {
                     {dateLabel(item.date)}
                     {item.size !== undefined && " · " + sizeLabel(item.size)}
                   </p>
-                  {item.status !== "done" || item.action === "restore" ? (
+                  {item.status !== "done" || item.action !== "create" ? (
                     <p role="status">
                       {activity[item.action]} ·{" "}
                       {item.status === "running"
