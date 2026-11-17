@@ -87,13 +87,17 @@ async function existingMarker() {
   }
 }
 
-export async function execute(action, value, onRestored = async () => {}) {
+export async function execute(
+  action,
+  value,
+  onRestored = async () => {},
+  id = randomUUID(),
+) {
   const root = await privateDir();
   const work = await mkdtemp(path.join(root, "work-"));
   const stage = path.join(work, "contents");
   const sql = path.join(stage, "database.sql");
   const media = path.join(stage, "media");
-  const id = randomUUID();
   const db = new pg.Client({
     connectionString: process.env.DATABASE_URI,
     connectionTimeoutMillis: 15000,

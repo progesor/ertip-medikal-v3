@@ -1,23 +1,18 @@
 import path from "node:path";
-import { randomUUID } from "node:crypto";
+import { createHmac, randomUUID } from "node:crypto";
 import { createReadStream, createWriteStream } from "node:fs";
 import { rm } from "node:fs/promises";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
-import { after } from "next/server";
-import { revalidatePath } from "next/cache";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { isAdmin } from "@/access/roles";
-import { invalidateProtectedMediaCache } from "@/lib/security/protectedMedia";
-import { execute } from "@/lib/backup/engine.mjs";
+import { scheduleBackup } from "@/lib/backup/schedule";
 import {
   completedArchive,
   inventory,
   kinds,
   privateDir,
-  processStarted,
-  saveJSON,
   validId,
 } from "@/lib/backup/storage.mjs";
 
@@ -27,8 +22,41 @@ const headers = { "Cache-Control": "private, no-store" };
 const reply = (message: string, status: number) =>
   Response.json({ message }, { status, headers });
 
-async function authorize(request: Request) {
+async function authorize(request: Request, downloadId?: string | null) {
   const payload = await getPayload({ config });
+  const authorization = request.headers.get("authorization");
+  if (
+    request.method === "GET" &&
+    downloadId &&
+    validId(downloadId) &&
+    authorization?.startsWith("Bearer ")
+  ) {
+    // Use the plugin's SHA-256 API key index and recheck the owner on each download.
+    const apiKeyIndex = createHmac("sha256", payload.secret)
+      .update(authorization.slice(7).trim())
+      .digest("hex");
+    const {
+      docs: [key],
+    } = await payload.find({
+      collection: "payload-mcp-api-keys",
+      overrideAccess: true,
+      depth: 1,
+      limit: 1,
+      pagination: false,
+      select: { user: true },
+      populate: { users: { role: true } },
+      where: {
+        and: [
+          { apiKeyIndex: { equals: apiKeyIndex } },
+          { enableAPIKey: { equals: true } },
+          { "payload-mcp-tool.getSiteBackupDownload": { equals: true } },
+        ],
+      },
+    });
+    if (!key || !isAdmin(key.user))
+      return reply("Bu bağlantının yedek indirme yetkisi yok.", 403);
+    return;
+  }
   const { user } = await payload.auth({ headers: request.headers });
   if (!user || user.collection !== "users" || !isAdmin(user))
     return reply("Bu alan yöneticilere açıktır.", user ? 403 : 401);
@@ -38,9 +66,9 @@ async function authorize(request: Request) {
 }
 
 export async function GET(request: Request) {
-  const denied = await authorize(request);
-  if (denied) return denied;
   const id = new URL(request.url).searchParams.get("download");
+  const denied = await authorize(request, id);
+  if (denied) return denied;
   if (id === null) return Response.json(await inventory(), { headers });
   if (!validId(id)) return reply("Yedek bulunamadı.", 404);
   const archive = await completedArchive(id).catch(() => null);
@@ -65,54 +93,22 @@ export async function GET(request: Request) {
   );
 }
 
-async function schedule(
-  action: "create" | "restore" | "import",
-  value: string,
-  kind?: string,
-) {
-  const job = {
-    id: randomUUID(),
-    date: new Date().toISOString(),
-    pid: process.pid,
-    started: processStarted,
-    status: "running",
-    action,
-    kind,
-  };
-  const file = path.join(await privateDir(), job.id + ".json");
-  await saveJSON(file, job);
-  after(async () => {
-    try {
-      const result = await execute(action, value, async () => {
-        invalidateProtectedMediaCache();
-        revalidatePath("/", "layout");
-      });
-      if (action === "restore")
-        await saveJSON(file, { ...job, status: "done", kind: result.kind });
-      else await rm(file); // The finished archive has its own persistent record.
-    } catch (error) {
-      await saveJSON(file, {
-        ...job,
-        status: "failed",
-        message:
-          error instanceof Error ? error.message : "İşlem tamamlanamadı.",
-      });
-    } finally {
-      if (action === "import") await rm(value, { force: true });
-    }
-  });
-  return Response.json({ id: job.id }, { status: 202, headers });
-}
 export async function POST(request: Request) {
   const denied = await authorize(request);
   if (denied) return denied;
   const body = await request.json().catch(() => null);
   if (body?.action === "create" && kinds.includes(body.kind))
-    return schedule("create", body.kind, body.kind);
+    return Response.json(await scheduleBackup("create", body.kind, body.kind), {
+      status: 202,
+      headers,
+    });
   if (body?.action === "restore" && validId(body.id) && body.confirm === true) {
     const archive = await completedArchive(body.id).catch(() => null);
     if (!archive) return reply("Yedek bulunamadı.", 404);
-    return schedule("restore", archive.file, archive.record.kind);
+    return Response.json(
+      await scheduleBackup("restore", archive.file, archive.record.kind),
+      { status: 202, headers },
+    );
   }
   return reply("İşlem ve yedek seçimini kontrol edin.", 400);
 }
@@ -139,7 +135,10 @@ export async function PUT(request: Request) {
       counter,
       createWriteStream(file, { flags: "wx", mode: 0o600 }),
     );
-    return await schedule("import", file);
+    return Response.json(await scheduleBackup("import", file), {
+      status: 202,
+      headers,
+    });
   } catch {
     await rm(file, { force: true });
     return reply(

@@ -7,8 +7,15 @@ import {
 } from "@/lib/catalog/contentReview";
 import { isAdmin, isContentManager } from "@/access/roles";
 import { uploadProductImage } from "@/lib/catalog/uploadProductImage";
+import { completedArchive, inventory } from "@/lib/backup/storage.mjs";
 
 type Tool = NonNullable<NonNullable<MCPPluginConfig["mcp"]>["tools"]>[number];
+function requireBackupAdmin(req: PayloadRequest) {
+  if (req.user?.collection !== "users" || !isAdmin(req.user))
+    throw new Error(
+      "Yedekleme için bağlı kullanıcının yönetici olması gerekir.",
+    );
+}
 
 function readAccess(req: PayloadRequest) {
   if (!isContentManager(req.user))
@@ -47,9 +54,64 @@ const reviewPage = z.object({
     .describe("Önceki sayfa için önceki yanıtın previousBefore değeri."),
 });
 const productQuery = z.object({ productId: z.number().int().positive() });
+const backupCreate = z.object({ kind: z.enum(["full", "sql", "media"]) });
+const backupId = z.object({ id: z.string().uuid() });
+const backupList = z.object({
+  id: backupId.shape.id.optional(),
+  page: z.number().int().positive().default(1),
+});
 
 export const portalTools: Tool[] = [
   uploadProductImage,
+  {
+    name: "createSiteBackup",
+    description:
+      "Tam site, SQL veya medya yedeği başlatır. Dönen kimliği listSiteBackups ile izleyin.",
+    parameters: backupCreate.shape,
+    async handler(args, req) {
+      requireBackupAdmin(req);
+      const { kind } = backupCreate.parse(args);
+      const { scheduleBackup } = await import("@/lib/backup/schedule");
+      return result(await scheduleBackup("create", kind, kind));
+    },
+  },
+  {
+    name: "listSiteBackups",
+    description:
+      "Yedek paketlerini ve işlemlerin durumunu listeler. Tek bir işlem için id verin.",
+    parameters: backupList.shape,
+    async handler(args, req) {
+      requireBackupAdmin(req);
+      const { id, page } = backupList.parse(args);
+      const rows = await inventory();
+      if (id) return result({ job: rows.find((row) => row.id === id) ?? null });
+      const offset = (page - 1) * 50;
+      return result({
+        jobs: rows.slice(offset, offset + 50),
+        total: rows.length,
+        page,
+      });
+    },
+  },
+  {
+    name: "getSiteBackupDownload",
+    description:
+      "Hazır şifreli paketin indirme yolunu verir. Aynı sunucuya GET isteğinde MCP Bearer anahtarını gönderin.",
+    parameters: backupId.shape,
+    async handler(args, req) {
+      requireBackupAdmin(req);
+      const { id } = backupId.parse(args);
+      const { record, size } = await completedArchive(id);
+      return result({
+        id,
+        kind: record.kind,
+        size,
+        path: "/api/site-backups?download=" + id,
+        method: "GET",
+        authentication: "Bearer",
+      });
+    },
+  },
   {
     name: "listProductContentIssues",
     description:

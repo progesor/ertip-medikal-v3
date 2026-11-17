@@ -38,6 +38,12 @@ Geri yükleme sırasında site istekleri geçici olarak 503 yanıtı alır. Post
 
 ## Komut satırı
 
+### MCP üzerinden yedek alma
+
+Yöneticiye bağlı MCP bağlantısında **Özel araçlar** altında kullanacağınız izinleri açın. `createSiteBackup` seçilen türde yedeği başlatır ve işlem kimliğini verir. `listSiteBackups` aynı kimlikle durumunu gösterir. Durum `done` olduğunda `getSiteBackupDownload` dosyanın boyutunu ve aynı sunucudaki indirme yolunu verir. Paketi bu yoldan, isteğin `Authorization: Bearer` başlığında aynı MCP anahtarıyla indirin. Anahtarın indirme yetkisi ve bağlı kullanıcının yönetici rolü her istekte kontrol edilir.
+
+### Sunucu komutları
+
 ```sh
 pnpm backup create full
 pnpm backup create sql

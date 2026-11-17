@@ -1304,6 +1304,9 @@ export interface PayloadMcpApiKey {
   };
   'payload-mcp-tool'?: {
     uploadProductImage?: boolean | null;
+    createSiteBackup?: boolean | null;
+    listSiteBackups?: boolean | null;
+    getSiteBackupDownload?: boolean | null;
     listProductContentIssues?: boolean | null;
     findCatalogItem?: boolean | null;
     reviewProductContent?: boolean | null;
@@ -2376,6 +2379,9 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
     | T
     | {
         uploadProductImage?: T;
+        createSiteBackup?: T;
+        listSiteBackups?: T;
+        getSiteBackupDownload?: T;
         listProductContentIssues?: T;
         findCatalogItem?: T;
         reviewProductContent?: T;

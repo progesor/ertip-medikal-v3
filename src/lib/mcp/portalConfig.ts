@@ -32,6 +32,9 @@ const actionNames: Record<string, string> = {
   reviewProductContent: "İki dilde ürün kontrolü",
   getContentOverview: "İçerik sayıları",
   getInboxSummary: "Talep ve mesaj özeti",
+  createSiteBackup: "Site yedeği oluşturma",
+  listSiteBackups: "Yedekleri ve durumlarını görüntüleme",
+  getSiteBackupDownload: "Yedek paketini indirme",
   editorialGuide: "İçerik rehberi",
   translateProduct: "Ürün çevirisi hazırlama",
 };
