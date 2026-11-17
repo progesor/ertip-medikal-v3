@@ -97,7 +97,7 @@ export const CTABlock: Block = {
           name: "buttonLink",
           type: "text",
           label: "Eski Buton Linki",
-          defaultValue: "/iletisim",
+          defaultValue: "/contact",
         },
       ],
     },

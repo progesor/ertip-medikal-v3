@@ -1,3 +1,4 @@
+import { mediaUsageEndpoint } from "@/lib/media/usageEndpoint";
 import {
   buildConfig,
   type CollectionConfig,
@@ -251,7 +252,7 @@ export default buildConfig({
       },
     },
   },
-  endpoints: [...imageOptimizationEndpoints, ...i18nContentEndpoints],
+  endpoints: [mediaUsageEndpoint, ...imageOptimizationEndpoints, ...i18nContentEndpoints],
   collections: [
     ProductsWithProtectedPublicApi,
     withContentAccess(LocalizedCategories),

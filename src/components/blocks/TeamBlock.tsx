@@ -49,7 +49,7 @@ function TeamImage({
   return (
     <Image
       src={avatarUrl}
-      alt={member.name || "Ekip üyesi"}
+      alt={member.name || ""}
       fill
       className="object-cover grayscale transition-transform duration-500 group-hover:scale-105 group-hover:grayscale-0"
       sizes={featured ? "(max-width: 768px) 100vw, 45vw" : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"}
@@ -79,12 +79,12 @@ function TeamCard({
                 {member.role}
               </p>
             )}
-            {member.linkedin && (
+            {member.linkedin && member.linkedin !== "/" && (
               <Link
                 href={member.linkedin}
                 target="_blank"
                 className="mx-auto inline-flex h-11 w-11 items-center justify-center rounded-full bg-surface-muted text-text-muted shadow-sm transition-colors duration-300 hover:bg-info hover:text-info-foreground md:mx-0"
-                aria-label={`${member.name || "Ekip üyesi"} LinkedIn profili`}
+                aria-label={member.name ? `${member.name} – LinkedIn` : "LinkedIn"}
               >
                 <span aria-hidden="true" className="text-xl font-bold leading-none">in</span>
               </Link>
@@ -108,12 +108,12 @@ function TeamCard({
           </p>
         )}
 
-        {member.linkedin && (
+        {member.linkedin && member.linkedin !== "/" && (
           <Link
             href={member.linkedin}
             target="_blank"
             className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-surface-muted text-text-muted shadow-sm transition-colors duration-300 hover:bg-info hover:text-info-foreground"
-            aria-label={`${member.name || "Ekip üyesi"} LinkedIn profili`}
+            aria-label={member.name ? `${member.name} – LinkedIn` : "LinkedIn"}
           >
             <span aria-hidden="true" className="text-xl font-bold leading-none">in</span>
           </Link>

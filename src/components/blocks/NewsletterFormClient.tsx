@@ -56,7 +56,7 @@ export function NewsletterFormClient({ buttonText }: { buttonText?: string | nul
   return (
     <form
       onSubmit={handleSubmit}
-      className="relative mx-auto flex max-w-lg flex-col gap-4 sm:flex-row"
+      className="relative flex w-full flex-col items-start gap-3 sm:flex-row"
     >
       <div
         aria-hidden="true"
@@ -77,13 +77,15 @@ export function NewsletterFormClient({ buttonText }: { buttonText?: string | nul
           name="email"
           type="email"
           maxLength={254}
+          aria-label={dictionary.emailPlaceholder}
+          autoComplete="email"
           placeholder={dictionary.emailPlaceholder}
           required
           disabled={status === "loading" || status === "success"}
           className="h-14 w-full rounded-full border-background/20 bg-background/10 px-6 text-lg text-primary-foreground placeholder:text-primary-foreground/50 focus-visible:ring-ring"
         />
         {status === "error" && (
-          <p className="absolute -bottom-7 left-4 flex items-center text-sm text-error-foreground">
+          <p role="alert" className="mt-2 flex items-center text-sm text-primary-foreground">
             <AlertCircle className="mr-1 h-3 w-3" /> {errorMessage}
           </p>
         )}

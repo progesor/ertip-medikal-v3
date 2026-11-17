@@ -137,7 +137,7 @@ export const uiDictionaries = {
         "Bağlantı hatası yaşandı. Lütfen internetinizi kontrol edin.",
       privacyPrefix: "Kişisel verilerin işlenmesine ilişkin detaylar için",
       privacyLink: "KVKK Aydınlatma Metni",
-      privacySuffix: "’ni inceleyebilirsiniz.",
+      privacySuffix: " sayfasını inceleyebilirsiniz.",
     },
     unsubscribe: {
       requestError: "İşlem tamamlanamadı. Lütfen tekrar deneyin.",

@@ -1,3 +1,4 @@
+import { getUnsubscribePath } from "@/lib/i18n/routing";
 import configPromise from "@payload-config";
 import { getPayload } from "payload";
 import { NextRequest, NextResponse } from "next/server";
@@ -14,6 +15,7 @@ import {
 import { createUnsubscribeToken } from "@/lib/security/unsubscribeToken";
 
 type UnsubscribeRequestBody = {
+  locale?: unknown;
   email?: unknown;
   website?: unknown;
 };
@@ -45,9 +47,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const locale = body.locale === "en" ? "en" : "tr";
+  const en = locale === "en";
+  const genericMessage = en ? "If the address is subscribed, a confirmation link has been sent to it." : GENERIC_MESSAGE;
+
   if (isHoneypotFilled(body.website)) {
     return NextResponse.json(
-      { success: true, message: GENERIC_MESSAGE },
+      { success: true, message: genericMessage },
       { status: 202 },
     );
   }
@@ -56,7 +62,7 @@ export async function POST(request: NextRequest) {
 
   if (!isValidEmail(email)) {
     return NextResponse.json(
-      { success: false, message: "Geçerli bir e-posta adresi girin." },
+      { success: false, message: en ? "Enter a valid email address." : "Geçerli bir e-posta adresi girin." },
       { status: 400 },
     );
   }
@@ -91,7 +97,7 @@ export async function POST(request: NextRequest) {
         email,
       });
       const confirmationURL = new URL(
-        "/abonelikten-ayril",
+        getUnsubscribePath(locale),
         serverEnv.publicSiteUrl,
       );
       confirmationURL.searchParams.set("token", token);
@@ -99,15 +105,15 @@ export async function POST(request: NextRequest) {
 
       await payload.sendEmail({
         to: email,
-        subject: "Ertip Medikal e-bülten aboneliği iptal onayı",
+        subject: en ? "Confirm your Ertip Medikal newsletter cancellation" : "Ertip Medikal e-bülten aboneliği iptal onayı",
         html: `
           <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;line-height:1.6;color:#172033;">
-            <h2 style="margin:0 0 16px;">Abonelikten ayrılma isteği</h2>
-            <p>Ertip Medikal e-bülten aboneliğinizi iptal etmek için aşağıdaki bağlantıyı kullanın.</p>
+            <h2 style="margin:0 0 16px;">${en ? "Unsubscribe request" : "Abonelikten ayrılma isteği"}</h2>
+            <p>${en ? "Use the link below to unsubscribe from the Ertip Medikal newsletter." : "Ertip Medikal e-bülten aboneliğinizi iptal etmek için aşağıdaki bağlantıyı kullanın."}</p>
             <p style="margin:28px 0;">
-              <a href="${safeURL}" style="display:inline-block;padding:12px 20px;border-radius:10px;background:#b42318;color:#ffffff;text-decoration:none;font-weight:700;">Aboneliği İptal Et</a>
+              <a href="${safeURL}" style="display:inline-block;padding:12px 20px;border-radius:10px;background:#b42318;color:#ffffff;text-decoration:none;font-weight:700;">${en ? "Unsubscribe" : "Aboneliği İptal Et"}</a>
             </p>
-            <p style="font-size:13px;color:#667085;">Bu bağlantı 48 saat geçerlidir. Bu isteği siz yapmadıysanız e-postayı yok sayabilirsiniz.</p>
+            <p style="font-size:13px;color:#667085;">${en ? "This link is valid for 48 hours. If you did not make this request, you can ignore this email." : "Bu bağlantı 48 saat geçerlidir. Bu isteği siz yapmadıysanız e-postayı yok sayabilirsiniz."}</p>
           </div>
         `,
       });
@@ -117,7 +123,7 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json(
-    { success: true, message: GENERIC_MESSAGE },
+    { success: true, message: genericMessage },
     {
       status: 202,
       headers: { "Cache-Control": "no-store" },

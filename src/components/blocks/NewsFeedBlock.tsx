@@ -1,4 +1,7 @@
 import React from "react";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { getNewsPath } from "@/lib/i18n/routing";
 import { getPayload } from "payload";
 import configPromise from "@payload-config";
 import { NewsGridClient } from "@/components/blocks/NewsGridClient";
@@ -9,6 +12,7 @@ export async function NewsFeedBlock({
   description,
   limit = 20,
   showFilters = true,
+  isHome = false,
 }: any) {
   const [payload, locale] = await Promise.all([
     getPayload({ config: configPromise }),
@@ -29,11 +33,18 @@ export async function NewsFeedBlock({
       fallbackLocale: false,
       where: {
         _status: { equals: "published" },
+        ...(isHome && { hideFromHomepage: { not_equals: true } }),
         slug: { exists: true },
       },
       sort: "-publishedDate",
       limit,
-      depth: 2,
+      depth: 1,
+      select: { title: true, slug: true, excerpt: true, publishedDate: true, image: true, category: true },
+      populate: {
+        // Payload resolves an upload's URL from its filename during afterRead.
+        media: { filename: true, url: true },
+        "news-categories": { title: true },
+      },
     }),
   ]);
 
@@ -55,6 +66,14 @@ export async function NewsFeedBlock({
           showFilters={showFilters}
           locale={locale}
         />
+        {isHome && (
+          <div className="mt-8 text-center">
+            <Link href={getNewsPath(locale)} className="inline-flex items-center gap-2 rounded-lg px-3 py-2 font-semibold text-primary hover:underline">
+              {locale === "en" ? "All news and events" : "Tüm haberler ve kongreler"}
+              <ArrowRight aria-hidden="true" className="size-4" />
+            </Link>
+          </div>
+        )}
       </div>
     </section>
   );

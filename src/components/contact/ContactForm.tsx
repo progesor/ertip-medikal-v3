@@ -13,9 +13,10 @@ type ContactResponse = {
 type ContactFormProps = {
   departments?: any[];
   privacyHref?: string;
+  privacyLabel?: string;
 };
 
-export function ContactForm({ departments, privacyHref }: ContactFormProps) {
+export function ContactForm({ departments, privacyHref, privacyLabel }: ContactFormProps) {
   const dictionary = useUiDictionary();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -235,7 +236,7 @@ export function ContactForm({ departments, privacyHref }: ContactFormProps) {
             href={privacyHref}
             className="font-semibold text-primary underline decoration-primary/30 underline-offset-4 transition-colors hover:decoration-primary"
           >
-            {dictionary.contact.privacyLink}
+            {privacyLabel || dictionary.contact.privacyLink}
           </a>
           {dictionary.contact.privacySuffix}
         </p>

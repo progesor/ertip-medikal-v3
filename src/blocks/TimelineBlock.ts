@@ -110,7 +110,7 @@ export const TimelineBlock: Block = {
               name: "link",
               type: "text",
               label: "Bağlantı",
-              admin: { placeholder: "/hakkimizda" },
+              admin: { placeholder: "/about-us" },
             },
           ],
         },

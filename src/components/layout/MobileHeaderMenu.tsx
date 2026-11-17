@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Menu, Search, ShoppingCart, X } from "lucide-react";
@@ -32,6 +32,7 @@ export function MobileHeaderMenu({
 }: MobileHeaderMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const menuRef = useRef<HTMLDivElement>(null);
   const panelId = useId();
   const router = useRouter();
   const { cartItems } = useCart();
@@ -61,6 +62,9 @@ export function MobileHeaderMenu({
   useEffect(() => {
     if (!isOpen) return;
 
+    const headerRow = menuRef.current?.closest("[data-fit]");
+    const onDesktop = () => setIsOpen(false);
+    headerRow?.addEventListener("desktopmenu", onDesktop);
     const previousOverflow = document.body.style.overflow;
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setIsOpen(false);
@@ -70,6 +74,7 @@ export function MobileHeaderMenu({
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
+      headerRow?.removeEventListener("desktopmenu", onDesktop);
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
@@ -87,7 +92,7 @@ export function MobileHeaderMenu({
   };
 
   return (
-    <div className="md:hidden">
+    <div ref={menuRef} data-header-drawer>
       <button
         type="button"
         onClick={() => setIsOpen((current) => !current)}
@@ -105,7 +110,7 @@ export function MobileHeaderMenu({
             type="button"
             aria-label={labels.close}
             onClick={closeMenu}
-            className="fixed inset-0 z-30 bg-surface-inverse/35 backdrop-blur-sm md:hidden"
+            className="fixed inset-0 z-30 bg-surface-inverse/35 backdrop-blur-sm"
           />
 
           <div
@@ -113,7 +118,7 @@ export function MobileHeaderMenu({
             role="dialog"
             aria-modal="true"
             aria-label={labels.navigation}
-            className="fixed inset-x-0 top-[4.5rem] z-40 max-h-[calc(100dvh-4.5rem)] overflow-y-auto border-b border-border bg-background p-4 shadow-2xl shadow-surface-inverse/15 md:hidden"
+            className="fixed inset-x-0 top-[4.5rem] z-40 max-h-[calc(100dvh-4.5rem)] overflow-y-auto border-b border-border bg-background p-4 shadow-2xl shadow-surface-inverse/15"
           >
             <div className="mx-auto flex w-full max-w-7xl flex-col gap-4">
               <form onSubmit={handleSearch} className="relative">
@@ -143,7 +148,7 @@ export function MobileHeaderMenu({
                     key={`${item.label}-${item.href}`}
                     href={item.href}
                     onClick={closeMenu}
-                    className="rounded-[var(--radius-xl)] border border-border/70 bg-surface px-4 py-3 text-sm font-bold text-text-main transition-colors hover:border-primary/30 hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="rounded-[var(--radius-xl)] border border-border/70 bg-surface px-4 py-3 text-sm [overflow-wrap:anywhere] font-bold text-text-main transition-colors hover:border-primary/30 hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     {item.label}
                   </Link>

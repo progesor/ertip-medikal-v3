@@ -1,8 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { getPayload } from "payload";
-import configPromise from "@payload-config";
+import { getPublicFooterSettings } from "@/lib/i18n/publicFooter";
 import { MapPin, Phone, Mail } from "lucide-react";
 import { getRequestLocale } from "@/lib/i18n/requestLocale";
 import {
@@ -11,16 +10,8 @@ import {
 } from "@/lib/i18n/routing";
 
 export async function Footer() {
-  const [payload, locale] = await Promise.all([
-    getPayload({ config: configPromise }),
-    getRequestLocale(),
-  ]);
-  const settings = (await payload.findGlobal({
-    slug: "site-settings",
-    locale,
-    fallbackLocale: false,
-    depth: 2,
-  })) as any;
+  const locale = await getRequestLocale();
+  const settings = await getPublicFooterSettings(locale);
 
   const { footer, contact, general } = settings;
   const columnCount = footer?.columns?.length || 0;
@@ -43,7 +34,8 @@ export async function Footer() {
             switch (column.blockType) {
               case "textColumn": {
                 const footerLogo =
-                  general?.whiteLogo?.url || general?.siteLogo?.url;
+                  (typeof general?.whiteLogo === "object" && general.whiteLogo?.url) ||
+                  (typeof general?.siteLogo === "object" && general.siteLogo?.url);
                 return (
                   <div key={index} className="space-y-6">
                     {column.showLogo && footerLogo && (
@@ -54,7 +46,6 @@ export async function Footer() {
                           width={180}
                           height={50}
                           className="h-12 w-auto object-contain"
-                          unoptimized
                         />
                       </Link>
                     )}

@@ -15,7 +15,7 @@ import {
 export function HeaderActions({
   locale,
   ctaLabel = "Bize Ulaşın",
-  ctaHref = "/iletisim",
+  ctaHref = "/contact",
 }: {
   locale: SiteLocale;
   ctaLabel?: string;
@@ -51,10 +51,11 @@ export function HeaderActions({
   };
 
   return (
-    <div className="flex items-center gap-4 lg:gap-6 ml-auto">
+    <div className="flex items-center gap-1.5 xl:gap-3">
       <form
         onSubmit={handleSearch}
-        className="relative hidden lg:block w-48 xl:w-64"
+        data-header-search
+        className="relative"
       >
         <input
           type="text"
@@ -92,13 +93,13 @@ export function HeaderActions({
       </Link>
 
       {ctaLabel && ctaHref && (
-        <Link href={ctaHref} className="hidden sm:block">
+        <Link href={ctaHref} title={ctaLabel} className="hidden sm:block">
           <Button
             variant="default"
             size="sm"
-            className="rounded-[var(--radius-2xl)] px-6"
+            className="rounded-[var(--radius-2xl)] px-3"
           >
-            {ctaLabel}
+            <span data-header-cta>{ctaLabel}</span>
           </Button>
         </Link>
       )}

@@ -127,8 +127,8 @@ export default async function ProductDetailPage({ params }: Args) {
 
   let relatedProducts = (product.relatedProducts || []).filter(
     (relatedProduct: any) =>
-      typeof relatedProduct !== "object" ||
-      (relatedProduct.slug && relatedProduct.title),
+      typeof relatedProduct === "object" && relatedProduct?._status === "published" &&
+      relatedProduct.slug && relatedProduct.title,
   );
 
   if (

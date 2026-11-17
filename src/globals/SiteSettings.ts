@@ -150,7 +150,7 @@ export const SiteSettings: GlobalConfig = {
                       name: "headerCtaHref",
                       type: "text",
                       label: "Üst menü düğme bağlantısı",
-                      defaultValue: "/iletisim",
+                      defaultValue: "/contact",
                       admin: { width: "33%" },
                     },
                   ],
@@ -169,7 +169,7 @@ export const SiteSettings: GlobalConfig = {
               fields: [
                 { name: "email", type: "email", label: "E-Posta Adresi" },
                 { name: "phone", type: "text", label: "Telefon Numarası" },
-                { name: "address", type: "textarea", label: "Açık Adres" },
+                { name: "address", type: "textarea", localized: true, label: "Açık Adres" },
               ],
             },
             {
@@ -365,7 +365,7 @@ export const SiteSettings: GlobalConfig = {
                   label: "Özel Link",
                   admin: {
                     description:
-                      "Buton türü Özel Link ise kullanılır. Örn: /iletisim veya https://...",
+                      "Buton türü Özel Link ise kullanılır. Örn: /contact veya https://...",
                   },
                 },
               ],
@@ -501,7 +501,7 @@ export const SiteSettings: GlobalConfig = {
                             {
                               name: "url",
                               type: "text",
-                              label: "Gideceği URL (Örn: /hakkimizda)",
+                              label: "Gideceği URL (Örn: /about-us)",
                               required: true,
                             },
                           ],
@@ -564,7 +564,7 @@ export const SiteSettings: GlobalConfig = {
                     {
                       name: "url",
                       type: "text",
-                      label: "Link URL (Örn: /gizlilik)",
+                      label: "Link URL (Örn: /privacy-policy)",
                       required: true,
                     },
                   ],

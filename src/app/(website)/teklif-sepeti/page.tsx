@@ -1,5 +1,6 @@
 "use client";
 
+import { catalogLabel } from "@/lib/i18n/catalogLabels";
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -170,7 +171,7 @@ export default function QuoteCartPage() {
                             {itemTitle}
                           </h4>
                         </Link>
-                        <p className="mt-1 text-sm text-text-muted">{item.variant}</p>
+                        <p className="mt-1 text-sm text-text-muted">{catalogLabel(item.variant, locale)}</p>
                         {item.sku && (
                           <span className="mt-2 inline-block rounded-full border border-border bg-surface-muted px-3 py-1 font-mono text-xs font-bold text-text-muted">
                             SKU: {item.sku}

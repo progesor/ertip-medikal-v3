@@ -118,7 +118,10 @@ function getRequestedMediaPath(request: NextRequest) {
 }
 
 function redirectToOriginal(request: NextRequest, sourceUrl: string) {
-  const location = new URL(sourceUrl, request.url).toString();
+  const original = new URL(sourceUrl, request.url);
+  const location = original.pathname.startsWith(MEDIA_FILE_MARKER)
+    ? original.pathname + original.search
+    : original.href;
 
   // Response.redirect() returns a response whose headers are immutable in the
   // runtime used by Next.js. Build the redirect response explicitly so cache

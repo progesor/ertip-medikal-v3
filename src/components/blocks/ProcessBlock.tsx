@@ -1,3 +1,5 @@
+import { getRequestLocale } from "@/lib/i18n/requestLocale";
+import { localizeInternalHref } from "@/lib/i18n/routing";
 import type { ElementType } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -94,7 +96,7 @@ function StepImage({ step }: { step: ProcessStep }) {
     <div className="relative mb-6 aspect-[16/9] overflow-hidden rounded-2xl bg-surface-muted">
       <Image
         src={media.url}
-        alt={media.alt || step.title || "Süreç adımı"}
+        alt={media.alt || step.title || ""}
         fill
         className="object-cover transition-transform duration-500 group-hover:scale-105"
         sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
@@ -104,7 +106,7 @@ function StepImage({ step }: { step: ProcessStep }) {
   );
 }
 
-function StepCopy({
+async function StepCopy({
   step,
   inverse,
   align = "center",
@@ -113,6 +115,7 @@ function StepCopy({
   inverse: boolean;
   align?: "left" | "center" | "right";
 }) {
+  const locale = await getRequestLocale();
   return (
     <div
       className={cn(
@@ -144,7 +147,7 @@ function StepCopy({
 
       {step.link && step.linkText && (
         <Link
-          href={step.link}
+          href={localizeInternalHref(step.link, locale)}
           className={cn(
             "mt-5 inline-flex items-center gap-2 font-bold transition-colors",
             inverse

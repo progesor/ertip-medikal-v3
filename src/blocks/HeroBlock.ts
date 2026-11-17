@@ -16,16 +16,18 @@ export const HeroBlock: Block = {
       name: "backgroundImage",
       type: "upload",
       relationTo: "media",
-      label: "Masaüstü Arka Plan Görseli",
+      label: "Masaüstü arka planı (görsel veya video)",
+      filterOptions: { or: [{ mimeType: { contains: "image/" } }, { mimeType: { contains: "video/" } }] },
     },
     {
       name: "mobileBackgroundImage",
       type: "upload",
       relationTo: "media",
-      label: "Mobil Arka Plan Görseli (Opsiyonel)",
+      label: "Mobil görsel / video kapak karesi",
+      filterOptions: { mimeType: { contains: "image/" } },
       admin: {
         description:
-          "Boş bırakılırsa masaüstü görseli mobil cihazlarda da kullanılır.",
+          "Masaüstünde video seçtiğinizde mobil cihazlarda ve azaltılmış hareket tercihinde gösterilecek kareyi yükleyin.",
       },
     },
     {

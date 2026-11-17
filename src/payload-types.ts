@@ -1134,6 +1134,7 @@ export interface News {
   };
   category?: (number | null) | NewsCategory;
   publishedDate: string;
+  hideFromHomepage?: boolean | null;
   /**
    * Başlıktan otomatik oluşturulur.
    */
@@ -2206,6 +2207,7 @@ export interface NewsSelect<T extends boolean = true> {
       };
   category?: T;
   publishedDate?: T;
+  hideFromHomepage?: T;
   slug?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2518,7 +2520,7 @@ export interface SiteSetting {
      */
     email?: string | null;
     /**
-     * Buton türü Özel Link ise kullanılır. Örn: /iletisim veya https://...
+     * Buton türü Özel Link ise kullanılır. Örn: /contact veya https://...
      */
     customUrl?: string | null;
   };

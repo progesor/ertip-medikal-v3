@@ -1,6 +1,7 @@
+import { getRequestLocale } from "@/lib/i18n/requestLocale";
+import { localizeInternalHref } from "@/lib/i18n/routing";
 import React from "react";
-import { getPayload } from "payload";
-import configPromise from "@payload-config";
+import { getPublicFooterSettings } from "@/lib/i18n/publicFooter";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { Mail, PhoneCall, ShieldCheck } from "lucide-react";
 
@@ -8,17 +9,17 @@ function readText(value: unknown) {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
 
-function findPrivacyHref(settings: any) {
+function findPrivacyLink(settings: any) {
   const links = Array.isArray(settings?.footer?.bottomLinks)
     ? settings.footer.bottomLinks
     : [];
 
   const privacyLink = links.find((link: any) => {
     const label = readText(link?.label)?.toLocaleLowerCase("tr-TR") || "";
-    return label.includes("kvkk") || label.includes("aydınlatma");
+    return label.includes("kvkk") || label.includes("aydınlatma") || label.includes("data protection") || label.includes("privacy") || label.includes("gizlilik");
   });
 
-  return readText(privacyLink?.url);
+  return privacyLink;
 }
 
 export async function ContactFormBlock({
@@ -28,15 +29,14 @@ export async function ContactFormBlock({
   departments,
   quickContact,
 }: any) {
-  const payload = await getPayload({ config: configPromise });
-  const settings = (await payload.findGlobal({
-    slug: "site-settings",
-    depth: 1,
-  })) as any;
+  const locale = await getRequestLocale();
+  const en = locale === "en";
+  const settings = await getPublicFooterSettings(locale);
 
   const phone = readText(quickContact?.phone) || readText(settings?.contact?.phone);
   const email = readText(quickContact?.email) || readText(settings?.contact?.email);
-  const privacyHref = findPrivacyHref(settings);
+  const privacyLink = findPrivacyLink(settings);
+  const privacyHref = readText(privacyLink?.url);
   const phoneHref = phone ? `tel:${phone.replace(/[^\d+]/g, "")}` : undefined;
 
   return (
@@ -46,11 +46,11 @@ export async function ContactFormBlock({
           <div className="space-y-10 lg:col-span-5">
             <div>
               <h2 className="mb-6 text-4xl font-black leading-tight tracking-tight text-text-main md:text-5xl">
-                {title || "Bize Ulaşın"}
+                {title || (en ? "Contact Us" : "Bize Ulaşın")}
               </h2>
               <p className="text-lg leading-relaxed text-text-muted">
                 {description ||
-                  "Ertip Medikal ürünleri, bayilik talepleri veya teknik destek için ekibimizle iletişime geçebilirsiniz."}
+                  (en ? "Contact our team about products, dealership inquiries or technical support." : "Ertip Medikal ürünleri, bayilik talepleri veya teknik destek için ekibimizle iletişime geçebilirsiniz.")}
               </p>
             </div>
 
@@ -66,7 +66,7 @@ export async function ContactFormBlock({
                     </div>
                     <div className="min-w-0">
                       <p className="text-xs font-bold uppercase tracking-widest text-text-muted">
-                        Destek Hattı
+                        {en ? "Support Line" : "Destek Hattı"}
                       </p>
                       <p className="break-words text-xl font-black text-text-main">
                         {phone}
@@ -85,7 +85,7 @@ export async function ContactFormBlock({
                     </div>
                     <div className="min-w-0">
                       <p className="text-xs font-bold uppercase tracking-widest text-text-muted">
-                        Kurumsal E-Posta
+                        {en ? "Corporate Email" : "Kurumsal E-Posta"}
                       </p>
                       <p className="break-all text-xl font-black text-text-main">
                         {email}
@@ -100,12 +100,12 @@ export async function ContactFormBlock({
               <div className="mb-3 flex items-center gap-3">
                 <ShieldCheck className="h-6 w-6 text-primary-foreground" />
                 <span className="font-bold text-primary-foreground">
-                  MDR & ISO Kalitesi
+                  {en ? "MDR and ISO Quality Standards" : "MDR & ISO Kalitesi"}
                 </span>
               </div>
               <p className="text-sm italic leading-relaxed text-primary-foreground/80">
                 {quickContact?.descriptionText ||
-                  "Tüm talepleriniz uluslararası kalite standartları çerçevesinde kayıt altına alınarak en kısa sürede yanıtlanmaktadır."}
+                  (en ? "We record all inquiries in line with international quality standards and respond as soon as possible." : "Tüm talepleriniz uluslararası kalite standartları çerçevesinde kayıt altına alınarak en kısa sürede yanıtlanmaktadır.")}
               </p>
             </div>
           </div>
@@ -114,14 +114,15 @@ export async function ContactFormBlock({
             <div className="rounded-3xl border border-border bg-surface p-8 shadow-2xl shadow-surface-inverse/5 md:p-14">
               <div className="mb-10">
                 <h3 className="mb-3 text-3xl font-black text-text-main">
-                  {formTitle || "Talep Formu"}
+                  {formTitle || (en ? "Inquiry Form" : "Talep Formu")}
                 </h3>
                 <div className="h-1.5 w-12 rounded-full bg-primary" />
               </div>
 
               <ContactForm
                 departments={departments}
-                privacyHref={privacyHref}
+                privacyLabel={readText(privacyLink?.label)}
+                privacyHref={privacyHref ? localizeInternalHref(privacyHref, locale) : undefined}
               />
             </div>
           </div>

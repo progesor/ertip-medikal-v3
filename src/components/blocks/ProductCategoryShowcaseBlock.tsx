@@ -102,7 +102,7 @@ export async function ProductCategoryShowcaseBlock({
       pagination: false,
       depth: 1,
     }),
-    payload.find({
+    showProductCount ? payload.find({
       collection: "products",
       locale,
       fallbackLocale: false,
@@ -112,8 +112,8 @@ export async function ProductCategoryShowcaseBlock({
       },
       pagination: false,
       depth: 0,
-      select: { category: true, variants: true },
-    }),
+      select: { category: true, variants: { isActive: true } },
+    }) : { docs: [] },
   ]);
 
   const byId = new Map(allCategories.map((category) => [String(category.id), category]));
@@ -195,7 +195,7 @@ export async function ProductCategoryShowcaseBlock({
         subtitle={subtitle}
         alignment={alignment}
         inverse={inverse}
-        className="mb-12 md:mb-16"
+        className={resolvedLayout === "compact" ? "mb-7 md:mb-9" : "mb-12 md:mb-16"}
       />
 
       {categories.length === 0 ? (
@@ -203,7 +203,7 @@ export async function ProductCategoryShowcaseBlock({
           {resolvedEmptyStateText}
         </div>
       ) : (
-        <div className={cn("grid gap-6", columnClasses[resolvedColumns])}>
+        <div className={cn("grid gap-6", columnClasses[resolvedColumns], resolvedLayout === "compact" && "grid-cols-2 gap-3 md:gap-5")}>
           {categories.map((category, index) => {
             if (!category) return null;
             const image = typeof category.image === "object" && category.image?.url ? category.image : null;
@@ -285,9 +285,9 @@ export async function ProductCategoryShowcaseBlock({
                 </div>
 
                 {resolvedCardStyle !== "overlay" && (
-                  <div className={cn(compact ? "p-5" : "p-6 md:p-7")}>
-                    <div className="flex items-start justify-between gap-4">
-                      <h3 className="text-xl font-black text-current md:text-2xl">
+                  <div className={cn(compact ? "p-3 sm:p-5" : "p-6 md:p-7")}>
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className={cn("font-bold text-current", compact ? "text-base leading-snug md:text-xl" : "text-xl md:text-2xl")}>
                         {category.title}
                       </h3>
                       <ArrowUpRight className="h-5 w-5 shrink-0 text-primary transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />

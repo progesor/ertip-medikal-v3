@@ -86,6 +86,13 @@ export const News: CollectionConfig = {
       label: "Yayın Tarihi",
       admin: { position: "sidebar" },
     },
+    {
+      name: "hideFromHomepage",
+      type: "checkbox",
+      label: "Ana sayfa akışında gizle",
+      defaultValue: false,
+      admin: { position: "sidebar" },
+    },
     slugField("title"),
     {
       name: "editOverview",

@@ -185,7 +185,7 @@ export const MediaTextBlock: Block = {
           name: "buttonLink",
           type: "text",
           label: "Buton Bağlantısı (Opsiyonel)",
-          admin: { placeholder: "/iletisim" },
+          admin: { placeholder: "/contact" },
         },
       ],
     },

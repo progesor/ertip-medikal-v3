@@ -1,3 +1,5 @@
+import { getRequestLocale } from "@/lib/i18n/requestLocale";
+import { localizeInternalHref } from "@/lib/i18n/routing";
 import type { ElementType, ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -114,7 +116,7 @@ function getGridClass(
   return "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
 }
 
-function FeatureCard({
+async function FeatureCard({
   feature,
   featured,
   compact,
@@ -127,6 +129,7 @@ function FeatureCard({
   cardStyle: CardStyle;
   iconStyle: IconStyle;
 }) {
+  const locale = await getRequestLocale();
   const IconComponent = iconMap[feature.icon || ""] || Star;
   const accent = feature.accent || "primary";
   const media = typeof feature.image === "object" && feature.image ? feature.image : null;
@@ -151,7 +154,7 @@ function FeatureCard({
         <div className="relative aspect-[16/9] overflow-hidden bg-surface-muted">
           <Image
             src={imageUrl}
-            alt={media?.alt || feature.featureTitle || "Özellik görseli"}
+            alt={media?.alt || feature.featureTitle || ""}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
@@ -223,9 +226,9 @@ function FeatureCard({
 
   return (
     <Link
-      href={feature.link}
+      href={localizeInternalHref(feature.link, locale)}
       className="block h-full rounded-3xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4"
-      aria-label={feature.linkText || feature.featureTitle || "Detaylı bilgi"}
+      aria-label={feature.linkText || feature.featureTitle || (locale === "en" ? "Learn more" : "Detaylı bilgi")}
     >
       {card as ReactNode}
     </Link>

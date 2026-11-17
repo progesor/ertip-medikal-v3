@@ -167,7 +167,7 @@ export const VideoMediaBlock: Block = {
       name: "buttonLink",
       type: "text",
       label: "Buton Bağlantısı (Opsiyonel)",
-      admin: { placeholder: "/iletisim" },
+      admin: { placeholder: "/contact" },
     },
     sectionField({
       background: "light",

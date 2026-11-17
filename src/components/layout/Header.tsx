@@ -1,3 +1,4 @@
+import { HeaderRow } from "./HeaderRow";
 import Link from "next/link";
 import Image from "next/image";
 import { getPayload } from "payload";
@@ -126,7 +127,7 @@ export async function Header() {
     headerSettings.headerCtaLabel ||
     (locale === "en" ? "Contact Us" : "Bize Ulaşın");
   const ctaHref = localizeInternalHref(
-    headerSettings.headerCtaHref || "/iletisim",
+    headerSettings.headerCtaHref || "/contact",
     locale,
   );
   const logoUrl = showLogo
@@ -141,18 +142,14 @@ export async function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/80 bg-background/95 shadow-sm shadow-surface-inverse/5 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80">
-      <div
-        className={`container mx-auto flex items-center justify-between gap-3 px-4 ${
-          shouldUseCompact ? "min-h-16 py-2" : "min-h-[4.5rem] py-3"
-        }`}
-      >
+      <HeaderRow compact={shouldUseCompact}>
         <div className="flex min-w-0 shrink items-center gap-2">
           <Link
             href={getHomePath(locale)}
             className="flex min-w-0 items-center gap-3"
           >
             {logoUrl ? (
-              <span className="relative block h-10 w-auto min-w-28 overflow-hidden">
+              <span className="relative block h-10 w-auto min-w-0 max-w-full overflow-hidden">
                 <Image
                   src={logoUrl}
                   alt={companyName}
@@ -193,7 +190,7 @@ export async function Header() {
 
         <nav
           aria-label={locale === "en" ? "Main menu" : "Ana menü"}
-          className="hidden items-center gap-1 rounded-[var(--radius-xl)] border border-border/70 bg-surface/80 p-1 text-sm font-semibold shadow-sm shadow-surface-inverse/5 md:flex"
+          className="rounded-[var(--radius-xl)] border border-border/70 bg-surface/80 p-1 text-sm font-semibold shadow-sm shadow-surface-inverse/5"
         >
           {navItems.map((item) => (
             <Link
@@ -206,7 +203,7 @@ export async function Header() {
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <LanguageSwitcher
             currentLocale={locale}
             sourcePathname={publicPathname}
@@ -225,7 +222,7 @@ export async function Header() {
             ctaHref={ctaHref}
           />
         </div>
-      </div>
+      </HeaderRow>
     </header>
   );
 }

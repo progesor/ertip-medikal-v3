@@ -14,6 +14,7 @@ import { ProductCategoryFilter as ProductCategoryFilter_9e86ddf401c1cc38c05945e9
 import { CollectionViewControls as CollectionViewControls_6f31e140d2db6ec622024d66c8318545 } from '../../../components/admin/CollectionViewControls'
 import { ProductContentReview as ProductContentReview_bf06938cb9b0f81481d07b8ae712c091 } from '../../../components/admin/ProductContentReview'
 import { GenericEditOverview as GenericEditOverview_4db186538cf6cfc3513ba6fff92ee59e } from '../../../components/admin/GenericEditOverview'
+import { MediaUsagePanel as MediaUsagePanel_a0ecd4a6d9fa772c4c71a28442483f51 } from '../../../components/admin/MediaUsagePanel'
 import { PageBuilderStudio as PageBuilderStudio_cfa49b16cbc9a5b323068d3463302516 } from '../../../components/admin/PageBuilderStudio'
 import { AdminArrayRowLabel as AdminArrayRowLabel_40b20e4e32bf7e756ec2219b88ff080b } from '../../../components/admin/AdminArrayRowLabel'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -75,6 +76,7 @@ export const importMap = {
   "/components/admin/CollectionViewControls#CollectionViewControls": CollectionViewControls_6f31e140d2db6ec622024d66c8318545,
   "/components/admin/ProductContentReview#ProductContentReview": ProductContentReview_bf06938cb9b0f81481d07b8ae712c091,
   "/components/admin/GenericEditOverview#GenericEditOverview": GenericEditOverview_4db186538cf6cfc3513ba6fff92ee59e,
+  "/components/admin/MediaUsagePanel#MediaUsagePanel": MediaUsagePanel_a0ecd4a6d9fa772c4c71a28442483f51,
   "/components/admin/PageBuilderStudio#PageBuilderStudio": PageBuilderStudio_cfa49b16cbc9a5b323068d3463302516,
   "/components/admin/AdminArrayRowLabel#AdminArrayRowLabel": AdminArrayRowLabel_40b20e4e32bf7e756ec2219b88ff080b,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,

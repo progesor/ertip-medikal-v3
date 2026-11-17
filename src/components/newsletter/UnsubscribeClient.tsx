@@ -37,6 +37,7 @@ export function UnsubscribeClient({ token }: { token?: string }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          locale,
           email: formData.get("email"),
           website: formData.get("website"),
         }),

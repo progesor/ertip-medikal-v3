@@ -108,7 +108,7 @@ export function RenderBlocks({ blocks, context }: RenderBlocksProps) {
       case "contactForm":
         return <ContactFormBlock key={key} {...props} />;
       case "newsFeed":
-        return <NewsFeedBlock key={key} {...props} />;
+        return <NewsFeedBlock key={key} {...props} isHome={context?.isHome} />;
       default:
         return <UnknownBlock key={key} blockType={block.blockType} />;
     }

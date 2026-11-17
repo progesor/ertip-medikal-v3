@@ -33,7 +33,7 @@ test.describe("M8 business-flow hardening", () => {
     const search = page.getByRole("searchbox", { name: "Ürün veya SKU ara" });
     await search.fill("punch test");
     await search.press("Enter");
-    await expect(page).toHaveURL(/\/tr\/urunler\?q=punch%20test$/);
+    await expect(page).toHaveURL(/\/tr\/products\?q=punch%20test$/);
     await expect(dialog).toBeHidden();
 
     await page.getByRole("button", { name: "Mobil menüyü aç" }).click();
@@ -57,7 +57,7 @@ test.describe("M8 business-flow hardening", () => {
     await page.goto("/tr");
 
     await page.getByRole("link", { name: "Teklif sepeti" }).click();
-    await expect(page).toHaveURL(/\/tr\/teklif-sepeti$/);
+    await expect(page).toHaveURL(/\/tr\/quote-cart$/);
 
     const switchToEnglish = page.getByRole("link", { name: "Switch to English" });
     await expect(switchToEnglish).toBeVisible();
@@ -71,13 +71,13 @@ test.describe("M8 business-flow hardening", () => {
     page,
   }) => {
     await page.goto("/urunler");
-    await expect(page).toHaveURL(/\/tr\/urunler$/);
+    await expect(page).toHaveURL(/\/tr\/products$/);
 
     await page.goto("/en/urunler");
     await expect(page).toHaveURL(/\/en\/products$/);
 
     await page.goto("/tr/products");
-    await expect(page).toHaveURL(/\/tr\/urunler$/);
+    await expect(page).toHaveURL(/\/tr\/products$/);
   });
 
   test("fixed application UI follows the public locale", async ({ page }) => {

@@ -18,6 +18,9 @@ import * as migration_20261116_134731_product_catalog_order from './20261116_134
 import * as migration_20261117_074946_portal_mcp_permissions from './20261117_074946_portal_mcp_permissions';
 import * as migration_20261117_081051_product_content_review from './20261117_081051_product_content_review';
 import * as migration_20261117_092007_mcp_site_backups from './20261117_092007_mcp_site_backups';
+import * as migration_20261117_100119_localized_media_and_address from './20261117_100119_localized_media_and_address';
+import * as migration_20261117_101059_english_link_defaults from './20261117_101059_english_link_defaults';
+import * as migration_20261117_115358_news_homepage_visibility from './20261117_115358_news_homepage_visibility';
 
 export const migrations = [
   {
@@ -118,6 +121,21 @@ export const migrations = [
   {
     up: migration_20261117_092007_mcp_site_backups.up,
     down: migration_20261117_092007_mcp_site_backups.down,
-    name: '20261117_092007_mcp_site_backups'
+    name: '20261117_092007_mcp_site_backups',
+  },
+  {
+    up: migration_20261117_100119_localized_media_and_address.up,
+    down: migration_20261117_100119_localized_media_and_address.down,
+    name: '20261117_100119_localized_media_and_address',
+  },
+  {
+    up: migration_20261117_101059_english_link_defaults.up,
+    down: migration_20261117_101059_english_link_defaults.down,
+    name: '20261117_101059_english_link_defaults',
+  },
+  {
+    up: migration_20261117_115358_news_homepage_visibility.up,
+    down: migration_20261117_115358_news_homepage_visibility.down,
+    name: '20261117_115358_news_homepage_visibility'
   },
 ];

@@ -24,7 +24,8 @@ import { ProductGallery } from "@/components/product/ProductGallery";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCart } from "@/providers/CartProvider";
-import { useUiDictionary } from "@/providers/SiteLocaleProvider";
+import { catalogLabel } from "@/lib/i18n/catalogLabels";
+import { useSiteLocale, useUiDictionary } from "@/providers/SiteLocaleProvider";
 
 import { parseLegacyAttributes } from "@/lib/sku-engine/legacyPunch";
 import { getVariantSelection } from "@/lib/sku-engine/storefrontSelection";
@@ -134,6 +135,7 @@ function NetDimensions({ mode, product }: LogisticsProps) {
 }
 
 function PackagingTable({ mode, product }: LogisticsProps) {
+  const locale = useSiteLocale();
   const dictionary = useUiDictionary();
 
   if (!Array.isArray(product.packaging) || product.packaging.length === 0) {
@@ -154,7 +156,7 @@ function PackagingTable({ mode, product }: LogisticsProps) {
               className="border-b border-border pb-3 text-sm last:border-0 last:pb-0"
             >
               <p className="mb-1 font-bold text-text-muted">
-                {packaging.packageLabel}{" "}
+                {catalogLabel(packaging.packageLabel, locale)}{" "}
                 <span className="text-primary">
                   ({packaging.quantity} {dictionary.product.quantityUnit})
                 </span>
@@ -207,7 +209,7 @@ function PackagingTable({ mode, product }: LogisticsProps) {
                 className="transition-colors hover:bg-surface-muted/50"
               >
                 <td className="px-6 py-4 font-bold text-text-muted">
-                  {packaging.packageLabel}
+                  {catalogLabel(packaging.packageLabel, locale)}
                 </td>
                 <td className="px-6 py-4 text-text-muted">
                   {packaging.quantity} {dictionary.product.quantityUnit}
@@ -229,6 +231,7 @@ function PackagingTable({ mode, product }: LogisticsProps) {
 
 export function ProductView({ product }: any) {
   const { addToCart } = useCart();
+  const locale = useSiteLocale();
   const dictionary = useUiDictionary();
   const searchParams = useSearchParams();
   const attributes = useMemo(() => parseLegacyAttributes(product.attributes), [product.attributes]);
@@ -236,8 +239,15 @@ export function ProductView({ product }: any) {
     variant,
     selection: getVariantSelection(attributes, variant),
   })), [attributes, product.variants]);
+  // Manually keyed catalogues can have different equipment options for each colour and motor.
+  const keyedSelections = useMemo(() => {
+    if (!options.length || !options.every(({ variant }: { variant: { combinationKey?: string } }) => variant.combinationKey)) return null;
+    return options
+      .filter(({ variant }: { variant: { isActive?: boolean } }) => variant.isActive !== false)
+      .map(({ selection }: { selection: Record<string, string> }) => selection) as Record<string, string>[];
+  }, [options]);
   const [selectedAttrs, setSelectedAttrs] = useState<Record<string, string>>(
-    () => options[0]?.selection ?? {},
+    () => keyedSelections?.[0] ?? options[0]?.selection ?? {},
   );
   const [manualCode, setManualCode] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
@@ -249,13 +259,24 @@ export function ProductView({ product }: any) {
 
   const activeTab = searchParams.get("tab") || "description";
 
-  const currentVariant = useMemo(() => {
-    if (!attributes.length) return options[0]?.variant;
-    const matches = options.filter(({ selection }: { selection: Record<string, string> }) =>
+  const [chosenSku, setChosenSku] = useState("");
+  const matches = useMemo(() => {
+    if (!attributes.length) return options.slice(0, 1);
+    return options.filter(({ selection }: { selection: Record<string, string> }) =>
       attributes.every(({ name }) => selectedAttrs[name] && selection[name] === selectedAttrs[name]),
     );
-    return matches.length === 1 ? matches[0].variant : undefined;
   }, [attributes, options, selectedAttrs]);
+
+  // Separate catalogue references can describe identical equipment. Only offer
+  // an explicit reference choice if each row can also be identified at checkout.
+  const references: string[] = matches.length > 1 && keyedSelections
+    ? matches.filter(({ variant }: any) => variant.isActive !== false).map(({ variant }: any) => variant.sku)
+    : [];
+  const selectable = references.length > 0 && references.every(Boolean) && new Set(references).size === references.length;
+  const baseSku = selectable && references.find(code => references.every(other => other === code || other.startsWith(code + "-")));
+  const reference = references.includes(chosenSku) ? chosenSku : baseSku;
+  const currentVariant = matches.length === 1 ? matches[0].variant :
+    selectable && reference ? matches.find(({ variant }: any) => variant.sku === reference)?.variant : undefined;
   const hasCompleteVariantSelection = Boolean(currentVariant);
   const selectedSku = (options.length ? currentVariant?.sku : product.sku) || "";
   const canAddToCart = options.length === 0 || (hasCompleteVariantSelection && currentVariant.isActive !== false);
@@ -394,12 +415,12 @@ export function ProductView({ product }: any) {
               url: image.url,
               alt:
                 image.alt ||
-                `${product.title} - ${currentVariant?.title || mediaVariant.title}`,
+                `${product.title} - ${catalogLabel(currentVariant?.title || mediaVariant.title, locale)}`,
             },
           ]
         : [];
     });
-  }, [currentVariant?.title, mediaVariant, product.title]);
+  }, [currentVariant?.title, mediaVariant, product.title, locale]);
 
   const displayedProductImages = useMemo(() => {
     const seenUrls = new Set<string>();
@@ -433,7 +454,7 @@ export function ProductView({ product }: any) {
             <div className="flex flex-col gap-1">
               <h3 className="flex items-center gap-2 line-clamp-1 font-bold text-text-main">
                 <FileText className="h-5 w-5 shrink-0 text-primary" />
-                {verifiedDoc.label}
+                {catalogLabel(verifiedDoc.label, locale)}
               </h3>
               <p className="flex items-center gap-1.5 text-[10px] italic text-text-muted md:text-xs">
                 <Info className="h-3 w-3 text-text-muted" />
@@ -467,7 +488,7 @@ export function ProductView({ product }: any) {
             <iframe
               src={`${verifiedDoc.url}#toolbar=0`}
               className="h-full w-full border-none"
-              title={verifiedDoc.label}
+              title={catalogLabel(verifiedDoc.label, locale)}
             />
           </div>
         </div>
@@ -512,7 +533,7 @@ export function ProductView({ product }: any) {
           images={displayedProductImages}
           productTitle={
             variantImages.length > 0
-              ? `${product.title} - ${currentVariant?.title}`
+              ? `${product.title} - ${catalogLabel(currentVariant?.title, locale)}`
               : product.title
           }
         />
@@ -544,40 +565,70 @@ export function ProductView({ product }: any) {
           {Array.isArray(product.attributes) && product.attributes.length > 0 && (
             <div className="space-y-6 pt-4">
               {product.attributes.map((attribute: any, index: number) => {
-                const values = String(attribute.values || "")
-                  .split("-")
-                  .map((value) => value.trim())
-                  .filter(Boolean);
+                const earlier = attributes.slice(0, index);
+                const available = keyedSelections?.filter(selection =>
+                  earlier.every(({ name }) => selection[name] === selectedAttrs[name])
+                );
+                const values = String(attribute.values || "").split("-").map(value => value.trim())
+                  .filter(value => value && (!available || available.some(selection => selection[attribute.name] === value)));
+
+                function choose(value: string) {
+                  if (selectedAttrs[attribute.name] !== value) setChosenSku("");
+                  const next = { ...selectedAttrs, [attribute.name]: value };
+                  if (!available) { setSelectedAttrs(next); return; }
+                  const candidates = available.filter(selection => selection[attribute.name] === value);
+                  // Keep subsequent choices where the new catalogue row permits them.
+                  let compatible = candidates;
+                  for (const { name } of attributes.slice(index + 1)) {
+                    const same = compatible.filter(selection => selection[name] === selectedAttrs[name]);
+                    if (same.length) compatible = same;
+                  }
+                  if (compatible[0]) setSelectedAttrs(compatible[0]);
+                }
 
                 return (
                   <div key={attribute.id || index} className="space-y-3">
                     <p className="text-sm font-bold uppercase tracking-wider text-text-main">
-                      {attribute.name} {dictionary.product.selectionSuffix}
+                      {catalogLabel(attribute.name, locale)} {dictionary.product.selectionSuffix}
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {values.map((value) => (
                         <button
                           key={value}
                           type="button"
-                          onClick={() =>
-                            setSelectedAttrs((previousAttributes) => ({
-                              ...previousAttributes,
-                              [attribute.name]: value,
-                            }))
-                          }
+                          aria-pressed={selectedAttrs[attribute.name] === value}
+                          onClick={() => choose(value)}
                           className={`rounded-[var(--radius)] border px-5 py-2.5 text-sm font-bold transition-all ${
                             selectedAttrs[attribute.name] === value
                               ? "border-primary bg-primary text-primary-foreground shadow-lg shadow-primary/20"
                               : "border-border bg-surface text-text-muted hover:border-primary hover:bg-primary/5 hover:text-primary"
                           }`}
                         >
-                          {value}
+                          {catalogLabel(value, locale)}
                         </button>
                       ))}
                     </div>
                   </div>
                 );
               })}
+              {selectable && references.length > 1 && (
+                <fieldset className="space-y-3">
+                  <legend className="text-sm font-bold uppercase tracking-wider text-text-main">
+                    {locale === "en" ? "Order reference" : "Sipariş kodu"}
+                  </legend>
+                  <p className="text-sm text-text-muted">
+                    {locale === "en" ? "Several references share these options. Select the code for your order." : "Katalogda bu seçim için birden fazla referans var. Sipariş kodunu seçebilirsiniz."}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {references.map(code => (
+                      <button key={code} type="button" aria-pressed={code === reference} onClick={() => setChosenSku(code)}
+                        className="rounded-[var(--radius)] border border-border px-4 py-2 font-mono text-sm aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground">
+                        {code}
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+              )}
             </div>
           )}
 
@@ -729,7 +780,7 @@ export function ProductView({ product }: any) {
                       }`}
                     >
                       <td className="px-6 py-4 text-sm font-medium text-text-muted">
-                        {variant.title}
+                        {catalogLabel(variant.title, locale)}
                       </td>
                       <td className="px-6 py-4 font-mono text-sm font-bold text-primary">
                         {variant.sku}
@@ -794,7 +845,7 @@ export function ProductView({ product }: any) {
                     className="group flex items-center justify-between rounded-2xl border border-border bg-surface-muted p-4 transition-all hover:border-primary"
                   >
                     <span className="font-medium text-text-muted">
-                      {document.label}
+                      {catalogLabel(document.label, locale)}
                     </span>
                     <Button
                       size="sm"
@@ -819,7 +870,7 @@ export function ProductView({ product }: any) {
                   className="rounded-2xl border-2 border-dashed border-border bg-surface p-4"
                 >
                   <p className="mb-3 font-bold text-text-main">
-                    {document.label}
+                    {catalogLabel(document.label, locale)}
                   </p>
                   <div className="relative flex gap-2">
                     <input

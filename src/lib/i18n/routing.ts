@@ -1,3 +1,4 @@
+import legacySlugs from "./legacySlugs.json";
 import {
   isSiteLocale,
   publicDefaultLocale,
@@ -22,12 +23,14 @@ export type LocalizedRoute = {
   slug?: string;
 };
 
-const routeSegments = {
-  products: { en: "products", tr: "urunler" },
-  news: { en: "news", tr: "haberler" },
-  quoteCart: { en: "quote-cart", tr: "teklif-sepeti" },
-  unsubscribe: { en: "unsubscribe", tr: "abonelikten-ayril" },
-} as const satisfies Record<string, Record<SiteLocale, string>>;
+function canonicalSlug(group: keyof typeof legacySlugs, slug: string) {
+  const aliases: Record<string, string> = legacySlugs[group];
+  return Object.hasOwn(aliases, slug) ? aliases[slug] : slug;
+}
+
+export function getCanonicalCategorySlug(slug: string) {
+  return canonicalSlug("categories", slug);
+}
 
 function safeDecodeURIComponent(value: string) {
   try {
@@ -69,25 +72,25 @@ export function getHomePath(locale: SiteLocale) {
 }
 
 export function getProductsPath(locale: SiteLocale, slug?: string) {
-  const base = `/${locale}/${routeSegments.products[locale]}`;
-  return slug ? `${base}/${encodeURIComponent(slug)}` : base;
+  const base = `/${locale}/products`;
+  return slug ? `${base}/${encodeURIComponent(canonicalSlug("products", slug))}` : base;
 }
 
 export function getNewsPath(locale: SiteLocale, slug?: string) {
-  const base = `/${locale}/${routeSegments.news[locale]}`;
-  return slug ? `${base}/${encodeURIComponent(slug)}` : base;
+  const base = `/${locale}/news`;
+  return slug ? `${base}/${encodeURIComponent(canonicalSlug("news", slug))}` : base;
 }
 
 export function getQuoteCartPath(locale: SiteLocale) {
-  return `/${locale}/${routeSegments.quoteCart[locale]}`;
+  return `/${locale}/quote-cart`;
 }
 
 export function getUnsubscribePath(locale: SiteLocale) {
-  return `/${locale}/${routeSegments.unsubscribe[locale]}`;
+  return `/${locale}/unsubscribe`;
 }
 
 export function getPagePath(locale: SiteLocale, slug: string) {
-  return `/${locale}/${encodeURIComponent(slug)}`;
+  return slug === "home" ? getHomePath(locale) : `/${locale}/${encodeURIComponent(canonicalSlug("pages", slug))}`;
 }
 
 export function parseLocalizedPublicPath(
@@ -112,20 +115,15 @@ export function parseLocalizedPublicPath(
   }
 
   const [first, second] = rest;
-  const productSegments = Object.values(routeSegments.products);
-  const newsSegments = Object.values(routeSegments.news);
-  const quoteCartSegments = Object.values(routeSegments.quoteCart);
-  const unsubscribeSegments = Object.values(routeSegments.unsubscribe);
-
-  if (productSegments.includes(first as (typeof productSegments)[number])) {
+  if (first === "products" || first === "urunler") {
     if (second) {
       const rawSlug = rest.slice(1).join("/");
-      const slug = safeDecodeURIComponent(rawSlug);
+      const slug = canonicalSlug("products", safeDecodeURIComponent(rawSlug));
       return {
         locale,
         kind: "product",
         slug,
-        internalPath: `/urunler/${rawSlug}`,
+        internalPath: `/urunler/${encodeURIComponent(slug)}`,
         publicPath: getProductsPath(locale, slug),
       };
     }
@@ -138,15 +136,15 @@ export function parseLocalizedPublicPath(
     };
   }
 
-  if (newsSegments.includes(first as (typeof newsSegments)[number])) {
+  if (first === "news" || first === "haberler") {
     if (second) {
       const rawSlug = rest.slice(1).join("/");
-      const slug = safeDecodeURIComponent(rawSlug);
+      const slug = canonicalSlug("news", safeDecodeURIComponent(rawSlug));
       return {
         locale,
         kind: "news-item",
         slug,
-        internalPath: `/haberler/${rawSlug}`,
+        internalPath: `/haberler/${encodeURIComponent(slug)}`,
         publicPath: getNewsPath(locale, slug),
       };
     }
@@ -159,7 +157,7 @@ export function parseLocalizedPublicPath(
     };
   }
 
-  if (quoteCartSegments.includes(first as (typeof quoteCartSegments)[number])) {
+  if (first === "quote-cart" || first === "teklif-sepeti") {
     return {
       locale,
       kind: "quote-cart",
@@ -169,7 +167,7 @@ export function parseLocalizedPublicPath(
   }
 
   if (
-    unsubscribeSegments.includes(first as (typeof unsubscribeSegments)[number])
+    first === "unsubscribe" || first === "abonelikten-ayril"
   ) {
     return {
       locale,
@@ -185,7 +183,7 @@ export function parseLocalizedPublicPath(
     kind: "page",
     slug,
     internalPath: `/${rest.join("/")}`,
-    publicPath: `/${locale}/${rest.join("/")}`,
+    publicPath: rest.length === 1 ? getPagePath(locale, slug) : `/${locale}/${rest.join("/")}`,
   };
 }
 
@@ -195,28 +193,7 @@ export function toLocalizedPublicPath(
 ) {
   const normalized = normalizePathname(internalPath);
 
-  if (normalized === "/") return getHomePath(locale);
-
-  if (normalized === "/urunler") return getProductsPath(locale);
-  if (normalized.startsWith("/urunler/")) {
-    return getProductsPath(
-      locale,
-      safeDecodeURIComponent(normalized.slice("/urunler/".length)),
-    );
-  }
-
-  if (normalized === "/haberler") return getNewsPath(locale);
-  if (normalized.startsWith("/haberler/")) {
-    return getNewsPath(
-      locale,
-      safeDecodeURIComponent(normalized.slice("/haberler/".length)),
-    );
-  }
-
-  if (normalized === "/teklif-sepeti") return getQuoteCartPath(locale);
-  if (normalized === "/abonelikten-ayril") return getUnsubscribePath(locale);
-
-  return `/${locale}${normalized}`;
+  return parseLocalizedPublicPath(`/${locale}${normalized}`)!.publicPath;
 }
 
 export function localizeInternalHref(href: string, locale: SiteLocale) {

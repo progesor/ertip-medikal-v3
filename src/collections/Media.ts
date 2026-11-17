@@ -1,3 +1,4 @@
+import { preventUsedImageDeletion } from "@/lib/media/usage";
 import type { CollectionConfig } from "payload";
 import path from "path";
 import { getAnonymousMediaReadAccess } from "@/lib/security/protectedMedia";
@@ -38,7 +39,12 @@ export const Media: CollectionConfig = {
   slug: "media",
   labels: { singular: "Medya", plural: "Medya kütüphanesi" },
   admin: {
-    components: { beforeListTable: ["/components/admin/CollectionViewControls#CollectionViewControls"] },
+    components: {
+      beforeListTable: [
+        "/components/admin/MediaUsagePanel#MediaUsagePanel",
+        "/components/admin/CollectionViewControls#CollectionViewControls",
+      ],
+    },
     defaultColumns: ["filename", "alt", "updatedAt"],
     group: "Ürün Yönetimi",
     description:
@@ -52,6 +58,7 @@ export const Media: CollectionConfig = {
     },
   },
   hooks: {
+    beforeDelete: [preventUsedImageDeletion],
     afterRead: [
       ({ doc, req }) => {
         if (req.user || !doc?.url || !doc?.sizes) return doc;
@@ -120,6 +127,7 @@ export const Media: CollectionConfig = {
   fields: [
     {
       name: "alt",
+      localized: true,
       type: "text",
       required: true,
       label: "Alternatif Metin / Belge Adı",
@@ -130,6 +138,7 @@ export const Media: CollectionConfig = {
     },
     {
       name: "caption",
+      localized: true,
       type: "text",
       label: "Altyazı (Opsiyonel)",
     },

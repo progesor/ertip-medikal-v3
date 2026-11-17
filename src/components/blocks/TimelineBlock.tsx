@@ -1,3 +1,5 @@
+import { getRequestLocale } from "@/lib/i18n/requestLocale";
+import { localizeInternalHref } from "@/lib/i18n/routing";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
@@ -43,7 +45,7 @@ function getMedia(value: MediaValue) {
   return typeof value === "object" && value?.url ? value : null;
 }
 
-function TimelineCard({
+async function TimelineCard({
   item,
   cardStyle,
   compact = false,
@@ -52,6 +54,7 @@ function TimelineCard({
   cardStyle: NonNullable<TimelineBlockProps["cardStyle"]>;
   compact?: boolean;
 }) {
+  const locale = await getRequestLocale();
   const media = getMedia(item.image);
 
   return (
@@ -74,7 +77,7 @@ function TimelineCard({
         >
           <Image
             src={media.url!}
-            alt={media.alt || item.itemTitle || "Zaman çizgisi görseli"}
+            alt={media.alt || item.itemTitle || ""}
             fill
             className="object-cover transition-transform duration-500 hover:scale-105"
             sizes="(max-width: 768px) 100vw, 50vw"
@@ -100,7 +103,7 @@ function TimelineCard({
         )}
         {item.link && item.linkText && (
           <Link
-            href={item.link}
+            href={localizeInternalHref(item.link, locale)}
             className="mt-5 inline-flex items-center gap-2 font-bold text-primary transition-colors hover:text-primary/75"
           >
             {item.linkText}

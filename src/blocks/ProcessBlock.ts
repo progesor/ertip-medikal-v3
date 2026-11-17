@@ -138,7 +138,7 @@ export const ProcessBlock: Block = {
               name: "link",
               type: "text",
               label: "Bağlantı (Opsiyonel)",
-              admin: { placeholder: "/iletisim" },
+              admin: { placeholder: "/contact" },
             },
           ],
         },

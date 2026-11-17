@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { HeroVideo } from "./HeroVideo";
 import { ChevronRight, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SectionShell, type SectionOptions } from "@/components/blocks/SectionShell";
@@ -13,6 +14,7 @@ type MediaValue =
   | {
       url?: string | null;
       alt?: string | null;
+      mimeType?: string | null;
     }
   | null
   | undefined;
@@ -160,7 +162,8 @@ export async function HeroBlock({
   const desktopMedia = getMedia(backgroundImage);
   const mobileMedia = getMedia(mobileBackgroundImage);
   const desktopUrl = desktopMedia?.url || null;
-  const mobileUrl = mobileMedia?.url || desktopUrl;
+  const isVideo = desktopMedia?.mimeType?.startsWith("video/");
+  const mobileUrl = mobileMedia?.url || (isVideo ? null : desktopUrl);
   const resolvedTheme = theme || "primary";
   const resolvedHeight = height || "standard";
   const resolvedAlignment = contentAlignment || "center";
@@ -183,9 +186,23 @@ export async function HeroBlock({
         className={cn(
           "relative flex w-full items-center overflow-hidden",
           heightClasses[resolvedHeight],
+          isVideo && mobileUrl && "max-md:flex-col max-md:gap-6 max-md:pt-12 max-md:pb-0",
         )}
       >
-        {mobileUrl && (
+        {isVideo && mobileUrl && (
+          <div className="relative order-last mt-auto h-[clamp(13rem,58vw,24rem)] w-full md:absolute md:inset-0 md:order-none md:h-full">
+            <Image
+              src={mobileUrl}
+              alt=""
+              fill
+              className={cn("object-cover max-md:[mask-image:linear-gradient(to_bottom,transparent,black_16%)]", focusClasses[resolvedFocus])}
+              sizes="100vw"
+              quality={82}
+              preload
+            />
+          </div>
+        )}
+        {!isVideo && mobileUrl && (
           <Image
             src={mobileUrl}
             alt={mobileMedia?.alt || desktopMedia?.alt || heading}
@@ -200,7 +217,11 @@ export async function HeroBlock({
           />
         )}
 
-        {desktopUrl && (
+        {desktopUrl && isVideo && (
+          <HeroVideo key={desktopUrl} src={desktopUrl} poster={mobileUrl || undefined} position={focusClasses[resolvedFocus]} locale={locale} />
+        )}
+
+        {desktopUrl && !isVideo && (
           <Image
             src={desktopUrl}
             alt={desktopMedia?.alt || heading}
@@ -221,6 +242,8 @@ export async function HeroBlock({
               "absolute inset-0",
               classes.overlay,
               overlayClasses[resolvedOverlay],
+              isVideo && resolvedTheme === "dark" && resolvedAlignment === "left" &&
+                "md:bg-gradient-to-r md:from-surface-inverse md:via-surface-inverse/75 md:to-transparent md:bg-transparent md:opacity-100",
             )}
             aria-hidden="true"
           />

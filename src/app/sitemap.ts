@@ -1,87 +1,33 @@
-import { MetadataRoute } from "next";
+import type { MetadataRoute } from "next";
 import { getPayload } from "payload";
-import configPromise from "@payload-config";
+import config from "@payload-config";
+import { serverEnv } from "@/lib/config/env";
+import { siteLocales } from "@/lib/i18n/config";
+import { getHomePath, getNewsPath, getPagePath, getProductsPath } from "@/lib/i18n/routing";
 
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL || "https://www.ertipmedikal.com.tr";
-  const payload = await getPayload({ config: configPromise });
-
-  // 1. Tüm Ürünleri Çek
-  const { docs: products } = await payload.find({
-    collection: "products",
-    where: { _status: { equals: "published" } },
-    limit: 1000,
-  });
-
-  // 2. Tüm Haberleri Çek
-  const { docs: news } = await payload.find({
-    collection: "news",
-    where: { _status: { equals: "published" } },
-    limit: 1000,
-  });
-
-  // 3. Tüm Kurumsal Sayfaları Çek
-  const { docs: pages } = await payload.find({
-    collection: "pages",
-    where: { _status: { equals: "published" } },
-    limit: 1000,
-  });
-
-  // Ürün Linkleri
-  const productUrls = products.map((product) => ({
-    url: `${baseUrl}/urunler/${product.slug}`,
-    lastModified: new Date(product.updatedAt),
-    changeFrequency: "weekly" as const,
-    priority: 0.8,
-  }));
-
-  // Haber Linkleri
-  const newsUrls = news.map((item) => ({
-    url: `${baseUrl}/haberler/${item.slug}`,
-    lastModified: new Date(item.updatedAt),
-    changeFrequency: "monthly" as const,
-    priority: 0.6,
-  }));
-
-  // Sayfa Linkleri
-  const pageUrls = pages.map((page) => ({
-    url: `${baseUrl}/${page.slug}`,
-    lastModified: new Date(page.updatedAt),
-    changeFrequency: "monthly" as const,
-    priority: 0.7,
-  }));
-
-  // Sabit Sayfalar
-  const staticUrls = [
-    {
-      url: `${baseUrl}`,
-      lastModified: new Date(),
-      changeFrequency: "daily" as const,
-      priority: 1.0,
-    },
-    {
-      url: `${baseUrl}/urunler`,
-      lastModified: new Date(),
-      changeFrequency: "daily" as const,
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/haberler`,
-      lastModified: new Date(),
-      changeFrequency: "daily" as const,
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/iletisim`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.8,
-    },
-  ];
-
-  // Hepsini birleştir ve Google'a sun
-  return [...staticUrls, ...pageUrls, ...productUrls, ...newsUrls];
+  const payload = await getPayload({ config });
+  const entries = new Map<string, MetadataRoute.Sitemap[number]>();
+  for (const locale of siteLocales) {
+    for (const path of [getHomePath(locale), getProductsPath(locale), getNewsPath(locale)]) {
+      const url = new URL(path, serverEnv.publicSiteUrl).href;
+      entries.set(url, { url });
+    }
+    for (const collection of ["pages", "news", "products"] as const) {
+      const pathFor = { pages: getPagePath, news: getNewsPath, products: getProductsPath }[collection];
+      const { docs } = await payload.find({
+        collection, locale, fallbackLocale: false, depth: 0, pagination: false,
+        select: { slug: true, updatedAt: true },
+        where: { _status: { equals: "published" }, slug: { exists: true } },
+      });
+      for (const doc of docs) {
+        if (!doc.slug) continue;
+        const url = new URL(pathFor(locale, doc.slug), serverEnv.publicSiteUrl).href;
+        entries.set(url, { url, lastModified: doc.updatedAt });
+      }
+    }
+  }
+  return [...entries.values()];
 }

@@ -85,7 +85,7 @@ export const portalMcp: MCPPluginConfig = {
                 "Ürün ve varyant kodları sku alanında tutulur. Katalog koduyla arama için findCatalogItem aracını kullanabilirsiniz.",
                 "Ürün açıklamalarında title, shortDescription ve description alanlarını kontrol edin. mainImage medya kaydına bağlanır.",
                 "Ürün ve varyant görselleri ortak medya kütüphanesinden seçilir. uploadProductImage medya kimliğini döndürür.",
-                "İçerik sayfaları pages koleksiyonundadır. /urunler ve /teklif-sepeti uygulamanın sabit sayfalarıdır.",
+                "İçerik sayfaları pages koleksiyonundadır. Katalog ve teklif sepeti iki dilde de /products ve /quote-cart adreslerini kullanır. Herkese açık URL başına /tr veya /en eklenir.",
               ].join("\n"),
             },
           ],

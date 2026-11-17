@@ -4,13 +4,6 @@ import configPromise from "@payload-config";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
 import { getRequestLocale } from "@/lib/i18n/requestLocale";
 import { getProductsPath } from "@/lib/i18n/routing";
@@ -81,90 +74,48 @@ export async function FeaturedProductsBlock({
   if (productsToDisplay.length === 0) return null;
 
   return (
-    <section className="py-24 bg-surface-muted/50 border-t border-border">
-      <div className="container mx-auto px-4 max-w-7xl">
-        <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
-          <div className="max-w-2xl">
-            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-text-main mb-4">
-              {title || labels.fallbackTitle}
-            </h2>
-          </div>
-          <Button
-            variant="outline"
-            className="rounded-xl font-bold bg-background"
-            asChild
-          >
+    <section className="border-y border-border bg-surface-muted/50 py-12 md:py-20">
+      <div className="container mx-auto max-w-7xl px-4">
+        <div className="mb-7 flex flex-wrap items-center justify-between gap-4 md:mb-9">
+          <h2 className="text-3xl font-bold tracking-tight text-text-main md:text-4xl">
+            {title || labels.fallbackTitle}
+          </h2>
+          <Button asChild variant="outline">
             <Link href={getProductsPath(locale)}>
-              {labels.catalog} <ArrowRight className="ml-2 w-4 h-4" />
+              {labels.catalog} <ArrowRight className="ml-2 size-4" aria-hidden="true" />
             </Link>
           </Button>
         </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {productsToDisplay.map((product: any) => {
-            const imageUrl =
-              typeof product.mainImage === "object" && product.mainImage?.url
-                ? product.mainImage.url
-                : "/placeholder.jpg";
-            const productHref = getProductsPath(locale, product.slug);
-
-            return (
-              <Card
-                key={product.id}
-                className="group overflow-hidden rounded-2xl border-border shadow-sm hover:shadow-xl hover:border-primary/20 transition-all duration-300 flex flex-col bg-surface"
-              >
-                <Link
-                  href={productHref}
-                  prefetch={false}
-                  className="relative aspect-square overflow-hidden bg-surface-muted p-6 flex items-center justify-center"
-                >
+        <div className="grid grid-cols-2 gap-3 md:gap-5 lg:grid-cols-4">
+          {productsToDisplay.map((product: any) => (
+            <Link
+              key={product.id}
+              href={getProductsPath(locale, product.slug)}
+              prefetch={false}
+              className="group flex min-w-0 flex-col overflow-hidden rounded-[var(--radius-xl)] border border-border bg-surface transition-colors hover:border-primary/50 focus-visible:outline-2 focus-visible:outline-ring"
+            >
+              <div className="relative aspect-[4/3] overflow-hidden bg-background">
+                {product.mainImage?.url && (
                   <Image
-                    src={imageUrl}
-                    alt={product.title}
+                    src={product.mainImage.url}
+                    alt=""
                     fill
-                    className="object-contain p-6 transition-transform duration-500 group-hover:scale-110 mix-blend-multiply"
-                    sizes="(max-width: 639px) calc(100vw - 32px), (max-width: 1023px) calc(50vw - 28px), (max-width: 1279px) 25vw, 294px"
-                    quality={75}
+                    className="object-contain p-3 transition-transform motion-safe:group-hover:scale-105 md:p-5"
+                    sizes="(max-width: 1023px) 48vw, (max-width: 1279px) 24vw, 300px"
                   />
-                  {product.sku && (
-                    <div className="absolute top-4 right-4 bg-surface text-text-muted text-[10px] px-2.5 py-1 rounded-md font-mono font-bold shadow-sm border border-border">
-                      {product.sku}
-                    </div>
-                  )}
-                </Link>
-                <CardHeader className="pt-6 pb-2">
-                  <CardTitle className="text-lg line-clamp-2 leading-snug font-bold">
-                    <Link
-                      href={productHref}
-                      prefetch={false}
-                      className="hover:text-primary transition-colors text-text-main"
-                    >
-                      {product.title}
-                    </Link>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="flex-1 pb-4">
-                  {product.shortDescription ? (
-                    <p className="text-sm text-text-muted line-clamp-2 leading-relaxed">
-                      {product.shortDescription}
-                    </p>
-                  ) : (
-                    <div className="h-10" />
-                  )}
-                </CardContent>
-                <CardFooter className="pt-0 pb-6 px-6">
-                  <Button
-                    className="w-full rounded-xl font-bold bg-primary hover:bg-primary transition-colors"
-                    asChild
-                  >
-                    <Link href={productHref} prefetch={false}>
-                      {labels.inspect}
-                    </Link>
-                  </Button>
-                </CardFooter>
-              </Card>
-            );
-          })}
+                )}
+              </div>
+              <div className="flex flex-1 flex-col gap-3 border-t border-border p-3 sm:p-5">
+                <h3 className="text-base font-semibold leading-snug text-text-main sm:text-lg">{product.title}</h3>
+                {product.shortDescription && (
+                  <p className="hidden text-sm leading-relaxed text-text-muted md:line-clamp-2">{product.shortDescription}</p>
+                )}
+                <span className="mt-auto flex items-center justify-between gap-2 pt-2 text-sm font-semibold text-primary">
+                  {labels.inspect} <ArrowRight className="size-4 shrink-0" aria-hidden="true" />
+                </span>
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
     </section>

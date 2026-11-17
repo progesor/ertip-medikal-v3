@@ -10,6 +10,7 @@ import {
 } from "@/lib/i18n/config";
 import {
   getPreferredLocaleFromAcceptLanguage,
+  getCanonicalCategorySlug,
   parseLocalizedPublicPath,
   toLocalizedPublicPath,
 } from "@/lib/i18n/routing";
@@ -100,11 +101,14 @@ export function proxy(request: NextRequest) {
   const localizedRoute = parseLocalizedPublicPath(pathname);
 
   if (localizedRoute) {
-    // Accept aliases such as /en/urunler, but permanently expose only the
-    // locale's canonical segment (/en/products, /tr/urunler, etc.).
-    if (localizedRoute.publicPath !== pathname) {
-      const canonicalUrl = request.nextUrl.clone();
-      canonicalUrl.pathname = localizedRoute.publicPath;
+    const canonicalUrl = request.nextUrl.clone();
+    canonicalUrl.pathname = localizedRoute.publicPath;
+    const category = canonicalUrl.searchParams.get("category");
+    if (localizedRoute.kind === "products" && category) {
+      const slug = getCanonicalCategorySlug(category);
+      if (slug !== category) canonicalUrl.searchParams.set("category", slug);
+    }
+    if (canonicalUrl.pathname !== pathname || canonicalUrl.search !== request.nextUrl.search) {
       return withLocaleCookie(
         NextResponse.redirect(canonicalUrl, 308),
         localizedRoute.locale,

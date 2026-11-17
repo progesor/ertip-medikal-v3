@@ -167,7 +167,7 @@ export const FeaturesBlock: Block = {
               name: "link",
               type: "text",
               label: "Bağlantı (Opsiyonel)",
-              admin: { placeholder: "/urunler" },
+              admin: { placeholder: "/products" },
             },
           ],
         },
