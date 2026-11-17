@@ -6,6 +6,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "backup": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/site-backup.mjs",
     "predev": "pnpm payload:importmap",
     "dev": "next dev --no-server-fast-refresh",
     "prebuild": "pnpm payload:importmap",
@@ -68,6 +69,7 @@
     "remark-gfm": "^4.0.1",
     "sharp": "0.35.5",
     "tailwind-merge": "^2.6.1",
+    "tar": "^7.5.23",
     "typescript": "6.0.3",
     "zod": "4.6.7"
   },

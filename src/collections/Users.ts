@@ -14,7 +14,19 @@ export const Users: CollectionConfig = {
   slug: "users",
   labels: { singular: "Kullanıcı", plural: "Kullanıcılar" },
   admin: {
-    components: { beforeListTable: ["/components/admin/CollectionViewControls#CollectionViewControls"] }, useAsTitle: "email", group: "Sistem", defaultColumns: ["email", "firstName", "lastName", "role"] },
+    components: {
+      beforeListTable: ["/components/admin/CollectionViewControls#CollectionViewControls"],
+      views: {
+        backups: {
+          path: "/yedekler",
+          exact: true,
+          Component: "/components/admin/BackupCenter#BackupCenter",
+          meta: { title: "Yedekleme ve taşıma" },
+        },
+      },
+    },
+    useAsTitle: "email", group: "Sistem", defaultColumns: ["email", "firstName", "lastName", "role"],
+  },
   auth: {
     maxLoginAttempts: 5,
     lockTime: 15 * 60 * 1000,

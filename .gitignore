@@ -143,3 +143,5 @@ pnpm-state/
 
 
 .idea
+.backups/
+*.ertip

@@ -3,6 +3,7 @@ import Image from "next/image";
 import { ContentReviewShortcuts } from "./ProductContentReview";
 import {
   ArrowRight,
+  Archive,
   FileText,
   FolderTree,
   Plug,
@@ -17,6 +18,13 @@ import { isAdmin } from "@/access/roles";
 import type { ServerProps } from "payload";
 
 const quickActions = [
+  {
+    href: "/admin/collections/users/yedekler",
+    label: "Yedekleme ve taşıma",
+    description: "Siteyi yedekle, indir veya geri yükle",
+    icon: Archive,
+    adminOnly: true,
+  },
   {
     href: "/admin/collections/products",
     label: "Ürünleri yönet",

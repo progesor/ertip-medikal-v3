@@ -41,6 +41,7 @@ import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ContactOverview as ContactOverview_09b648ea85b88a478badceecaa3104da } from '../../../components/admin/ContactOverview'
 import { MaskedAccessCodeCell as MaskedAccessCodeCell_eaf81d43e0bebff327adac4dab6c4b1d } from '../../../components/admin/DownloadLogCells'
+import { BackupCenter as BackupCenter_20adc5f18a19b0beb9549bce531048b1 } from '../../../components/admin/BackupCenter'
 import { McpConnectionGuide as McpConnectionGuide_78728cb835a934477389c876822d2698 } from '../../../components/admin/McpConnectionGuide'
 import { SiteSettingsStudio as SiteSettingsStudio_c9532c2f4b1d3365edbbe3b8f9d1dd1d } from '../../../components/admin/SiteSettingsStudio'
 import { EnglishContentBootstrapControl as EnglishContentBootstrapControl_12b5097f7980ec875f31629c0313de31 } from '../../../components/admin/EnglishContentBootstrapControl'
@@ -101,6 +102,7 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "/components/admin/ContactOverview#ContactOverview": ContactOverview_09b648ea85b88a478badceecaa3104da,
   "/components/admin/DownloadLogCells#MaskedAccessCodeCell": MaskedAccessCodeCell_eaf81d43e0bebff327adac4dab6c4b1d,
+  "/components/admin/BackupCenter#BackupCenter": BackupCenter_20adc5f18a19b0beb9549bce531048b1,
   "/components/admin/McpConnectionGuide#McpConnectionGuide": McpConnectionGuide_78728cb835a934477389c876822d2698,
   "/components/admin/SiteSettingsStudio#SiteSettingsStudio": SiteSettingsStudio_c9532c2f4b1d3365edbbe3b8f9d1dd1d,
   "/components/admin/EnglishContentBootstrapControl#EnglishContentBootstrapControl": EnglishContentBootstrapControl_12b5097f7980ec875f31629c0313de31,

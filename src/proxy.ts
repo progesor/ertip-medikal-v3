@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { existsSync } from "node:fs";
+import { maintenanceFile } from "@/lib/backup/storage.mjs";
 import {
   isSiteLocale,
   localeCookieName,
@@ -73,6 +75,15 @@ function redirectToLocalizedPath(
 
 export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  if (existsSync(maintenanceFile()) && !(
+    pathname.startsWith("/_next/") ||
+    (["GET", "HEAD"].includes(request.method) && (pathname.startsWith("/admin/") || pathname === "/admin")) ||
+    ["/api/users/login", "/api/users/me", "/api/users/refresh-token"].includes(pathname)
+  )) {
+    return new NextResponse("Site geri yükleniyor. Lütfen biraz sonra yeniden deneyin.", {
+      status: 503, headers: { "Retry-After": "30", "Cache-Control": "no-store" },
+    });
+  }
 
   if (shouldBypass(pathname)) {
     return NextResponse.next();
@@ -134,5 +145,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image).*)"],
+  // Leave large backup uploads on the route's streaming body, outside Proxy's replay buffer.
+  matcher: ["/((?!_next/static|_next/image|api/site-backups(?:/|$)).*)"],
 };

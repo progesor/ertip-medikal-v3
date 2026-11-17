@@ -200,6 +200,8 @@ html[data-theme="dark"] {
 }
 
 .ertip-admin-nav-footer {
+  display: grid;
+  gap: .85rem;
   margin: 20px 12px 12px;
   padding: 14px;
   border: 1px solid var(--theme-elevation-150);
@@ -1249,6 +1251,21 @@ html::selection, html ::selection {
 .ertip-review-header > svg, .ertip-review-links svg, .ertip-review-empty > svg { flex-shrink: 0; color: var(--ertip-admin-primary); }
 .ertip-review-header h1 { margin: 0; font-size: clamp(1.65rem, 3vw, 2.55rem); line-height: 1.15; }
 .ertip-review-header p, .ertip-review-empty p { margin: .45rem 0 0; color: var(--ertip-admin-muted); }
+.ertip-backup-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: 1rem; margin: 1rem 0; }
+.ertip-backup-grid article { display: flex; flex-direction: column; align-items: flex-start; gap: .7rem; }
+.ertip-backup-grid article > svg { color: var(--ertip-admin-primary); }
+.ertip-backup h2 { margin: 0; font-size: 1.2rem; }
+.ertip-backup .ertip-module p { color: var(--ertip-admin-muted); }
+.ertip-backup-grid p, .ertip-backup-list p { margin: 0; }
+.ertip-backup-grid article button { margin-top: auto; }
+.ertip-backup-heading, .ertip-backup-list li, .ertip-backup-actions { display: flex; align-items: center; gap: .65rem; flex-wrap: wrap; }
+.ertip-backup-heading, .ertip-backup-list li { justify-content: space-between; }
+.ertip-backup .ertip-module__button { display: inline-flex; align-items: center; gap: .45rem; text-decoration: none; }
+.ertip-backup-list { list-style: none; padding: 0; margin: 1rem 0 0; }
+.ertip-backup-list li { padding: .9rem 0; border-top: 1px solid var(--ertip-admin-border); }
+.ertip-backup-guide { margin-top: 1rem; }
+.ertip-backup-guide summary { cursor: pointer; font-weight: 600; }
+.ertip-backup-guide li { margin-block: .5rem; overflow-wrap: anywhere; }
 .ertip-review-links, .ertip-review-issues { display: flex; flex-wrap: wrap; gap: .5rem; }
 .ertip-review > nav { margin-block: 1.25rem; }
 .ertip-review-links a, .ertip-review-issues a { padding: .42rem .75rem; border-radius: var(--style-radius-m); border: 1px solid var(--ertip-admin-border); background: var(--ertip-admin-panel); color: var(--ertip-admin-heading); text-decoration: none; }
