@@ -5,6 +5,7 @@ export const Categories: CollectionConfig = {
   defaultSort: ["displayOrder", "id"],
   labels: { singular: "Kategori", plural: "Kategoriler" },
   admin: {
+    components: { beforeListTable: ["/components/admin/CollectionViewControls#CollectionViewControls"] },
     useAsTitle: "title",
     defaultColumns: ["title", "parent", "displayOrder"],
     group: "Ürün Yönetimi",
@@ -12,15 +13,6 @@ export const Categories: CollectionConfig = {
       "Katalog kategorilerini ve kategori sırasını yönetin.",
   },
   fields: [
-    {
-      name: "editOverview",
-      type: "ui",
-      admin: {
-        components: {
-          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
-        },
-      },
-    },
     { name: "title", type: "text", required: true, label: "Kategori Adı" },
     {
       name: "displayOrder",
@@ -37,6 +29,7 @@ export const Categories: CollectionConfig = {
     },
     {
       name: "slug",
+      label: "Kategori adresi",
       type: "text",
       unique: true,
       required: true,
@@ -46,7 +39,7 @@ export const Categories: CollectionConfig = {
       name: "parent",
       type: "relationship",
       relationTo: "categories",
-      label: "Üst Kategori (Alt Kategori Yaratmak İçin)",
+      label: "Üst kategori",
       admin: { position: "sidebar" },
     },
     {
@@ -80,6 +73,15 @@ export const Categories: CollectionConfig = {
       hasMany: true,
       label: "Kategoriye Özel Manuel Ürün Sırası",
       admin: { hidden: true },
+    },
+    {
+      name: "editOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+        },
+      },
     },
   ],
 };

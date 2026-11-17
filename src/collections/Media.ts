@@ -36,8 +36,10 @@ async function markRasterMediaChanged({
 
 export const Media: CollectionConfig = {
   slug: "media",
-  labels: { singular: "Medya", plural: "Medyalar" },
+  labels: { singular: "Medya", plural: "Medya kütüphanesi" },
   admin: {
+    components: { beforeListTable: ["/components/admin/CollectionViewControls#CollectionViewControls"] },
+    defaultColumns: ["filename", "alt", "updatedAt"],
     group: "Ürün Yönetimi",
     description:
       "Ürün görsellerini, videoları, belgeleri ve site medyalarını yönetin.",
@@ -117,15 +119,6 @@ export const Media: CollectionConfig = {
   },
   fields: [
     {
-      name: "editOverview",
-      type: "ui",
-      admin: {
-        components: {
-          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
-        },
-      },
-    },
-    {
       name: "alt",
       type: "text",
       required: true,
@@ -139,6 +132,15 @@ export const Media: CollectionConfig = {
       name: "caption",
       type: "text",
       label: "Altyazı (Opsiyonel)",
+    },
+    {
+      name: "editOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+        },
+      },
     },
   ],
 };

@@ -13,7 +13,8 @@ const allowAnonymousFirstUser =
 export const Users: CollectionConfig = {
   slug: "users",
   labels: { singular: "Kullanıcı", plural: "Kullanıcılar" },
-  admin: { useAsTitle: "email", group: "Sistem" },
+  admin: {
+    components: { beforeListTable: ["/components/admin/CollectionViewControls#CollectionViewControls"] }, useAsTitle: "email", group: "Sistem", defaultColumns: ["email", "firstName", "lastName", "role"] },
   auth: {
     maxLoginAttempts: 5,
     lockTime: 15 * 60 * 1000,
@@ -66,28 +67,20 @@ export const Users: CollectionConfig = {
   },
   fields: [
     {
-      name: "editOverview",
-      type: "ui",
-      admin: {
-        components: {
-          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
-        },
-      },
-    },
-    {
       name: "role",
       type: "select",
       required: true,
       defaultValue: "editor",
       saveToJWT: true,
-      label: "Sistem Rolü",
+      label: "Yetki düzeyi",
+      admin: { description: "Yöneticiler tüm paneli, içerik editörleri katalog ve site içeriklerini yönetebilir." },
       access: {
         create: ({ req }) =>
           isAdmin(req.user) || (!req.user && allowAnonymousFirstUser),
         update: adminsOnly,
       },
       options: [
-        { label: "Yönetici (Admin)", value: "admin" },
+        { label: "Yönetici", value: "admin" },
         { label: "İçerik Editörü", value: "editor" },
       ],
     },
@@ -97,6 +90,15 @@ export const Users: CollectionConfig = {
         { name: "firstName", type: "text", label: "Ad" },
         { name: "lastName", type: "text", label: "Soyad" },
       ],
+    },
+    {
+      name: "editOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+        },
+      },
     },
   ],
 };

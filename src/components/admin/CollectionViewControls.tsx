@@ -1,75 +1,37 @@
 "use client";
 
-import { Grid2X2, LayoutGrid, List, Rows3, Table2 } from "lucide-react";
-import { usePathname } from "next/navigation";
-import type { ComponentType } from "react";
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useListQuery } from "@payloadcms/ui";
+import { CollectionQuickFilters } from "./CollectionQuickFilters";
+import { useCallback, useEffect, useRef, useSyncExternalStore } from "react";
 
 type ViewMode = "table" | "list" | "cards" | "grid" | "compact";
 
-const viewModes: Array<{
-  description: string;
-  icon: ComponentType<{ size?: number }>;
-  label: string;
-  value: ViewMode;
-}> = [
-  {
-    description: "Standart kolonlu tablo",
-    icon: Table2,
-    label: "Tablo",
-    value: "table",
-  },
-  {
-    description: "Okunabilir satır listesi",
-    icon: List,
-    label: "Liste",
-    value: "list",
-  },
-  {
-    description: "Tek kolon kart görünümü",
-    icon: Rows3,
-    label: "Kart",
-    value: "cards",
-  },
-  {
-    description: "Çok kolonlu grid görünümü",
-    icon: Grid2X2,
-    label: "Grid",
-    value: "grid",
-  },
-  {
-    description: "Yoğun veri görünümü",
-    icon: LayoutGrid,
-    label: "Kompakt",
-    value: "compact",
-  },
+const viewModes: { label: string; value: ViewMode }[] = [
+  { label: "Tablo", value: "table" },
+  { label: "Liste", value: "list" },
+  { label: "Kart", value: "cards" },
+  { label: "Izgara", value: "grid" },
+  { label: "Sık tablo", value: "compact" },
 ];
 
-const getEffectiveMode = (selectedMode: ViewMode) => {
-  if (typeof window === "undefined") return selectedMode;
-  if (window.innerWidth <= 900 && selectedMode !== "table") return "table";
-  return selectedMode;
-};
-
-const normalizeHeading = (text: string) =>
-  {
-    const label = text
+const normalizeHeading = (text: string) => {
+  const label = text
     .replace(/select-all/gi, "")
     .replace(/Sort by.+?(Ascending|Descending)/gi, "")
-      .replace(/\(.+?\)/g, "")
+    .replace(/\(.+?\)/g, "")
     .replace(/\s+/g, " ")
     .trim();
 
-    if (!label) return "Alan";
-    if (/ürün adı|urun adi/i.test(label)) return "Ürün";
-    if (/ana ürün kodu|ana urun kodu|sku/i.test(label)) return "Ana SKU";
-    if (/status|durum/i.test(label)) return "Durum";
-    if (/created|oluştur/i.test(label)) return "Oluşturma";
-    if (/updated|güncelle/i.test(label)) return "Güncelleme";
-    if (/published|yayın/i.test(label)) return "Yayın";
+  if (!label) return "Alan";
+  if (/ürün adı|urun adi/i.test(label)) return "Ürün";
+  if (/ana ürün kodu|ana urun kodu|sku/i.test(label)) return "Ana SKU";
+  if (/status|durum/i.test(label)) return "Durum";
+  if (/created|oluştur/i.test(label)) return "Oluşturma";
+  if (/updated|güncelle/i.test(label)) return "Güncelleme";
+  if (/published|yayın/i.test(label)) return "Yayın";
 
-    return label.length > 30 ? `${label.slice(0, 27)}...` : label;
-  };
+  return label.length > 30 ? `${label.slice(0, 27)}...` : label;
+};
 
 function subscribeToMode(update: () => void) {
   window.addEventListener("storage", update);
@@ -81,49 +43,45 @@ function subscribeToMode(update: () => void) {
 }
 
 export function CollectionViewControls() {
-  const pathname = usePathname();
-  const collectionSlug = pathname.split("/collections/")[1]?.split("/")[0] || "collection";
+  const { collectionSlug, data, orderableFieldName, isGroupingBy } =
+    useListQuery();
+  const allowModes =
+    !orderableFieldName && !isGroupingBy && collectionSlug !== "products";
   const storageKey = `ertip-admin-view:${collectionSlug}`;
   const readMode = useCallback((): ViewMode => {
     const saved = window.localStorage.getItem(storageKey);
     return viewModes.find((item) => item.value === saved)?.value || "table";
   }, [storageKey]);
-  const mode = useSyncExternalStore(subscribeToMode, readMode, () => "table" as const);
-  const [viewportMode, setViewportMode] = useState<ViewMode>("table");
-  const [rowCount, setRowCount] = useState(0);
-
+  const preference = useSyncExternalStore(
+    subscribeToMode,
+    readMode,
+    () => "table" as const,
+  );
+  const controlsRef = useRef<HTMLElement>(null);
+  const mode = allowModes ? preference : "table";
 
   useEffect(() => {
-    const syncMode = () => setViewportMode(getEffectiveMode(mode));
-    syncMode();
-    window.addEventListener("resize", syncMode);
-
+    const list = controlsRef.current?.closest<HTMLElement>(".collection-list");
+    if (!list) return;
+    list.dataset.ertipCollectionView = mode;
     return () => {
-      window.removeEventListener("resize", syncMode);
+      delete list.dataset.ertipCollectionView;
     };
-  }, [mode]);
+  }, [mode, collectionSlug]);
 
   useEffect(() => {
-    document.documentElement.dataset.ertipCollectionView = viewportMode;
-
-    return () => {
-      delete document.documentElement.dataset.ertipCollectionView;
-    };
-  }, [viewportMode]);
-
-  useEffect(() => {
+    if (mode === "table" || mode === "compact") return;
+    const list = controlsRef.current?.closest(".collection-list");
+    if (!list) return;
     let frame = 0;
 
     const annotateTable = () => {
       window.cancelAnimationFrame(frame);
 
       frame = window.requestAnimationFrame(() => {
-        const table = document.querySelector<HTMLTableElement>(
-          ".collection-list .table table",
-        );
+        const table = list.querySelector<HTMLTableElement>(".table table");
 
         if (!table) {
-          setRowCount(0);
           return;
         }
 
@@ -137,9 +95,12 @@ export function CollectionViewControls() {
           const cells = Array.from(row.children);
           const detectedPrimaryIndex = cells.findIndex((cell, index) => {
             if (index === 0) return false;
-            return cell.querySelector("a, strong, [class*='cell-link']") !== null;
+            return (
+              cell.querySelector("a, strong, [class*='cell-link']") !== null
+            );
           });
-          const primaryIndex = detectedPrimaryIndex >= 1 ? detectedPrimaryIndex : 1;
+          const primaryIndex =
+            detectedPrimaryIndex >= 1 ? detectedPrimaryIndex : 1;
 
           cells.forEach((cell, index) => {
             const label = headings[index] || "Alan";
@@ -149,14 +110,11 @@ export function CollectionViewControls() {
             cell.toggleAttribute("data-utility", index === 0);
           });
         });
-
-        setRowCount(rows.length);
       });
     };
 
     annotateTable();
 
-    const list = document.querySelector(".collection-list");
     const observer = new MutationObserver(annotateTable);
 
     if (list) {
@@ -170,37 +128,39 @@ export function CollectionViewControls() {
       observer.disconnect();
       window.cancelAnimationFrame(frame);
     };
-  }, [collectionSlug]);
+  }, [collectionSlug, mode]);
 
   return (
-    <section className="ertip-collection-tools" aria-label="Liste görünümü">
-      <div className="ertip-collection-tools__meta">
-        <span>Görünüm</span>
-        <strong>{rowCount > 0 ? `${rowCount} kayıt` : "Kayıt görünümü"}</strong>
-      </div>
-
-      <div className="ertip-collection-tools__modes" role="group">
-        {viewModes.map((item) => {
-          const Icon = item.icon;
-          const isActive = mode === item.value;
-
-          return (
-            <button
-              aria-pressed={isActive}
-              className="ertip-collection-tools__button"
-              key={item.value}
-              onClick={() => {
-                window.localStorage.setItem(storageKey, item.value);
+    <section
+      ref={controlsRef}
+      className="ertip-collection-tools"
+      aria-label="Liste görünümü"
+    >
+      <CollectionQuickFilters />
+      <div className="ertip-list-options">
+        {data && (
+          <small aria-live="polite">
+            {data.totalDocs.toLocaleString("tr-TR")} kayıt
+          </small>
+        )}
+        {allowModes && (
+          <label>
+            Görünüm
+            <select
+              value={mode}
+              onChange={(event) => {
+                window.localStorage.setItem(storageKey, event.target.value);
                 window.dispatchEvent(new Event("ertip-view-mode"));
               }}
-              title={item.description}
-              type="button"
             >
-              <Icon size={16} />
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
+              {viewModes.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
       </div>
     </section>
   );

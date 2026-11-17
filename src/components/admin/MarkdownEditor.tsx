@@ -1,46 +1,51 @@
 "use client";
 
-import React, { useState } from "react";
-import { MdEditor, NormalToolbar } from "md-editor-rt"; // NormalToolbar eklendi
+import { FieldLabel, useField, useTheme } from "@payloadcms/ui";
+import type { CodeFieldClientProps } from "payload";
+import { MdEditor } from "md-editor-rt";
+import { useId, useState } from "react";
 import "md-editor-rt/lib/style.css";
-import { useField } from "@payloadcms/ui";
-import { Label } from "@/components/ui/label";
 
-export const MarkdownEditor: React.FC<{ path: string; label: string }> = ({
+export function MarkdownEditor({
+  field,
   path,
-  label,
-}) => {
+  readOnly,
+}: CodeFieldClientProps) {
   const { value, setValue } = useField<string>({ path });
-
-  // Tema state'ini oluşturuyoruz (Varsayılan: light)
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-
-  // Tema değiştirme fonksiyonu
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
-  };
+  const { theme } = useTheme();
+  const inputId = useId();
+  const [formatting, setFormatting] = useState(false);
 
   return (
-    <div className="field-type code" style={{ marginBottom: "20px" }}>
-      <Label>{label}</Label>
-      <div
-        style={{
-          marginTop: "10px",
-          borderRadius: "var(--radius, 12px)",
-          overflow: "hidden",
-          border: "1px solid var(--theme-elevation-150)",
-        }}
-      >
+    <div className="ertip-description">
+      <div className="ertip-description__header">
+        <FieldLabel
+          htmlFor={inputId}
+          path={path}
+          label={field.label}
+          localized={field.localized}
+          required={field.required}
+        />
+        <button
+          type="button"
+          aria-pressed={formatting}
+          onClick={() => setFormatting(!formatting)}
+        >
+          Biçimlendirme araçları
+        </button>
+      </div>
+      {formatting ? (
         <MdEditor
+          editorId={inputId + "-editor"}
           modelValue={value || ""}
-          onChange={(val) => setValue(val)}
+          onChange={setValue}
+          theme={theme}
           language="en-US"
-          theme={theme} // Dinamik tema
+          readOnly={readOnly}
           toolbars={[
             "bold",
             "underline",
             "italic",
-            "-",
             "title",
             "strikeThrough",
             "sub",
@@ -48,46 +53,30 @@ export const MarkdownEditor: React.FC<{ path: string; label: string }> = ({
             "quote",
             "unorderedList",
             "orderedList",
-            "-",
             "code",
             "link",
             "image",
             "table",
             "mermaid",
-            "-",
             "revoke",
             "next",
             "=",
-            0, // Özel toolbar elementimizin (Dark Mode butonu) index'i
             "pageFullscreen",
             "fullscreen",
             "preview",
             "catalog",
           ]}
-          // Özel (Custom) Toolbar tanımlamaları
-          defToolbars={[
-            <NormalToolbar
-              key="theme-toggle"
-              title={
-                theme === "light" ? "Karanlık Moda Geç" : "Aydınlık Moda Geç"
-              }
-              onClick={toggleTheme}
-            >
-              <div
-                style={{
-                  fontSize: "16px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {theme === "light" ? "🌙" : "☀️"}
-              </div>
-            </NormalToolbar>,
-          ]}
-          style={{ height: "600px" }}
+          style={{ height: "min(55vh, 34rem)" }}
         />
-      </div>
+      ) : (
+        <textarea
+          id={inputId}
+          rows={8}
+          value={value || ""}
+          readOnly={readOnly}
+          onChange={(event) => setValue(event.target.value)}
+        />
+      )}
     </div>
   );
-};
+}

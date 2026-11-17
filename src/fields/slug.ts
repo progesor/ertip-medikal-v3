@@ -28,14 +28,14 @@ const formatSlug = (val: string): string => {
 // fieldToUse parametresi: Slug'ın hangi alandan türetileceğini belirler (Genelde 'title' olur)
 export const slugField = (fieldToUse: string = "title"): Field => ({
   name: "slug",
-  label: "URL Yolu (Slug)",
+  label: "Sayfa adresi",
   type: "text",
   index: true,
   unique: true,
   admin: {
     position: "sidebar",
     description:
-      "Otomatik oluşturulur. Gerekirse manuel olarak düzenleyebilirsiniz.",
+      "Başlıktan otomatik oluşturulur.",
   },
   hooks: {
     beforeValidate: [

@@ -1,13 +1,14 @@
 import {
   buildConfig,
-  flattenAllFields,
   type CollectionConfig,
   type GlobalConfig,
 } from "payload";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { mcpPlugin } from "@payloadcms/plugin-mcp";
-import { uploadProductImage } from "@/lib/catalog/uploadProductImage";
+import { portalMcp } from "@/lib/mcp/portalConfig";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
+import { tr } from "@payloadcms/translations/languages/tr";
+import { en } from "@payloadcms/translations/languages/en";
 import sharp from "sharp";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -204,30 +205,28 @@ export default buildConfig({
   defaultDepth: 1,
   maxDepth: 4,
   localization: payloadLocalization,
+  i18n: {
+    fallbackLanguage: "tr",
+    supportedLanguages: { tr, en },
+    translations: {
+      tr: {
+        general: {
+          locale: "İçerik dili",
+          dashboard: "Ana sayfa",
+          searchBy: "Ara · {{label}}",
+          or: "veya",
+          true: "Evet",
+          false: "Hayır",
+          of: "/",
+        },
+      },
+    },
+  },
   graphQL: {
     disable: true,
   },
   telemetry: false,
-  plugins: [
-    mcpPlugin({
-      collections: {
-        products: { enabled: { find: true, create: true, update: true, delete: false } },
-        categories: { enabled: { find: true, create: true, update: true, delete: false } },
-      },
-      mcp: { tools: [uploadProductImage] },
-      overrideApiKeyCollection: (collection) => {
-        // Custom tools default to enabled in the plugin. Make image uploads opt-in per key.
-        const group = flattenAllFields({ fields: collection.fields })
-          .find((field) => field.name === "payload-mcp-tool");
-        const permission = group?.type === "group" && group.fields.find(
-          (field) => field.type === "checkbox" && field.name === uploadProductImage.name,
-        );
-        if (!permission || permission.type !== "checkbox") throw new Error("Missing MCP image upload permission");
-        permission.defaultValue = false;
-        return withAdminAccess(collection);
-      },
-    }),
-  ],
+  plugins: [mcpPlugin(portalMcp)],
   upload: {
     abortOnLimit: true,
     limits: {
@@ -241,11 +240,10 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
     components: {
-      actions: ["/components/admin/AdminSurfaceEnhancer#AdminSurfaceEnhancer"],
-      beforeDashboard: [
-        "/components/admin/AdminDashboard#default",
-        "/components/admin/EnglishContentBootstrapControl#EnglishContentBootstrapControl",
-      ],
+      actions: ["/components/admin/AdminThemeToggle#AdminThemeToggle"],
+      beforeLogin: ["/components/admin/AdminBrand#AdminLoginHeading"],
+      beforeNavLinks: ["/components/admin/AdminBrand#AdminNavHome"],
+      beforeDashboard: ["/components/admin/AdminDashboard#default"],
       afterNavLinks: ["/components/admin/AdminBrand#AdminNavFooter"],
       graphics: {
         Icon: "/components/admin/AdminBrand#AdminIcon",
@@ -255,17 +253,17 @@ export default buildConfig({
   },
   endpoints: [...imageOptimizationEndpoints, ...i18nContentEndpoints],
   collections: [
-    Users,
-    MediaWithRBAC,
     ProductsWithProtectedPublicApi,
     withContentAccess(LocalizedCategories),
-    withAdminAccess(Inquiries),
-    withContentAccess(LocalizedNews),
+    MediaWithRBAC,
     withContentAccess(LocalizedPages),
+    withContentAccess(LocalizedNews),
     withContentAccess(LocalizedNewsCategories),
     withAdminAccess(QuoteRequests),
+    withAdminAccess(Inquiries),
     DownloadLogs,
     withAdminAccess(Subscribers),
+    Users,
   ],
   globals: [
     SiteSettingsWithRBAC,

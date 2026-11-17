@@ -27,15 +27,20 @@ export const Products: CollectionConfig = {
   admin: {
     useAsTitle: "title",
     group: "Ürün Yönetimi",
-    description:
-      "Ürünleri soldaki tutamaçtan sürükleyerek katalog sırasını değiştirin. Kategori filtresi aynı sırayı o kategorideki ürünlerle gösterir.",
     components: {
-      beforeListTable: ["/components/admin/ProductCategoryFilter#ProductCategoryFilter"],
+      views: {
+        contentReview: {
+          path: "/icerik-kontrolu",
+          exact: true,
+          Component: "/components/admin/ProductContentReview#ProductContentReview",
+          meta: { title: "İçerik kontrolü" },
+        },
+      },
+      beforeListTable: ["/components/admin/ProductCategoryFilter#ProductCategoryFilter", "/components/admin/CollectionViewControls#CollectionViewControls"],
     },
     defaultColumns: [
       "title",
       "category",
-      "variants",
       "isFeatured",
       "_status",
       "updatedAt",
@@ -161,25 +166,7 @@ export const Products: CollectionConfig = {
         },
       },
     },
-    {
-      name: "productArrayEnhancer",
-      type: "ui",
-      admin: {
-        components: {
-          Field: "/components/admin/ProductArrayEnhancer#ProductArrayEnhancer",
-        },
-      },
-    },
-    {
-      name: "productWorkspaceStudio",
-      type: "ui",
-      admin: {
-        components: {
-          Field:
-            "/components/admin/ProductWorkspaceStudio#ProductWorkspaceStudio",
-        },
-      },
-    },
+
     {
       type: "tabs",
       tabs: [
@@ -190,7 +177,7 @@ export const Products: CollectionConfig = {
               name: "title",
               type: "text",
               required: true,
-              label: "Ürün Adı (Örn: Dijital Trikoskop)",
+              label: "Ürün adı",
               admin: {
                 components: {
                   Cell: "/components/admin/ProductListCells#ProductTitleCell",
@@ -220,7 +207,8 @@ export const Products: CollectionConfig = {
             {
               name: "specs",
               type: "array",
-              label: "Temel/Teknik Özellikler",
+              labels: { singular: "Özellik", plural: "Özellikler" },
+              label: "Teknik özellikler",
               admin: {
                 initCollapsed: true,
                 components: {
@@ -259,6 +247,7 @@ export const Products: CollectionConfig = {
             {
               name: "gallery",
               type: "array",
+              labels: { singular: "Görsel", plural: "Görseller" },
               label: "Ürün Galerisi",
               admin: {
                 initCollapsed: true,
@@ -287,6 +276,12 @@ export const Products: CollectionConfig = {
           label: "Varyantlar ve Stok",
           fields: [
             {
+              name: "sku",
+              type: "text",
+              label: "Ana ürün kodu",
+              admin: { description: "Tek seçenekli ürünün katalog kodu." },
+            },
+            {
               type: "row",
               fields: [
                 {
@@ -306,6 +301,7 @@ export const Products: CollectionConfig = {
             {
               name: "attributes",
               type: "array",
+              labels: { singular: "Özellik", plural: "Özellikler" },
               label: "Ürün Özellikleri (Çap, Uzunluk vb.)",
               admin: {
                 initCollapsed: true,
@@ -363,6 +359,7 @@ export const Products: CollectionConfig = {
             {
               name: "variants",
               type: "array",
+              labels: { singular: "Varyant", plural: "Varyantlar" },
               label: "Üretilen Varyantlar",
               admin: {
                 initCollapsed: true,
@@ -394,6 +391,7 @@ export const Products: CollectionConfig = {
                 {
                   name: "variantImages",
                   type: "array",
+                  labels: { singular: "Görsel", plural: "Görseller" },
                   label: "Varyanta Özel Görseller",
                   admin: {
                     description:
@@ -430,7 +428,7 @@ export const Products: CollectionConfig = {
               options: [
                 { label: "Açıklamanın Altında (Geniş Tablo)", value: "below" },
                 {
-                  label: "Yan Panelde (Sidebar - Özet Kartlar)",
+                  label: "Yan panelde (özet kartlar)",
                   value: "sidebar",
                 },
                 { label: "Her İki Yerde de Göster", value: "both" },
@@ -472,6 +470,7 @@ export const Products: CollectionConfig = {
             {
               name: "packaging",
               type: "array",
+              labels: { singular: "Paket", plural: "Paketler" },
               label: "Ambalaj ve Paketleme Seçenekleri",
               admin: {
                 initCollapsed: true,
@@ -540,6 +539,7 @@ export const Products: CollectionConfig = {
             {
               name: "publicDocs",
               type: "array",
+              labels: { singular: "Belge", plural: "Belgeler" },
               label: "Halka Açık Belgeler (Katalog, Broşür vb.)",
               admin: {
                 initCollapsed: true,
@@ -565,6 +565,7 @@ export const Products: CollectionConfig = {
             {
               name: "protectedDocs",
               type: "array",
+              labels: { singular: "Kılavuz", plural: "Kılavuzlar" },
               label: "Korumalı Belgeler (Kullanma Kılavuzu)",
               admin: {
                 initCollapsed: true,
@@ -588,6 +589,7 @@ export const Products: CollectionConfig = {
                 {
                   name: "accessCodes",
                   type: "array",
+                  labels: { singular: "Erişim kodu", plural: "Erişim kodları" },
                   label: "Yetkili Kodlar / Seri Numaraları",
                   admin: {
                     initCollapsed: true,
@@ -623,7 +625,7 @@ export const Products: CollectionConfig = {
           ],
         },
         {
-          label: "SEO Ayarları",
+          label: "Arama sonuçları",
           fields: [
             metaFields, // Merkezi SEO alanımız
           ],
@@ -631,12 +633,7 @@ export const Products: CollectionConfig = {
       ],
     },
     // --- YAN BAR (Sidebar) ALANLARI ---
-    {
-      name: "sku",
-      type: "text",
-      label: "Ana Ürün Kodu (Varyantsız Ürünler İçin)",
-      admin: { position: "sidebar" },
-    },
+
     {
       name: "category",
       type: "relationship",
@@ -657,7 +654,7 @@ export const Products: CollectionConfig = {
     {
       name: "isFeatured",
       type: "checkbox",
-      label: "Anasayfada Öne Çıkar",
+      label: "Ana sayfada göster",
       defaultValue: false,
       admin: { position: "sidebar" },
     },

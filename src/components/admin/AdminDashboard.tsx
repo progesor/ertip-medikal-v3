@@ -1,9 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
+import { ContentReviewShortcuts } from "./ProductContentReview";
 import {
   ArrowRight,
   FileText,
   FolderTree,
+  Plug,
   ImageIcon,
   MessageSquareText,
   Package,
@@ -11,16 +13,10 @@ import {
   Settings2,
   ShoppingCart,
 } from "lucide-react";
+import { isAdmin } from "@/access/roles";
 import type { ServerProps } from "payload";
 
 const quickActions = [
-  {
-    href: "/admin/collections/products/create",
-    label: "Yeni ürün ekle",
-    description: "Ürün bilgileri, görseller ve varyantlar",
-    icon: PackagePlus,
-    primary: true,
-  },
   {
     href: "/admin/collections/products",
     label: "Ürünleri yönet",
@@ -28,16 +24,23 @@ const quickActions = [
     icon: Package,
   },
   {
-    href: "/admin/collections/categories",
-    label: "Kategorileri düzenle",
-    description: "Katalog yapısı ve ürün sıralaması",
-    icon: FolderTree,
+    href: "/admin/collections/pages",
+    label: "Sayfaları düzenle",
+    description: "Sitede yayımlanan metinler ve görseller",
+    icon: FileText,
   },
   {
     href: "/admin/globals/site-settings",
     label: "Site ayarları",
     description: "Logo, başlık ve iletişim seçenekleri",
     icon: Settings2,
+  },
+  {
+    href: "/admin/collections/payload-mcp-api-keys",
+    label: "MCP bağlantıları",
+    description: "Bağlı uygulamalar ve erişim izinleri",
+    icon: Plug,
+    adminOnly: true,
   },
 ];
 
@@ -49,8 +52,14 @@ function getProductImage(product: Record<string, any>) {
   return image.sizes?.thumbnail?.url || image.url || null;
 }
 
-export default async function AdminDashboard({ payload, user }: ServerProps) {
+export default async function AdminDashboard({
+  payload,
+  user,
+  locale,
+}: ServerProps) {
   if (user?.collection !== "users") return null;
+  const access = { user, overrideAccess: false } as const;
+  const showRequests = isAdmin(user);
   const [
     products,
     categories,
@@ -60,19 +69,29 @@ export default async function AdminDashboard({ payload, user }: ServerProps) {
     quoteRequests,
     recentProducts,
   ] = await Promise.all([
-    payload.count({ collection: "products" }),
-    payload.count({ collection: "categories" }),
-    payload.count({ collection: "media" }),
-    payload.count({ collection: "pages" }),
-    payload.count({
-      collection: "inquiries",
-      where: { status: { equals: "unread" } },
-    }),
-    payload.count({
-      collection: "quote-requests",
-      where: { status: { equals: "new" } },
-    }),
+    payload.count({ ...access, collection: "products" }),
+    payload.count({ ...access, collection: "categories" }),
+    payload.count({ ...access, collection: "media" }),
+    payload.count({ ...access, collection: "pages" }),
+    showRequests
+      ? payload.count({
+          ...access,
+          collection: "inquiries",
+          where: { status: { equals: "unread" } },
+        })
+      : null,
+    showRequests
+      ? payload.count({
+          ...access,
+          collection: "quote-requests",
+          where: { status: { equals: "new" } },
+        })
+      : null,
     payload.find({
+      ...access,
+      locale: locale?.code === "en" ? "en" : "tr",
+      draft: true,
+      select: { title: true, mainImage: true, updatedAt: true, _status: true },
       collection: "products",
       depth: 1,
       limit: 5,
@@ -86,10 +105,30 @@ export default async function AdminDashboard({ payload, user }: ServerProps) {
     "Yönetici";
 
   const stats = [
-    { label: "Toplam ürün", value: products.totalDocs, icon: Package },
-    { label: "Kategori", value: categories.totalDocs, icon: FolderTree },
-    { label: "Medya dosyası", value: media.totalDocs, icon: ImageIcon },
-    { label: "İçerik sayfası", value: pages.totalDocs, icon: FileText },
+    {
+      label: "Toplam ürün",
+      href: "/admin/collections/products",
+      value: products.totalDocs,
+      icon: Package,
+    },
+    {
+      label: "Kategori",
+      href: "/admin/collections/categories",
+      value: categories.totalDocs,
+      icon: FolderTree,
+    },
+    {
+      label: "Medya dosyası",
+      href: "/admin/collections/media",
+      value: media.totalDocs,
+      icon: ImageIcon,
+    },
+    {
+      label: "İçerik sayfası",
+      href: "/admin/collections/pages",
+      value: pages.totalDocs,
+      icon: FileText,
+    },
   ];
 
   return (
@@ -112,31 +151,33 @@ export default async function AdminDashboard({ payload, user }: ServerProps) {
         </Link>
       </section>
 
-      <section
-        className="ertip-dashboard__attention"
-        aria-label="Bekleyen işler"
-      >
-        <Link href="/admin/collections/quote-requests?where[status][equals]=new">
-          <ShoppingCart size={20} />
-          <span>
-            <strong>{quoteRequests.totalDocs}</strong>
-            Yeni teklif talebi
-          </span>
-          <ArrowRight size={17} />
-        </Link>
-        <Link href="/admin/collections/inquiries?where[status][equals]=unread">
-          <MessageSquareText size={20} />
-          <span>
-            <strong>{inquiries.totalDocs}</strong>
-            Yeni iletişim mesajı
-          </span>
-          <ArrowRight size={17} />
-        </Link>
-      </section>
+      {quoteRequests && inquiries && (
+        <section
+          className="ertip-dashboard__attention"
+          aria-label="Bekleyen işler"
+        >
+          <Link href="/admin/collections/quote-requests?where[status][equals]=new">
+            <ShoppingCart size={20} />
+            <span>
+              <strong>{quoteRequests.totalDocs}</strong>
+              Yeni teklif talebi
+            </span>
+            <ArrowRight size={17} />
+          </Link>
+          <Link href="/admin/collections/inquiries?where[status][equals]=unread">
+            <MessageSquareText size={20} />
+            <span>
+              <strong>{inquiries.totalDocs}</strong>
+              Yeni iletişim mesajı
+            </span>
+            <ArrowRight size={17} />
+          </Link>
+        </section>
+      )}
 
       <section className="ertip-dashboard__stats" aria-label="İçerik özeti">
-        {stats.map(({ icon: Icon, label, value }) => (
-          <article key={label}>
+        {stats.map(({ icon: Icon, label, value, href }) => (
+          <Link href={href} key={label}>
             <span className="ertip-dashboard__stat-icon">
               <Icon size={19} />
             </span>
@@ -144,21 +185,28 @@ export default async function AdminDashboard({ payload, user }: ServerProps) {
               <strong>{value}</strong>
               <span>{label}</span>
             </div>
-          </article>
+          </Link>
         ))}
       </section>
+
+      <ContentReviewShortcuts />
 
       <div className="ertip-dashboard__columns">
         <section className="ertip-dashboard__panel">
           <div className="ertip-dashboard__panel-heading">
             <div>
-              <span className="ertip-dashboard__eyebrow">Katalog</span>
-              <h2>Son düzenlenen ürünler</h2>
+              <h2>Son çalışılan ürünler</h2>
             </div>
             <Link href="/admin/collections/products">Tümünü gör</Link>
           </div>
 
           <div className="ertip-dashboard__product-list">
+            {recentProducts.docs.length === 0 && (
+              <div className="ertip-dashboard__empty">
+                <Package size={28} aria-hidden="true" />
+                <p>İlk ürününüzü eklediğinizde burada görünecek.</p>
+              </div>
+            )}
             {recentProducts.docs.map((product) => {
               const imageUrl = getProductImage(product);
 
@@ -182,7 +230,12 @@ export default async function AdminDashboard({ payload, user }: ServerProps) {
                   </span>
                   <span className="ertip-dashboard__product-copy">
                     <strong>{product.title}</strong>
-                    <small>{product.sku || "Ana SKU tanımlanmamış"}</small>
+                    <small>
+                      {new Intl.DateTimeFormat("tr-TR", {
+                        dateStyle: "medium",
+                        timeZone: "Europe/Istanbul",
+                      }).format(new Date(product.updatedAt))}
+                    </small>
                   </span>
                   <span
                     className={`ertip-dashboard__status ertip-dashboard__status--${product._status || "draft"}`}
@@ -199,19 +252,15 @@ export default async function AdminDashboard({ payload, user }: ServerProps) {
         <section className="ertip-dashboard__panel">
           <div className="ertip-dashboard__panel-heading">
             <div>
-              <span className="ertip-dashboard__eyebrow">Kısayollar</span>
-              <h2>Sık kullanılan işlemler</h2>
+              <h2>Hızlı işlemler</h2>
             </div>
           </div>
 
           <div className="ertip-dashboard__quick-actions">
-            {quickActions.map(
-              ({ description, href, icon: Icon, label, primary }) => (
-                <Link
-                  className={primary ? "is-primary" : undefined}
-                  href={href}
-                  key={href}
-                >
+            {quickActions
+              .filter((action) => !action.adminOnly || isAdmin(user))
+              .map(({ description, href, icon: Icon, label }) => (
+                <Link href={href} key={href}>
                   <span>
                     <Icon size={19} />
                   </span>
@@ -221,8 +270,7 @@ export default async function AdminDashboard({ payload, user }: ServerProps) {
                   </div>
                   <ArrowRight size={16} />
                 </Link>
-              ),
-            )}
+              ))}
           </div>
         </section>
       </div>

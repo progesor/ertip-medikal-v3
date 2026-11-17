@@ -1,4 +1,6 @@
-import React from "react";
+import type { ServerProps } from "payload";
+import Link from "next/link";
+import { ExternalLink } from "lucide-react";
 
 export function AdminLogo() {
   return (
@@ -12,6 +14,16 @@ export function AdminLogo() {
         <small>İçerik Yönetim Merkezi</small>
       </span>
     </div>
+  );
+}
+
+export function AdminLoginHeading({ i18n }: ServerProps) {
+  return (
+    <h1 className="ertip-login-heading">
+      {i18n.language === "en"
+        ? "Sign in to your account"
+        : "Hesabınıza giriş yapın"}
+    </h1>
   );
 }
 
@@ -29,15 +41,25 @@ export function AdminIcon() {
   );
 }
 
+export function AdminNavHome() {
+  return (
+    <Link
+      href="/admin"
+      className="ertip-nav-home"
+      aria-label="Yönetim ana sayfası"
+    >
+      <AdminLogo />
+    </Link>
+  );
+}
+
 export function AdminNavFooter() {
   return (
     <div className="ertip-admin-nav-footer">
-      <span className="ertip-admin-nav-footer__eyebrow">Hızlı erişim</span>
       <a href="/" target="_blank" rel="noreferrer">
         Web sitesini görüntüle
-        <span aria-hidden="true">↗</span>
+        <ExternalLink aria-hidden="true" size={15} />
       </a>
-      <p>Ürün ve içerik değişikliklerini yayınlamadan önce önizleyin.</p>
     </div>
   );
 }

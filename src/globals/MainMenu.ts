@@ -11,44 +11,46 @@ export const MainMenu: GlobalConfig = {
   },
   fields: [
     {
-      name: "editOverview",
+      name: "menuPreview",
       type: "ui",
       admin: {
         components: {
-          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+          Field: "/components/admin/MenuPreview#MenuPreview",
         },
       },
     },
     {
       name: "items",
       type: "array",
-      label: "Menü Linkleri",
+      label: "Menü bağlantıları",
       admin: {
+        initCollapsed: true,
         components: {
           RowLabel: "/components/admin/AdminArrayRowLabel#AdminArrayRowLabel",
         },
       },
       labels: {
-        singular: "Link",
-        plural: "Linkler",
+        singular: "Bağlantı",
+        plural: "Bağlantılar",
       },
       fields: [
         {
           name: "label",
           type: "text",
           required: true,
-          label: "Menüde Görünecek İsim (Örn: Hakkımızda, Ürünler)",
+          label: "Menüde görünen ad",
         },
         {
           name: "type",
           type: "radio",
+          label: "Bağlantı hedefi",
           defaultValue: "reference",
           options: [
             {
-              label: "İç Sayfa (Dinamik Pages Koleksiyonu)",
+              label: "Sitedeki bir sayfa",
               value: "reference",
             },
-            { label: "Özel Link (Manuel URL)", value: "custom" },
+            { label: "Başka bir adres", value: "custom" },
           ],
         },
         {
@@ -63,7 +65,7 @@ export const MainMenu: GlobalConfig = {
         {
           name: "url",
           type: "text",
-          label: "URL (Örn: /urunler veya https://...)",
+          label: "Bağlantı adresi",
           admin: {
             condition: (_, siblingData) => siblingData?.type === "custom",
           },

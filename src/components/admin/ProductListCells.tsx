@@ -34,7 +34,6 @@ export function ProductTitleCell({
       </span>
       <span className="ertip-product-cell__content">
         <strong>{String(cellData || "İsimsiz ürün")}</strong>
-        <small>{rowData.sku || "Ana SKU yok"}</small>
       </span>
       <span className="ertip-product-cell__edit" aria-hidden="true">
         <Pencil size={13} />

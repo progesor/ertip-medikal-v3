@@ -198,7 +198,12 @@ export function enhanceProductFields(fields: Field[]): Field[] {
         return {
           ...tab,
           fields: [
-            ...skuRuleFields,
+            {
+              type: "collapsible",
+              label: "Otomatik ürün kodu ayarları",
+              admin: { initCollapsed: true },
+              fields: skuRuleFields,
+            },
             ...tab.fields.map(enhanceVariantTabField),
           ],
         };

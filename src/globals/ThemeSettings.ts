@@ -75,7 +75,7 @@ export const ThemeSettings: GlobalConfig = {
     {
       name: "borderRadius",
       type: "select",
-      label: "Köşe ve Form Tarzı (Border Radius)",
+      label: "Köşe biçimi",
       defaultValue: "bubbly",
       required: true,
       options: [

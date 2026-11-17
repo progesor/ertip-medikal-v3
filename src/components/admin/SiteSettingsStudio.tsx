@@ -52,12 +52,8 @@ export function SiteSettingsStudio() {
   });
 
   return (
-    <section className="ertip-studio ertip-settings-studio" aria-label="Site ayarları">
-      <div className="ertip-studio__header">
-        <span>Kurumsal Kimlik</span>
-        <strong>Site Ayarları</strong>
-      </div>
-
+    <details className="ertip-detail">
+      <summary>İletişim ve marka bilgileri özeti</summary>
       <div className="ertip-settings-grid">
         <article>
           <Palette size={18} />
@@ -87,9 +83,9 @@ export function SiteSettingsStudio() {
         <article>
           <FileText size={18} />
           <strong>{data.columns + data.bottomLinks}</strong>
-          <small>Footer öğesi</small>
+          <small>Alt menü öğesi</small>
         </article>
       </div>
-    </section>
+    </details>
   );
 }

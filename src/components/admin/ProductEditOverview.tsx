@@ -1,14 +1,10 @@
 "use client";
 
-import {
-  Boxes,
-  Image as ImageIcon,
-  Layers3,
-  PackageCheck,
-} from "lucide-react";
+import { Boxes, Image as ImageIcon, Layers3, PackageCheck } from "lucide-react";
 import Link from "next/link";
-import { useMemo } from "react";
-import { useDocumentInfo, useFormFields } from "@payloadcms/ui";
+import { ProductWorkspaceStudio } from "./ProductWorkspaceStudio";
+import { getProductsPath } from "@/lib/i18n/routing";
+import { useDocumentInfo, useFormFields, useLocale } from "@payloadcms/ui";
 
 type FormField = {
   rows?: unknown[];
@@ -29,6 +25,7 @@ const rowCount = (field?: FormField) => {
 };
 
 export function ProductEditOverview() {
+  const locale = useLocale();
   const { hasPublishedDoc, id, versionCount } = useDocumentInfo();
 
   const summary = useFormFields(([fields]) => {
@@ -40,39 +37,21 @@ export function ProductEditOverview() {
       isFeatured: valueAsText(getField("isFeatured")?.value, "Hayır"),
       publicDocCount: rowCount(getField("publicDocs")),
       protectedDocCount: rowCount(getField("protectedDocs")),
-      shortDescription: valueAsText(
-        getField("shortDescription")?.value,
-        "Kısa ürün özeti girilmedi",
-      ),
       sku: valueAsText(getField("sku")?.value),
       slug: valueAsText(getField("slug")?.value, ""),
-      title: valueAsText(getField("title")?.value, "Yeni ürün"),
       variantCount: rowCount(getField("variants")),
     };
   });
 
-  const publicUrl = useMemo(
-    () => (summary.slug ? `/urunler/${summary.slug}` : ""),
-    [summary.slug],
-  );
+  const publicUrl =
+    summary.slug && hasPublishedDoc ? getProductsPath(locale.code === "en" ? "en" : "tr", summary.slug) : "";
 
   const docCount = summary.publicDocCount + summary.protectedDocCount;
 
   return (
-    <section className="ertip-product-overview" aria-label="Ürün özeti">
-      <div className="ertip-product-overview__main">
-        <div>
-          <span className="ertip-product-overview__eyebrow">Ürün Dosyası</span>
-          <h2>{summary.title}</h2>
-          <p>{summary.shortDescription}</p>
-        </div>
-
-        <div className="ertip-product-overview__actions">
-          {publicUrl ? <Link href={publicUrl}>Önizleme</Link> : null}
-          <span>{hasPublishedDoc ? "Yayında" : "Taslak"}</span>
-        </div>
-      </div>
-
+    <details className="ertip-detail">
+      <summary>Ürün bilgileri ve teknik ayrıntılar</summary>
+      {publicUrl && <Link href={publicUrl}>Ürünü sitede görüntüle</Link>}
       <div className="ertip-product-overview__stats">
         <span>
           <PackageCheck size={17} />
@@ -100,11 +79,12 @@ export function ProductEditOverview() {
         </span>
       </div>
 
+      <ProductWorkspaceStudio />
       <div className="ertip-product-overview__footer">
         <span>ID: {id || "Yeni kayıt"}</span>
         <span>Versiyon: {versionCount || 0}</span>
         <span>Durum: {hasPublishedDoc ? "Yayında" : "Taslak"}</span>
       </div>
-    </section>
+    </details>
   );
 }

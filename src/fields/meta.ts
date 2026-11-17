@@ -12,7 +12,7 @@ export const metaFields: Field = {
     {
       name: "title",
       type: "text",
-      label: "SEO Başlığı (Meta Title)",
+      label: "Arama sonucu başlığı",
       admin: {
         description:
           "Boş bırakılırsa içeriğin ana başlığı kullanılır. (Önerilen: 50-60 karakter)",
@@ -22,7 +22,7 @@ export const metaFields: Field = {
     {
       name: "description",
       type: "textarea",
-      label: "SEO Açıklaması (Meta Description)",
+      label: "Arama sonucu açıklaması",
       admin: {
         description:
           "Arama sonuçlarında başlığın altında görünecek özet metin. (Önerilen: 150-160 karakter)",

@@ -78,7 +78,7 @@ Where a listing depends on a localized slug, only records with a slug in the req
 
 M10.1 safely moved the pre-existing single-language content into Turkish locale rows. Early M10.2 testing showed that empty English locale rows are inconvenient for editors because Page Builder structures and localized product fields otherwise have to be recreated manually.
 
-M10.2 therefore adds an explicit **Eksik İngilizce İçeriği Türkçeden Doldur** control to the Payload Admin dashboard.
+In Payload Admin, open **Site Ayarları → Dil ve metinler** and select **Eksik İngilizce İçeriği Türkçeden Doldur**.
 
 The tool is Owner/Admin only and fills only missing English localized values from Turkish for:
 

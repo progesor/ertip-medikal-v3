@@ -15,6 +15,8 @@ import * as migration_20261116_090430_catalog_mcp from './20261116_090430_catalo
 import * as migration_20261116_121118_catalog_image_upload from './20261116_121118_catalog_image_upload';
 import * as migration_20261116_133315_category_display_order from './20261116_133315_category_display_order';
 import * as migration_20261116_134731_product_catalog_order from './20261116_134731_product_catalog_order';
+import * as migration_20261117_074946_portal_mcp_permissions from './20261117_074946_portal_mcp_permissions';
+import * as migration_20261117_081051_product_content_review from './20261117_081051_product_content_review';
 
 export const migrations = [
   {
@@ -100,6 +102,16 @@ export const migrations = [
   {
     up: migration_20261116_134731_product_catalog_order.up,
     down: migration_20261116_134731_product_catalog_order.down,
-    name: '20261116_134731_product_catalog_order'
+    name: '20261116_134731_product_catalog_order',
+  },
+  {
+    up: migration_20261117_074946_portal_mcp_permissions.up,
+    down: migration_20261117_074946_portal_mcp_permissions.down,
+    name: '20261117_074946_portal_mcp_permissions',
+  },
+  {
+    up: migration_20261117_081051_product_content_review.up,
+    down: migration_20261117_081051_product_content_review.down,
+    name: '20261117_081051_product_content_review'
   },
 ];

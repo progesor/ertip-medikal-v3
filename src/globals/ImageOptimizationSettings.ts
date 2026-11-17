@@ -148,34 +148,41 @@ export const ImageOptimizationSettings: GlobalConfig = {
       ],
     },
     {
-      name: "profiles",
-      type: "group",
-      label: "Boyut ve Kalite Profilleri",
-      admin: {
-        description:
-          "Görseller kırpılmaz; yalnızca en-boy oranı korunarak belirtilen azami genişliğe küçültülür.",
-      },
+      type: "collapsible",
+      label: "Görsel boyutları ve kalite ayarları",
+      admin: { initCollapsed: true },
       fields: [
-        profileFields(
-          "thumbnail",
-          "Küçük Görseller",
-          "Logo, avatar ve küçük önizleme alanları.",
-        ),
-        profileFields(
-          "card",
-          "Kart Görselleri",
-          "Ürün kataloğu, haber ve benzeri kartlar.",
-        ),
-        profileFields(
-          "content",
-          "İçerik Görselleri",
-          "Sayfa galerileri, ekip ve sertifika görselleri.",
-        ),
-        profileFields(
-          "fullscreen",
-          "Büyük / Tam Ekran Görseller",
-          "Ürün detay ana görseli, hero ve lightbox görüntüleri.",
-        ),
+        {
+          name: "profiles",
+          type: "group",
+          label: "Boyut ve Kalite Profilleri",
+          admin: {
+            description:
+              "Görseller kırpılmaz; yalnızca en-boy oranı korunarak belirtilen azami genişliğe küçültülür.",
+          },
+          fields: [
+            profileFields(
+              "thumbnail",
+              "Küçük Görseller",
+              "Logo, avatar ve küçük önizleme alanları.",
+            ),
+            profileFields(
+              "card",
+              "Kart Görselleri",
+              "Ürün kataloğu, haber ve benzeri kartlar.",
+            ),
+            profileFields(
+              "content",
+              "İçerik Görselleri",
+              "Sayfa galerileri, ekip ve sertifika görselleri.",
+            ),
+            profileFields(
+              "fullscreen",
+              "Büyük / Tam Ekran Görseller",
+              "Ürün detay ana görseli, hero ve lightbox görüntüleri.",
+            ),
+          ],
+        },
       ],
     },
     {

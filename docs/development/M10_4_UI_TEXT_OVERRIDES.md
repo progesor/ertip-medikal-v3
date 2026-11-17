@@ -8,7 +8,7 @@ The code dictionaries remain canonical fallbacks. An empty or missing admin over
 
 ## Scope
 
-The Admin dashboard now includes a localized UI text editor alongside the existing English-content bootstrap control.
+In Payload Admin, **Site Ayarları → Dil ve metinler** contains the localized UI text editor. Administrators also see the English-content bootstrap control there.
 
 Editable surfaces intentionally focus on business-facing copy:
 
@@ -61,7 +61,7 @@ The unsubscribe metadata title uses the same resolved dictionary server-side.
 
 ## Admin UX
 
-The dashboard editor has its own Turkish / English selector.
+The text editor has its own Turkish / English selector.
 
 Each editable field shows the code default as both placeholder and helper text. Leaving a field blank restores fallback behavior for that key. A locale can also be reset completely to defaults.
 

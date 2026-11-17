@@ -7,6 +7,7 @@ export const Subscribers: CollectionConfig = {
     plural: "E-Bülten Aboneleri",
   },
   admin: {
+    components: { beforeListTable: ["/components/admin/CollectionViewControls#CollectionViewControls"] },
     useAsTitle: "email",
     group: "Müşteri İletişimi",
     defaultColumns: ["email", "status", "createdAt"],

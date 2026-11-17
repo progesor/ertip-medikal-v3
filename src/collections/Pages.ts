@@ -30,7 +30,7 @@ export const Pages: CollectionConfig = {
   admin: {
     useAsTitle: "title",
     group: "İçerik Yönetimi",
-    defaultColumns: ["title", "slug", "updatedAt"],
+    defaultColumns: ["title", "_status", "updatedAt"],
     components: {
       beforeListTable: [
         "/components/admin/CollectionViewControls#CollectionViewControls",
@@ -39,15 +39,6 @@ export const Pages: CollectionConfig = {
   },
   versions: { drafts: true },
   fields: [
-    {
-      name: "editOverview",
-      type: "ui",
-      admin: {
-        components: {
-          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
-        },
-      },
-    },
     {
       type: "tabs",
       tabs: [
@@ -72,7 +63,8 @@ export const Pages: CollectionConfig = {
             {
               name: "layout",
               type: "blocks",
-              label: "Sayfa Tasarım Blokları (Page Builder)",
+              label: "Sayfa bölümleri",
+              labels: { singular: "Bölüm", plural: "Bölümler" },
               minRows: 1,
               blocks: [
                 HeroBlock,
@@ -102,11 +94,20 @@ export const Pages: CollectionConfig = {
           ],
         },
         {
-          label: "SEO Ayarları",
+          label: "Arama sonuçları",
           fields: [metaFields],
         },
       ],
     },
     slugField("title"),
+    {
+      name: "editOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+        },
+      },
+    },
   ],
 };

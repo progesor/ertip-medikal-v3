@@ -18,15 +18,6 @@ export const News: CollectionConfig = {
   versions: { drafts: true },
   fields: [
     {
-      name: "editOverview",
-      type: "ui",
-      admin: {
-        components: {
-          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
-        },
-      },
-    },
-    {
       type: "tabs",
       tabs: [
         {
@@ -38,7 +29,7 @@ export const News: CollectionConfig = {
               name: "content",
               type: "richText",
               required: true,
-              label: "Detaylı İçerik",
+              label: "Haber metni",
             },
           ],
         },
@@ -55,7 +46,7 @@ export const News: CollectionConfig = {
             {
               name: "gallery",
               type: "array",
-              label: "Etkinlik / Fuar Galerisi (Opsiyonel)",
+              label: "Fotoğraf galerisi",
               admin: {
                 components: {
                   RowLabel:
@@ -75,7 +66,7 @@ export const News: CollectionConfig = {
           ],
         },
         {
-          label: "SEO Ayarları",
+          label: "Arama sonuçları",
           fields: [metaFields],
         },
       ],
@@ -96,5 +87,14 @@ export const News: CollectionConfig = {
       admin: { position: "sidebar" },
     },
     slugField("title"),
+    {
+      name: "editOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+        },
+      },
+    },
   ],
 };

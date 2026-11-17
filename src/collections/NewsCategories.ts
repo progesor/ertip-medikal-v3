@@ -3,8 +3,27 @@ import type { CollectionConfig } from "payload";
 export const NewsCategories: CollectionConfig = {
   slug: "news-categories",
   labels: { singular: "Haber Kategorisi", plural: "Haber Kategorileri" },
-  admin: { useAsTitle: "title", group: "İçerik Yönetimi" },
+  admin: {
+    components: { beforeListTable: ["/components/admin/CollectionViewControls#CollectionViewControls"] },
+    useAsTitle: "title",
+    defaultColumns: ["title", "updatedAt"],
+    group: "İçerik Yönetimi",
+  },
   fields: [
+    {
+      name: "title",
+      type: "text",
+      required: true,
+      label: "Kategori adı",
+    },
+    {
+      name: "slug",
+      type: "text",
+      required: true,
+      unique: true,
+      label: "Kategori adresi",
+      admin: { position: "sidebar" },
+    },
     {
       name: "editOverview",
       type: "ui",
@@ -13,20 +32,6 @@ export const NewsCategories: CollectionConfig = {
           Field: "/components/admin/GenericEditOverview#GenericEditOverview",
         },
       },
-    },
-    {
-      name: "title",
-      type: "text",
-      required: true,
-      label: "Kategori Adı (Örn: Yurt Dışı Etkinlikleri)",
-    },
-    {
-      name: "slug",
-      type: "text",
-      required: true,
-      unique: true,
-      label: "URL Yolu",
-      admin: { position: "sidebar" },
     },
   ],
 };

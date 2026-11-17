@@ -103,8 +103,8 @@ export function SkuRuleWorkbench() {
 
   if (profile === "manual") {
     return (
-      <section style={styles.wrapper}>
-        <h3 style={styles.title}>SKU Kural Çalışma Alanı</h3>
+      <section className="ertip-module" style={styles.wrapper}>
+        <h3 style={styles.title}>Ürün kodlarını oluştur</h3>
         <p style={styles.description}>
           Manuel profil seçili. Varyantlar ve SKU kodları aşağıdaki listeden
           doğrudan yönetilir; otomatik üretim uygulanmaz.
@@ -114,31 +114,26 @@ export function SkuRuleWorkbench() {
   }
 
   return (
-    <section style={styles.wrapper}>
+    <section className="ertip-module" style={styles.wrapper}>
       <div style={styles.header}>
         <div>
-          <h3 style={styles.title}>SKU Kural Çalışma Alanı</h3>
+          <h3 style={styles.title}>Ürün kodlarını oluştur</h3>
           <p style={styles.description}>
             Kaydetmeden önce oluşacak SKU’ları ve manuel verilerin nasıl
             korunacağını inceleyin. “Forma Uygula” yalnızca aşağıdaki varyant
-            alanını günceller; son kayıt yine Payload’ın Kaydet düğmesiyle
+            alanını günceller. Son kayıt Kaydet düğmesiyle
             yapılır.
           </p>
         </div>
         <div style={styles.actions}>
-          <button type="button" onClick={runPreview} style={styles.button}>
+          <button type="button" onClick={runPreview} className="ertip-module__button">
             Önizleme Oluştur
           </button>
           <button
             type="button"
             onClick={applyPreview}
             disabled={!preview || previewIsStale}
-            style={{
-              ...styles.button,
-              ...styles.primaryButton,
-              opacity: !preview || previewIsStale ? 0.5 : 1,
-              cursor: !preview || previewIsStale ? "not-allowed" : "pointer",
-            }}
+            className="ertip-module__button ertip-module__button--primary"
           >
             Forma Uygula
           </button>
@@ -146,13 +141,13 @@ export function SkuRuleWorkbench() {
       </div>
 
       {previewIsStale && (
-        <p style={styles.warning}>
+        <p className="ertip-module__notice ertip-module__notice--warning">
           Önizlemeden sonra alanlar değişti. Uygulamadan önce yeniden önizleme
           oluşturun.
         </p>
       )}
 
-      {error && <pre style={styles.error}>{error}</pre>}
+      {error && <pre className="ertip-module__notice ertip-module__notice--error">{error}</pre>}
 
       {preview && (
         <>
@@ -216,7 +211,7 @@ export function SkuRuleWorkbench() {
           )}
 
           {applied && (
-            <p style={styles.success}>
+            <p className="ertip-module__notice">
               Önizleme varyant alanına uygulandı. Değişiklikleri kalıcı yapmak
               için ürünü kaydedin.
             </p>
@@ -239,10 +234,6 @@ function SummaryItem({ label, value }: { label: string; value: number }) {
 const styles: Record<string, React.CSSProperties> = {
   wrapper: {
     margin: "1rem 0",
-    padding: "1rem",
-    border: "1px solid var(--theme-elevation-150)",
-    borderRadius: "12px",
-    background: "var(--theme-elevation-50)",
   },
   header: {
     display: "flex",
@@ -255,24 +246,10 @@ const styles: Record<string, React.CSSProperties> = {
   description: {
     margin: "0.45rem 0 0",
     maxWidth: "760px",
-    color: "var(--theme-elevation-600)",
+    color: "var(--ertip-admin-muted)",
     lineHeight: 1.5,
   },
   actions: { display: "flex", gap: "0.5rem", flexWrap: "wrap" },
-  button: {
-    padding: "0.7rem 0.9rem",
-    borderRadius: "8px",
-    border: "1px solid var(--theme-elevation-250)",
-    background: "var(--theme-elevation-0)",
-    color: "var(--theme-text)",
-    fontWeight: 700,
-    cursor: "pointer",
-  },
-  primaryButton: {
-    border: 0,
-    background: "var(--theme-success-500, #15803d)",
-    color: "white",
-  },
   summaryGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
@@ -283,19 +260,19 @@ const styles: Record<string, React.CSSProperties> = {
     padding: "0.7rem",
     borderRadius: "8px",
     border: "1px solid var(--theme-elevation-100)",
-    background: "var(--theme-elevation-0)",
+    background: "var(--ertip-admin-panel-subtle)",
   },
   summaryLabel: {
     display: "block",
-    fontSize: "0.72rem",
+    fontSize: "var(--ertip-admin-caption-size)",
     textTransform: "uppercase",
-    color: "var(--theme-elevation-500)",
+    color: "var(--ertip-admin-muted)",
     fontWeight: 700,
   },
   summaryValue: { display: "block", marginTop: "0.2rem", fontSize: "1.1rem" },
   detailLine: {
     margin: "0.8rem 0 0",
-    color: "var(--theme-elevation-600)",
+    color: "var(--ertip-admin-muted)",
     fontSize: "0.85rem",
   },
   tableWrapper: { overflowX: "auto", marginTop: "1rem" },
@@ -304,36 +281,12 @@ const styles: Record<string, React.CSSProperties> = {
     padding: "0.55rem",
     textAlign: "left",
     borderBottom: "1px solid var(--theme-elevation-200)",
-    fontSize: "0.75rem",
-    color: "var(--theme-elevation-600)",
+    fontSize: "var(--ertip-admin-caption-size)",
+    color: "var(--ertip-admin-muted)",
   },
   tableCell: {
     padding: "0.55rem",
     borderBottom: "1px solid var(--theme-elevation-100)",
     fontSize: "0.85rem",
-  },
-  warning: {
-    margin: "1rem 0 0",
-    padding: "0.7rem",
-    borderRadius: "8px",
-    background: "var(--theme-warning-100, #fef3c7)",
-    color: "var(--theme-warning-700, #92400e)",
-  },
-  error: {
-    whiteSpace: "pre-wrap",
-    margin: "1rem 0 0",
-    padding: "0.7rem",
-    borderRadius: "8px",
-    background: "var(--theme-error-100, #fee2e2)",
-    color: "var(--theme-error-700, #991b1b)",
-    fontFamily: "inherit",
-  },
-  success: {
-    margin: "1rem 0 0",
-    padding: "0.7rem",
-    borderRadius: "8px",
-    background: "var(--theme-success-100, #dcfce7)",
-    color: "var(--theme-success-700, #166534)",
-    fontWeight: 700,
   },
 };

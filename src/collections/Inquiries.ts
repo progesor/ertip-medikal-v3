@@ -27,17 +27,14 @@ export const Inquiries: CollectionConfig = {
   },
   fields: [
     {
-      name: "editOverview",
+      name: "contactOverview",
       type: "ui",
-      admin: {
-        components: {
-          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
-        },
-      },
+      admin: { components: { Field: "/components/admin/ContactOverview#ContactOverview" } },
     },
     {
       name: "status",
       type: "select",
+      label: "Mesaj durumu",
       defaultValue: "unread",
       options: [
         { label: "Okunmadı", value: "unread" },
@@ -46,10 +43,25 @@ export const Inquiries: CollectionConfig = {
       ],
       admin: { position: "sidebar" },
     },
-    { name: "name", type: "text", required: true, label: "Ad Soyad" },
-    { name: "email", type: "email", required: true, label: "E-Posta" },
-    { name: "phone", type: "text", label: "Telefon" },
     { name: "message", type: "textarea", required: true, label: "Mesaj" },
+    {
+      type: "collapsible",
+      label: "İletişim bilgileri",
+      fields: [
+        { name: "name", type: "text", required: true, label: "Ad Soyad" },
+        { name: "email", type: "email", required: true, label: "E-Posta" },
+        { name: "phone", type: "text", label: "Telefon" },
+      ],
+    },
+    {
+      name: "editOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+        },
+      },
+    },
   ],
   hooks: {
     afterChange: [

@@ -120,37 +120,14 @@ export default function ThemePreview() {
     const radius3xl = currentRadius["--radius-3xl"];
 
     const styles = {
-        wrapper: {
-            marginTop: "2rem",
-            marginBottom: "1.5rem",
-            fontFamily:
-                'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        } as React.CSSProperties,
-
-        titleRow: {
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "1rem",
-            marginBottom: "1rem",
-            flexWrap: "wrap",
-        } as React.CSSProperties,
-
-        title: {
-            margin: 0,
-            fontWeight: 700,
-            fontSize: "14px",
-            color: "var(--theme-elevation-800)",
-        } as React.CSSProperties,
-
         adminBadge: {
             display: "inline-flex",
             alignItems: "center",
             gap: "0.5rem",
             padding: "0.45rem 0.75rem",
             borderRadius: "999px",
-            backgroundColor: "var(--theme-elevation-100)",
-            color: "var(--theme-elevation-800)",
+            backgroundColor: "var(--ertip-admin-primary-soft)",
+            color: "var(--ertip-admin-primary-strong)",
             fontSize: "12px",
             fontWeight: 600,
         } as React.CSSProperties,
@@ -228,7 +205,7 @@ export default function ThemePreview() {
         content: {
             padding: "1.5rem",
             display: "grid",
-            gridTemplateColumns: "minmax(0, 1.35fr) minmax(280px, 0.65fr)",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 22rem), 1fr))",
             gap: "1.25rem",
         } as React.CSSProperties,
 
@@ -240,23 +217,10 @@ export default function ThemePreview() {
                 currentTheme["--surface-muted"],
                 currentTheme["--muted"],
             )} 100%)`,
-            minHeight: "320px",
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
             gap: "1.5rem",
-        } as React.CSSProperties,
-
-        heroBadge: {
-            display: "inline-flex",
-            width: "fit-content",
-            padding: "0.45rem 0.75rem",
-            borderRadius: "999px",
-            backgroundColor: hslAlpha(currentTheme["--primary"], 0.1),
-            color: hsl(currentTheme["--primary"]),
-            border: `1px solid ${hslAlpha(currentTheme["--primary"], 0.2)}`,
-            fontSize: "0.78rem",
-            fontWeight: 800,
         } as React.CSSProperties,
 
         heroTitle: {
@@ -315,32 +279,6 @@ export default function ThemePreview() {
             fontSize: "0.88rem",
             fontWeight: 800,
             cursor: "default",
-        } as React.CSSProperties,
-
-        miniStats: {
-            display: "grid",
-            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-            gap: "0.75rem",
-        } as React.CSSProperties,
-
-        statCard: {
-            padding: "1rem",
-            borderRadius: radiusXl,
-            backgroundColor: hsl(currentTheme["--surface"]),
-            border: `1px solid ${hsl(currentTheme["--border"])}`,
-        } as React.CSSProperties,
-
-        statValue: {
-            color: hsl(currentTheme["--primary"]),
-            fontWeight: 850,
-            fontSize: "1.1rem",
-            margin: 0,
-        } as React.CSSProperties,
-
-        statLabel: {
-            color: hsl(currentTheme["--text-muted"], currentTheme["--muted-foreground"]),
-            fontSize: "0.75rem",
-            margin: "0.25rem 0 0",
         } as React.CSSProperties,
 
         sideColumn: {
@@ -464,13 +402,13 @@ export default function ThemePreview() {
         lowerArea: {
             padding: "0 1.5rem 1.5rem",
             display: "grid",
-            gridTemplateColumns: "minmax(0, 1fr) minmax(280px, 0.7fr)",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 22rem), 1fr))",
             gap: "1.25rem",
         } as React.CSSProperties,
 
         radiusGrid: {
             display: "grid",
-            gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 7rem), 1fr))",
             gap: "0.75rem",
         } as React.CSSProperties,
 
@@ -556,23 +494,23 @@ export default function ThemePreview() {
     ] as const;
 
     return (
-        <div style={styles.wrapper}>
-            <div style={styles.titleRow}>
-                <h4 style={styles.title}>Canlı Tema Önizlemesi</h4>
+        <details className="ertip-preview-disclosure">
+            <summary>
+                <strong>Web sitesi önizlemesi</strong>
 
-                <div style={styles.adminBadge}>
+                <span style={styles.adminBadge}>
                     <span>{themeLabels[colorPalette] || colorPalette}</span>
                     <span>•</span>
                     <span>{radiusLabels[borderRadius] || borderRadius}</span>
-                </div>
-            </div>
+                </span>
+            </summary>
 
-            <div style={styles.previewShell}>
+            <div className="ertip-site-preview" style={styles.previewShell}>
                 <div style={styles.topBar}>
                     <div style={styles.brand}>
                         <div style={styles.logoMark} />
                         <div>
-                            <p style={styles.brandName}>Ertıp Medikal</p>
+                            <p style={styles.brandName}>Ertip Medikal</p>
                             <p style={styles.brandSub}>Hair Transplant & Medical Instruments</p>
                         </div>
                     </div>
@@ -587,49 +525,30 @@ export default function ThemePreview() {
                 <div style={styles.content}>
                     <section style={styles.hero}>
                         <div>
-                            <span style={styles.heroBadge}>Medikal Tema Önizlemesi</span>
 
                             <h2 style={styles.heroTitle}>
-                                Klinik güven, modern tasarım ve kurumsal medikal görünüm.
+                                Ürün kataloğu
                             </h2>
 
                             <p style={styles.heroText}>
-                                Bu alan; arka plan, ana metin, muted metin, primary renk,
-                                secondary renk, border, surface ve radius değerlerinin gerçek
-                                sayfa düzeninde nasıl görüneceğini test eder.
+                                Katalogdaki ürünleri inceleyin ve ihtiyacınıza uygun ürünler için teklif isteyin.
                             </p>
 
                             <div style={styles.buttonRow}>
-                                <button type="button" style={styles.primaryButton}>
+                                <span style={styles.primaryButton}>
                                     Ürünü İncele
-                                </button>
+                                </span>
 
-                                <button type="button" style={styles.secondaryButton}>
+                                <span style={styles.secondaryButton}>
                                     Katalog İste
-                                </button>
+                                </span>
 
-                                <button type="button" style={styles.outlineButton}>
+                                <span style={styles.outlineButton}>
                                     İletişime Geç
-                                </button>
+                                </span>
                             </div>
                         </div>
 
-                        <div style={styles.miniStats}>
-                            <div style={styles.statCard}>
-                                <p style={styles.statValue}>CE</p>
-                                <p style={styles.statLabel}>Sertifikalı ürün yapısı</p>
-                            </div>
-
-                            <div style={styles.statCard}>
-                                <p style={styles.statValue}>2A</p>
-                                <p style={styles.statLabel}>Medikal sınıf algısı</p>
-                            </div>
-
-                            <div style={styles.statCard}>
-                                <p style={styles.statValue}>ISO</p>
-                                <p style={styles.statLabel}>Kurumsal güven hissi</p>
-                            </div>
-                        </div>
                     </section>
 
                     <aside style={styles.sideColumn}>
@@ -639,22 +558,23 @@ export default function ThemePreview() {
                             <h3 style={styles.productTitle}>Serrated FUE Punch</h3>
 
                             <p style={styles.productText}>
-                                Ürün kartlarında surface, border, primary, muted ve text
-                                renklerinin uyumunu test etmek için örnek kart.
+                                Cerrahi aletler
                             </p>
 
                             <div style={{ ...styles.buttonRow, marginTop: "1rem" }}>
-                                <button type="button" style={styles.primaryButton}>
+                                <span style={styles.primaryButton}>
                                     Detay
-                                </button>
+                                </span>
                             </div>
                         </div>
 
                         <div style={styles.panel}>
-                            <h3 style={styles.panelTitle}>Form / Input Testi</h3>
+                            <h3 style={styles.panelTitle}>İletişim formu</h3>
 
                             <input
                                 readOnly
+                                aria-label="Örnek e-posta alanı"
+                                tabIndex={-1}
                                 value="info@ertipmedical.com"
                                 style={styles.input}
                             />
@@ -691,136 +611,139 @@ export default function ThemePreview() {
                     </aside>
                 </div>
 
-                <div style={styles.lowerArea}>
-                    <section style={styles.panel}>
-                        <h3 style={styles.panelTitle}>Border Radius Testi</h3>
+                <details className="ertip-detail">
+                    <summary>Tema renkleri ve teknik değerler</summary>
+                    <div style={styles.lowerArea}>
+                        <section style={styles.panel}>
+                            <h3 style={styles.panelTitle}>Border Radius Testi</h3>
 
-                        <div style={styles.radiusGrid}>
-                            <div style={{ ...styles.radiusBoxBase, borderRadius: radius }}>
-                                --radius
-                                <br />
-                                {radius}
-                            </div>
-
-                            <div style={{ ...styles.radiusBoxBase, borderRadius: radiusXl }}>
-                                --radius-xl
-                                <br />
-                                {radiusXl}
-                            </div>
-
-                            <div style={{ ...styles.radiusBoxBase, borderRadius: radius2xl }}>
-                                --radius-2xl
-                                <br />
-                                {radius2xl}
-                            </div>
-
-                            <div style={{ ...styles.radiusBoxBase, borderRadius: radius3xl }}>
-                                --radius-3xl
-                                <br />
-                                {radius3xl}
-                            </div>
-                        </div>
-                    </section>
-
-                    <section style={styles.panel}>
-                        <h3 style={styles.panelTitle}>Tema Özeti</h3>
-
-                        <div
-                            style={{
-                                display: "grid",
-                                gap: "0.6rem",
-                                color: hsl(currentTheme["--text-muted"], currentTheme["--muted-foreground"]),
-                                fontSize: "0.82rem",
-                                lineHeight: 1.5,
-                            }}
-                        >
-                            <div>
-                                <strong style={{ color: hsl(currentTheme["--text-main"], currentTheme["--foreground"]) }}>
-                                    Seçili tema:
-                                </strong>{" "}
-                                {themeLabels[colorPalette] || colorPalette}
-                            </div>
-
-                            <div>
-                                <strong style={{ color: hsl(currentTheme["--text-main"], currentTheme["--foreground"]) }}>
-                                    Seçili radius:
-                                </strong>{" "}
-                                {radiusLabels[borderRadius] || borderRadius}
-                            </div>
-
-                            <div>
-                                <strong style={{ color: hsl(currentTheme["--text-main"], currentTheme["--foreground"]) }}>
-                                    Primary:
-                                </strong>{" "}
-                                {currentTheme["--primary"]}
-                            </div>
-
-                            <div>
-                                <strong style={{ color: hsl(currentTheme["--text-main"], currentTheme["--foreground"]) }}>
-                                    Background:
-                                </strong>{" "}
-                                {currentTheme["--background"]}
-                            </div>
-                        </div>
-
-                        <div style={styles.richPreview}>
-                            <strong style={{ color: hsl(currentTheme["--text-main"], currentTheme["--foreground"]) }}>
-                                Rich text:
-                            </strong>{" "}
-                            Başlıklar, paragraflar, bağlantılar ve listeler muted/text-main
-                            tokenlarıyla okunabilir kalmalıdır.{" "}
-                            <span style={{ color: hsl(currentTheme["--primary"]), fontWeight: 800 }}>
-                                Link rengi
-                            </span>{" "}
-                            primary tokenını takip eder.
-                        </div>
-
-                        <div style={styles.inversePanel}>
-                            <div style={{ fontSize: "0.78rem", fontWeight: 850, marginBottom: "0.35rem" }}>
-                                Footer / Inverse Section
-                            </div>
-                            <div style={{ fontSize: "0.78rem", lineHeight: 1.5, opacity: 0.78 }}>
-                                surface-inverse ve surface-inverse-foreground tokenları koyu
-                                bantlar, footer ve modal overlay algısını test eder.
-                            </div>
-                        </div>
-                    </section>
-                </div>
-
-                <div style={{ padding: "0 1.5rem 1.5rem" }}>
-                    <section style={styles.panel}>
-                        <h3 style={styles.panelTitle}>Renk Token Önizlemesi</h3>
-
-                        <div style={styles.tokenGrid}>
-                            {tokenGroups.map((group) => (
-                                <div key={group.title} style={styles.tokenGroup}>
-                                    <div style={styles.tokenGroupTitle}>{group.title}</div>
-
-                                    {group.tokens.map((token) => {
-                                        const value = currentTheme[token as keyof typeof currentTheme];
-
-                                        return (
-                                            <div key={token} style={styles.tokenRow}>
-                                                <div
-                                                    style={{
-                                                        ...styles.tokenSwatch,
-                                                        backgroundColor: hsl(value),
-                                                    }}
-                                                />
-
-                                                <div style={{ minWidth: 0 }}>
-                                                    <p style={styles.tokenName}>{token}</p>
-                                                    <p style={styles.tokenValue}>{value || "Tanımlı değil"}</p>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
+                            <div style={styles.radiusGrid}>
+                                <div style={{ ...styles.radiusBoxBase, borderRadius: radius }}>
+                                    --radius
+                                    <br />
+                                    {radius}
                                 </div>
-                            ))}
-                        </div>
-                    </section>
-                </div>
+
+                                <div style={{ ...styles.radiusBoxBase, borderRadius: radiusXl }}>
+                                    --radius-xl
+                                    <br />
+                                    {radiusXl}
+                                </div>
+
+                                <div style={{ ...styles.radiusBoxBase, borderRadius: radius2xl }}>
+                                    --radius-2xl
+                                    <br />
+                                    {radius2xl}
+                                </div>
+
+                                <div style={{ ...styles.radiusBoxBase, borderRadius: radius3xl }}>
+                                    --radius-3xl
+                                    <br />
+                                    {radius3xl}
+                                </div>
+                            </div>
+                        </section>
+
+                        <section style={styles.panel}>
+                            <h3 style={styles.panelTitle}>Tema Özeti</h3>
+
+                            <div
+                                style={{
+                                    display: "grid",
+                                    gap: "0.6rem",
+                                    color: hsl(currentTheme["--text-muted"], currentTheme["--muted-foreground"]),
+                                    fontSize: "0.82rem",
+                                    lineHeight: 1.5,
+                                }}
+                            >
+                                <div>
+                                    <strong style={{ color: hsl(currentTheme["--text-main"], currentTheme["--foreground"]) }}>
+                                        Seçili tema:
+                                    </strong>{" "}
+                                    {themeLabels[colorPalette] || colorPalette}
+                                </div>
+
+                                <div>
+                                    <strong style={{ color: hsl(currentTheme["--text-main"], currentTheme["--foreground"]) }}>
+                                        Seçili radius:
+                                    </strong>{" "}
+                                    {radiusLabels[borderRadius] || borderRadius}
+                                </div>
+
+                                <div>
+                                    <strong style={{ color: hsl(currentTheme["--text-main"], currentTheme["--foreground"]) }}>
+                                        Primary:
+                                    </strong>{" "}
+                                    {currentTheme["--primary"]}
+                                </div>
+
+                                <div>
+                                    <strong style={{ color: hsl(currentTheme["--text-main"], currentTheme["--foreground"]) }}>
+                                        Background:
+                                    </strong>{" "}
+                                    {currentTheme["--background"]}
+                                </div>
+                            </div>
+
+                            <div style={styles.richPreview}>
+                                <strong style={{ color: hsl(currentTheme["--text-main"], currentTheme["--foreground"]) }}>
+                                    Rich text:
+                                </strong>{" "}
+                                Başlıklar, paragraflar, bağlantılar ve listeler muted/text-main
+                                tokenlarıyla okunabilir kalmalıdır.{" "}
+                                <span style={{ color: hsl(currentTheme["--primary"]), fontWeight: 800 }}>
+                                    Link rengi
+                                </span>{" "}
+                                primary tokenını takip eder.
+                            </div>
+
+                            <div style={styles.inversePanel}>
+                                <div style={{ fontSize: "0.78rem", fontWeight: 850, marginBottom: "0.35rem" }}>
+                                    Footer / Inverse Section
+                                </div>
+                                <div style={{ fontSize: "0.78rem", lineHeight: 1.5, opacity: 0.78 }}>
+                                    surface-inverse ve surface-inverse-foreground tokenları koyu
+                                    bantlar, footer ve modal overlay algısını test eder.
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div style={{ padding: "0 1.5rem 1.5rem" }}>
+                        <section style={styles.panel}>
+                            <h3 style={styles.panelTitle}>Renk Token Önizlemesi</h3>
+
+                            <div style={styles.tokenGrid}>
+                                {tokenGroups.map((group) => (
+                                    <div key={group.title} style={styles.tokenGroup}>
+                                        <div style={styles.tokenGroupTitle}>{group.title}</div>
+
+                                        {group.tokens.map((token) => {
+                                            const value = currentTheme[token as keyof typeof currentTheme];
+
+                                            return (
+                                                <div key={token} style={styles.tokenRow}>
+                                                    <div
+                                                        style={{
+                                                            ...styles.tokenSwatch,
+                                                            backgroundColor: hsl(value),
+                                                        }}
+                                                    />
+
+                                                    <div style={{ minWidth: 0 }}>
+                                                        <p style={styles.tokenName}>{token}</p>
+                                                        <p style={styles.tokenValue}>{value || "Tanımlı değil"}</p>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    </div>
+                </details>
             </div>
-        </div>
+        </details>
     );
 }

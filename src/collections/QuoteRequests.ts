@@ -30,50 +30,9 @@ export const QuoteRequests: CollectionConfig = {
   },
   fields: [
     {
-      name: "editOverview",
+      name: "contactOverview",
       type: "ui",
-      admin: {
-        components: {
-          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
-        },
-      },
-    },
-    {
-      type: "row",
-      fields: [
-        {
-          name: "customerName",
-          type: "text",
-          label: "Müşteri / Yetkili Adı",
-          required: true,
-          admin: { width: "50%" },
-        },
-        {
-          name: "company",
-          type: "text",
-          label: "Firma / Klinik Adı",
-          admin: { width: "50%" },
-        },
-      ],
-    },
-    {
-      type: "row",
-      fields: [
-        {
-          name: "email",
-          type: "email",
-          label: "E-Posta Adresi",
-          required: true,
-          admin: { width: "50%" },
-        },
-        {
-          name: "phone",
-          type: "text",
-          label: "Telefon Numarası",
-          required: true,
-          admin: { width: "50%" },
-        },
-      ],
+      admin: { components: { Field: "/components/admin/ContactOverview#ContactOverview" } },
     },
     {
       name: "message",
@@ -86,19 +45,21 @@ export const QuoteRequests: CollectionConfig = {
       label: "Talep Durumu",
       defaultValue: "new",
       options: [
-        { label: "🔴 Yeni Talep", value: "new" },
-        { label: "🟡 İnceleniyor", value: "reviewing" },
-        { label: "🟢 Fiyat Verildi", value: "quoted" },
-        { label: "⚫ Kapandı / İptal", value: "closed" },
+        { label: "Yeni talep", value: "new" },
+        { label: "İnceleniyor", value: "reviewing" },
+        { label: "Fiyat verildi", value: "quoted" },
+        { label: "Kapandı / iptal", value: "closed" },
       ],
       admin: { position: "sidebar" },
     },
     {
       name: "items",
       type: "array",
-      label: "Talep Edilen Ürünler",
+      label: "Talep edilen ürünler",
+      labels: { singular: "Ürün", plural: "Ürünler" },
       required: true,
       admin: {
+        initCollapsed: true,
         components: {
           RowLabel: "/components/admin/AdminArrayRowLabel#AdminArrayRowLabel",
         },
@@ -109,6 +70,58 @@ export const QuoteRequests: CollectionConfig = {
         { name: "sku", type: "text", label: "Ürün Kodu (SKU)" },
         { name: "quantity", type: "number", label: "Adet", defaultValue: 1 },
       ],
+    },
+    {
+      type: "collapsible",
+      label: "İletişim bilgileri",
+      fields: [
+        {
+          type: "row",
+          fields: [
+            {
+              name: "customerName",
+              type: "text",
+              label: "Müşteri / Yetkili Adı",
+              required: true,
+              admin: { width: "50%" },
+            },
+            {
+              name: "company",
+              type: "text",
+              label: "Firma / Klinik Adı",
+              admin: { width: "50%" },
+            },
+          ],
+        },
+        {
+          type: "row",
+          fields: [
+            {
+              name: "email",
+              type: "email",
+              label: "E-Posta Adresi",
+              required: true,
+              admin: { width: "50%" },
+            },
+            {
+              name: "phone",
+              type: "text",
+              label: "Telefon Numarası",
+              required: true,
+              admin: { width: "50%" },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "editOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+        },
+      },
     },
   ],
   hooks: {

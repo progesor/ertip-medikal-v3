@@ -7,6 +7,7 @@ import {
   Link2,
   ListChecks,
   MapPin,
+  Mail,
   MessageSquareQuote,
   PackageSearch,
   ShieldCheck,
@@ -14,7 +15,7 @@ import {
   Star,
   Users,
 } from "lucide-react";
-import { useFormFields, useRowLabel } from "@payloadcms/ui";
+import { useDocumentInfo, useFormFields, useRowLabel } from "@payloadcms/ui";
 
 type RowData = Record<string, unknown>;
 
@@ -41,7 +42,9 @@ const getRowIndex = (path: string, rowNumber?: number) => {
   return index ? Number(index) + 1 : 1;
 };
 
-const getKind = (path: string) => {
+const getKind = (path: string, globalSlug?: string) => {
+  if (globalSlug === "main-menu") return "menuLink";
+  if (path.includes("Receivers")) return "recipient";
   if (path.includes("slides")) return "slides";
   if (path.includes("features")) return "features";
   if (path.includes("questions")) return "questions";
@@ -61,6 +64,7 @@ const getKind = (path: string) => {
 };
 
 export function AdminArrayRowLabel() {
+  const { globalSlug } = useDocumentInfo();
   const { data, path, rowNumber } = useRowLabel<RowData>();
   const row = useFormFields(([fields]) => {
     const merged: RowData = { ...(data || {}) };
@@ -68,6 +72,8 @@ export function AdminArrayRowLabel() {
     [
       "address",
       "answer",
+      "email",
+      "type",
       "buttonText",
       "code",
       "content",
@@ -100,9 +106,19 @@ export function AdminArrayRowLabel() {
   });
 
   const index = getRowIndex(path, rowNumber);
-  const kind = getKind(path);
+  const kind = getKind(path, globalSlug);
 
   const definitionsByKind = {
+    menuLink: {
+      icon: Link2,
+      title: firstText(row, ["label"]) || "Yeni bağlantı",
+      meta: row.type === "custom" ? firstText(row, ["url"]) || "Özel adres" : "Site sayfası",
+    },
+    recipient: {
+      icon: Mail,
+      title: firstText(row, ["email"]) || "Yeni alıcı",
+      meta: "Bildirim alıcısı",
+    },
     buttons: {
       icon: Link2,
       meta: firstText(row, ["link", "url"]) || "Aksiyon linki",

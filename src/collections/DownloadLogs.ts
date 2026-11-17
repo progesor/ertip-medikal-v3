@@ -5,11 +5,11 @@ const isAdmin: Access = ({ req }) =>
 
 export const DownloadLogs: CollectionConfig = {
   slug: "download-logs",
-  labels: { singular: "Kılavuz Logu", plural: "Kılavuz Logları" },
+  labels: { singular: "Kılavuz indirme kaydı", plural: "Kılavuz indirmeleri" },
   admin: {
-    useAsTitle: "accessCode",
+    useAsTitle: "documentName",
     group: "Uyumluluk ve Kayıtlar",
-    defaultColumns: ["productTitle", "accessCode", "ipAddress", "createdAt"],
+    defaultColumns: ["productTitle", "documentName", "createdAt"],
     components: {
       beforeListTable: [
         "/components/admin/CollectionViewControls#CollectionViewControls",
@@ -25,15 +25,6 @@ export const DownloadLogs: CollectionConfig = {
   },
   fields: [
     {
-      name: "editOverview",
-      type: "ui",
-      admin: {
-        components: {
-          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
-        },
-      },
-    },
-    {
       name: "productTitle",
       type: "text",
       label: "Ürün Adı",
@@ -46,33 +37,49 @@ export const DownloadLogs: CollectionConfig = {
       admin: { readOnly: true },
     },
     {
-      name: "accessCode",
-      type: "text",
-      label: "Erişim Kodu Parmak İzi",
-      admin: {
-        readOnly: true,
-        components: {
-          Cell: "/components/admin/DownloadLogCells#MaskedAccessCodeCell",
-        },
-      },
-    },
-    {
-      name: "ipAddress",
-      type: "text",
-      label: "IP Adresi",
-      admin: { readOnly: true },
-    },
-    {
       name: "country",
       type: "text",
       label: "Ülke (Tahmini)",
       admin: { readOnly: true },
     },
     {
-      name: "deviceInfo",
-      type: "text",
-      label: "Cihaz/Tarayıcı",
-      admin: { readOnly: true },
+      type: "collapsible",
+      label: "Teknik ayrıntılar",
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          name: "accessCode",
+          type: "text",
+          label: "Erişim Kodu Parmak İzi",
+          admin: {
+            readOnly: true,
+            components: {
+              Cell: "/components/admin/DownloadLogCells#MaskedAccessCodeCell",
+            },
+          },
+        },
+        {
+          name: "ipAddress",
+          type: "text",
+          label: "IP Adresi",
+          admin: { readOnly: true },
+        },
+        {
+          name: "deviceInfo",
+          type: "text",
+          label: "Cihaz/Tarayıcı",
+          admin: { readOnly: true },
+        },
+      ],
+    },
+    {
+      name: "editOverview",
+      type: "ui",
+      admin: {
+        components: {
+          Field: "/components/admin/GenericEditOverview#GenericEditOverview",
+        },
+      },
     },
   ],
 };

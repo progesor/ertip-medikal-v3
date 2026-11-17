@@ -28,15 +28,19 @@ const blockConfig = {
   certificateGrid: { icon: ShieldCheck, label: "Sertifika" },
   contactForm: { icon: MousePointerClick, label: "Talep" },
   content: { icon: FileText, label: "Metin" },
-  cta: { icon: MousePointerClick, label: "CTA" },
+  cta: { icon: MousePointerClick, label: "Eylem çağrısı" },
   faq: { icon: FileText, label: "SSS" },
   featuredProducts: { icon: PackageSearch, label: "Ürün vitrini" },
   features: { icon: Blocks, label: "Özellik" },
   gallery: { icon: Image, label: "Galeri" },
-  hero: { icon: LayoutTemplate, label: "Hero" },
-  heroSlider: { icon: Image, label: "Slider" },
-  location: { icon: LayoutTemplate, label: "Lokasyon" },
+  hero: { icon: LayoutTemplate, label: "Kapak" },
+  heroSlider: { icon: Image, label: "Kayan kapak" },
+  location: { icon: LayoutTemplate, label: "Konum" },
   logoSlider: { icon: ShieldCheck, label: "Logo bandı" },
+  timeline: { icon: BarChart3, label: "Zaman çizelgesi" },
+  mediaText: { icon: LayoutTemplate, label: "Görsel ve metin" },
+  videoMedia: { icon: Image, label: "Video" },
+  productCategoryShowcase: { icon: PackageSearch, label: "Kategori vitrini" },
   newsFeed: { icon: Newspaper, label: "Haber" },
   newsletter: { icon: MousePointerClick, label: "Bülten" },
   process: { icon: BarChart3, label: "Süreç" },
@@ -92,22 +96,22 @@ export function PageBuilderStudio() {
   return (
     <section className="ertip-studio ertip-page-studio" aria-label="Sayfa düzeni">
       <div className="ertip-studio__header">
-        <span>Sayfa Mimarı</span>
+        <span>Sayfa düzeni</span>
         <strong>{data.title || "Yeni sayfa"}</strong>
       </div>
 
       <div className="ertip-studio__stats">
         <span>
           <strong>{data.layout.length}</strong>
-          <small>Blok</small>
+          <small>Bölüm</small>
         </span>
         <span>
           <strong>{Object.keys(data.types).length}</strong>
-          <small>Tip</small>
+          <small>Bölüm türü</small>
         </span>
         <span>
-          <strong>{data.types.heroSlider || data.types.hero || 0}</strong>
-          <small>Hero</small>
+          <strong>{(data.types.heroSlider || 0) + (data.types.hero || 0)}</strong>
+          <small>Kapak bölümü</small>
         </span>
       </div>
 
@@ -135,7 +139,7 @@ export function PageBuilderStudio() {
         ) : (
           <article className="ertip-page-map__empty">
             <Blocks size={18} />
-            <strong>Blok eklenmedi</strong>
+            <strong>Henüz bölüm eklenmedi</strong>
           </article>
         )}
       </div>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useAuth } from "@payloadcms/ui";
+import { isAdmin } from "@/access/roles";
 import { useEffect, useState } from "react";
 import type { SiteLocale } from "@/lib/i18n/config";
 import {
@@ -25,9 +27,10 @@ type UiTextResponse = {
 };
 
 export function EnglishContentBootstrapControl() {
+  const { user } = useAuth();
   return (
     <div style={styles.stack}>
-      <EnglishBootstrapSection />
+      {isAdmin(user) && <EnglishBootstrapSection />}
       <UiTextOverrideEditor />
     </div>
   );
@@ -85,15 +88,13 @@ function EnglishBootstrapSection() {
   };
 
   return (
-    <section style={styles.wrapper} aria-label="Çoklu dil içerik araçları">
+    <section className="ertip-module" style={styles.wrapper} aria-label="Çoklu dil içerik araçları">
       <div style={styles.copy}>
         <span style={styles.eyebrow}>Çoklu Dil</span>
-        <h2 style={styles.title}>İngilizce İçerik Başlangıcını Hazırla</h2>
+        <h2 style={styles.title}>Eksik İngilizce içerikler</h2>
         <p style={styles.description}>
           Türkçe içerikleri kaynak alarak yalnızca boş İngilizce alanları
-          doldurur. Mevcut İngilizce çeviriler korunur. Sayfaların Page Builder
-          blokları, ürün içerikleri, kategoriler, haberler, ana menü ve site
-          ayarları kapsama dahildir.
+          doldurur. Mevcut çeviriler korunur.
         </p>
       </div>
 
@@ -102,23 +103,16 @@ function EnglishBootstrapSection() {
           type="button"
           onClick={() => void runBootstrap()}
           disabled={isRunning}
-          style={{
-            ...styles.button,
-            cursor: isRunning ? "not-allowed" : "pointer",
-            opacity: isRunning ? 0.65 : 1,
-          }}
+          className="ertip-module__button ertip-module__button--primary"
         >
           {isRunning
             ? "İngilizce İçerik Hazırlanıyor..."
             : "Eksik İngilizce İçeriği Türkçeden Doldur"}
         </button>
-        <small style={styles.note}>
-          Güvenli mod: dolu İngilizce alanların üzerine yazılmaz.
-        </small>
       </div>
 
-      {message && !error && <p style={styles.message}>{message}</p>}
-      {error && <p style={styles.error}>{error}</p>}
+      {message && !error && <p className="ertip-module__notice">{message}</p>}
+      {error && <p className="ertip-module__notice ertip-module__notice--error">{error}</p>}
     </section>
   );
 }
@@ -142,7 +136,7 @@ function UiTextOverrideEditor() {
     })
       .then(async (response) => {
         const data = (await response.json().catch(() => ({}))) as UiTextResponse;
-        if (!response.ok) throw new Error(data.message || "UI metinleri yüklenemedi.");
+        if (!response.ok) throw new Error(data.message || "Site metinleri yüklenemedi.");
         if (!cancelled) {
           setValues(data.data || {});
           setIsLoading(false);
@@ -153,7 +147,7 @@ function UiTextOverrideEditor() {
           setError(
             loadError instanceof Error
               ? loadError.message
-              : "UI metinleri yüklenemedi.",
+              : "Site metinleri yüklenemedi.",
           );
           setIsLoading(false);
         }
@@ -180,12 +174,12 @@ function UiTextOverrideEditor() {
         body: JSON.stringify({ action: "load", locale: nextLocale }),
       });
       const data = (await response.json().catch(() => ({}))) as UiTextResponse;
-      if (!response.ok) throw new Error(data.message || "UI metinleri yüklenemedi.");
+      if (!response.ok) throw new Error(data.message || "Site metinleri yüklenemedi.");
       setValues(data.data || {});
     } catch (loadError) {
       setValues({});
       setError(
-        loadError instanceof Error ? loadError.message : "UI metinleri yüklenemedi.",
+        loadError instanceof Error ? loadError.message : "Site metinleri yüklenemedi.",
       );
     } finally {
       setIsLoading(false);
@@ -207,12 +201,12 @@ function UiTextOverrideEditor() {
         body: JSON.stringify({ action: "save", locale, data: nextValues }),
       });
       const data = (await response.json().catch(() => ({}))) as UiTextResponse;
-      if (!response.ok) throw new Error(data.message || "UI metinleri kaydedilemedi.");
+      if (!response.ok) throw new Error(data.message || "Site metinleri kaydedilemedi.");
       setValues(data.data || {});
-      setMessage(data.message || "UI metinleri kaydedildi.");
+      setMessage(data.message || "Site metinleri kaydedildi.");
     } catch (saveError) {
       setError(
-        saveError instanceof Error ? saveError.message : "UI metinleri kaydedilemedi.",
+        saveError instanceof Error ? saveError.message : "Site metinleri kaydedilemedi.",
       );
     } finally {
       setIsSaving(false);
@@ -221,7 +215,7 @@ function UiTextOverrideEditor() {
 
   const resetLocale = async () => {
     const confirmed = window.confirm(
-      `${locale.toUpperCase()} için tanımlanmış tüm özel UI metinleri temizlenecek ve sistem varsayılanlarına dönülecek. Devam edilsin mi?`,
+      `${locale.toUpperCase()} için tanımlanmış tüm özel Site metinleri temizlenecek ve sistem varsayılanlarına dönülecek. Devam edilsin mi?`,
     );
     if (!confirmed) return;
 
@@ -229,15 +223,12 @@ function UiTextOverrideEditor() {
   };
 
   return (
-    <section style={styles.editorWrapper} aria-label="UI metinleri düzenleyicisi">
+    <section className="ertip-module" aria-label="Site metinleri düzenleyicisi">
       <div style={styles.editorHeader}>
         <div style={styles.copy}>
-          <span style={styles.eyebrow}>UI Metinleri</span>
-          <h2 style={styles.title}>Sabit Site Metinlerini Düzenle</h2>
+          <h2 style={styles.title}>Düğme ve sayfa metinleri</h2>
           <p style={styles.description}>
-            Ziyaretçiye görünen temel buton, başlık ve form metinlerini dil bazında
-            özelleştirin. Alanı boş bırakırsanız kod içindeki güvenli varsayılan
-            otomatik olarak kullanılır.
+            Düzenlemek istediğiniz dili seçin. Boş bıraktığınız alanlarda sitenin varsayılan metni gösterilir.
           </p>
         </div>
 
@@ -248,10 +239,8 @@ function UiTextOverrideEditor() {
               type="button"
               onClick={() => void loadLocale(option)}
               disabled={isLoading || isSaving}
-              style={{
-                ...styles.localeButton,
-                ...(locale === option ? styles.localeButtonActive : {}),
-              }}
+              aria-pressed={locale === option}
+              className="ertip-module__locale"
             >
               {option === "tr" ? "Türkçe" : "English"}
             </button>
@@ -260,7 +249,7 @@ function UiTextOverrideEditor() {
       </div>
 
       {isLoading ? (
-        <p style={styles.loading}>UI metinleri yükleniyor...</p>
+        <p style={styles.loading}>Site metinleri yükleniyor...</p>
       ) : (
         <div style={styles.editorSections}>
           {uiTextOverrideSections.map((section, sectionIndex) => (
@@ -315,7 +304,7 @@ function UiTextOverrideEditor() {
           type="button"
           onClick={() => void resetLocale()}
           disabled={isLoading || isSaving}
-          style={styles.secondaryButton}
+          className="ertip-module__button"
         >
           Bu Dili Varsayılanlara Döndür
         </button>
@@ -323,17 +312,14 @@ function UiTextOverrideEditor() {
           type="button"
           onClick={() => void save()}
           disabled={isLoading || isSaving}
-          style={{
-            ...styles.button,
-            opacity: isLoading || isSaving ? 0.65 : 1,
-          }}
+          className="ertip-module__button ertip-module__button--primary"
         >
-          {isSaving ? "Kaydediliyor..." : `${locale.toUpperCase()} UI Metinlerini Kaydet`}
+          {isSaving ? "Kaydediliyor..." : `${locale.toUpperCase()} Site metinlerini Kaydet`}
         </button>
       </div>
 
-      {message && !error && <p style={styles.message}>{message}</p>}
-      {error && <p style={styles.error}>{error}</p>}
+      {message && !error && <p className="ertip-module__notice">{message}</p>}
+      {error && <p className="ertip-module__notice ertip-module__notice--error">{error}</p>}
     </section>
   );
 }
@@ -346,19 +332,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   wrapper: {
     display: "grid",
-    gridTemplateColumns: "minmax(0, 1fr) auto",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 20rem), 1fr))",
     gap: "1rem 1.5rem",
     alignItems: "center",
-    padding: "1.25rem",
-    border: "1px solid var(--theme-elevation-150)",
-    borderRadius: "14px",
-    background: "var(--theme-elevation-50)",
-  },
-  editorWrapper: {
-    padding: "1.25rem",
-    border: "1px solid var(--theme-elevation-150)",
-    borderRadius: "14px",
-    background: "var(--theme-elevation-50)",
   },
   editorHeader: {
     display: "flex",
@@ -373,8 +349,8 @@ const styles: Record<string, React.CSSProperties> = {
   eyebrow: {
     display: "block",
     marginBottom: "0.3rem",
-    color: "var(--theme-elevation-500)",
-    fontSize: "0.72rem",
+    color: "var(--ertip-admin-muted)",
+    fontSize: "var(--ertip-admin-caption-size)",
     fontWeight: 800,
     letterSpacing: "0.08em",
     textTransform: "uppercase",
@@ -386,7 +362,7 @@ const styles: Record<string, React.CSSProperties> = {
   description: {
     maxWidth: "760px",
     margin: "0.45rem 0 0",
-    color: "var(--theme-elevation-600)",
+    color: "var(--ertip-admin-muted)",
     lineHeight: 1.55,
   },
   actions: {
@@ -394,28 +370,10 @@ const styles: Record<string, React.CSSProperties> = {
     flexDirection: "column",
     alignItems: "stretch",
     gap: "0.45rem",
-    minWidth: "300px",
-  },
-  button: {
-    border: 0,
-    borderRadius: "9px",
-    padding: "0.85rem 1.05rem",
-    background: "var(--theme-success-500, #15803d)",
-    color: "white",
-    fontWeight: 800,
-    cursor: "pointer",
-  },
-  secondaryButton: {
-    border: "1px solid var(--theme-elevation-250)",
-    borderRadius: "9px",
-    padding: "0.8rem 1rem",
-    background: "var(--theme-elevation-100)",
-    color: "var(--theme-text)",
-    fontWeight: 700,
-    cursor: "pointer",
+    minWidth: 0,
   },
   note: {
-    color: "var(--theme-elevation-500)",
+    color: "var(--ertip-admin-muted)",
     textAlign: "center",
   },
   localeSwitcher: {
@@ -425,23 +383,9 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: "10px",
     background: "var(--theme-elevation-100)",
   },
-  localeButton: {
-    border: 0,
-    borderRadius: "7px",
-    padding: "0.55rem 0.8rem",
-    background: "transparent",
-    color: "var(--theme-elevation-650)",
-    fontWeight: 750,
-    cursor: "pointer",
-  },
-  localeButtonActive: {
-    background: "var(--theme-elevation-0)",
-    color: "var(--theme-text)",
-    boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
-  },
   loading: {
     margin: "1rem 0 0",
-    color: "var(--theme-elevation-600)",
+    color: "var(--ertip-admin-muted)",
   },
   editorSections: {
     display: "grid",
@@ -449,9 +393,9 @@ const styles: Record<string, React.CSSProperties> = {
     marginTop: "1rem",
   },
   details: {
-    border: "1px solid var(--theme-elevation-150)",
+    border: "1px solid var(--ertip-admin-border)",
     borderRadius: "10px",
-    background: "var(--theme-elevation-0)",
+    background: "var(--ertip-admin-panel-subtle)",
     overflow: "hidden",
   },
   summary: {
@@ -462,13 +406,13 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: "pointer",
   },
   summaryDescription: {
-    color: "var(--theme-elevation-550)",
-    fontSize: "0.82rem",
+    color: "var(--ertip-admin-muted)",
+    fontSize: "var(--ertip-admin-caption-size)",
     fontWeight: 400,
   },
   fieldGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))",
     gap: "0.9rem",
     padding: "0 1rem 1rem",
   },
@@ -478,21 +422,21 @@ const styles: Record<string, React.CSSProperties> = {
     gap: "0.35rem",
   },
   fieldLabel: {
-    fontSize: "0.82rem",
+    fontSize: "var(--ertip-admin-caption-size)",
     fontWeight: 700,
   },
   input: {
     width: "100%",
-    border: "1px solid var(--theme-elevation-250)",
+    border: "1px solid var(--ertip-admin-control-border)",
     borderRadius: "7px",
     padding: "0.65rem 0.75rem",
-    background: "var(--theme-elevation-0)",
+    background: "var(--ertip-admin-panel-subtle)",
     color: "var(--theme-text)",
     font: "inherit",
     resize: "vertical",
   },
   defaultHint: {
-    color: "var(--theme-elevation-500)",
+    color: "var(--ertip-admin-muted)",
     lineHeight: 1.35,
   },
   editorActions: {
@@ -501,21 +445,5 @@ const styles: Record<string, React.CSSProperties> = {
     gap: "0.65rem",
     flexWrap: "wrap",
     marginTop: "1rem",
-  },
-  message: {
-    margin: "0.75rem 0 0",
-    padding: "0.75rem",
-    borderRadius: "8px",
-    background: "var(--theme-success-100, #dcfce7)",
-    color: "var(--theme-success-700, #166534)",
-    fontWeight: 650,
-  },
-  error: {
-    margin: "0.75rem 0 0",
-    padding: "0.75rem",
-    borderRadius: "8px",
-    background: "var(--theme-error-100, #fee2e2)",
-    color: "var(--theme-error-700, #b91c1c)",
-    fontWeight: 650,
   },
 };

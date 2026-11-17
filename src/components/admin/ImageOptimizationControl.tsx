@@ -209,15 +209,14 @@ export function ImageOptimizationControl() {
       : 0;
 
   return (
-    <div style={styles.wrapper}>
+    <div className="ertip-module" style={styles.wrapper}>
       <div style={styles.header}>
         <div style={styles.descriptionColumn}>
           <h3 style={styles.title}>Toplu Görsel Optimizasyonu</h3>
           <p style={styles.description}>
-            Önce yukarıdaki ayarları Payload’ın Kaydet düğmesiyle kaydedin.
-            Ardından yeni veya değişen raster görselleri artımlı olarak optimize
-            edin. Gerektiğinde tüm türevleri yeniden oluşturabilirsiniz. PDF,
-            SVG ve hareketli GIF dosyaları değiştirilmez.
+            Boyut veya kalite ayarlarını değiştirdiyseniz önce kaydedin. Ardından
+            yeni ve güncellenen görselleri işleyebilir ya da tüm görselleri
+            yeniden hazırlayabilirsiniz.
           </p>
         </div>
 
@@ -226,11 +225,7 @@ export function ImageOptimizationControl() {
             type="button"
             onClick={() => void runOptimization(false)}
             disabled={isRunning}
-            style={{
-              ...styles.actionButton,
-              cursor: isRunning ? "not-allowed" : "pointer",
-              opacity: isRunning ? 0.6 : 1,
-            }}
+            className="ertip-module__button ertip-module__button--primary"
           >
             {isRunning
               ? "Görseller İşleniyor..."
@@ -240,11 +235,7 @@ export function ImageOptimizationControl() {
             type="button"
             onClick={() => void runOptimization(true)}
             disabled={isRunning}
-            style={{
-              ...styles.secondaryActionButton,
-              cursor: isRunning ? "not-allowed" : "pointer",
-              opacity: isRunning ? 0.6 : 1,
-            }}
+            className="ertip-module__button"
           >
             Tümünü Yeniden Oluştur
           </button>
@@ -284,7 +275,7 @@ export function ImageOptimizationControl() {
         <p style={styles.message}>{progressMessage || status?.message}</p>
       )}
 
-      {error && <p style={styles.error}>{error}</p>}
+      {error && <p className="ertip-module__notice ertip-module__notice--error">{error}</p>}
     </div>
   );
 }
@@ -301,10 +292,6 @@ function StatusItem({ label, value }: { label: string; value: string }) {
 const styles: Record<string, React.CSSProperties> = {
   wrapper: {
     marginTop: "1.5rem",
-    padding: "1.25rem",
-    border: "1px solid var(--theme-elevation-150)",
-    borderRadius: "12px",
-    background: "var(--theme-elevation-50)",
   },
   header: {
     display: "flex",
@@ -328,24 +315,8 @@ const styles: Record<string, React.CSSProperties> = {
   },
   description: {
     margin: "0.5rem 0 0",
-    color: "var(--theme-elevation-600)",
+    color: "var(--ertip-admin-muted)",
     lineHeight: 1.55,
-  },
-  actionButton: {
-    border: 0,
-    borderRadius: "8px",
-    padding: "0.8rem 1.1rem",
-    background: "var(--theme-success-500, #15803d)",
-    color: "white",
-    fontWeight: 700,
-  },
-  secondaryActionButton: {
-    border: "1px solid var(--theme-elevation-250)",
-    borderRadius: "8px",
-    padding: "0.8rem 1.1rem",
-    background: "var(--theme-elevation-0)",
-    color: "var(--theme-elevation-800)",
-    fontWeight: 700,
   },
   statusGrid: {
     display: "grid",
@@ -356,14 +327,14 @@ const styles: Record<string, React.CSSProperties> = {
   statusItem: {
     padding: "0.75rem",
     borderRadius: "8px",
-    background: "var(--theme-elevation-0)",
+    background: "var(--ertip-admin-panel-subtle)",
     border: "1px solid var(--theme-elevation-100)",
   },
   statusLabel: {
-    fontSize: "0.72rem",
+    fontSize: "var(--ertip-admin-caption-size)",
     textTransform: "uppercase",
     letterSpacing: "0.06em",
-    color: "var(--theme-elevation-500)",
+    color: "var(--ertip-admin-muted)",
     fontWeight: 700,
   },
   statusValue: {
@@ -374,24 +345,16 @@ const styles: Record<string, React.CSSProperties> = {
     height: "8px",
     overflow: "hidden",
     borderRadius: "999px",
-    background: "var(--theme-elevation-150)",
+    background: "var(--ertip-admin-border)",
     marginTop: "1rem",
   },
   progressBar: {
     height: "100%",
-    background: "var(--theme-success-500, #15803d)",
+    background: "var(--ertip-admin-primary)",
     transition: "width 200ms ease",
   },
   message: {
     margin: "1rem 0 0",
     color: "var(--theme-elevation-700)",
-  },
-  error: {
-    margin: "1rem 0 0",
-    padding: "0.75rem",
-    borderRadius: "8px",
-    background: "var(--theme-error-100, #fee2e2)",
-    color: "var(--theme-error-600, #b91c1c)",
-    fontWeight: 600,
   },
 };
