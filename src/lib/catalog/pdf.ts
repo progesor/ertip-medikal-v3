@@ -1,13 +1,15 @@
 import path from "node:path";
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import sharp from "sharp";
 import type { CatalogSnapshot } from "@/types/catalog";
 import { renderCatalog } from "./render";
+import { catalogConfigSchema } from "./schema";
 
 // Resolve filesystem assets at runtime; bundlers otherwise turn require.resolve into module IDs.
 const resolveAsset = process
   .getBuiltinModule("module")
   .createRequire(path.join(process.cwd(), "package.json")).resolve;
+const imageCache = new Map<string, string>();
 export async function catalogHTML(snapshot: CatalogSnapshot) {
   const assets = new Map<number, string>();
   const images = [
@@ -15,8 +17,10 @@ export async function catalogHTML(snapshot: CatalogSnapshot) {
     ...snapshot.products.map((p) => p.image),
   ].filter((image) => image !== null);
   const root = path.resolve("media");
-  for (const image of images) {
-    if (assets.has(image.id)) continue;
+  const unique = [
+    ...new Map(images.map((image) => [image.id, image])).values(),
+  ];
+  async function prepareImage(image: (typeof unique)[number]) {
     if (
       path.basename(image.filename) !== image.filename ||
       /[\\/\x00]/.test(image.filename)
@@ -24,8 +28,17 @@ export async function catalogHTML(snapshot: CatalogSnapshot) {
       throw Error("Geçersiz medya dosyası.");
     const file = path.resolve(root, image.filename);
     if (path.dirname(file) !== root) throw Error("Geçersiz medya konumu.");
+    const info = await stat(file);
+    const key = file + ":" + info.mtimeMs + ":" + snapshot.config.profile;
+    const cached = imageCache.get(key);
+    if (cached) {
+      assets.set(image.id, cached);
+      return;
+    }
     const data = await sharp(await readFile(file))
       .rotate()
+      .flatten({ background: "#ffffff" })
+      .trim({ background: "#ffffff", threshold: 8 })
       .resize({
         width: snapshot.config.profile === "quality" ? 2200 : 1000,
         height: snapshot.config.profile === "quality" ? 2200 : 1000,
@@ -35,8 +48,14 @@ export async function catalogHTML(snapshot: CatalogSnapshot) {
       .flatten({ background: "#ffffff" })
       .jpeg({ quality: snapshot.config.profile === "quality" ? 95 : 83 })
       .toBuffer();
-    assets.set(image.id, "data:image/jpeg;base64," + data.toString("base64"));
+    const result = "data:image/jpeg;base64," + data.toString("base64");
+    assets.set(image.id, result);
+    imageCache.set(key, result);
+    if (imageCache.size > 200)
+      imageCache.delete(imageCache.keys().next().value!);
   }
+  for (let i = 0; i < unique.length; i += 4)
+    await Promise.all(unique.slice(i, i + 4).map(prepareImage));
   let fonts = "";
   for (const [pkg, family] of [
     ["inter", "Catalog Sans"],
@@ -71,7 +90,11 @@ export async function catalogHTML(snapshot: CatalogSnapshot) {
   }
   return renderCatalog(snapshot, assets, fonts);
 }
-export async function generateCatalogPDF(snapshot: CatalogSnapshot) {
+async function prepareDocument(snapshot: CatalogSnapshot, exportPDF: boolean) {
+  snapshot = {
+    ...snapshot,
+    config: catalogConfigSchema.parse(snapshot.config),
+  };
   const { chromium } = await import("playwright-core");
   const executablePath =
     process.env.CATALOG_CHROMIUM_PATH ||
@@ -102,6 +125,17 @@ export async function generateCatalogPDF(snapshot: CatalogSnapshot) {
       pages: Number(document.body.dataset.pages),
       overflow: document.body.dataset.overflow,
       failed: document.body.dataset.failed,
+      sheets: Array.from(
+        document.querySelectorAll<HTMLElement>("#pages > .sheet"),
+      ).map((sheet, index) => ({
+        id: sheet.dataset.plan || sheet.id || "page-" + index,
+        title: sheet.dataset.title || "",
+        kind: sheet.dataset.kind || "products",
+        page: index + 1,
+        productIds: Array.from(
+          sheet.querySelectorAll<HTMLElement>(".card[data-product]"),
+        ).map((card) => Number(card.dataset.product)),
+      })),
     }));
     if (result.failed || !result.pages)
       throw Error("Sayfa yerleşimi oluşturulamadı.");
@@ -110,13 +144,33 @@ export async function generateCatalogPDF(snapshot: CatalogSnapshot) {
         "Sayfaya sığmayan içerik var. Daha az ürünlü düzen seçin. " +
           result.overflow.slice(0, 200),
       );
-    const data = await page.pdf({
-      printBackground: true,
-      preferCSSPageSize: true,
-      tagged: true,
-    });
-    return { data, pages: result.pages };
+    const data = exportPDF
+      ? await page.pdf({
+          printBackground: true,
+          preferCSSPageSize: true,
+          tagged: true,
+        })
+      : undefined;
+    // A static preview cannot hang on client script, font timing or postMessage races.
+    await page.evaluate(() =>
+      document
+        .querySelectorAll("template,script")
+        .forEach((node) => node.remove()),
+    );
+    return {
+      data,
+      pages: result.pages,
+      sheets: result.sheets,
+      html: exportPDF ? "" : await page.content(),
+    };
   } finally {
     await browser.close();
   }
+}
+export async function previewCatalog(snapshot: CatalogSnapshot) {
+  return prepareDocument(snapshot, false);
+}
+export async function generateCatalogPDF(snapshot: CatalogSnapshot) {
+  const result = await prepareDocument(snapshot, true);
+  return { data: result.data!, pages: result.pages };
 }

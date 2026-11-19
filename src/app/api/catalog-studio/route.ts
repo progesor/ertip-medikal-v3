@@ -3,6 +3,7 @@ import config from "@payload-config";
 import { isContentManager } from "@/access/roles";
 import { catalogSaveSchema } from "@/lib/catalog/schema";
 import { catalogSnapshot } from "@/lib/catalog/source";
+import { resolvePages } from "@/lib/catalog/pagePlan";
 import type { CatalogSnapshot } from "@/types/catalog";
 
 export const runtime = "nodejs";
@@ -138,10 +139,22 @@ export async function POST(request: Request) {
       );
       if (!snapshot.products.length)
         return reply("Yayımlanmış en az bir ürün seçin.", 400);
-      const { catalogHTML } = await import("@/lib/catalog/pdf");
+      if (
+        !resolvePages(snapshot.products, snapshot.config).some(
+          (page) => page.kind === "products" && page.productIds.length,
+        )
+      )
+        return reply(
+          "Sayfa planına en az bir ürün yerleştirin veya otomatik moda dönün.",
+          400,
+        );
+      const { previewCatalog } = await import("@/lib/catalog/pdf");
+      const rendered = await previewCatalog(snapshot);
       return Response.json(
         {
-          html: await catalogHTML(snapshot),
+          html: rendered.html,
+          sheets: rendered.sheets,
+          pageCount: rendered.pages,
           warnings: snapshot.warnings,
           products: snapshot.products,
         },
@@ -166,6 +179,15 @@ export async function POST(request: Request) {
       );
       if (!snapshot.products.length)
         return reply("Yayımlanmış en az bir ürün seçin.", 400);
+      if (
+        !resolvePages(snapshot.products, snapshot.config).some(
+          (page) => page.kind === "products" && page.productIds.length,
+        )
+      )
+        return reply(
+          "Sayfa planına en az bir ürün yerleştirin veya otomatik moda dönün.",
+          400,
+        );
       return Response.json(await queueOutput(payload, user, doc.id, snapshot), {
         status: 202,
         headers,

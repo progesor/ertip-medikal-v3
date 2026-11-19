@@ -1,0 +1,64 @@
+.designer {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+.designer > p {
+  font-size: 11px;
+  color: var(--ertip-admin-muted);
+}
+.frame {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 3px;
+  box-shadow: 0 5px 16px #0002;
+  isolation: isolate;
+}
+.brand {
+  position: absolute;
+  left: 9%;
+  top: 7%;
+  font-size: 7px;
+  letter-spacing: 1px;
+}
+.title,
+.image {
+  position: absolute;
+  cursor: grab;
+  touch-action: none;
+  outline: 1px dashed #8aadd277;
+  outline-offset: 3px;
+}
+.title:focus-visible,
+.image:focus-visible {
+  outline: 2px solid #8aadd2;
+}
+.title strong {
+  display: block;
+  font-weight: 600;
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+.title small {
+  display: block;
+  font-size: 7px;
+  line-height: 1.5;
+  margin-top: 8px;
+  white-space: pre-line;
+}
+.title {
+  z-index: 2;
+}
+.image {
+  background: #fff;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.colors {
+  display: flex;
+  gap: 12px;
+}
+.colors > label {
+  flex: 1;
+}

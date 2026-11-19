@@ -9,6 +9,7 @@ import type {
 import { serverEnv } from "@/lib/config/env";
 import { catalogLabel } from "@/lib/i18n/catalogLabels";
 import { catalogOptions } from "./options";
+import { catalogIdentity } from "./identity";
 
 export function catalogImage(value: unknown): CatalogImage | null {
   if (!value || typeof value !== "object" || !("filename" in value))
@@ -87,7 +88,42 @@ export async function catalogSnapshot(
       custom?.imageId !== undefined
         ? images.get(custom.imageId || 0) || null
         : catalogImage(p.mainImage);
-    const name = custom?.title ?? p.title ?? "";
+    const name =
+      custom?.title ??
+      (config.shortTitles
+        ? p.title?.replace(/^(?:ERTIP|ERTİP|Ertıp)\s+/iu, "")
+        : p.title) ??
+      "";
+    const identity =
+      custom?.sku !== undefined
+        ? {
+            sku: custom.sku,
+            skuLabel: config.locale === "en" ? "Product code" : "Ürün kodu",
+          }
+        : catalogIdentity(p, config.locale);
+    const memberships = p.category.map((c) =>
+      typeof c === "object" ? c.id : c,
+    );
+    const primaryCategory =
+      categories.docs.find(
+        (c) =>
+          memberships.includes(c.id) &&
+          !categories.docs.some(
+            (child) => memberships.includes(child.id) && child.parent === c.id,
+          ),
+      ) || categories.docs.find((c) => memberships.includes(c.id));
+    let section = primaryCategory;
+    const visited = new Set<number>();
+    while (
+      section &&
+      typeof section.parent === "number" &&
+      !visited.has(section.id)
+    ) {
+      visited.add(section.id);
+      const parent = categories.docs.find((c) => c.id === section!.parent);
+      if (!parent) break;
+      section = parent;
+    }
     const description = custom?.description ?? p.shortDescription ?? "";
     const add = (message: string) =>
       warnings.push({
@@ -112,15 +148,11 @@ export async function catalogSnapshot(
     return {
       id: p.id,
       title: name || (config.locale === "en" ? "Product" : "Ürün") + " " + p.id,
-      sku: p.sku || "",
-      category: p.category
-        .map((c) =>
-          typeof c === "object"
-            ? c.title
-            : categories.docs.find((x) => x.id === c)?.title,
-        )
-        .filter(Boolean)
-        .join(" / "),
+      ...identity,
+      categoryId: primaryCategory?.id,
+      sectionId: section?.id,
+      sectionTitle: section?.title || "",
+      category: primaryCategory?.title || "",
       description,
       image,
       gallery: (p.gallery || [])
@@ -162,6 +194,29 @@ export async function catalogSnapshot(
         warnings.push({
           productId: id,
           message: "#" + id + " yayımlanmış ürünler arasında bulunamadı.",
+        });
+  }
+  if (config.pageMode === "manual") {
+    const placed = new Set(
+      config.pages
+        .filter((page) => page.kind === "products")
+        .flatMap((page) => page.productIds),
+    );
+    const missing = products.filter((product) => !placed.has(product.id));
+    if (missing.length)
+      warnings.push({
+        message:
+          missing.length +
+          " ürün sayfa planına yerleştirilmedi; PDF içinde görünmeyecek.",
+      });
+    for (const id of placed)
+      if (!products.some((product) => product.id === id))
+        warnings.push({
+          productId: id,
+          message:
+            "#" +
+            id +
+            " sayfa planında, ancak seçilen yayındaki ürünler arasında bulunamadı.",
         });
   }
   return {

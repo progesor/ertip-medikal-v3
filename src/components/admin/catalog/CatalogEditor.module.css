@@ -540,3 +540,29 @@
     min-height: 500px;
   }
 }
+.pageNavigation {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  max-width: 500px;
+}
+.pageNavigation select {
+  flex: 1;
+  min-width: 0;
+}
+.canvasToolbar {
+  height: auto;
+  min-height: 52px;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 12px;
+}
+.canvasToolbar button {
+  font-size: 11px;
+  padding: 6px 9px;
+}
+.canvasToolbar button[aria-pressed="true"] {
+  background: var(--theme-elevation-100);
+  color: var(--studio-accent);
+}

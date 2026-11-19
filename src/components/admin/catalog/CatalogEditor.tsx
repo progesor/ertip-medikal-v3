@@ -31,6 +31,9 @@ import type {
   CatalogWarning,
 } from "@/types/catalog";
 import styles from "./CatalogEditor.module.css";
+import { PageBoard } from "./PageBoard";
+import { CoverDesigner } from "./CoverDesigner";
+import type { CatalogPagePreview } from "@/types/catalog";
 
 type ProductOption = {
   id: number;
@@ -48,6 +51,8 @@ type Library = {
 type Working = { title: string; isTemplate: boolean; config: CatalogConfig };
 type Preview = {
   html: string;
+  pageCount: number;
+  sheets: CatalogPagePreview[];
   warnings: CatalogWarning[];
   products: CatalogProduct[];
 };
@@ -66,7 +71,9 @@ async function request<T>(
   const response = await fetch(api + query, {
     method: body ? "POST" : "GET",
     cache: "no-store",
-    signal,
+    signal: signal
+      ? AbortSignal.any([signal, AbortSignal.timeout(120000)])
+      : AbortSignal.timeout(120000),
     headers: body
       ? { "Content-Type": "application/json", "x-ertip-catalog": "1" }
       : {},
@@ -84,7 +91,8 @@ export function CatalogEditor() {
   const [working, setWorking] = useState<Working>(empty);
   const [saved, setSaved] = useState<CatalogDocument | null>(null);
   const [preview, setPreview] = useState<Preview | null>(null);
-  const iframe = useRef<HTMLIFrameElement>(null);
+  const [view, setView] = useState<"preview" | "pages">("preview");
+  const [visiblePage, setVisiblePage] = useState(1);
   const [layout, setLayout] = useState<{ pages: number; error: string } | null>(
     null,
   );
@@ -141,7 +149,11 @@ export function CatalogEditor() {
     )
       return;
     const next = doc
-      ? { title: doc.title, isTemplate: !!doc.isTemplate, config: doc.config }
+      ? {
+          title: doc.title,
+          isTemplate: !!doc.isTemplate,
+          config: catalogConfigSchema.parse(doc.config),
+        }
       : empty;
     setWorking(next);
     setSaved(doc);
@@ -178,23 +190,6 @@ export function CatalogEditor() {
     window.addEventListener("beforeunload", leave);
     return () => window.removeEventListener("beforeunload", leave);
   }, [dirty]);
-  useEffect(() => {
-    const receive = (event: MessageEvent) => {
-      if (
-        event.source !== iframe.current?.contentWindow ||
-        event.data?.type !== "catalog-layout"
-      )
-        return;
-      if (
-        Number.isSafeInteger(event.data.pages) &&
-        typeof event.data.error === "string"
-      ) {
-        setLayout({ pages: event.data.pages, error: event.data.error });
-      }
-    };
-    window.addEventListener("message", receive);
-    return () => window.removeEventListener("message", receive);
-  }, []);
   const loadOutputs = useCallback(async () => {
     if (saved)
       setOutputs(
@@ -247,7 +242,10 @@ export function CatalogEditor() {
     try {
       if (action === "preview") {
         setLayout(null);
-        setPreview(await request<Preview>({ action, ...working }));
+        const result = await request<Preview>({ action, ...working });
+        setPreview(result);
+        setLayout({ pages: result.pageCount, error: "" });
+        setVisiblePage(1);
         setPreviewKey(JSON.stringify(working));
       } else {
         const doc = await save();
@@ -258,7 +256,13 @@ export function CatalogEditor() {
         } else setNotice("Çalışma kaydedildi.");
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "İşlem tamamlanamadı.");
+      setError(
+        e instanceof Error && e.name === "TimeoutError"
+          ? "Önizleme zaman aşımına uğradı. Yeniden deneyin veya daha az ürün seçin."
+          : e instanceof Error
+            ? e.message
+            : "İşlem tamamlanamadı.",
+      );
     } finally {
       setBusy("");
     }
@@ -551,6 +555,18 @@ export function CatalogEditor() {
         </aside>
         <section className={styles.canvasArea} aria-label="Katalog önizleme">
           <div className={styles.canvasToolbar}>
+            <button
+              aria-pressed={view === "preview"}
+              onClick={() => setView("preview")}
+            >
+              Önizleme
+            </button>
+            <button
+              aria-pressed={view === "pages"}
+              onClick={() => setView("pages")}
+            >
+              Sayfa planı
+            </button>
             <span>
               {config.paper} ·{" "}
               {config.orientation === "portrait" ? "Dikey" : "Yatay"} ·{" "}
@@ -580,21 +596,85 @@ export function CatalogEditor() {
               Tasarım değişti. Önizlemeyi yenile
             </button>
           )}
-          {preview ? (
+          {view === "pages" ? (
+            <PageBoard
+              config={config}
+              products={preview?.products || []}
+              disabled={!!busy}
+              onChange={configure}
+            />
+          ) : preview ? (
             <div className={styles.canvasScroll}>
-              <iframe
-                ref={iframe}
-                title="PDF sayfaları"
-                sandbox="allow-scripts"
-                srcDoc={preview.html}
+              <div className={styles.pageNavigation}>
+                <button
+                  aria-label="Önceki PDF sayfası"
+                  disabled={visiblePage <= 1}
+                  onClick={() => setVisiblePage((n) => n - 1)}
+                >
+                  ‹
+                </button>
+                <select
+                  aria-label="Önizleme sayfası"
+                  value={visiblePage}
+                  onChange={(e) => setVisiblePage(Number(e.target.value))}
+                >
+                  {preview.sheets.map((page) => (
+                    <option key={page.page} value={page.page}>
+                      {page.page} · {page.title || "Ürünler"}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  aria-label="Sonraki PDF sayfası"
+                  disabled={visiblePage >= preview.pageCount}
+                  onClick={() => setVisiblePage((n) => n + 1)}
+                >
+                  ›
+                </button>
+              </div>
+              <div
                 style={{
-                  width: pageWidth + 66,
-                  height: 1400,
-                  transform: "scale(" + zoom / 100 + ")",
-                  transformOrigin: "top left",
-                  marginBottom: -(1400 * (1 - zoom / 100)),
+                  position: "relative",
+                  width: (pageWidth * zoom) / 100,
+                  height:
+                    ((config.orientation === "portrait"
+                      ? config.paper === "A4"
+                        ? 1123
+                        : 794
+                      : config.paper === "A4"
+                        ? 794
+                        : 559) *
+                      zoom) /
+                    100,
                 }}
-              />
+              >
+                <iframe
+                  title="PDF sayfaları"
+                  sandbox=""
+                  srcDoc={preview.html.replace(
+                    "</head>",
+                    "<style>#pages>.sheet:not(:nth-child(" +
+                      visiblePage +
+                      ")){display:none}.sheet{margin:0;box-shadow:none}</style></head>",
+                  )}
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    top: 0,
+                    width: pageWidth,
+                    height:
+                      config.orientation === "portrait"
+                        ? config.paper === "A4"
+                          ? 1123
+                          : 794
+                        : config.paper === "A4"
+                          ? 794
+                          : 559,
+                    transform: "scale(" + zoom / 100 + ")",
+                    transformOrigin: "top left",
+                  }}
+                />
+              </div>
             </div>
           ) : (
             <div className={styles.empty}>
@@ -715,6 +795,18 @@ export function CatalogEditor() {
                     "Eksik İngilizce alanlarda Türkçe kullan",
                     "fallbackTurkish",
                   )}
+                {toggle("Kategoriye göre grupla", "groupByCategory")}
+                {labelSelect("Kategori bölümleri", "groupLevel", [
+                  ["top", "Ana kategoriler · kompakt"],
+                  ["leaf", "Alt kategoriler · ayrıntılı"],
+                ])}
+                {toggle("Kategori ayırıcıları", "categoryDividers")}
+                {labelSelect("Ayırıcı görünümü", "dividerStyle", [
+                  ["band", "Sayfa başında başlık"],
+                  ["page", "Tam sayfa bölüm kapağı"],
+                ])}
+                {toggle("Otomatik içindekiler", "toc")}
+                {toggle("Ürün adında marka tekrarını kaldır", "shortTitles")}
                 <h3>Gösterilecek bilgiler</h3>
                 {labelSelect("Açıklama", "description", [
                   ["short", "Kısa açıklama"],
@@ -735,6 +827,38 @@ export function CatalogEditor() {
             {tab === "design" && (
               <>
                 <h2>Belge tasarımı</h2>
+                {labelSelect("Yerleşim", "layout", [
+                  ["grid", "Dengeli kartlar"],
+                  ["rows", "Yatay ürün satırları"],
+                  ["spotlight", "Ürün vitrini"],
+                ])}
+                {labelSelect("Teknik bilgi yoğunluğu", "information", [
+                  ["essential", "Seçili temel özellikler"],
+                  ["all", "Tüm teknik bilgiler"],
+                ])}
+                <label>
+                  Temel özellik sayısı
+                  <input
+                    type="number"
+                    min={1}
+                    max={30}
+                    value={config.specLimit}
+                    disabled={!!busy}
+                    onChange={(e) =>
+                      configure({
+                        specLimit: Math.max(
+                          1,
+                          Math.min(30, Number(e.target.value) || 1),
+                        ),
+                      })
+                    }
+                  />
+                </label>
+                <p className={styles.hint}>
+                  6 kartta en fazla 4, 9 kartta en fazla 3 temel özellik
+                  kullanılır. Tüm bilgiler seçilirse sığmayan ürün için ek
+                  vitrin sayfası oluşturulur.
+                </p>
                 <div className={styles.themes}>
                   {(
                     [
@@ -752,7 +876,23 @@ export function CatalogEditor() {
                       onClick={() =>
                         configure({
                           theme: key,
-                          density: key === "compact" ? "6" : config.density,
+                          density:
+                            key === "compact"
+                              ? "6"
+                              : key === "premium"
+                                ? "4"
+                                : "2",
+                          coverDesign: {
+                            ...config.coverDesign,
+                            background:
+                              key === "corporate"
+                                ? "#eef3f6"
+                                : key === "premium"
+                                  ? "#142330"
+                                  : "#ffffff",
+                            foreground:
+                              key === "premium" ? "#ffffff" : "#172b3a",
+                          },
                         })
                       }
                     >
@@ -855,6 +995,21 @@ export function CatalogEditor() {
                   Ürün görsellerini seçebilmek için önce önizleme oluşturun.
                 </p>
                 {toggle("Arka kapak ekle", "backCover")}
+                {config.cover !== "none" && (
+                  <CoverDesigner
+                    config={config}
+                    title={working.title}
+                    image={
+                      preview?.products
+                        .map((p) => p.image)
+                        .find((image) => image?.id === config.coverImageId) ||
+                      preview?.products[0]?.image ||
+                      null
+                    }
+                    disabled={!!busy}
+                    onChange={configure}
+                  />
+                )}
               </>
             )}
             {tab === "product" && (
@@ -885,6 +1040,19 @@ export function CatalogEditor() {
                         onChange={(e) => editProduct({ title: e.target.value })}
                       />
                     </label>
+                    <label>
+                      Ana ürün kodu / SKU
+                      <input
+                        value={override?.sku ?? product.sku}
+                        maxLength={120}
+                        disabled={!!busy}
+                        onChange={(e) => editProduct({ sku: e.target.value })}
+                      />
+                    </label>
+                    <p className={styles.hint}>
+                      Ana kod yoksa mevcut kod serisi gösterilir. Bu alan
+                      yalnızca bu kataloğu değiştirir.
+                    </p>
                     <label>
                       Bu katalogdaki kısa açıklama
                       <textarea

@@ -1,7 +1,18 @@
 import type { z } from "zod";
-import type { catalogConfigSchema } from "@/lib/catalog/schema";
+import type {
+  catalogConfigSchema,
+  catalogPageSchema,
+} from "@/lib/catalog/schema";
 
 export type CatalogConfig = z.infer<typeof catalogConfigSchema>;
+export type CatalogPage = z.infer<typeof catalogPageSchema>;
+export type CatalogPagePreview = {
+  id: string;
+  title: string;
+  kind: string;
+  page: number;
+  productIds: number[];
+};
 export type CatalogImage = {
   id: number;
   url: string;
@@ -13,6 +24,10 @@ export type CatalogProduct = {
   id: number;
   title: string;
   sku: string;
+  skuLabel?: string;
+  categoryId?: number;
+  sectionId?: number;
+  sectionTitle?: string;
   category: string;
   updatedAt: string;
   description: string;
