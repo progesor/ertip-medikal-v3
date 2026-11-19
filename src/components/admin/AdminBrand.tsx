@@ -1,7 +1,7 @@
 import type { ServerProps } from "payload";
 import Link from "next/link";
 import { ArchiveRestore, ExternalLink } from "lucide-react";
-import { isAdmin } from "@/access/roles";
+import { isAdmin, isContentManager } from "@/access/roles";
 
 export function AdminLogo() {
   return (
@@ -57,6 +57,7 @@ export function AdminNavHome() {
 export function AdminNavFooter({ user, i18n }: ServerProps) {
   return (
     <div className="ertip-admin-nav-footer">
+      {user?.collection === "users" && isContentManager(user) && <Link href="/admin/collections/catalogs/studio" prefetch={false}>Katalog Stüdyosu</Link>}
       {user?.collection === "users" && isAdmin(user) && (
         <Link href="/admin/collections/users/yedekler" prefetch={false}>
           {i18n.language === "en" ? "Backup and migration" : "Yedekleme ve taşıma"}

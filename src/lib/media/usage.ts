@@ -8,6 +8,7 @@ type ImageRow = {
 type Column = { source: string; field: string };
 type Status = "unused" | "current" | "history";
 function sourceLabel(table: string) {
+  if (table.startsWith("catalog")) return "Katalog Stüdyosu";
   if (table.startsWith("_")) return "Taslak ve sürüm geçmişi";
   if (table.includes("variants")) return "Ürün varyantları";
   if (table.startsWith("products")) return "Ürünler";

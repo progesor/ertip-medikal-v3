@@ -115,6 +115,7 @@ const securityHeaders = [
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  serverExternalPackages: ["playwright-core", "@fontsource/inter", "@fontsource/source-serif-4"],
   reactCompiler: false,
   async headers() {
     return [

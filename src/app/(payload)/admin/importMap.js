@@ -1,3 +1,4 @@
+import { CatalogStudio as CatalogStudio_0ea7fa58c69dbff6f811386039c159d9 } from '../../../components/admin/catalog/CatalogStudio'
 import { ProductEditOverview as ProductEditOverview_518c93856b07622e92047c77b25dbe52 } from '../../../components/admin/ProductEditOverview'
 import { ProductTitleCell as ProductTitleCell_f39a3ec76b51f65f3faaf8a9a0089e08 } from '../../../components/admin/ProductListCells'
 import { MarkdownEditor as MarkdownEditor_0d02660a52a6d77227b43bb8fbabb167 } from '../../../components/admin/MarkdownEditor'
@@ -60,6 +61,7 @@ import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } f
 
 /** @type import('payload').ImportMap */
 export const importMap = {
+  "/components/admin/catalog/CatalogStudio#CatalogStudio": CatalogStudio_0ea7fa58c69dbff6f811386039c159d9,
   "/components/admin/ProductEditOverview#ProductEditOverview": ProductEditOverview_518c93856b07622e92047c77b25dbe52,
   "/components/admin/ProductListCells#ProductTitleCell": ProductTitleCell_f39a3ec76b51f65f3faaf8a9a0089e08,
   "/components/admin/MarkdownEditor#MarkdownEditor": MarkdownEditor_0d02660a52a6d77227b43bb8fbabb167,

@@ -1,3 +1,6 @@
+import { Catalogs } from "@/collections/Catalogs";
+import { CatalogOutputs } from "@/collections/CatalogOutputs";
+import { catalogPDFTask } from "@/lib/catalog/task";
 import { mediaUsageEndpoint } from "@/lib/media/usageEndpoint";
 import {
   buildConfig,
@@ -253,7 +256,13 @@ export default buildConfig({
     },
   },
   endpoints: [mediaUsageEndpoint, ...imageOptimizationEndpoints, ...i18nContentEndpoints],
+  jobs: {
+    tasks: [catalogPDFTask],
+    access: { run: adminsOnly, queue: adminsOnly, cancel: adminsOnly },
+    autoRun: [{ cron: "*/10 * * * * *", queue: "catalog", limit: 1 }],
+  },
   collections: [
+    Catalogs, CatalogOutputs,
     ProductsWithProtectedPublicApi,
     withContentAccess(LocalizedCategories),
     MediaWithRBAC,
