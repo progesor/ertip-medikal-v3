@@ -18,6 +18,8 @@ async function paginateCatalog() {
     sheet.dataset.plan = plan.dataset.plan || "";
     sheet.dataset.title = plan.dataset.title || "";
     sheet.dataset.kind = plan.dataset.kind;
+    sheet.style.setProperty("--accent",plan.dataset.accent);
+    sheet.style.setProperty("--image-scale",plan.dataset.imageScale+"%");
     if (sheet.dataset.title && !sections.has(sheet.dataset.title)) sections.set(sheet.dataset.title, sheet);
   }
   function newSheet(plan, capacity, layout) {
@@ -131,7 +133,7 @@ async function paginateCatalog() {
       const remaining=products.length-offset;
       const target=Math.ceil(remaining/Math.ceil(remaining/capacity));
       for (let count=target;count>=1;count--) {
-        const layout=count===1 ? "spotlight" : adaptive && (count===3 || count===2) && document.body.dataset.orientation==="portrait" ? "rows" : plan.dataset.layout;
+        const layout=count===1 ? "spotlight" : adaptive && plan.dataset.manual!=="true" && (count===3 || count===2) && document.body.dataset.orientation==="portrait" ? "rows" : plan.dataset.layout;
         const current=newSheet(plan,count,layout);
         for (const original of products.slice(offset,offset+count)) current.grid.appendChild(original.cloneNode(true));
         await Promise.all(Array.from(current.grid.querySelectorAll("img")).map(image=>image.decode().catch(()=>undefined)));

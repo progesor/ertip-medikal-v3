@@ -148,6 +148,15 @@ export async function catalogSnapshot(
       add("SKU eksik");
     return {
       id: p.id,
+      sourceDefaults: {
+        title:
+          (config.shortTitles
+            ? p.title?.replace(/^(?:ERTIP|ERTİP|Ertıp)\s+/iu, "")
+            : p.title) || "",
+        ...catalogIdentity(p, config.locale),
+        description: p.shortDescription || "",
+        image: catalogImage(p.mainImage),
+      },
       title: name || (config.locale === "en" ? "Product" : "Ürün") + " " + p.id,
       ...identity,
       categoryId: primaryCategory?.id,

@@ -47,7 +47,7 @@ test("main SKU stays distinct from a variant family", () => {
       },
       "en",
     ),
-    { sku: "110-… S-303", skuLabel: "Code series" },
+    { sku: "110-625 S-303", skuLabel: "Example variant code" },
   );
 });
 test("grouping uses main categories without repeating category paths in product titles", () => {

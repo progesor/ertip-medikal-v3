@@ -77,6 +77,8 @@ test("source uses published records, short description and active variants", asy
   const { payload, requests } = fixture();
   const snapshot = await catalogSnapshot(payload, "Test", defaultCatalogConfig);
   assert.equal(snapshot.products[0].description, "Kısa bilgi");
+  assert.equal(snapshot.products[0].sourceDefaults?.title, "Ürün");
+  assert.equal(snapshot.products[0].sourceDefaults?.sku, "S-10");
   assert.deepEqual(snapshot.products[0].options, [
     { key: "Seçenek", value: "Aktif" },
   ]);

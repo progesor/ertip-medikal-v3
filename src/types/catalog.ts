@@ -12,6 +12,7 @@ export type CatalogPagePreview = {
   kind: string;
   page: number;
   productIds: number[];
+  layout?: string;
 };
 export type CatalogImage = {
   id: number;
@@ -38,6 +39,13 @@ export type CatalogProduct = {
   dimensions: string;
   packaging: string[];
   link: string;
+  sourceDefaults?: {
+    title: string;
+    sku: string;
+    skuLabel: string;
+    description: string;
+    image: CatalogImage | null;
+  };
 };
 export type CatalogWarning = { productId?: number; message: string };
 export type CatalogSnapshot = {

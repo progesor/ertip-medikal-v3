@@ -136,6 +136,9 @@ async function prepareDocument(snapshot: CatalogSnapshot, exportPDF: boolean) {
         title: sheet.dataset.title || "",
         kind: sheet.dataset.kind || "products",
         page: index + 1,
+        layout: ["grid", "rows", "spotlight"].find((layout) =>
+          sheet.classList.contains("layout-" + layout),
+        ),
         productIds: Array.from(
           sheet.querySelectorAll<HTMLElement>(".card[data-product]"),
         ).map((card) => Number(card.dataset.product)),

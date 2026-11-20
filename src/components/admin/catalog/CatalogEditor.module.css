@@ -114,6 +114,17 @@
   border-right: 1px solid var(--ertip-admin-border, var(--theme-elevation-150));
   min-width: 0;
 }
+.workspace[data-board="true"] {
+  grid-template-columns: minmax(0, 1fr) 290px;
+}
+.workspace[data-board="true"] .library {
+  display: none;
+}
+@media (max-width: 900px) {
+  .workspace[data-board="true"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 .panelTitle {
   display: flex;
   justify-content: space-between;

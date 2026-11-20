@@ -52,6 +52,8 @@ body[data-adaptive="true"] .layout-spotlight .card-body{display:flex;flex-direct
 body[data-adaptive="true"] .layout-spotlight .visual{max-height:none;width:100%;padding:6mm}
 body[data-adaptive="true"] .layout-spotlight .copy{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 7mm}
 body[data-adaptive="true"] .layout-spotlight .description,body[data-adaptive="true"] .layout-spotlight .product-link{grid-column:1/-1}
+.code{flex-wrap:wrap;line-height:1.35}.code span{font-size:6.8pt}.code strong{font-size:8.5pt;letter-spacing:0;overflow-wrap:anywhere;color:var(--ink)}
+.dense .code strong{font-size:8.5pt}.visual img{max-width:var(--image-scale,100%);max-height:var(--image-scale,100%)}
 @page{size:${width}mm ${height}mm;margin:0}@media print{body{background:white;-webkit-print-color-adjust:exact;print-color-adjust:exact}.sheet{margin:0;box-shadow:none}}
 `;
 }

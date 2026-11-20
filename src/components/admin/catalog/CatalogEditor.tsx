@@ -236,7 +236,10 @@ export function CatalogEditor() {
     );
     return doc;
   }
-  async function perform(action: "save" | "preview" | "generate") {
+  async function perform(
+    action: "save" | "preview" | "generate",
+    planId?: string,
+  ) {
     setBusy(action);
     setError("");
     setNotice("");
@@ -246,7 +249,12 @@ export function CatalogEditor() {
         const result = await request<Preview>({ action, ...working });
         setPreview(result);
         setLayout({ pages: result.pageCount, error: "" });
-        setVisiblePage(1);
+        setVisiblePage(
+          planId
+            ? result.sheets.find((sheet) => sheet.id === planId)?.page || 1
+            : 1,
+        );
+        if (planId) setView("preview");
         setPreviewKey(JSON.stringify(working));
       } else {
         const doc = await save();
@@ -278,7 +286,10 @@ export function CatalogEditor() {
   const selectedProducts = config.productIds
     .map((id) => library?.products.find((p) => p.id === id))
     .filter((p): p is ProductOption => !!p);
-  const product = preview?.products.find((p) => p.id === editedProduct);
+  const previewProduct = preview?.products.find((p) => p.id === editedProduct);
+  const product = previewProduct
+    ? { ...previewProduct, ...previewProduct.sourceDefaults }
+    : undefined;
   const override = config.overrides.find((p) => p.productId === editedProduct);
   const editProduct = (patch: Partial<NonNullable<typeof override>>) => {
     if (!editedProduct) return;
@@ -336,7 +347,26 @@ export function CatalogEditor() {
     </label>
   );
   return (
-    <main className={styles.studio}>
+    <main
+      className={styles.studio}
+      onKeyDown={(event) => {
+        if (!(event.ctrlKey || event.metaKey) || busy) return;
+        if (event.key.toLowerCase() === "s") {
+          event.preventDefault();
+          void perform("save");
+        }
+        if (
+          (event.target as HTMLElement).closest(
+            "input,textarea,[contenteditable=true]",
+          )
+        )
+          return;
+        if (event.key.toLowerCase() === "z") {
+          event.preventDefault();
+          historyMove(event.shiftKey ? 1 : -1);
+        }
+      }}
+    >
       <header className={styles.header}>
         <div>
           <Link href="/admin" className={styles.back}>
@@ -400,7 +430,7 @@ export function CatalogEditor() {
               : "Kaydediliyor…"}
         </p>
       )}
-      <div className={styles.workspace}>
+      <div className={styles.workspace} data-board={view === "pages"}>
         <aside className={styles.library}>
           <div className={styles.panelTitle}>
             <h2>Çalışmalar</h2>
@@ -601,8 +631,15 @@ export function CatalogEditor() {
             <PageBoard
               config={config}
               products={preview?.products || []}
+              sheets={preview?.sheets || []}
+              stale={!!stale}
               disabled={!!busy}
               onChange={configure}
+              onEditProduct={(id) => {
+                setEditedProduct(id);
+                setTab("product");
+              }}
+              onPreview={(pageId) => perform("preview", pageId)}
             />
           ) : preview ? (
             <div className={styles.canvasScroll}>
@@ -1132,8 +1169,8 @@ export function CatalogEditor() {
                       />
                     </label>
                     <p className={styles.hint}>
-                      Ana kod yoksa mevcut kod serisi gösterilir. Bu alan
-                      yalnızca bu kataloğu değiştirir.
+                      Ana kod yoksa ilk aktif varyasyonun tam kodu gösterilir.
+                      Bu alan yalnızca bu kataloğu değiştirir.
                     </p>
                     <label>
                       Bu katalogdaki kısa açıklama

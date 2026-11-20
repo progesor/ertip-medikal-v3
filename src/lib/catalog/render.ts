@@ -94,8 +94,9 @@ export function renderCatalog(
       c.information === "all"
         ? Infinity
         : Math.min(
-            c.specLimit,
-            capacity >= 9 ? 3 : capacity >= 6 ? 4 : c.specLimit,
+            plan.specLimit ?? c.specLimit,
+            plan.specLimit ??
+              (capacity >= 9 ? 3 : capacity >= 6 ? 4 : c.specLimit),
           );
     const specs = c.showSpecs ? selectCatalogSpecs(p.specs, limit) : [];
     const options = c.showVariants
@@ -109,7 +110,7 @@ export function renderCatalog(
         )
       : [];
     const description =
-      c.description === "none"
+      (plan.description ?? c.description) === "none"
         ? ""
         : plainText(p.description)
             .split(/\n+/)
@@ -171,6 +172,12 @@ export function renderCatalog(
         plan.layout +
         '" data-kind="' +
         plan.kind +
+        '" data-accent="' +
+        escape(plan.accent || c.color) +
+        '" data-image-scale="' +
+        (plan.imageScale ?? 100) +
+        '" data-manual="' +
+        (c.pageMode === "manual") +
         '"';
       if (plan.kind === "divider")
         return (

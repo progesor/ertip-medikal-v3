@@ -10,6 +10,13 @@ export const catalogPageSchema = z.object({
   productIds: z.array(id).max(2000).default([]),
   density: density.default("4"),
   layout: z.enum(["grid", "rows", "spotlight"]).default("grid"),
+  accent: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/)
+    .optional(),
+  imageScale: z.number().int().min(60).max(100).optional(),
+  description: z.enum(["short", "none"]).optional(),
+  specLimit: z.number().int().min(1).max(30).optional(),
 });
 export const catalogConfigSchema = z.object({
   version: z.literal(1).default(1),
