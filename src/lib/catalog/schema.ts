@@ -28,6 +28,8 @@ export const catalogConfigSchema = z.object({
   density: density.default("4"),
   layout: z.enum(["grid", "rows", "spotlight"]).default("grid"),
   pageMode: z.enum(["auto", "manual"]).default("auto"),
+  adaptiveLayout: z.boolean().default(true),
+  featuredProductIds: z.array(id).max(100).default([]),
   pages: z
     .array(catalogPageSchema)
     .max(500)

@@ -4,6 +4,7 @@ import sharp from "sharp";
 import type { CatalogSnapshot } from "@/types/catalog";
 import { renderCatalog } from "./render";
 import { catalogConfigSchema } from "./schema";
+import { catalogImageTargets } from "./imageSizing";
 
 // Resolve filesystem assets at runtime; bundlers otherwise turn require.resolve into module IDs.
 const resolveAsset = process
@@ -12,6 +13,7 @@ const resolveAsset = process
 const imageCache = new Map<string, string>();
 export async function catalogHTML(snapshot: CatalogSnapshot) {
   const assets = new Map<number, string>();
+  const targets = catalogImageTargets(snapshot);
   const images = [
     snapshot.coverImage,
     ...snapshot.products.map((p) => p.image),
@@ -19,7 +21,7 @@ export async function catalogHTML(snapshot: CatalogSnapshot) {
   const root = path.resolve("media");
   const unique = [
     ...new Map(images.map((image) => [image.id, image])).values(),
-  ];
+  ].filter((image) => targets.has(image.id));
   async function prepareImage(image: (typeof unique)[number]) {
     if (
       path.basename(image.filename) !== image.filename ||
@@ -29,7 +31,9 @@ export async function catalogHTML(snapshot: CatalogSnapshot) {
     const file = path.resolve(root, image.filename);
     if (path.dirname(file) !== root) throw Error("Geçersiz medya konumu.");
     const info = await stat(file);
-    const key = file + ":" + info.mtimeMs + ":" + snapshot.config.profile;
+    const target = targets.get(image.id)!;
+    const key =
+      file + ":" + info.mtimeMs + ":" + snapshot.config.profile + ":" + target;
     const cached = imageCache.get(key);
     if (cached) {
       assets.set(image.id, cached);
@@ -40,8 +44,8 @@ export async function catalogHTML(snapshot: CatalogSnapshot) {
       .flatten({ background: "#ffffff" })
       .trim({ background: "#ffffff", threshold: 8 })
       .resize({
-        width: snapshot.config.profile === "quality" ? 2200 : 1000,
-        height: snapshot.config.profile === "quality" ? 2200 : 1000,
+        width: target,
+        height: target,
         fit: "inside",
         withoutEnlargement: true,
       })

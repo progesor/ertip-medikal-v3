@@ -54,6 +54,9 @@ const product = {
 function fixture() {
   const requests: Record<string, unknown>[] = [];
   const payload = {
+    findGlobal: async () => ({
+      profiles: { card: { width: 768, quality: 75 } },
+    }),
     find: async (args: Record<string, unknown>) => {
       requests.push(args);
       return {

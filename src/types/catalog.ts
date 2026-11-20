@@ -47,6 +47,10 @@ export type CatalogSnapshot = {
   coverImage: CatalogImage | null;
   warnings: CatalogWarning[];
   createdAt: string;
+  imageProfiles?: Record<
+    "thumbnail" | "card" | "content" | "fullscreen",
+    { width: number; quality: number }
+  >;
 };
 export type CatalogDocument = {
   id: number;

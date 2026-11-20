@@ -215,6 +215,8 @@ export function renderCatalog(
     c.paper +
     '" data-orientation="' +
     c.orientation +
+    '" data-adaptive="' +
+    c.adaptiveLayout +
     '"><main id="pages">' +
     cover +
     '</main><template id="page-template"><section class="sheet">' +

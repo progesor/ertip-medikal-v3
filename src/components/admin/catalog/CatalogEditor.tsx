@@ -33,6 +33,7 @@ import type {
 import styles from "./CatalogEditor.module.css";
 import { PageBoard } from "./PageBoard";
 import { CoverDesigner } from "./CoverDesigner";
+import { applyCatalogPreset, catalogPresets } from "@/lib/catalog/presets";
 import type { CatalogPagePreview } from "@/types/catalog";
 
 type ProductOption = {
@@ -827,6 +828,93 @@ export function CatalogEditor() {
             {tab === "design" && (
               <>
                 <h2>Belge tasarımı</h2>
+                <h3>Nasıl bir yayın hazırlıyorsunuz?</h3>
+                <div className={styles.presets}>
+                  {catalogPresets.map((preset) => (
+                    <button
+                      key={preset.id}
+                      disabled={!!busy}
+                      onClick={() => {
+                        configure(applyCatalogPreset(config, preset.id));
+                        setNotice(
+                          preset.title +
+                            " ayarları uygulandı. Ürün seçiminiz korundu; otomatik sayfa düzeni kullanılacak.",
+                        );
+                      }}
+                    >
+                      <strong>{preset.title}</strong>
+                      <span>{preset.description}</span>
+                    </button>
+                  ))}
+                </div>
+                {toggle("İçeriğe göre akıllı yerleşim", "adaptiveLayout")}
+                <p className={styles.hint}>
+                  Görsel oranları ve metin uzunluğu ölçülür. Sayfada ürün sayısı
+                  üst sınırdır; okunaklılık için gerektiğinde azaltılır.
+                  Görseller, görsel optimizasyonundaki ölçülerden sayfaya uygun
+                  çözünürlükte hazırlanır.
+                </p>
+                <h3>Öne çıkan ürünler</h3>
+                <label>
+                  Vitrin ürünü ekle
+                  <select
+                    value=""
+                    disabled={!!busy}
+                    onChange={(event) => {
+                      const id = Number(event.target.value);
+                      if (id && !config.featuredProductIds.includes(id))
+                        configure({
+                          featuredProductIds: [
+                            ...config.featuredProductIds,
+                            id,
+                          ],
+                        });
+                    }}
+                  >
+                    <option value="">Ürün seçin…</option>
+                    {library?.products
+                      .filter(
+                        (p) =>
+                          !config.featuredProductIds.includes(p.id) &&
+                          (config.selection !== "products" ||
+                            config.productIds.includes(p.id)),
+                      )
+                      .map((p) => (
+                        <option value={p.id} key={p.id}>
+                          {p.title}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+                {config.featuredProductIds.map((id) => (
+                  <div className={styles.featured} key={id}>
+                    <span>
+                      {library?.products.find((p) => p.id === id)?.title ||
+                        "#" + id}
+                    </span>
+                    <button
+                      disabled={!!busy}
+                      aria-label={
+                        (library?.products.find((p) => p.id === id)?.title ||
+                          "Ürün") + " vitrin seçimini kaldır"
+                      }
+                      onClick={() =>
+                        configure({
+                          featuredProductIds: config.featuredProductIds.filter(
+                            (value) => value !== id,
+                          ),
+                        })
+                      }
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+                <p className={styles.hint}>
+                  Seçilen ürünler katalog kapsamındaysa kendi bölümünün başında
+                  tam sayfa görünür. Bu özellik otomatik sayfa düzeninde
+                  geçerlidir.
+                </p>
                 {labelSelect("Yerleşim", "layout", [
                   ["grid", "Dengeli kartlar"],
                   ["rows", "Yatay ürün satırları"],
@@ -876,12 +964,6 @@ export function CatalogEditor() {
                       onClick={() =>
                         configure({
                           theme: key,
-                          density:
-                            key === "compact"
-                              ? "6"
-                              : key === "premium"
-                                ? "4"
-                                : "2",
                           coverDesign: {
                             ...config.coverDesign,
                             background:

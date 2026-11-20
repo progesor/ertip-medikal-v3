@@ -8,6 +8,7 @@ async function paginateCatalog() {
   const faults = [];
   const sections = new Map();
   let serial = 0;
+  const adaptive = document.body.dataset.adaptive === "true";
   const overflow = node => node.scrollHeight > node.clientHeight + 2 || node.scrollWidth > node.clientWidth + 2;
   function identify(sheet, plan) {
     sheet.id = "catalog-page-" + (++serial);
@@ -23,8 +24,9 @@ async function paginateCatalog() {
     const sheet = sheetTemplate.content.firstElementChild.cloneNode(true);
     identify(sheet, plan);
     sheet.classList.add("layout-" + layout);
+    sheet.dataset.capacity=String(capacity);
     if (capacity >= 6) sheet.classList.add("dense");
-    const columns = layout === "grid" ? (capacity === 1 ? 1 : capacity === 9 ? 3 : 2) : 1;
+    const columns = layout === "grid" ? (capacity === 1 ? 1 : capacity >= 5 ? 3 : 2) : 1;
     const rows = Math.ceil(capacity / columns);
     const grid = sheet.querySelector(".cards");
     grid.style.setProperty("--cols", columns);
@@ -39,7 +41,50 @@ async function paginateCatalog() {
     grid.style.setProperty("--visual", Math.max(36, Math.min(200, cardHeight * (layout === "rows" ? .8 : .30))) + "px");
     return {sheet, grid};
   }
+  function discard(current) {
+    for (const [title,sheet] of sections) if (sheet===current.sheet) sections.delete(title);
+    current.sheet.remove();
+  }
+  function compose(current) {
+    const cards = Array.from(current.grid.children);
+    const columns = Number(current.grid.style.getPropertyValue("--cols"));
+    const horizontal = current.sheet.classList.contains("layout-rows");
+    if (columns>1) {
+      current.grid.style.gridTemplateColumns="repeat(6,minmax(0,1fr))";
+      for (let i=0;i<cards.length;i+=columns) {
+        const row=cards.slice(i,i+columns);
+        for (const card of row) card.style.gridColumn="span "+(6/row.length);
+      }
+    }
+    for (let i=0;i<cards.length;i+=columns) {
+      const row = cards.slice(i,i+columns);
+      for (const card of row) card.querySelector(".card-heading").style.minHeight="0";
+      const heading = Math.max(...row.map(card=>card.querySelector(".card-heading").getBoundingClientRect().height));
+      let sharedVisual=Infinity;
+      for (const card of row) {
+        card.querySelector(".card-heading").style.minHeight=heading+"px";
+        const body=card.querySelector(".card-body"), visual=card.querySelector(".visual"), copy=card.querySelector(".copy");
+        if (!visual) continue;
+        if (horizontal) {
+          const img=visual.querySelector("img");
+          const ratio=img?.naturalWidth && img.naturalHeight ? img.naturalWidth/img.naturalHeight : 1;
+          visual.style.height=Math.min(body.clientHeight,Math.max(135,visual.clientWidth/ratio+24))+"px";
+          visual.style.maxHeight="none";
+        } else {
+          const gap=parseFloat(getComputedStyle(body).rowGap)||0;
+          const available=body.clientHeight-copy.scrollHeight-gap-2;
+          // Reserve a recognisable image; reduce the number of products before making it a thumbnail.
+          if (available < 76) return false;
+          visual.style.height=available+"px";
+          sharedVisual=Math.min(sharedVisual,available);
+        }
+      }
+      if (!horizontal) for (const card of row) card.querySelector(".visual").style.height=sharedVisual+"px";
+    }
+    return cards.every(card=>!overflow(card) && !overflow(card.querySelector(".card-body")) && !overflow(card.querySelector(".copy")));
+  }
   function fit(card) {
+    if (adaptive) return compose({sheet:card.closest(".sheet"),grid:card.parentElement});
     if (!overflow(card)) return true;
     card.classList.add("tight");
     const visual = card.querySelector(".visual");
@@ -56,7 +101,7 @@ async function paginateCatalog() {
     let placed = 0;
     for (const unit of units) {
       card.querySelector(".copy").appendChild(unit);
-      if (overflow(card) && placed > 0) {
+      if (!fit(card) && placed > 0) {
         unit.remove();
         current = newSheet(plan, 1, "spotlight");
         card = original.cloneNode(true);
@@ -79,28 +124,27 @@ async function paginateCatalog() {
       identify(sheet, plan); root.appendChild(sheet); continue;
     }
     const products = Array.from(plan.content.children);
-    const capacity = Math.min(Number(plan.dataset.density), products.length);
-    const layout = plan.dataset.layout === "spotlight" || capacity === 1 ? "spotlight" : plan.dataset.layout;
-    let current = null, filled = 0;
-    for (const original of products) {
-      if (!current || filled >= capacity) { current = newSheet(plan, capacity, layout); filled = 0; }
-      const card = original.cloneNode(true); current.grid.appendChild(card);
-      // Cloned template images need decoding too, before their dimensions are measured.
-      await Promise.all(Array.from(card.querySelectorAll("img")).map(image=>image.decode().catch(()=>undefined)));
-      if (!fit(card)) {
-        card.remove();
-        if (!filled) {
-          for (const [title,sheet] of sections) if (sheet===current.sheet) sections.delete(title);
-          current.sheet.remove();
-        }
-        fullProduct(original, plan);
-        current=null; filled=0;
-      } else filled++;
+    const capacity = plan.dataset.layout === "spotlight" ? 1 : Math.min(Number(plan.dataset.density), products.length);
+    let offset=0;
+    while (offset<products.length) {
+      let accepted=false;
+      const remaining=products.length-offset;
+      const target=Math.ceil(remaining/Math.ceil(remaining/capacity));
+      for (let count=target;count>=1;count--) {
+        const layout=count===1 ? "spotlight" : adaptive && (count===3 || count===2) && document.body.dataset.orientation==="portrait" ? "rows" : plan.dataset.layout;
+        const current=newSheet(plan,count,layout);
+        for (const original of products.slice(offset,offset+count)) current.grid.appendChild(original.cloneNode(true));
+        await Promise.all(Array.from(current.grid.querySelectorAll("img")).map(image=>image.decode().catch(()=>undefined)));
+        const fits=adaptive ? compose(current) : Array.from(current.grid.children).every(fit);
+        if (fits) {offset+=count;accepted=true;break;}
+        discard(current);
+      }
+      if (!accepted) {fullProduct(products[offset],plan);offset++;}
     }
   }
   const back = document.getElementById("back-template");
   if (back) {const sheet=back.content.firstElementChild.cloneNode(true);sheet.dataset.kind="back";sheet.dataset.title=document.documentElement.lang==="en"?"Back cover":"Arka kapak";root.appendChild(sheet);}
-  if (document.body.dataset.toc === "true" && sections.size) {
+  if (document.body.dataset.toc === "true" && sections.size > 1) {
     const reference = root.querySelector(".sheet:not(.cover)");
     const tocTemplate = document.getElementById("toc-template");
     let toc = null;

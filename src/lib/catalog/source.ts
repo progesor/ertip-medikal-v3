@@ -10,6 +10,7 @@ import { serverEnv } from "@/lib/config/env";
 import { catalogLabel } from "@/lib/i18n/catalogLabels";
 import { catalogOptions } from "./options";
 import { catalogIdentity } from "./identity";
+import { loadImageOptimizationSettings } from "@/lib/imageOptimization/server";
 
 export function catalogImage(value: unknown): CatalogImage | null {
   if (!value || typeof value !== "object" || !("filename" in value))
@@ -222,6 +223,8 @@ export async function catalogSnapshot(
   return {
     title,
     config,
+    imageProfiles: (await loadImageOptimizationSettings(payload)).settings
+      .profiles,
     products,
     coverImage:
       images.get(config.coverImageId || 0) || products[0]?.image || null,

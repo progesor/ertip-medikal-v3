@@ -39,17 +39,35 @@ export function automaticPages(
         layout: config.layout,
       });
     }
+    const featured = new Set(config.featuredProductIds);
+    const highlighted = members.filter((p) => featured.has(p.id));
+    for (const product of highlighted)
+      pages.push({
+        id: "featured-" + product.id,
+        kind: "products",
+        title,
+        subtitle: "",
+        productIds: [product.id],
+        density: "1",
+        layout: "spotlight",
+      });
+    const remaining = members.filter((p) => !featured.has(p.id));
     const size = config.layout === "spotlight" ? 1 : Number(config.density);
-    for (let i = 0; i < members.length; i += size) {
+    // Avoid one orphan on the last page: distribute each section evenly.
+    const pageCount = Math.ceil(remaining.length / size);
+    let offset = 0;
+    for (let i = 0; i < pageCount; i++) {
+      const count = Math.ceil((remaining.length - offset) / (pageCount - i));
       pages.push({
         id: "group-" + key + "-" + i,
         kind: "products",
         title,
         subtitle: "",
-        productIds: members.slice(i, i + size).map((p) => p.id),
+        productIds: remaining.slice(offset, offset + count).map((p) => p.id),
         density: config.density,
         layout: config.layout,
       });
+      offset += count;
     }
   }
   return pages;
