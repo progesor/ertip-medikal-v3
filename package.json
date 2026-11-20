@@ -22,6 +22,7 @@
     "test:quote": "tsc -p tsconfig.quote-tests.json && tsx --test tests/quote/*.test.ts",
     "test:i18n": "tsc -p tsconfig.i18n-tests.json && tsx --test tests/i18n/*.test.ts",
     "test:catalog": "tsx --test tests/catalog/*.test.ts",
+    "test:product-export": "tsx --test tests/product-export/*.test.ts",
     "test:e2e": "playwright test",
     "security:audit": "pnpm audit --prod --audit-level low",
     "format": "prettier --write \"src/**/*.{ts,tsx,md,json,css}\"",

@@ -13,6 +13,7 @@ import { DocumentRowLabel as DocumentRowLabel_ec41670ca22349b6e293b43001df200d }
 import { AccessCodeRowLabel as AccessCodeRowLabel_ec41670ca22349b6e293b43001df200d } from '../../../components/admin/ArrayRowLabels'
 import { ProductCategoryFilter as ProductCategoryFilter_9e86ddf401c1cc38c05945e913026966 } from '../../../components/admin/ProductCategoryFilter'
 import { CollectionViewControls as CollectionViewControls_6f31e140d2db6ec622024d66c8318545 } from '../../../components/admin/CollectionViewControls'
+import { ProductExportCenter as ProductExportCenter_b1c8045d592d5d0e4a1a8a21c09a686f } from '../../../components/admin/product-export/ProductExportCenter'
 import { ProductContentReview as ProductContentReview_bf06938cb9b0f81481d07b8ae712c091 } from '../../../components/admin/ProductContentReview'
 import { GenericEditOverview as GenericEditOverview_4db186538cf6cfc3513ba6fff92ee59e } from '../../../components/admin/GenericEditOverview'
 import { MediaUsagePanel as MediaUsagePanel_a0ecd4a6d9fa772c4c71a28442483f51 } from '../../../components/admin/MediaUsagePanel'
@@ -76,6 +77,7 @@ export const importMap = {
   "/components/admin/ArrayRowLabels#AccessCodeRowLabel": AccessCodeRowLabel_ec41670ca22349b6e293b43001df200d,
   "/components/admin/ProductCategoryFilter#ProductCategoryFilter": ProductCategoryFilter_9e86ddf401c1cc38c05945e913026966,
   "/components/admin/CollectionViewControls#CollectionViewControls": CollectionViewControls_6f31e140d2db6ec622024d66c8318545,
+  "/components/admin/product-export/ProductExportCenter#ProductExportCenter": ProductExportCenter_b1c8045d592d5d0e4a1a8a21c09a686f,
   "/components/admin/ProductContentReview#ProductContentReview": ProductContentReview_bf06938cb9b0f81481d07b8ae712c091,
   "/components/admin/GenericEditOverview#GenericEditOverview": GenericEditOverview_4db186538cf6cfc3513ba6fff92ee59e,
   "/components/admin/MediaUsagePanel#MediaUsagePanel": MediaUsagePanel_a0ecd4a6d9fa772c4c71a28442483f51,

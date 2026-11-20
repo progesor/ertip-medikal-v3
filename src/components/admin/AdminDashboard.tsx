@@ -4,6 +4,7 @@ import { ContentReviewShortcuts } from "./ProductContentReview";
 import {
   ArrowRight,
   Archive,
+  Database,
   FileText,
   FolderTree,
   Plug,
@@ -18,6 +19,7 @@ import { isAdmin } from "@/access/roles";
 import type { ServerProps } from "payload";
 
 const quickActions = [
+  { href: "/admin/collections/products/disa-aktar", label: "Ürün bilgi bankası", description: "Ürün bilgilerini ve görselleri dışarı aktarın", icon: Database, adminOnly: true },
   { href: "/admin/collections/catalogs/studio", label: "Katalog Stüdyosu", description: "Ürünlerden katalog ve broşür hazırlayın", icon: FileText },
   {
     href: "/admin/collections/users/yedekler",

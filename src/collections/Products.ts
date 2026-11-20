@@ -29,6 +29,12 @@ export const Products: CollectionConfig = {
     group: "Ürün Yönetimi",
     components: {
       views: {
+        productExport: {
+          path: "/disa-aktar",
+          exact: true,
+          Component: "/components/admin/product-export/ProductExportCenter#ProductExportCenter",
+          meta: { title: "Ürün bilgi bankası" },
+        },
         contentReview: {
           path: "/icerik-kontrolu",
           exact: true,

@@ -57,6 +57,7 @@ export function AdminNavHome() {
 export function AdminNavFooter({ user, i18n }: ServerProps) {
   return (
     <div className="ertip-admin-nav-footer">
+      {user?.collection === "users" && isAdmin(user) && <Link href="/admin/collections/products/disa-aktar" prefetch={false}>Ürün bilgi bankası</Link>}
       {user?.collection === "users" && isContentManager(user) && <Link href="/admin/collections/catalogs/studio" prefetch={false}>Katalog Stüdyosu</Link>}
       {user?.collection === "users" && isAdmin(user) && (
         <Link href="/admin/collections/users/yedekler" prefetch={false}>
