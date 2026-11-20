@@ -1,6 +1,6 @@
 import path from "node:path";
-import type { CollectionConfig } from "payload";
-import { contentManagers } from "@/access/roles";
+import { APIError, type CollectionConfig } from "payload";
+import { contentManagers, isAdmin } from "@/access/roles";
 
 export const CatalogOutputs: CollectionConfig = {
   slug: "catalog-outputs",
@@ -14,7 +14,25 @@ export const CatalogOutputs: CollectionConfig = {
     read: contentManagers,
     create: () => false,
     update: () => false,
-    delete: () => false,
+    delete: ({ req }) =>
+      isAdmin(req.user) ? { status: { in: ["done", "failed"] } } : false,
+  },
+  hooks: {
+    beforeDelete: [
+      async ({ req, id }) => {
+        const output = await req.payload.findByID({
+          collection: "catalog-outputs",
+          id,
+          depth: 0,
+          req,
+        });
+        if (output.status === "queued" || output.status === "running")
+          throw new APIError(
+            "Hazırlanan dosya silinemez. Tamamlanmasını bekleyin.",
+            409,
+          );
+      },
+    ],
   },
   upload: {
     staticDir: path.resolve("media", "catalog-pdfs"),

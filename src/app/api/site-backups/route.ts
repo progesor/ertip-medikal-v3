@@ -1,4 +1,6 @@
 import path from "node:path";
+import { execute } from "@/lib/backup/engine.mjs";
+import { validExportOrigin } from "@/lib/product-export/origin";
 import { createHmac, randomUUID } from "node:crypto";
 import { createReadStream, createWriteStream } from "node:fs";
 import { rm } from "node:fs/promises";
@@ -183,5 +185,28 @@ export async function PUT(request: Request) {
       size > limit ? "Paket yükleme sınırını aşıyor." : "Paket yüklenemedi.",
       size > limit ? 413 : 400,
     );
+  }
+}
+
+export async function DELETE(request: Request) {
+  const denied = await authorize(request);
+  if (denied) return denied;
+  if (!validExportOrigin(request)) return reply("Geçersiz kaynak.", 403);
+  const body = await request.json().catch(() => null);
+  if (!validId(body?.id) || body?.confirm !== true)
+    return reply("Silinecek yedeği seçin ve silmeyi onaylayın.", 400);
+  try {
+    await execute("delete", body.id);
+    return Response.json({ deleted: body.id }, { headers });
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      "status" in error &&
+      typeof error.status === "number"
+    )
+      return reply(error.message, error.status);
+    const payload = await getPayload({ config });
+    payload.logger.error({ err: error }, "Backup archive deletion failed");
+    return reply("Yedek silinemedi. Depolama alanını kontrol edin.", 500);
   }
 }

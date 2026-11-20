@@ -1,6 +1,7 @@
 import { getPayload, createLocalReq } from "payload";
 import config from "@payload-config";
-import { isContentManager } from "@/access/roles";
+import { validExportOrigin } from "@/lib/product-export/origin";
+import { isContentManager, isAdmin } from "@/access/roles";
 import { catalogSaveSchema } from "@/lib/catalog/schema";
 import { catalogSnapshot } from "@/lib/catalog/source";
 import { resolvePages } from "@/lib/catalog/pagePlan";
@@ -68,6 +69,7 @@ export async function GET(request: Request) {
   ]);
   return Response.json(
     {
+      canDeleteOutputs: isAdmin(user),
       catalogs: catalogs.docs,
       categories: categories.docs.map((c) => ({
         id: c.id,
@@ -256,5 +258,47 @@ async function queueOutput(
   } catch (error) {
     await payload.db.rollbackTransaction(transactionID);
     throw error;
+  }
+}
+
+export async function DELETE(request: Request) {
+  const { payload, user } = await authorize(request);
+  if (!user || !isAdmin(user))
+    return reply("Dosya silme yetkisi yöneticilere aittir.", user ? 403 : 401);
+  if (
+    request.headers.get("x-ertip-catalog") !== "1" ||
+    !validExportOrigin(request)
+  )
+    return reply("Geçersiz istek.", 403);
+  const body = await request.json().catch(() => null);
+  if (!Number.isSafeInteger(body?.id) || body.id <= 0 || body.confirm !== true)
+    return reply("Silinecek dosyayı seçin ve silmeyi onaylayın.", 400);
+  try {
+    const output = await payload.findByID({
+      collection: "catalog-outputs",
+      id: body.id,
+      depth: 0,
+    });
+    if (output.status === "queued" || output.status === "running")
+      return reply("Hazırlanan dosya silinemez. Tamamlanmasını bekleyin.", 409);
+    await payload.delete({
+      collection: "catalog-outputs",
+      id: body.id,
+      user,
+      overrideAccess: false,
+    });
+    return Response.json({ deleted: body.id }, { headers });
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      "status" in error &&
+      (error.status === 404 || error.status === 409)
+    )
+      return reply(
+        error.status === 404 ? "Dosya bulunamadı." : error.message,
+        error.status,
+      );
+    payload.logger.error({ err: error }, "Catalog archive deletion failed");
+    return reply("Dosya silinemedi. Depolama alanını kontrol edin.", 500);
   }
 }

@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  ArchiveDeleteButton,
+  deleteArchive,
+} from "@/components/admin/ArchiveDeleteButton";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import { backupAction, uploadBackup } from "@/lib/backup/uploadClient";
 import { Archive, Database, Images, Download, Upload } from "lucide-react";
@@ -218,24 +223,51 @@ export function BackupControls() {
                     </p>
                   ) : null}
                 </div>
-                {item.status === "done" && item.action !== "restore" && (
-                  <div className="ertip-backup-actions">
-                    <a
-                      className={button}
-                      href={api + "?download=" + item.id}
-                      download
-                    >
-                      <Download size={16} /> İndir
-                    </a>
-                    <button
-                      className={button}
-                      disabled={busy}
-                      onClick={() => setSelected(item)}
-                    >
-                      Geri yükle
-                    </button>
-                  </div>
-                )}
+                <div className="ertip-backup-actions">
+                  {item.status === "done" && item.action !== "restore" && (
+                    <>
+                      <a
+                        className={button}
+                        href={api + "?download=" + item.id}
+                        download
+                      >
+                        <Download size={16} /> İndir
+                      </a>
+                      <button
+                        className={button}
+                        disabled={busy}
+                        onClick={() => setSelected(item)}
+                      >
+                        Geri yükle
+                      </button>
+                    </>
+                  )}
+                  <ArchiveDeleteButton
+                    label={
+                      (item.kind ? scopes[item.kind].label : "Yedek kaydı") +
+                      " · " +
+                      dateLabel(item.date)
+                    }
+                    disabled={busy}
+                    onDelete={async () => {
+                      setSending(true);
+                      try {
+                        await deleteArchive(api, "x-ertip-backup", item.id);
+                        setItems(
+                          (current) =>
+                            current?.filter(
+                              (record) => record.id !== item.id,
+                            ) || [],
+                        );
+                        setSelected((current) =>
+                          current?.id === item.id ? null : current,
+                        );
+                      } finally {
+                        setSending(false);
+                      }
+                    }}
+                  />
+                </div>
               </li>
             ))}
           </ul>

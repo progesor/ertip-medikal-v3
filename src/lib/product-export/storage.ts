@@ -60,11 +60,14 @@ export async function listJobs() {
     jobs: ProductExportJob[] = [];
   for (const file of await readdir(/* turbopackIgnore: true */ dir)) {
     if (!file.endsWith(".json") || !validId(file.slice(0, -5))) continue;
-    const job = await readJob(file.slice(0, -5));
+    const job = await readJob(file.slice(0, -5)).catch((error) => {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
+      throw error;
+    });
+    if (!job) continue;
     if (job.status === "running" && !isAlive(job)) {
       job.status = "failed";
       job.error = "Sunucu yeniden başladı. Yeni bir aktarım oluşturun.";
-      await saveJob(job);
       await rm(await exportPath(job.id, "partial"), { force: true });
     }
     if (job.status !== "running" && Date.parse(job.expiresAt) < Date.now()) {
@@ -140,4 +143,23 @@ export async function createJob(options: ProductExportOptions) {
 }
 export async function finishArchive(id: string) {
   await rename(await exportPath(id, "partial"), await exportPath(id, "zip"));
+}
+
+export async function deleteJob(id: string) {
+  if (!validId(id))
+    throw Object.assign(Error("Geçersiz aktarım."), { status: 400 });
+  const job = await readJob(id).catch((error) => {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
+    throw error;
+  });
+  if (!job) throw Object.assign(Error("Paket bulunamadı."), { status: 404 });
+  if (job.status === "running" && isAlive(job))
+    throw Object.assign(
+      Error("Hazırlanan paket silinemez. Tamamlanmasını bekleyin."),
+      { status: 409 },
+    );
+  // Keep metadata until all files are removed so a failed removal can be retried.
+  for (const ext of ["zip", "partial", "json"] as const)
+    await rm(await exportPath(id, ext), { force: true });
+  await releaseJob(id);
 }

@@ -1,5 +1,6 @@
 import path from "node:path";
 import {
+  rm,
   mkdir,
   readdir,
   readFile,
@@ -25,7 +26,9 @@ function contains(parent, child) {
 }
 export function backupRoot() {
   // Runtime volume. Its contents must never become build inputs.
-  const dir = path.resolve(/* turbopackIgnore: true */ process.env.BACKUP_DIR || ".backups");
+  const dir = path.resolve(
+    /* turbopackIgnore: true */ process.env.BACKUP_DIR || ".backups",
+  );
   for (const forbidden of [
     mediaRoot(),
     path.resolve("public"),
@@ -97,4 +100,20 @@ export async function completedArchive(id) {
   if (record.status !== "done" || !["create", "import"].includes(record.action))
     throw Error("Yedek hazır değil.");
   return { file, record, size: (await stat(file)).size };
+}
+
+// Called only while the backup engine holds the PostgreSQL backup/restore lock.
+export async function deleteBackupRecord(id) {
+  if (!validId(id))
+    throw Object.assign(Error("Geçersiz yedek."), { status: 400 });
+  const records = await inventory();
+  if (records.some((r) => r.status === "running"))
+    throw Object.assign(
+      Error("Yedekleme işlemi sürüyor. Tamamlanmasını bekleyin."),
+      { status: 409 },
+    );
+  if (!records.some((r) => r.id === id))
+    throw Object.assign(Error("Yedek bulunamadı."), { status: 404 });
+  await rm(archiveFile(id), { force: true });
+  await rm(path.join(backupRoot(), id + ".json"), { force: true });
 }

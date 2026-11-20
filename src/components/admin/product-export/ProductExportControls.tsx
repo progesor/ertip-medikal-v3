@@ -1,4 +1,9 @@
 "use client";
+
+import {
+  ArchiveDeleteButton,
+  deleteArchive,
+} from "@/components/admin/ArchiveDeleteButton";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
@@ -540,6 +545,24 @@ export function ProductExportControls() {
                 <Download size={17} /> ZIP indir
               </a>
             )}
+            <ArchiveDeleteButton
+              label={
+                "Ürün paketi · " +
+                new Date(job.createdAt).toLocaleString("tr-TR")
+              }
+              disabled={job.status === "running"}
+              onDelete={async () => {
+                await deleteArchive(
+                  "/api/product-exports",
+                  "x-ertip-export",
+                  job.id,
+                );
+                setJobs((current) =>
+                  current.filter((item) => item.id !== job.id),
+                );
+                setNotice("Paket ve arşiv kaydı silindi.");
+              }}
+            />
           </article>
         ))}
       </section>

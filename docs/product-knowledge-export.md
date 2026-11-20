@@ -85,3 +85,27 @@ Bu bir CMS geri yükleme biçimi değildir; mevcut yedekleme ayrı kalır.
 
 CSV aktarımında SKU sütunları metin türüyle alınmalıdır; otomatik sayı dönüşümü
 baştaki sıfırları silebilir. JSON her zaman asıl değeri korur.
+
+## Arşiv temizliği (20 Kasım 2026)
+
+Ürün aktarımı, Katalog Stüdyosu ve Yedekleme ekranlarında indirme bağlantısının
+yanındaki **Sil**, dosya adını/tarihini gösteren **Kalıcı olarak sil** onayını açar.
+Yalnızca yöneticiler kullanabilir. Arşiv dosyası ve kayıt kaldırılır; ürünler,
+kaynak medya ve katalog çalışma ayarları korunur. Bu işlem geri alınamaz.
+
+- Ürün paketleri: ZIP ve varsa yarım kalan dosya temizlenir; kayıt en son silinir.
+  Çalışan aktarım korunur. Tamamlanamayan işler de silinebilir.
+- Katalog: PDF veya düzenlenebilir ZIP, Payload upload temizliği ile kaldırılır.
+  Sıradaki/çalışan işler koleksiyon erişimi ve beforeDelete kancası ile korunur.
+  Eski çıktılara Katalog dosya arşivi listesinden de erişilebilir.
+- Yedekler: .ertip ve durum kaydı kaldırılır. Geri yükleme/oluşturma ile ortak
+  PostgreSQL kilidi kullanılır; çalışan/bekleyen yedekleme ve yarım kalmış geri
+  yükleme varsa silme reddedilir. Başarısız işlem geçmişi de temizlenebilir.
+- DELETE uçları mevcut yönetici oturumu, ilgili özel istek başlığı, aynı kaynak
+  kontrolü ve confirm=true ister. Silme için yeni MCP izni açılmaz.
+
+Doğrulama: 9 ürün aktarımı testi, 34 katalog testi; gerçek yerel API ile PDF,
+ZIP ve .ertip dosyalarının/kayıtlarının kaldırılması; editör/oturumsuz erişim,
+eksik onay/başlık, yabancı origin, çalışan katalog işi, yedek kilidi ve tekrar
+silme denemeleri. Kaynak ürün/medya/katalog sayıları değişmedi. Üç yönetim
+ekranında silme onayı ve vazgeçme kontrolleri incelendi.

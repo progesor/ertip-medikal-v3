@@ -71,3 +71,10 @@ Inkscape'te ayrı bir uygulama testi yapılmadı.
 
 - [Adobe Illustrator desteklenen biçimler](https://helpx.adobe.com/illustrator/desktop/get-started/learn-the-basics/supported-file-formats.html)
 - [fflate belgeleri](https://github.com/101arrowz/fflate)
+
+## Arşivden silme
+
+Dosya arşivinde PDF/ZIP indirme işleminin yanında yöneticiler için **Sil** bulunur.
+İkinci onayla çıktı dosyası ve arşiv kaydı kalıcı olarak kaldırılır; çalışma
+tasarımı ve kaynak ürün görselleri korunur. Çalışan veya sıradaki çıktılar
+silinemez. Aynı koruma Katalog dosya arşivi koleksiyonuna da uygulanır.

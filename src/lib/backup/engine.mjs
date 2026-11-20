@@ -15,6 +15,7 @@ import { randomUUID } from "node:crypto";
 import pg from "pg";
 import { pack, unpack } from "./archive.mjs";
 import {
+  deleteBackupRecord,
   archiveFile,
   backupRoot,
   kinds,
@@ -117,12 +118,20 @@ export async function execute(
       "SELECT pg_try_advisory_lock(20168113, 1) AS acquired",
     );
     if (!lock.rows[0].acquired)
-      throw Error(
-        "Başka bir yedekleme işlemi sürüyor. Tamamlanmasını bekleyin.",
+      throw Object.assign(
+        Error("Başka bir yedekleme işlemi sürüyor. Tamamlanmasını bekleyin."),
+        { status: 409 },
       );
     const marker = await existingMarker();
     if (marker && action !== "restore")
-      throw Error("Yarım kalan geri yükleme için aynı paketi tekrar seçin.");
+      throw Object.assign(
+        Error("Yarım kalan geri yükleme için aynı paketi tekrar seçin."),
+        { status: 409 },
+      );
+    if (action === "delete") {
+      await deleteBackupRecord(value);
+      return { deleted: value, kind: undefined };
+    }
     if (action === "create") {
       if (!kinds.includes(value)) throw Error("Geçersiz yedek türü.");
       const manifest = {

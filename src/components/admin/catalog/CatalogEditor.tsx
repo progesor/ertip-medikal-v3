@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  ArchiveDeleteButton,
+  deleteArchive,
+} from "@/components/admin/ArchiveDeleteButton";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   BookOpen,
@@ -46,6 +51,7 @@ type ProductOption = {
 };
 type CategoryOption = { id: number; title: string; parent?: number | null };
 type Library = {
+  canDeleteOutputs: boolean;
   catalogs: CatalogDocument[];
   categories: CategoryOption[];
   products: ProductOption[];
@@ -1337,6 +1343,25 @@ export function CatalogEditor() {
                       ? "Düzenlenebilir ZIP indir"
                       : "PDF indir"}
                   </a>
+                )}
+                {library?.canDeleteOutputs && (
+                  <ArchiveDeleteButton
+                    label={o.filename || o.title || "Katalog dosyası"}
+                    disabled={
+                      !!busy || o.status === "queued" || o.status === "running"
+                    }
+                    onDelete={async () => {
+                      await deleteArchive(
+                        "/api/catalog-studio",
+                        "x-ertip-catalog",
+                        o.id,
+                      );
+                      setOutputs((current) =>
+                        current.filter((item) => item.id !== o.id),
+                      );
+                      setNotice("Dosya ve arşiv kaydı silindi.");
+                    }}
+                  />
                 )}
                 {o.status === "failed" && (
                   <button disabled={!!busy} onClick={() => perform("generate")}>

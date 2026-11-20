@@ -8,6 +8,7 @@ import { isAdmin } from "@/access/roles";
 import { productExportSchema } from "@/lib/product-export/schema";
 import { allRecords } from "@/lib/product-export/source";
 import {
+  deleteJob,
   createJob,
   exportPath,
   listJobs,
@@ -119,5 +120,31 @@ export async function POST(request: Request) {
       return reply(error.message, 409);
     payload.logger.error({ err: error }, "Product export could not start");
     return reply("Aktarım başlatılamadı. Depolama alanını kontrol edin.", 500);
+  }
+}
+
+export async function DELETE(request: Request) {
+  const { payload, user } = await authorize(request);
+  if (!user) return reply("Bu alan yöneticilere açıktır.", 401);
+  if (
+    request.headers.get("x-ertip-export") !== "1" ||
+    !validExportOrigin(request)
+  )
+    return reply("Geçersiz istek.", 403);
+  const body = await request.json().catch(() => null);
+  if (!validId(body?.id) || body?.confirm !== true)
+    return reply("Silinecek paketi seçin ve silmeyi onaylayın.", 400);
+  try {
+    await deleteJob(body.id);
+    return Response.json({ deleted: body.id }, { headers });
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      "status" in error &&
+      typeof error.status === "number"
+    )
+      return reply(error.message, error.status);
+    payload.logger.error({ err: error }, "Product archive deletion failed");
+    return reply("Paket silinemedi. Depolama alanını kontrol edin.", 500);
   }
 }
