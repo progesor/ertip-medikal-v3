@@ -1,7 +1,7 @@
 import path from "node:path";
 import { readFile, stat } from "node:fs/promises";
 import sharp from "sharp";
-import type { CatalogSnapshot } from "@/types/catalog";
+import type { CatalogSnapshot, CatalogSVGPage } from "@/types/catalog";
 import { renderCatalog } from "./render";
 import { catalogConfigSchema } from "./schema";
 import { catalogImageTargets } from "./imageSizing";
@@ -94,7 +94,10 @@ export async function catalogHTML(snapshot: CatalogSnapshot) {
   }
   return renderCatalog(snapshot, assets, fonts);
 }
-async function prepareDocument(snapshot: CatalogSnapshot, exportPDF: boolean) {
+async function prepareDocument(
+  snapshot: CatalogSnapshot,
+  mode: "preview" | "pdf" | "editable",
+) {
   snapshot = {
     ...snapshot,
     config: catalogConfigSchema.parse(snapshot.config),
@@ -151,13 +154,20 @@ async function prepareDocument(snapshot: CatalogSnapshot, exportPDF: boolean) {
         "Sayfaya sığmayan içerik var. Daha az ürünlü düzen seçin. " +
           result.overflow.slice(0, 200),
       );
-    const data = exportPDF
-      ? await page.pdf({
-          printBackground: true,
-          preferCSSPageSize: true,
-          tagged: true,
-        })
-      : undefined;
+    const data =
+      mode !== "preview"
+        ? await page.pdf({
+            printBackground: true,
+            preferCSSPageSize: true,
+            tagged: true,
+          })
+        : undefined;
+    const svgs =
+      mode === "editable"
+        ? await page.evaluate<CatalogSVGPage[]>(
+            (await import("./svg")).catalogSVGScript,
+          )
+        : [];
     // A static preview cannot hang on client script, font timing or postMessage races.
     await page.evaluate(() =>
       document
@@ -168,16 +178,29 @@ async function prepareDocument(snapshot: CatalogSnapshot, exportPDF: boolean) {
       data,
       pages: result.pages,
       sheets: result.sheets,
-      html: exportPDF ? "" : await page.content(),
+      svgs,
+      html: mode === "preview" ? await page.content() : "",
     };
   } finally {
     await browser.close();
   }
 }
 export async function previewCatalog(snapshot: CatalogSnapshot) {
-  return prepareDocument(snapshot, false);
+  return prepareDocument(snapshot, "preview");
 }
 export async function generateCatalogPDF(snapshot: CatalogSnapshot) {
-  const result = await prepareDocument(snapshot, true);
+  const result = await prepareDocument(snapshot, "pdf");
   return { data: result.data!, pages: result.pages };
+}
+
+export async function generateEditableCatalog(snapshot: CatalogSnapshot) {
+  const result = await prepareDocument(
+    { ...snapshot, config: { ...snapshot.config, profile: "quality" } },
+    "editable",
+  );
+  const { buildEditablePackage } = await import("./editablePackage");
+  return {
+    data: await buildEditablePackage(result.svgs, result.data!),
+    pages: result.pages,
+  };
 }

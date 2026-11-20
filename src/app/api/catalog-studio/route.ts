@@ -162,6 +162,12 @@ export async function POST(request: Request) {
       );
     }
     if (body.action === "generate" && Number.isSafeInteger(body.id)) {
+      if (
+        body.format !== undefined &&
+        body.format !== "pdf" &&
+        body.format !== "editable-svg"
+      )
+        return reply("Geçersiz aktarım biçimi.", 400);
       const doc = await payload.findByID({
         collection: "catalogs",
         id: body.id,
@@ -188,10 +194,16 @@ export async function POST(request: Request) {
           "Sayfa planına en az bir ürün yerleştirin veya otomatik moda dönün.",
           400,
         );
-      return Response.json(await queueOutput(payload, user, doc.id, snapshot), {
-        status: 202,
-        headers,
-      });
+      return Response.json(
+        await queueOutput(payload, user, doc.id, {
+          ...snapshot,
+          exportFormat: body.format || "pdf",
+        }),
+        {
+          status: 202,
+          headers,
+        },
+      );
     }
     return reply("İşlem bulunamadı.", 400);
   } catch (error) {

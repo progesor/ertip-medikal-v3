@@ -618,3 +618,30 @@
 .workspace[data-wide="true"] > .settings {
   display: none;
 }
+
+.exportFormat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--ertip-admin-muted);
+}
+.exportFormat select {
+  max-width: 220px;
+  padding: 8px 10px;
+  border: 1px solid var(--ertip-admin-border);
+  border-radius: 7px;
+  background: var(--ertip-admin-panel, var(--theme-elevation-0));
+  color: var(--theme-text);
+  font-size: 12px;
+}
+.exportHelp {
+  margin-bottom: 18px !important;
+  padding: 12px 16px;
+  border: 1px solid var(--ertip-admin-border);
+  border-radius: 9px;
+  background: var(--theme-elevation-50);
+  color: var(--ertip-admin-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}

@@ -4,7 +4,7 @@ import { contentManagers } from "@/access/roles";
 
 export const CatalogOutputs: CollectionConfig = {
   slug: "catalog-outputs",
-  labels: { singular: "Katalog PDF", plural: "Katalog PDF arşivi" },
+  labels: { singular: "Katalog dosyası", plural: "Katalog dosya arşivi" },
   admin: {
     group: "Katalog Stüdyosu",
     useAsTitle: "title",
@@ -18,7 +18,7 @@ export const CatalogOutputs: CollectionConfig = {
   },
   upload: {
     staticDir: path.resolve("media", "catalog-pdfs"),
-    mimeTypes: ["application/pdf"],
+    mimeTypes: ["application/pdf", "application/zip"],
     filesRequiredOnCreate: false,
   },
   fields: [

@@ -108,6 +108,9 @@ export function CatalogEditor() {
   const [search, setSearch] = useState("");
   const [editedProduct, setEditedProduct] = useState<number | null>(null);
   const [busy, setBusy] = useState("");
+  const [exportFormat, setExportFormat] = useState<"pdf" | "editable-svg">(
+    "pdf",
+  );
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [zoom, setZoom] = useState(65);
@@ -262,8 +265,12 @@ export function CatalogEditor() {
       } else {
         const doc = await save();
         if (action === "generate") {
-          await request({ action, id: doc.id });
-          setNotice("PDF sıraya alındı. Bu ekrandan ayrılabilirsiniz.");
+          await request({ action, id: doc.id, format: exportFormat });
+          setNotice(
+            exportFormat === "editable-svg"
+              ? "Düzenlenebilir paket sıraya alındı. Hazır olunca dosya arşivinden indirebilirsiniz."
+              : "PDF sıraya alındı. Bu ekrandan ayrılabilirsiniz.",
+          );
           await loadOutputs();
         } else setNotice("Çalışma kaydedildi.");
       }
@@ -404,15 +411,40 @@ export function CatalogEditor() {
           <button disabled={!!busy} onClick={() => perform("preview")}>
             <Eye size={16} /> Önizle
           </button>
+          <label className={styles.exportFormat}>
+            Dışa aktarma
+            <select
+              aria-label="Dışa aktarma biçimi"
+              value={exportFormat}
+              disabled={!!busy}
+              onChange={(e) =>
+                setExportFormat(e.target.value as "pdf" | "editable-svg")
+              }
+            >
+              <option value="pdf">PDF · Gönderime hazır</option>
+              <option value="editable-svg">Düzenlenebilir · SVG + PDF</option>
+            </select>
+          </label>
           <button
             className={styles.primary}
             disabled={!!busy || !library}
             onClick={() => perform("generate")}
           >
-            <Download size={16} /> PDF oluştur
+            <Download size={16} />{" "}
+            {exportFormat === "editable-svg"
+              ? "Düzenlenebilir paket oluştur"
+              : "PDF oluştur"}
           </button>
         </div>
       </header>
+      {exportFormat === "editable-svg" && (
+        <p className={styles.exportHelp}>
+          Illustrator ve Inkscape için her sayfa ayrı SVG; düzenlenebilir
+          metinler, gruplu ürünler, gömülü görseller, fontlar ve referans PDF
+          tek ZIP paketinde. Açmadan önce paketteki fontları kurun. Harici
+          değişiklikler stüdyoya geri aktarılmaz.
+        </p>
+      )}
       {error && (
         <p role="alert" className={styles.error}>
           {error}
@@ -429,7 +461,9 @@ export function CatalogEditor() {
           {busy === "preview"
             ? "Ürünler ve sayfalar hazırlanıyor…"
             : busy === "generate"
-              ? "PDF hazırlanmak üzere kaydediliyor…"
+              ? exportFormat === "editable-svg"
+                ? "Düzenlenebilir paket hazırlanmak üzere kaydediliyor…"
+                : "PDF hazırlanmak üzere kaydediliyor…"
               : "Kaydediliyor…"}
         </p>
       )}
@@ -1270,10 +1304,10 @@ export function CatalogEditor() {
             )}
           </div>
           <section className={styles.exports}>
-            <h2>PDF arşivi</h2>
+            <h2>Dosya arşivi</h2>
             {!outputs.length && (
               <p className={styles.hint}>
-                Oluşturduğunuz PDF sürümleri burada görünür.
+                PDF ve düzenlenebilir paketleriniz burada görünür.
               </p>
             )}
             {outputs.map((o) => (
@@ -1298,7 +1332,10 @@ export function CatalogEditor() {
                     }
                     download
                   >
-                    <Download size={14} /> PDF indir
+                    <Download size={14} />{" "}
+                    {o.filename.endsWith(".zip")
+                      ? "Düzenlenebilir ZIP indir"
+                      : "PDF indir"}
                   </a>
                 )}
                 {o.status === "failed" && (

@@ -50,7 +50,9 @@ export type CatalogProduct = {
   };
 };
 export type CatalogWarning = { productId?: number; message: string };
+export type CatalogSVGPage = { page: number; title: string; svg: string };
 export type CatalogSnapshot = {
+  exportFormat?: "pdf" | "editable-svg";
   title: string;
   config: CatalogConfig;
   products: CatalogProduct[];

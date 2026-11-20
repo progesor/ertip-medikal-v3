@@ -6,7 +6,7 @@ export const catalogPDFTask: TaskConfig<{
   output: { pages: number };
 }> = {
   slug: "catalogPDF",
-  label: "Katalog PDF oluştur",
+  label: "Katalog dosyası oluştur",
   inputSchema: [{ name: "outputId", type: "number", required: true }],
   outputSchema: [{ name: "pages", type: "number" }],
   retries: 0,
@@ -25,18 +25,25 @@ export const catalogPDFTask: TaskConfig<{
       data: { status: "running", error: null },
     });
     try {
-      const { generateCatalogPDF } = await import("./pdf");
-      const result = await generateCatalogPDF(
-        output.snapshot as unknown as CatalogSnapshot,
-      );
+      const { generateCatalogPDF, generateEditableCatalog } =
+        await import("./pdf");
+      const editable =
+        (output.snapshot as unknown as CatalogSnapshot).exportFormat ===
+        "editable-svg";
+      const result = await (
+        editable ? generateEditableCatalog : generateCatalogPDF
+      )(output.snapshot as unknown as CatalogSnapshot);
       await payload.update({
         collection: "catalog-outputs",
         id: output.id,
         data: { status: "done", pages: result.pages, error: null },
         file: {
           data: result.data,
-          name: "ertip-catalog-" + output.id + ".pdf",
-          mimetype: "application/pdf",
+          name:
+            "ertip-catalog-" +
+            output.id +
+            (editable ? "-editable.zip" : ".pdf"),
+          mimetype: editable ? "application/zip" : "application/pdf",
           size: result.data.length,
         },
       });
@@ -44,12 +51,12 @@ export const catalogPDFTask: TaskConfig<{
     } catch (error) {
       payload.logger.error(
         { err: error, outputId: output.id },
-        "Catalog PDF failed",
+        "Catalog export failed",
       );
       const message =
         error instanceof Error && error.message.startsWith("Sayfaya")
           ? error.message
-          : "PDF oluşturulamadı. Görselleri ve PDF sunucusunu kontrol edip tekrar deneyin.";
+          : "Dosya oluşturulamadı. Görselleri ve aktarım sunucusunu kontrol edip tekrar deneyin.";
       await payload.update({
         collection: "catalog-outputs",
         id: output.id,
