@@ -4,6 +4,8 @@ import type {
   CatalogProduct,
 } from "@/types/catalog";
 
+import { reconcilePageSections } from "./sections";
+
 export function automaticPages(
   products: CatalogProduct[],
   config: CatalogConfig,
@@ -89,5 +91,6 @@ export function resolvePages(
         return true;
       }),
     }))
+    .map(reconcilePageSections)
     .filter((page) => page.kind === "divider" || page.productIds.length);
 }

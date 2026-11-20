@@ -32,6 +32,7 @@ import type {
 } from "@/types/catalog";
 import styles from "./CatalogEditor.module.css";
 import { PageBoard } from "./PageBoard";
+import { PagePlan } from "./PagePlan";
 import { CoverDesigner } from "./CoverDesigner";
 import { applyCatalogPreset, catalogPresets } from "@/lib/catalog/presets";
 import type { CatalogPagePreview } from "@/types/catalog";
@@ -92,11 +93,13 @@ export function CatalogEditor() {
   const [working, setWorking] = useState<Working>(empty);
   const [saved, setSaved] = useState<CatalogDocument | null>(null);
   const [preview, setPreview] = useState<Preview | null>(null);
-  const [view, setView] = useState<"preview" | "pages">("preview");
+  const [view, setView] = useState<"preview" | "pages" | "editor">("preview");
   const [visiblePage, setVisiblePage] = useState(1);
   const [layout, setLayout] = useState<{ pages: number; error: string } | null>(
     null,
   );
+  const [editorPageId, setEditorPageId] = useState("");
+  const [wideEditor, setWideEditor] = useState(true);
   const [previewKey, setPreviewKey] = useState("");
   const [outputs, setOutputs] = useState<CatalogOutputSummary[]>([]);
   const [tab, setTab] = useState<"content" | "design" | "cover" | "product">(
@@ -430,7 +433,11 @@ export function CatalogEditor() {
               : "Kaydediliyor…"}
         </p>
       )}
-      <div className={styles.workspace} data-board={view === "pages"}>
+      <div
+        className={styles.workspace}
+        data-board={view !== "preview"}
+        data-wide={view === "pages" || (view === "editor" && wideEditor)}
+      >
         <aside className={styles.library}>
           <div className={styles.panelTitle}>
             <h2>Çalışmalar</h2>
@@ -598,25 +605,41 @@ export function CatalogEditor() {
             >
               Sayfa planı
             </button>
+            <button
+              aria-pressed={view === "editor"}
+              onClick={() => setView("editor")}
+            >
+              Görsel editör
+            </button>
+            {view === "editor" && (
+              <button
+                aria-pressed={wideEditor}
+                onClick={() => setWideEditor(!wideEditor)}
+              >
+                {wideEditor ? "Genel ayarları aç" : "Çalışma alanını genişlet"}
+              </button>
+            )}
             <span>
               {config.paper} ·{" "}
               {config.orientation === "portrait" ? "Dikey" : "Yatay"} ·{" "}
               {config.locale.toUpperCase()}
             </span>
-            <label>
-              Yakınlaştır
-              <select
-                aria-label="Yakınlaştırma"
-                value={zoom}
-                onChange={(e) => setZoom(Number(e.target.value))}
-              >
-                {[35, 50, 65, 80, 100].map((v) => (
-                  <option key={v} value={v}>
-                    %{v}
-                  </option>
-                ))}
-              </select>
-            </label>
+            {view === "preview" && (
+              <label>
+                Yakınlaştır
+                <select
+                  aria-label="Yakınlaştırma"
+                  value={zoom}
+                  onChange={(e) => setZoom(Number(e.target.value))}
+                >
+                  {[35, 50, 65, 80, 100].map((v) => (
+                    <option key={v} value={v}>
+                      %{v}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
           </div>
           {stale && (
             <button
@@ -628,7 +651,21 @@ export function CatalogEditor() {
             </button>
           )}
           {view === "pages" ? (
+            <PagePlan
+              config={config}
+              products={preview?.products || []}
+              disabled={!!busy}
+              onChange={configure}
+              onEdit={(id) => {
+                setEditorPageId(id);
+                setView("editor");
+              }}
+              onPreview={() => perform("preview")}
+            />
+          ) : view === "editor" ? (
             <PageBoard
+              selectedPageId={editorPageId}
+              onSelectPage={setEditorPageId}
               config={config}
               products={preview?.products || []}
               sheets={preview?.sheets || []}
@@ -636,6 +673,7 @@ export function CatalogEditor() {
               disabled={!!busy}
               onChange={configure}
               onEditProduct={(id) => {
+                setWideEditor(false);
                 setEditedProduct(id);
                 setTab("product");
               }}

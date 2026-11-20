@@ -1,4 +1,9 @@
 import type { CatalogPage, CatalogPagePreview } from "@/types/catalog";
+import {
+  pageSections,
+  reconcilePageSections,
+  prunePageSections,
+} from "./sections";
 
 export function moveCatalogProducts(
   pages: CatalogPage[],
@@ -8,13 +13,15 @@ export function moveCatalogProducts(
   if (!pages.some((p) => p.id === targetId && p.kind === "products"))
     return pages;
   const selected = new Set(ids);
-  return pages.map((page) => ({
-    ...page,
-    productIds:
-      page.id === targetId
-        ? [...page.productIds.filter((id) => !selected.has(id)), ...selected]
-        : page.productIds.filter((id) => !selected.has(id)),
-  }));
+  return pages.map((page) =>
+    reconcilePageSections({
+      ...page,
+      productIds:
+        page.id === targetId
+          ? [...page.productIds.filter((id) => !selected.has(id)), ...selected]
+          : page.productIds.filter((id) => !selected.has(id)),
+    }),
+  );
 }
 
 export function splitCatalogPage(
@@ -38,7 +45,9 @@ export function splitCatalogPage(
     { ...page, productIds: page.productIds.filter((id) => !selected.has(id)) },
     { ...page, id: newId, productIds: moved },
   );
-  return next;
+  return next.map((p, i) =>
+    i === index || i === index + 1 ? prunePageSections(p) : p,
+  );
 }
 
 export function mergeCatalogPage(pages: CatalogPage[], pageId: string) {
@@ -49,14 +58,38 @@ export function mergeCatalogPage(pages: CatalogPage[], pageId: string) {
     pages[index + 1]?.kind !== "products"
   )
     return pages;
+  if (
+    pageSections(pages[index]).length + pageSections(pages[index + 1]).length >
+    50
+  )
+    return pages;
   const next = [...pages];
   next.splice(index, 2, {
     ...pages[index],
+    ...(pages[index].sections?.length ||
+    pages[index + 1].sections?.length ||
+    pages[index].title !== pages[index + 1].title
+      ? {
+          density: (["1", "2", "4", "6", "9"].find(
+            (n) =>
+              Number(n) >=
+              pages[index].productIds.length +
+                pages[index + 1].productIds.length,
+          ) || "9") as CatalogPage["density"],
+          sections: [
+            ...pageSections(pages[index]),
+            ...pageSections(pages[index + 1]),
+          ].map((section, i) => ({
+            ...section,
+            id: ("merged-" + i + "-" + section.id).slice(0, 80),
+          })),
+        }
+      : {}),
     productIds: [
       ...new Set([...pages[index].productIds, ...pages[index + 1].productIds]),
     ],
   });
-  return next;
+  return next.map(reconcilePageSections);
 }
 
 // Convert measured PDF groups to editable pages. Continuations keep their source product once.
@@ -81,7 +114,7 @@ export function pagesFromPreview(
         : plan.layout;
     return [
       {
-        ...plan,
+        ...prunePageSections({ ...plan, productIds }),
         id: ("fixed-" + index + "-" + plan.id).slice(0, 80),
         productIds,
         layout,
@@ -117,7 +150,7 @@ export function moveCatalogProduct(
     0,
     productId,
   );
-  return next;
+  return next.map(reconcilePageSections);
 }
 export function moveCatalogPage(
   pages: CatalogPage[],
@@ -133,5 +166,5 @@ export function moveCatalogPage(
     0,
     source,
   );
-  return next;
+  return next.map(reconcilePageSections);
 }

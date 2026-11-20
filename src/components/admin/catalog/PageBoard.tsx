@@ -29,8 +29,17 @@ import {
   pagesFromPreview,
 } from "@/lib/catalog/pageEditing";
 import styles from "./PageBoard.module.css";
+import { SectionInspector } from "./SectionInspector";
+import {
+  pageSections,
+  setPageSections,
+  reconcilePageSections,
+  moveProductsToSection,
+} from "@/lib/catalog/sections";
 
 type Props = {
+  selectedPageId: string;
+  onSelectPage: (id: string) => void;
   config: CatalogConfig;
   products: CatalogProduct[];
   sheets: CatalogPagePreview[];
@@ -41,6 +50,8 @@ type Props = {
   onPreview: (pageId?: string) => void;
 };
 export function PageBoard({
+  selectedPageId,
+  onSelectPage,
   config,
   products,
   sheets,
@@ -51,7 +62,7 @@ export function PageBoard({
   onPreview,
 }: Props) {
   const [search, setSearch] = useState("");
-  const [selectedPageId, setSelectedPageId] = useState("");
+  const [selectedSectionId, setSelectedSectionId] = useState("");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [showAll, setShowAll] = useState(false);
   const [over, setOver] = useState("");
@@ -61,6 +72,20 @@ export function PageBoard({
       : automaticPages(products, config);
   const page = pages.find((p) => p.id === selectedPageId) || pages[0];
   const index = page ? pages.indexOf(page) : -1;
+  const sections = page ? pageSections(page) : [];
+  const activeSection =
+    sections.find((s) => s.id === selectedSectionId) || sections[0];
+  const saveSections = (next: typeof sections) =>
+    page &&
+    save(pages.map((p) => (p.id === page.id ? setPageSections(p, next) : p)));
+  const reorderSection = (id: string, step: number) => {
+    const next = [...sections],
+      i = next.findIndex((s) => s.id === id),
+      to = i + step;
+    if (i < 0 || to < 0 || to >= next.length) return;
+    [next[i], next[to]] = [next[to], next[i]];
+    saveSections(next);
+  };
   const byId = new Map(
     products.map((original) => {
       const p = { ...original, ...original.sourceDefaults };
@@ -83,10 +108,11 @@ export function PageBoard({
         .includes(search.toLocaleLowerCase("tr")),
   );
   const save = (next: CatalogPage[]) =>
-    onChange({ pageMode: "manual", pages: next });
+    onChange({ pageMode: "manual", pages: next.map(reconcilePageSections) });
   const selectPage = (id: string) => {
-    setSelectedPageId(id);
+    onSelectPage(id);
     setSelectedIds([]);
+    setSelectedSectionId("");
   };
   const patch = (update: Partial<CatalogPage>) =>
     page &&
@@ -99,7 +125,12 @@ export function PageBoard({
     const id = crypto.randomUUID();
     const next: CatalogPage =
       copy && page
-        ? { ...page, id, productIds: [] }
+        ? {
+            ...page,
+            id,
+            productIds: [],
+            sections: page.sections?.map((s) => ({ ...s, productIds: [] })),
+          }
         : {
             id,
             kind,
@@ -115,9 +146,13 @@ export function PageBoard({
     selectPage(id);
   };
   const move = (targetId: string, ids = selectedIds) => {
-    save(moveCatalogProducts(pages, ids, targetId));
+    save(
+      targetId === page?.id && page.sections?.length && activeSection
+        ? moveProductsToSection(pages, ids, targetId, activeSection.id)
+        : moveCatalogProducts(pages, ids, targetId),
+    );
     setSelectedIds([]);
-    setSelectedPageId(targetId);
+    onSelectPage(targetId);
   };
   const remove = (ids: number[]) => {
     save(
@@ -130,12 +165,22 @@ export function PageBoard({
   };
   const reorder = (id: number, step: number) => {
     if (!page) return;
-    const ids = [...page.productIds],
+    const section = sections.find((s) => s.productIds.includes(id));
+    if (!section) return;
+    const ids = [...section.productIds],
       i = ids.indexOf(id),
       to = i + step;
-    if (i < 0 || to < 0 || to >= ids.length) return;
+    if (to < 0 || to >= ids.length) return;
     [ids[i], ids[to]] = [ids[to], ids[i]];
-    patch({ productIds: ids });
+    if (!page.sections?.length) {
+      patch({ productIds: ids });
+      return;
+    }
+    saveSections(
+      sections.map((s) =>
+        s.id === section.id ? { ...s, productIds: ids } : s,
+      ),
+    );
   };
   const drag = (event: React.DragEvent, kind: string, id: string | number) => {
     event.stopPropagation();
@@ -156,6 +201,7 @@ export function PageBoard({
     event: React.DragEvent,
     target: CatalogPage,
     position?: number,
+    sectionId?: string,
   ) => {
     event.preventDefault();
     event.stopPropagation();
@@ -165,13 +211,52 @@ export function PageBoard({
       const value = JSON.parse(
         event.dataTransfer.getData("application/ertip-catalog"),
       );
+      if (value.kind === "section" && target.id === page?.id && sectionId) {
+        const source = sections.find((s) => s.id === value.id);
+        if (source && source.id !== sectionId) {
+          const next = sections.filter((s) => s.id !== source.id);
+          next.splice(
+            next.findIndex((s) => s.id === sectionId),
+            0,
+            source,
+          );
+          saveSections(next);
+        }
+      }
       if (value.kind === "page" && typeof value.id === "string")
         save(moveCatalogPage(pages, value.id, target.id));
       if (value.kind === "product" && target.kind === "products") {
         const ids = Array.isArray(value.ids)
           ? value.ids.filter((id: number) => products.some((p) => p.id === id))
           : [];
-        if (ids.length > 1) save(moveCatalogProducts(pages, ids, target.id));
+        if (sectionId && target.sections?.length && ids.length) {
+          const next = moveProductsToSection(pages, ids, target.id, sectionId);
+          if (position !== undefined && ids.length === 1) {
+            const original =
+              pageSections(target).find((s) => s.id === sectionId)
+                ?.productIds || [];
+            const old = original.indexOf(ids[0]);
+            const at = old >= 0 && old < position ? position - 1 : position;
+            save(
+              next.map((p) =>
+                p.id !== target.id
+                  ? p
+                  : setPageSections(
+                      p,
+                      pageSections(p).map((s) => {
+                        if (s.id !== sectionId) return s;
+                        const members = s.productIds.filter(
+                          (id) => id !== ids[0],
+                        );
+                        members.splice(at, 0, ids[0]);
+                        return { ...s, productIds: members };
+                      }),
+                    ),
+              ),
+            );
+          } else save(next);
+        } else if (ids.length > 1)
+          save(moveCatalogProducts(pages, ids, target.id));
         else if (products.some((p) => p.id === value.id))
           save(moveCatalogProduct(pages, value.id, target.id, position));
       }
@@ -193,7 +278,7 @@ export function PageBoard({
     <section className={styles.board} aria-label="Görsel sayfa düzenleyici">
       <div className={styles.toolbar}>
         <div>
-          <h2>Sayfa atölyesi</h2>
+          <h2>Görsel editör</h2>
           <p>
             {pages.length} plan sayfası · {used.size} yerleştirilen ürün ·{" "}
             {unplaced.length} bekleyen
@@ -350,100 +435,164 @@ export function PageBoard({
                   </div>
                 ) : (
                   <>
-                    <h3>{page.title || "Ürün koleksiyonu"}</h3>
-                    <div
-                      className={styles.cards}
-                      style={
-                        {
-                          "--columns":
-                            page.layout === "grid"
-                              ? page.productIds.length >= 5
-                                ? 3
-                                : 2
-                              : 1,
-                        } as React.CSSProperties
-                      }
-                    >
-                      {page.productIds.map((id, i) => {
-                        const product = byId.get(id);
-                        return (
-                          <article
-                            key={id}
-                            className={styles.card}
-                            data-selected={selectedIds.includes(id)}
-                            data-over={over === "product-" + id}
+                    {sections.map((section, sectionIndex) => (
+                      <section
+                        key={section.id}
+                        className={styles.module}
+                        data-active={activeSection?.id === section.id}
+                        data-layout={section.layout}
+                        onDragOver={(e) => accept(e, "section-" + section.id)}
+                        onDrop={(e) => drop(e, page, undefined, section.id)}
+                      >
+                        <div className={styles.moduleToolbar}>
+                          <button
                             draggable={!disabled}
-                            onDragStart={(e) => drag(e, "product", id)}
-                            onDragEnd={() => setOver("")}
-                            onDragOver={(e) => accept(e, "product-" + id)}
-                            onDrop={(e) => drop(e, page, i)}
+                            disabled={disabled}
+                            onDragStart={(e) => drag(e, "section", section.id)}
+                            aria-label={section.title + " bölümünü sürükle"}
                           >
-                            <div className={styles.cardTools}>
-                              <label>
-                                <input
-                                  type="checkbox"
-                                  disabled={disabled}
-                                  checked={selectedIds.includes(id)}
-                                  onChange={() => check(id)}
-                                  aria-label={(product?.title || id) + " seç"}
-                                />
-                              </label>
-                              <button
+                            <GripVertical size={14} />
+                          </button>
+                          <button
+                            disabled={disabled}
+                            onClick={() => setSelectedSectionId(section.id)}
+                            className={styles.moduleTitle}
+                          >
+                            {section.title || "Başlıksız ürün grubu"}
+                          </button>
+                          <button
+                            disabled={disabled || sectionIndex === 0}
+                            onClick={() => reorderSection(section.id, -1)}
+                            aria-label={section.title + " bölümü yukarı"}
+                          >
+                            <ArrowUp size={13} />
+                          </button>
+                          <button
+                            disabled={
+                              disabled || sectionIndex === sections.length - 1
+                            }
+                            onClick={() => reorderSection(section.id, 1)}
+                            aria-label={section.title + " bölümü aşağı"}
+                          >
+                            <ArrowDown size={13} />
+                          </button>
+                        </div>
+                        {section.subtitle && (
+                          <p className={styles.moduleSubtitle}>
+                            {section.subtitle}
+                          </p>
+                        )}
+                        <div
+                          className={styles.cards}
+                          style={
+                            {
+                              "--columns":
+                                section.layout === "grid" ? section.columns : 1,
+                            } as React.CSSProperties
+                          }
+                        >
+                          {section.productIds.map((id, i) => {
+                            const product = byId.get(id);
+                            return (
+                              <article
+                                key={id}
+                                className={styles.card}
+                                data-selected={selectedIds.includes(id)}
+                                data-over={over === "product-" + id}
                                 draggable={!disabled}
-                                disabled={disabled}
                                 onDragStart={(e) => drag(e, "product", id)}
-                                aria-label={(product?.title || id) + " sürükle"}
+                                onDragEnd={() => setOver("")}
+                                onDragOver={(e) => accept(e, "product-" + id)}
+                                onDrop={(e) => drop(e, page, i, section.id)}
                               >
-                                <GripVertical size={13} />
-                              </button>
-                              <button
-                                disabled={disabled || i === 0}
-                                aria-label={(product?.title || id) + " yukarı"}
-                                onClick={() => reorder(id, -1)}
-                              >
-                                <ArrowUp size={12} />
-                              </button>
-                              <button
-                                disabled={
-                                  disabled || i === page.productIds.length - 1
-                                }
-                                aria-label={(product?.title || id) + " aşağı"}
-                                onClick={() => reorder(id, 1)}
-                              >
-                                <ArrowDown size={12} />
-                              </button>
-                            </div>
-                            <button
-                              className={styles.productEdit}
-                              disabled={disabled || !product}
-                              onClick={() => onEditProduct(id)}
-                              aria-label={(product?.title || id) + " düzenle"}
-                            >
-                              <span className={styles.visual}>
-                                {product?.image ? (
-                                  <Image
-                                    src={product.image.url}
-                                    width={220}
-                                    height={150}
-                                    unoptimized
-                                    alt=""
-                                    style={{
-                                      maxWidth: (page.imageScale ?? 100) + "%",
-                                    }}
-                                  />
-                                ) : (
-                                  <ImagePlus size={24} />
-                                )}
-                              </span>
-                              <span>
-                                <strong>{product?.title || "#" + id}</strong>
-                                <code>{product?.sku || "Kod eksik"}</code>
-                              </span>
-                            </button>
-                          </article>
-                        );
-                      })}
-                    </div>
+                                <div className={styles.cardTools}>
+                                  <label>
+                                    <input
+                                      type="checkbox"
+                                      disabled={disabled}
+                                      checked={selectedIds.includes(id)}
+                                      onChange={() => check(id)}
+                                      aria-label={
+                                        (product?.title || id) + " seç"
+                                      }
+                                    />
+                                  </label>
+                                  <button
+                                    draggable={!disabled}
+                                    disabled={disabled}
+                                    onDragStart={(e) => drag(e, "product", id)}
+                                    aria-label={
+                                      (product?.title || id) + " sürükle"
+                                    }
+                                  >
+                                    <GripVertical size={13} />
+                                  </button>
+                                  <button
+                                    disabled={disabled || i === 0}
+                                    aria-label={
+                                      (product?.title || id) + " yukarı"
+                                    }
+                                    onClick={() => reorder(id, -1)}
+                                  >
+                                    <ArrowUp size={12} />
+                                  </button>
+                                  <button
+                                    disabled={
+                                      disabled ||
+                                      i === section.productIds.length - 1
+                                    }
+                                    aria-label={
+                                      (product?.title || id) + " aşağı"
+                                    }
+                                    onClick={() => reorder(id, 1)}
+                                  >
+                                    <ArrowDown size={12} />
+                                  </button>
+                                </div>
+                                <button
+                                  className={styles.productEdit}
+                                  disabled={disabled || !product}
+                                  onClick={() => onEditProduct(id)}
+                                  aria-label={
+                                    (product?.title || id) + " düzenle"
+                                  }
+                                >
+                                  <span className={styles.visual}>
+                                    {product?.image ? (
+                                      <Image
+                                        src={product.image.url}
+                                        width={220}
+                                        height={150}
+                                        unoptimized
+                                        alt=""
+                                        style={{
+                                          maxWidth:
+                                            (page.imageScale ?? 100) + "%",
+                                        }}
+                                      />
+                                    ) : (
+                                      <ImagePlus size={24} />
+                                    )}
+                                  </span>
+                                  <span>
+                                    <strong>
+                                      {product?.title || "#" + id}
+                                    </strong>
+                                    <code>{product?.sku || "Kod eksik"}</code>
+                                  </span>
+                                </button>
+                              </article>
+                            );
+                          })}
+                        </div>
+                        {!section.productIds.length && (
+                          <div className={styles.empty}>
+                            Bu bölüme ürün sürükleyin veya bölümü seçip havuzdan
+                            ekleyin.
+                          </div>
+                        )}
+                      </section>
+                    ))}
                     {!page.productIds.length && (
                       <div className={styles.empty}>
                         <ImagePlus size={30} />
@@ -476,6 +625,34 @@ export function PageBoard({
                       </option>
                     ))}
                 </select>
+                <select
+                  aria-label="Seçili ürünleri bölüme taşı"
+                  value=""
+                  disabled={
+                    disabled || !selectedIds.length || page.kind !== "products"
+                  }
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      save(
+                        moveProductsToSection(
+                          pages,
+                          selectedIds,
+                          page.id,
+                          e.target.value,
+                        ),
+                      );
+                      setSelectedSectionId(e.target.value);
+                      setSelectedIds([]);
+                    }
+                  }}
+                >
+                  <option value="">Bölüme taşı…</option>
+                  {sections.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.title || "Başlıksız grup"}
+                    </option>
+                  ))}
+                </select>
                 <button
                   disabled={disabled || !selectedIds.length}
                   onClick={() => remove(selectedIds)}
@@ -501,9 +678,20 @@ export function PageBoard({
             className={styles.inspector}
             aria-label="Seçili sayfa ayarları"
           >
+            {page.kind === "products" && (
+              <SectionInspector
+                page={page}
+                selectedId={activeSection.id}
+                disabled={disabled}
+                onSelect={setSelectedSectionId}
+                onChange={(next) =>
+                  save(pages.map((p) => (p.id === page.id ? next : p)))
+                }
+              />
+            )}
             <h3>Sayfa ayarları</h3>
             <label>
-              Sayfa başlığı
+              {page.sections?.length ? "Plan sayfasının adı" : "Sayfa başlığı"}
               <input
                 value={page.title}
                 disabled={disabled}
@@ -524,10 +712,11 @@ export function PageBoard({
             ) : (
               <>
                 <label>
-                  Sayfa yerleşimi
+                  Sayfa yerleşimi{" "}
+                  {page.sections?.length ? "· bölüm ayarlarını kullanır" : ""}
                   <select
                     value={page.layout}
-                    disabled={disabled}
+                    disabled={disabled || !!page.sections?.length}
                     onChange={(e) =>
                       patch({ layout: e.target.value as CatalogPage["layout"] })
                     }
@@ -541,7 +730,10 @@ export function PageBoard({
                   Sayfada en fazla
                   <select
                     value={page.density}
-                    disabled={disabled || page.layout === "spotlight"}
+                    disabled={
+                      disabled ||
+                      (!page.sections?.length && page.layout === "spotlight")
+                    }
                     onChange={(e) =>
                       patch({
                         density: e.target.value as CatalogPage["density"],
@@ -692,11 +884,16 @@ export function PageBoard({
                 disabled={
                   disabled ||
                   page.kind !== "products" ||
-                  pages[index + 1]?.kind !== "products"
+                  pages[index + 1]?.kind !== "products" ||
+                  sections.length +
+                    (pages[index + 1]
+                      ? pageSections(pages[index + 1]).length
+                      : 0) >
+                    50
                 }
                 onClick={() => save(mergeCatalogPage(pages, page.id))}
               >
-                <Combine size={14} /> Sonrakiyle birleştir
+                <Combine size={14} /> Başlıkları koruyarak birleştir
               </button>
               <button
                 disabled={disabled}
@@ -736,7 +933,7 @@ export function PageBoard({
           />
         </div>
         <p className={styles.hint}>
-          Eklemek ürünü seçili sayfaya taşır; aynı ürün tekrar eklenmez. Kartına
+          Eklemek ürünü seçili bölüme taşır; aynı ürün tekrar eklenmez. Kartına
           tıklayarak sağ panelde metin ve görselini düzenleyebilirsiniz.
         </p>
         <div className={styles.pool}>

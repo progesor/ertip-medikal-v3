@@ -611,3 +611,10 @@
   background: var(--theme-elevation-100);
   color: var(--studio-accent);
 }
+
+.workspace[data-wide="true"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+.workspace[data-wide="true"] > .settings {
+  display: none;
+}

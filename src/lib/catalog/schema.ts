@@ -2,12 +2,36 @@ import { z } from "zod";
 
 const id = z.number().int().positive();
 const density = z.enum(["1", "2", "4", "6", "9"]);
+export const catalogSectionSchema = z.object({
+  id: z.string().min(1).max(80),
+  title: z.string().max(150).default(""),
+  subtitle: z.string().max(300).default(""),
+  productIds: z.array(id).max(2000).default([]),
+  columns: z.number().int().min(1).max(3).default(2),
+  layout: z.enum(["grid", "rows"]).default("grid"),
+});
 export const catalogPageSchema = z.object({
   id: z.string().min(1).max(80),
   kind: z.enum(["products", "divider"]).default("products"),
   title: z.string().max(150).default(""),
   subtitle: z.string().max(300).default(""),
   productIds: z.array(id).max(2000).default([]),
+  sections: z
+    .array(catalogSectionSchema)
+    .max(50)
+    .refine(
+      (sections) => new Set(sections.map((s) => s.id)).size === sections.length,
+      "Bölüm kimlikleri benzersiz olmalı.",
+    )
+    .refine(
+      (sections) =>
+        sections.reduce(
+          (count, section) => count + section.productIds.length,
+          0,
+        ) <= 2000,
+      "Bölümlerde en fazla 2000 ürün yerleştirilebilir.",
+    )
+    .optional(),
   density: density.default("4"),
   layout: z.enum(["grid", "rows", "spotlight"]).default("grid"),
   accent: z
@@ -46,8 +70,18 @@ export const catalogConfigSchema = z.object({
     )
     .refine(
       (pages) =>
-        pages.reduce((count, page) => count + page.productIds.length, 0) <=
-        2000,
+        pages.reduce(
+          (count, page) =>
+            count +
+            Math.max(
+              page.productIds.length,
+              page.sections?.reduce(
+                (sum, section) => sum + section.productIds.length,
+                0,
+              ) || 0,
+            ),
+          0,
+        ) <= 2000,
       "En fazla 2000 ürün yerleştirilebilir.",
     )
     .default([]),

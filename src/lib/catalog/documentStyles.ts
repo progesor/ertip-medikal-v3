@@ -54,6 +54,13 @@ body[data-adaptive="true"] .layout-spotlight .copy{display:grid;grid-template-co
 body[data-adaptive="true"] .layout-spotlight .description,body[data-adaptive="true"] .layout-spotlight .product-link{grid-column:1/-1}
 .code{flex-wrap:wrap;line-height:1.35}.code span{font-size:6.8pt}.code strong{font-size:8.5pt;letter-spacing:0;overflow-wrap:anywhere;color:var(--ink)}
 .dense .code strong{font-size:8.5pt}.visual img{max-width:var(--image-scale,100%);max-height:var(--image-scale,100%)}
+.module-stack{height:calc(100% - 11mm);display:flex;flex-direction:column;gap:16px}
+.product-module{min-height:0;flex:none;break-inside:avoid}
+.module-heading{padding:1mm 0 3mm;border-bottom:.3mm solid var(--accent);margin-bottom:3mm}
+.module-heading h2{font-size:16pt;line-height:1.2;overflow-wrap:anywhere}
+.module-heading p{font-size:8pt;color:var(--muted);margin-top:1.5mm;white-space:pre-line;overflow-wrap:anywhere}
+.product-module .cards{height:auto}
+.product-module.layout-rows .card-heading h2{font-size:13pt}
 @page{size:${width}mm ${height}mm;margin:0}@media print{body{background:white;-webkit-print-color-adjust:exact;print-color-adjust:exact}.sheet{margin:0;box-shadow:none}}
 `;
 }

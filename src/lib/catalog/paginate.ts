@@ -34,7 +34,7 @@ async function paginateCatalog() {
     grid.style.setProperty("--cols", columns);
     grid.style.setProperty("--rows", rows);
     root.appendChild(sheet);
-    if (document.body.dataset.bands === "true" && plan.dataset.title) {
+    if ((document.body.dataset.bands === "true" || plan.dataset.forceBand === "true") && plan.dataset.title) {
       const band = document.createElement("div"); band.className = "section-band";
       const title = document.createElement("h2"); title.textContent = plan.dataset.title;
       band.appendChild(title); grid.before(band); sheet.classList.add("has-band");
@@ -120,10 +120,97 @@ async function paginateCatalog() {
       placed++;
     }
   }
+  async function modularPage(plan) {
+    const modules = Array.from(plan.content.children);
+    const entries = modules.flatMap(module => Array.from(module.querySelectorAll(".card")).map(card => ({module,card})));
+    const capacity = Number(plan.dataset.density);
+    async function attempt(batch) {
+      const copyPlan = {dataset:{...plan.dataset,title:""}};
+      const current = newSheet(copyPlan,batch.length,"grid");
+      current.sheet.dataset.title = plan.dataset.title || "";
+      current.sheet.classList.add("modular");
+      current.grid.className = "module-stack";
+      current.grid.removeAttribute("style");
+      const groups=[];
+      for (const entry of batch) {
+        let group=groups[groups.length-1];
+        if (!group || group.source !== entry.module) {
+          const section=entry.module.cloneNode(false);
+          section.classList.add("layout-"+entry.module.dataset.layout);
+          if (batch.length>=6) section.classList.add("dense");
+          section.appendChild(entry.module.querySelector(".module-heading").cloneNode(true));
+          const grid=document.createElement("div"); grid.className="cards";
+          const columns=entry.module.dataset.layout==="rows" ? 1 : Number(entry.module.dataset.columns);
+          grid.style.setProperty("--cols",columns);
+          section.appendChild(grid);current.grid.appendChild(section);
+          group={source:entry.module,section,grid,columns};groups.push(group);
+        }
+        group.grid.appendChild(entry.card.cloneNode(true));
+      }
+      await Promise.all(Array.from(current.grid.querySelectorAll("img")).map(image=>image.decode().catch(()=>undefined)));
+      const gap=16;
+      let required=gap*Math.max(0,groups.length-1), weight=0;
+      for (const group of groups) {
+        const cards=Array.from(group.grid.children);
+        group.rows=Math.ceil(cards.length/group.columns);
+        group.grid.style.setProperty("--rows",group.rows);
+        // Fix row widths before measuring natural copy; sparse rows fill their section.
+        group.grid.style.gridTemplateColumns="repeat(6,minmax(0,1fr))";
+        let rowMinimum=0;
+        for(let i=0;i<cards.length;i+=group.columns) {
+          const row=cards.slice(i,i+group.columns);
+          for(const card of row) {
+            card.style.gridColumn="span "+(6/row.length);
+            card.querySelector(".card-heading").style.minHeight="0";
+          }
+          const minimum=Math.max(...row.map(card=>{
+            const body=card.querySelector(".card-body");
+            const head=card.querySelector(".card-heading").getBoundingClientRect().height;
+            const copy=card.querySelector(".copy").scrollHeight;
+            const bodyGap=parseFloat(getComputedStyle(body).rowGap)||0;
+            return head+(group.source.dataset.layout==="rows"?Math.max(135,copy):copy+76+bodyGap)+12;
+          }));
+          rowMinimum=Math.max(rowMinimum,minimum);
+        }
+        group.heading=group.section.querySelector(".module-heading").getBoundingClientRect().height+parseFloat(getComputedStyle(group.section.querySelector(".module-heading")).marginBottom);
+        group.minimum=rowMinimum*group.rows+19*Math.max(0,group.rows-1);
+        required+=group.heading+group.minimum;weight+=group.rows;
+      }
+      const extra=current.grid.clientHeight-required;
+      if (extra < -1) {discard(current);return false;}
+      for (const group of groups) {
+        group.grid.style.height=(group.minimum+Math.max(0,extra)*group.rows/weight)+"px";
+        if (!compose({sheet:group.section,grid:group.grid}) || overflow(group.grid)) {
+          discard(current);return false;
+        }
+      }
+      if(overflow(current.grid)){discard(current);return false;}
+      for(const group of groups) {
+        const title=group.source.dataset.title;
+        if(title && !sections.has(title))sections.set(title,current.sheet);
+      }
+      return true;
+    }
+    let offset=0;
+    while(offset<entries.length) {
+      let placed=false;
+      for(let count=Math.min(capacity,entries.length-offset);count>=1;count--) {
+        if(await attempt(entries.slice(offset,offset+count))) {offset+=count;placed=true;break;}
+      }
+      if(!placed) {
+        const entry=entries[offset++];
+        fullProduct(entry.card,{dataset:{...plan.dataset,title:entry.module.dataset.title,forceBand:"true"}});
+      }
+    }
+  }
+
   for (const plan of document.querySelectorAll("template.planned")) {
     if (plan.dataset.kind === "divider") {
       const sheet = plan.content.firstElementChild.cloneNode(true);
       identify(sheet, plan); root.appendChild(sheet); continue;
+    }
+    if (plan.content.querySelector(".product-module")) {
+      await modularPage(plan); continue;
     }
     const products = Array.from(plan.content.children);
     const capacity = plan.dataset.layout === "spotlight" ? 1 : Math.min(Number(plan.dataset.density), products.length);

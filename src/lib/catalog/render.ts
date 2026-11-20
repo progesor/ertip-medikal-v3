@@ -1,3 +1,4 @@
+import { pageSections } from "./sections";
 import type {
   CatalogImage,
   CatalogProduct,
@@ -197,11 +198,37 @@ export function renderCatalog(
         '<template class="planned"' +
         attributes +
         ">" +
-        plan.productIds
-          .map((id) => byId.get(id))
-          .filter((p): p is CatalogProduct => !!p)
-          .map((p) => card(p, plan))
-          .join("") +
+        (plan.sections?.length
+          ? pageSections(plan)
+              .filter((s) => s.productIds.length)
+              .map(
+                (section) =>
+                  '<section class="product-module" data-title="' +
+                  escape(section.title) +
+                  '" data-columns="' +
+                  section.columns +
+                  '" data-layout="' +
+                  section.layout +
+                  '"><header class="module-heading"><h2>' +
+                  escape(section.title) +
+                  "</h2>" +
+                  (section.subtitle
+                    ? "<p>" + escape(section.subtitle) + "</p>"
+                    : "") +
+                  "</header>" +
+                  section.productIds
+                    .map((id) => byId.get(id))
+                    .filter((p): p is CatalogProduct => !!p)
+                    .map((p) => card(p, plan))
+                    .join("") +
+                  "</section>",
+              )
+              .join("")
+          : plan.productIds
+              .map((id) => byId.get(id))
+              .filter((p): p is CatalogProduct => !!p)
+              .map((p) => card(p, plan))
+              .join("")) +
         "</template>"
       );
     })

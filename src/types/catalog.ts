@@ -2,9 +2,11 @@ import type { z } from "zod";
 import type {
   catalogConfigSchema,
   catalogPageSchema,
+  catalogSectionSchema,
 } from "@/lib/catalog/schema";
 
 export type CatalogConfig = z.infer<typeof catalogConfigSchema>;
+export type CatalogSection = z.infer<typeof catalogSectionSchema>;
 export type CatalogPage = z.infer<typeof catalogPageSchema>;
 export type CatalogPagePreview = {
   id: string;
