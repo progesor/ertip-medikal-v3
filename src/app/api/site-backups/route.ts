@@ -1,6 +1,7 @@
 import path from "node:path";
 import { execute } from "@/lib/backup/engine.mjs";
 import { validExportOrigin } from "@/lib/product-export/origin";
+import { serverEnv } from "@/lib/config/env";
 import { createHmac, randomUUID } from "node:crypto";
 import { createReadStream, createWriteStream } from "node:fs";
 import { rm } from "node:fs/promises";
@@ -191,7 +192,8 @@ export async function PUT(request: Request) {
 export async function DELETE(request: Request) {
   const denied = await authorize(request);
   if (denied) return denied;
-  if (!validExportOrigin(request)) return reply("Geçersiz kaynak.", 403);
+  if (!validExportOrigin(request, serverEnv.publicSiteUrl))
+    return reply("Geçersiz kaynak.", 403);
   const body = await request.json().catch(() => null);
   if (!validId(body?.id) || body?.confirm !== true)
     return reply("Silinecek yedeği seçin ve silmeyi onaylayın.", 400);

@@ -18,6 +18,7 @@ import {
 import { runProductExport } from "@/lib/product-export/run";
 import { validId } from "@/lib/backup/storage.mjs";
 import { validExportOrigin } from "@/lib/product-export/origin";
+import { serverEnv } from "@/lib/config/env";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -105,7 +106,8 @@ export async function POST(request: Request) {
   if (!user) return reply("Bu alan yöneticilere açıktır.", 401);
   if (request.headers.get("x-ertip-export") !== "1")
     return reply("Geçersiz istek.", 403);
-  if (!validExportOrigin(request)) return reply("Geçersiz kaynak.", 403);
+  if (!validExportOrigin(request, serverEnv.publicSiteUrl))
+    return reply("Geçersiz kaynak.", 403);
   const parsed = productExportSchema.safeParse(
     await request.json().catch(() => null),
   );
@@ -128,7 +130,7 @@ export async function DELETE(request: Request) {
   if (!user) return reply("Bu alan yöneticilere açıktır.", 401);
   if (
     request.headers.get("x-ertip-export") !== "1" ||
-    !validExportOrigin(request)
+    !validExportOrigin(request, serverEnv.publicSiteUrl)
   )
     return reply("Geçersiz istek.", 403);
   const body = await request.json().catch(() => null);

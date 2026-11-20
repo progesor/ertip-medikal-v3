@@ -292,20 +292,61 @@ test("private jobs reject concurrent creation and expire only completed packages
 });
 
 import { validExportOrigin } from "../../src/lib/product-export/origin";
-test("origin check accepts the public host behind Next and rejects foreign or malformed origins", () => {
-  const req = (origin: string, proto = "https") =>
-    new Request("http://localhost:3020/api/product-exports", {
-      headers: { host: "test.example.com", origin, "x-forwarded-proto": proto },
+
+test("public origin survives internal proxy hosts and HTTP TLS termination", () => {
+  const publicUrl = "https://ertip.progesor.net";
+  for (const headers of [
+    { host: "ertip.progesor.net", "x-forwarded-proto": "https" },
+    { host: "localhost:3000", "x-forwarded-proto": "http" },
+    { host: "container:3000", "x-forwarded-proto": "http, https" },
+    { host: "container:3000", "x-forwarded-proto": "" },
+  ]) {
+    const request = new Request("http://container:3000/api/product-exports", {
+      headers: { ...headers, origin: publicUrl },
     });
-  assert.equal(validExportOrigin(req("https://test.example.com")), true);
-  assert.equal(validExportOrigin(req("https://other.example.com")), false);
-  assert.equal(validExportOrigin(req("http://test.example.com")), false);
-  assert.equal(validExportOrigin(req("null")), false);
+    assert.equal(validExportOrigin(request, publicUrl), true);
+  }
+});
+
+test("origin validation rejects foreign origins even with matching spoofed proxy headers", () => {
+  const publicUrl = "https://ertip.progesor.net";
+  for (const origin of [
+    "https://foreign.example",
+    "http://ertip.progesor.net",
+    "https://ertip.progesor.net:444",
+    "null",
+    "not a URL",
+    "https://ertip.progesor.net.evil.example",
+    "https://ertip.progesor.net/path",
+    "https://user@ertip.progesor.net",
+    "https://ertip.progesor.net, https://foreign.example",
+  ]) {
+    const request = new Request("https://foreign.example/api/product-exports", {
+      headers: {
+        origin,
+        host: "foreign.example",
+        "x-forwarded-host": "foreign.example",
+        "x-forwarded-proto": "https",
+      },
+    });
+    assert.equal(validExportOrigin(request, publicUrl), false, origin);
+  }
+});
+
+test("local public origin and authenticated non-browser clients remain supported", () => {
   assert.equal(
     validExportOrigin(
       new Request("http://localhost:3020/api/product-exports", {
-        headers: { host: "127.0.0.1:3020", origin: "http://127.0.0.1:3020" },
+        headers: { host: "localhost:3020", origin: "http://127.0.0.1:3020" },
       }),
+      "http://127.0.0.1:3020",
+    ),
+    true,
+  );
+  assert.equal(
+    validExportOrigin(
+      new Request("http://localhost:3020/api/product-exports"),
+      "https://ertip.progesor.net",
     ),
     true,
   );

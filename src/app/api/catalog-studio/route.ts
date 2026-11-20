@@ -1,6 +1,7 @@
 import { getPayload, createLocalReq } from "payload";
 import config from "@payload-config";
 import { validExportOrigin } from "@/lib/product-export/origin";
+import { serverEnv } from "@/lib/config/env";
 import { isContentManager, isAdmin } from "@/access/roles";
 import { catalogSaveSchema } from "@/lib/catalog/schema";
 import { catalogSnapshot } from "@/lib/catalog/source";
@@ -267,7 +268,7 @@ export async function DELETE(request: Request) {
     return reply("Dosya silme yetkisi yöneticilere aittir.", user ? 403 : 401);
   if (
     request.headers.get("x-ertip-catalog") !== "1" ||
-    !validExportOrigin(request)
+    !validExportOrigin(request, serverEnv.publicSiteUrl)
   )
     return reply("Geçersiz istek.", 403);
   const body = await request.json().catch(() => null);
